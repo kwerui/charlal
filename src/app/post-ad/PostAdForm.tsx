@@ -17,6 +17,7 @@ import {
   createLocalListingId,
   readLocalListings,
 } from '@/lib/localListings';
+import { getDemoUserOwnerId } from '@/lib/listingOwnership';
 
 type Props = {
   categories: CategoryOption[];
@@ -155,6 +156,14 @@ export default function PostAdForm({ categories }: Props) {
         ...localListings.map((listing) => listing.id),
       ]);
       const demoUser = getDemoUser();
+      const ownerId = getDemoUserOwnerId(demoUser);
+
+      if (!ownerId) {
+        setErrors([content.postAdErrorSaveFailed]);
+        setIsSubmitting(false);
+        return;
+      }
+
       const newListing: Listing = {
         id,
         title,
@@ -167,6 +176,7 @@ export default function PostAdForm({ categories }: Props) {
         image: LOCAL_LISTING_PLACEHOLDER_IMAGE,
         sellerName: demoUser?.email || content.localListingSellerName,
         datePosted: new Date().toISOString().slice(0, 10),
+        ownerId,
       };
 
       if (categorySlug === 'housing') {

@@ -12,6 +12,7 @@ export const content = {
   headerActionsLabel: "Account actions / Аккаунттуң ажыл-чорудулгазы",
   headerSignIn: "Sign In / Кирер",
   headerSignOut: "Sign Out / Үнер",
+  headerAccount: "Account", // TODO: add reviewed Tuvan translation.
   headerPostAd: "Post Ad / Чарлалдан үндүрер",
   signedInAsLabel: "Signed in as / Кылдыр кирген",
   
@@ -69,7 +70,24 @@ export const content = {
   listingDetailMarketplaceTypeLabel: "Marketplace type / Рынок хевири",
   contactSellerButton: "Contact seller / Садыгжы-биле харылзажыңар",
   backToHomepage: "Back to homepage / Кол арынче", // TODO: add reviewed Tuvan translation.
+  backToAccount: "Back to account", // TODO: add reviewed Tuvan translation.
   backToResults: "Back to results / Түңнелдерже эглип келир",
+
+  // Account
+  accountKicker: "Demo account", // TODO: add reviewed Tuvan translation.
+  accountTitle: "Account", // TODO: add reviewed Tuvan translation.
+  accountInfoTitle: "Account information", // TODO: add reviewed Tuvan translation.
+  accountEmailLabel: "Signed in as", // TODO: add reviewed Tuvan translation.
+  myAdvertisementsTitle: "My advertisements", // TODO: add reviewed Tuvan translation.
+  myAdvertisementsCountLabel: "My advertisements", // TODO: add reviewed Tuvan translation.
+  noAdvertisementsPostedTitle: "No advertisements posted", // TODO: add reviewed Tuvan translation.
+  noAdvertisementsPostedMessage: "Advertisements you create while signed in will appear here.", // TODO: add reviewed Tuvan translation.
+  deleteAdvertisementButton: "Delete advertisement", // TODO: add reviewed Tuvan translation.
+  confirmDeleteAdvertisementTitle: "Confirm deletion", // TODO: add reviewed Tuvan translation.
+  confirmDeleteAdvertisementMessage: "Delete this advertisement?", // TODO: add reviewed Tuvan translation.
+  cancelButton: "Cancel", // TODO: add reviewed Tuvan translation.
+  advertisementDeletedMessage: "Advertisement deleted.", // TODO: add reviewed Tuvan translation.
+  advertisementDeleteFailedMessage: "This advertisement could not be deleted.", // TODO: add reviewed Tuvan translation.
 
   // Demo authentication
   signInKicker: "Demo account",

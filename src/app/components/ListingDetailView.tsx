@@ -24,7 +24,12 @@ type Props = {
 };
 
 export default function ListingDetailView({ listing, categories, backHref }: Props) {
-  const backLabel = backHref === '/' ? content.backToHomepage : content.backToResults;
+  const backLabel =
+    backHref === '/'
+      ? content.backToHomepage
+      : backHref === '/account'
+      ? content.backToAccount
+      : content.backToResults;
   const category = categories.find(
     (item) => item.slug === listing.categorySlug
   );

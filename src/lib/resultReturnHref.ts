@@ -43,6 +43,7 @@ export function getSafeResultsHref(
       parsedHref.pathname === '/' && parsedHref.search === '' && parsedHref.hash === '';
     const isResultsRoute =
       isHomepageRoute ||
+      parsedHref.pathname === '/account' ||
       parsedHref.pathname === '/search' ||
       parsedHref.pathname.startsWith('/category/');
 

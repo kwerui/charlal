@@ -1,6 +1,7 @@
 'use client';
 
 import type { Listing } from '@/data/listings';
+import { isListingOwnedByOwnerId } from '@/lib/listingOwnership';
 
 export const LOCAL_LISTINGS_STORAGE_KEY = 'tuva-marketplace:user-listings:v1';
 const LOCAL_LISTINGS_CHANGED_EVENT = 'tuva-marketplace:user-listings-changed';
@@ -40,7 +41,8 @@ function isLocalListing(value: unknown): value is StorageListing {
     typeof listing.subcategorySlug === 'string' &&
     typeof listing.image === 'string' &&
     typeof listing.sellerName === 'string' &&
-    typeof listing.datePosted === 'string'
+    typeof listing.datePosted === 'string' &&
+    (listing.ownerId === undefined || typeof listing.ownerId === 'string')
   );
 }
 
@@ -130,6 +132,28 @@ export function addLocalListing(listing: Listing): void {
 
 export function findLocalListingById(id: string): Listing | undefined {
   return readLocalListings().find((listing) => listing.id === id);
+}
+
+export function getLocalListingsOwnedBy(ownerId: string): Listing[] {
+  return readLocalListings().filter((listing) =>
+    isListingOwnedByOwnerId(listing, ownerId)
+  );
+}
+
+export function deleteLocalListingOwnedBy(
+  listingId: string | number,
+  ownerId: string
+): boolean {
+  const currentListings = readLocalListings();
+  const listing = currentListings.find((item) => item.id === listingId);
+
+  if (!listing || !isListingOwnedByOwnerId(listing, ownerId)) {
+    return false;
+  }
+
+  writeLocalListings(currentListings.filter((item) => item.id !== listingId));
+
+  return true;
 }
 
 export function combineListings(

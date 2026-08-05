@@ -33,8 +33,8 @@ export default function SiteHeader() {
   function handleSignOut() {
     demoSignOut();
 
-    if (pathname === '/post-ad') {
-      router.replace('/sign-in?next=/post-ad');
+    if (pathname === '/post-ad' || pathname === '/account') {
+      router.replace(`/sign-in?next=${pathname}`);
     }
   }
 
@@ -45,9 +45,14 @@ export default function SiteHeader() {
       </Link>
       <nav className="header-actions" aria-label={content.headerActionsLabel}>
         {signedIn ? (
-          <button type="button" className="header-button secondary-header-button" onClick={handleSignOut}>
-            {content.headerSignOut}
-          </button>
+          <>
+            <Link href="/account" className="header-button secondary-header-button">
+              {content.headerAccount}
+            </Link>
+            <button type="button" className="header-button secondary-header-button" onClick={handleSignOut}>
+              {content.headerSignOut}
+            </button>
+          </>
         ) : (
           <Link href="/sign-in" className="header-button secondary-header-button">
             {content.headerSignIn}
