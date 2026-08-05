@@ -1,8 +1,10 @@
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import ListingCard from '@/app/components/ListingCard';
+import ResultsScrollRestorer from '@/app/components/ResultsScrollRestorer';
 import { content } from '@/content/tyv';
 import { listings } from '@/data/listings';
+import { buildHrefWithSearchParams } from '@/lib/resultReturnHref';
 import HousingFilterControls from './HousingFilterControls';
 import MarketplaceBuyTypeDropdown from './MarketplaceBuyTypeDropdown';
 import PriceFilterControls from './PriceFilterControls';
@@ -25,6 +27,7 @@ type SubcategoryPageProps = {
 export default async function SubcategoryPage({ params, searchParams }: SubcategoryPageProps) {
   const { slug, subcategory } = await params;
   const query = await searchParams;
+  const resultsHref = buildHrefWithSearchParams(`/category/${slug}/${subcategory}`, query);
   const category = content.categories.find((item) => item.slug === slug);
 
   if (!category) {
@@ -260,7 +263,7 @@ export default async function SubcategoryPage({ params, searchParams }: Subcateg
           {filteredListings.length > 0 ? (
             <div className="listings-grid">
               {filteredListings.map((listing) => (
-                <ListingCard key={listing.id} listing={listing} />
+                <ListingCard key={listing.id} listing={listing} fromHref={resultsHref} />
               ))}
             </div>
           ) : (
@@ -269,6 +272,8 @@ export default async function SubcategoryPage({ params, searchParams }: Subcateg
               <p>{content.emptyResultsMessage}</p>
             </div>
           )}
+
+          <ResultsScrollRestorer resultsHref={resultsHref} />
         </div>
       </section>
     </div>

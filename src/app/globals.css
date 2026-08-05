@@ -949,6 +949,15 @@ body {
   font-weight: 700;
 }
 
+.search-results-heading {
+  max-width: 1200px;
+  margin: 24px auto 14px;
+}
+
+.search-results-heading .results-summary {
+  margin: 6px 0 0;
+}
+
 .empty-results {
   max-width: 1200px;
   margin: 0 auto;
@@ -959,6 +968,7 @@ body {
   box-shadow: var(--shadow);
 }
 
+.empty-results h2,
 .empty-results h3 {
   margin: 0 0 8px;
   color: var(--text-dark);

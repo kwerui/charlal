@@ -1,11 +1,13 @@
-import Link from 'next/link';
 import Image from 'next/image';
 import { notFound } from 'next/navigation';
+import BackToResultsLink from '@/app/components/BackToResultsLink';
 import { content } from '@/content/tyv';
 import { formatListingPrice, listings } from '@/data/listings';
+import { getSafeResultsHref } from '@/lib/resultReturnHref';
 
 type ListingPageProps = {
   params: Promise<{ id: string }>;
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 };
 
 type TypeOption = {
@@ -29,8 +31,9 @@ function getBackHref(listingCategorySlug: string, listingSubcategorySlug: string
   return `/category/${listingCategorySlug}/${listingSubcategorySlug}`;
 }
 
-export default async function ListingPage({ params }: ListingPageProps) {
+export default async function ListingPage({ params, searchParams }: ListingPageProps) {
   const { id } = await params;
+  const query = await searchParams;
   const listingId = Number(id);
   const listing = listings.find((item) => item.id === listingId);
 
@@ -50,16 +53,22 @@ export default async function ListingPage({ params }: ListingPageProps) {
       : listing.transactionType === 'rent'
       ? content.housingRentOption
       : undefined;
+  const fallbackBackHref = getBackHref(
+    listing.categorySlug,
+    listing.subcategorySlug,
+    listing.propertyType
+  );
+  const backHref = getSafeResultsHref(query.from) || fallbackBackHref;
 
   return (
     <div className="app-container">
       <article className="listing-detail-page">
-        <Link
-          href={getBackHref(listing.categorySlug, listing.subcategorySlug, listing.propertyType)}
+        <BackToResultsLink
+          href={backHref}
           className="page-back-link"
         >
           {content.backToResults}
-        </Link>
+        </BackToResultsLink>
 
         <div className="listing-detail-layout">
           <div className="listing-detail-image-wrapper">

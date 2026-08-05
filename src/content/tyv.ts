@@ -17,7 +17,9 @@ export const content = {
   
   // Search
   searchPlaceholder: "Чүнү дилеп тур силер бээр парлаптыңар",
+  searchInputLabel: "Search listings", // TODO: add reviewed Tuvan translation.
   searchButton: "Дилээр",
+  searchResultsTitle: "Search results", // TODO: add reviewed Tuvan translation.
   
   // Category navigation
   categorySectionTitle: "Категорияларже",

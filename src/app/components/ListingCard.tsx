@@ -1,20 +1,26 @@
 import Link from 'next/link';
 import Image from 'next/image';
+import ListingCardLink from '@/app/components/ListingCardLink';
 import { content } from '@/content/tyv';
 import type { Listing } from '@/data/listings';
 import { formatListingPrice } from '@/data/listings';
 
 type Props = {
   listing: Listing;
+  fromHref?: string;
 };
 
-export default function ListingCard({ listing }: Props) {
-  return (
-    <Link
-      href={`/listing/${listing.id}`}
-      className="listing-card"
-      aria-label={`${content.openListingLabel}: ${listing.title}`}
-    >
+export default function ListingCard({ listing, fromHref }: Props) {
+  const listingPath = `/listing/${listing.id}`;
+  const listingHref = fromHref
+    ? {
+        pathname: listingPath,
+        query: { from: fromHref },
+      }
+    : listingPath;
+
+  const cardContent = (
+    <>
       <span className="listing-image-wrapper">
         <Image
           className="listing-image"
@@ -29,6 +35,29 @@ export default function ListingCard({ listing }: Props) {
         <p className="listing-price">{formatListingPrice(listing.price)}</p>
         <p className="listing-location">{listing.location}</p>
       </div>
+    </>
+  );
+
+  if (fromHref) {
+    return (
+      <ListingCardLink
+        href={listingHref}
+        fromHref={fromHref}
+        className="listing-card"
+        ariaLabel={`${content.openListingLabel}: ${listing.title}`}
+      >
+        {cardContent}
+      </ListingCardLink>
+    );
+  }
+
+  return (
+    <Link
+      href={listingPath}
+      className="listing-card"
+      aria-label={`${content.openListingLabel}: ${listing.title}`}
+    >
+      {cardContent}
     </Link>
   );
 }

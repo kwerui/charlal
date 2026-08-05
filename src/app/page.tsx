@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import ListingCard from '@/app/components/ListingCard';
+import SearchForm from '@/app/components/SearchForm';
 import { content } from '@/content/tyv';
 import { listings } from '@/data/listings';
 
@@ -10,16 +11,7 @@ import { listings } from '@/data/listings';
 export default function Home(): React.ReactNode {
   return (
     <div className="app-container">
-      <section className="search-section">
-        <div className="search-container">
-          <input
-            type="text"
-            className="search-input"
-            placeholder={content.searchPlaceholder}
-          />
-          <button className="search-button">{content.searchButton}</button>
-        </div>
-      </section>
+      <SearchForm />
 
       <section className="categories-section">
         <h2 className="section-title">{content.categorySectionTitle}</h2>
