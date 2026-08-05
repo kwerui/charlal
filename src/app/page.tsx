@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import ListingCard from '@/app/components/ListingCard';
+import ListingResults from '@/app/components/ListingResults';
 import SearchForm from '@/app/components/SearchForm';
 import { content } from '@/content/tyv';
 import { listings } from '@/data/listings';
@@ -32,11 +32,13 @@ export default function Home(): React.ReactNode {
       </section>
 
       <section className="listings-section">
-        <div className="listings-grid">
-          {listings.slice(0, 6).map((listing) => (
-            <ListingCard key={listing.id} listing={listing} />
-          ))}
-        </div>
+        <ListingResults
+          builtInListings={listings}
+          resultsHref="/"
+          limit={6}
+          showResultsSummary={false}
+          showEmptyState={false}
+        />
       </section>
     </div>
   );

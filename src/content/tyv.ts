@@ -58,6 +58,7 @@ export const content = {
   resultsCountLabel: "Matching listings / Таарыштырган даңзылар",
   emptyResultsTitle: "No listings found / Данзылдар тывылбаан",
   emptyResultsMessage: "Try changing or clearing the filters. / Фильтрлерни өскертип азы арыглап көрүңер",
+  freePriceLabel: "Free / Халас", // TODO: add reviewed Tuvan translation.
   listingDetailDescriptionTitle: "Description / Тодарадып бижиири",
   listingDetailSellerLabel: "Seller / Садыгжы",
   listingDetailDatePostedLabel: "Date posted / үндүрген хүнү",
@@ -67,6 +68,7 @@ export const content = {
   listingDetailTransactionTypeLabel: "Transaction type / Транзакцияның хевири",
   listingDetailMarketplaceTypeLabel: "Marketplace type / Рынок хевири",
   contactSellerButton: "Contact seller / Садыгжы-биле харылзажыңар",
+  backToHomepage: "Back to homepage / Кол арынче", // TODO: add reviewed Tuvan translation.
   backToResults: "Back to results / Түңнелдерже эглип келир",
 
   // Demo authentication
@@ -117,7 +119,20 @@ export const content = {
   listingImagePlaceholder: "Image upload will be added later.",
   listingImageRequirements: "You can upload up to 10 photos. Each photo must be less than 6MB. JPG, JPEG, and PNG only. / 10 чедир чуруктарны үндүрүп болур силер. Чурук бүрүзү 6 МБ-дан эвээш болур ужурлуг. Чүгле JPG, JPEG болгаш PNG.",
   postAdSubmitButton: "Submit Ad / Чарлал киирер",
-  postAdSuccessMessage: "Demo ad submitted. Nothing has been saved yet.",
+  postAdSubmittingButton: "Saving ad...", // TODO: add reviewed Tuvan translation.
+  postAdSuccessMessage: "Demo ad saved in this browser.", // TODO: add reviewed Tuvan translation.
+  postAdErrorTitleRequired: "Enter a listing title.", // TODO: add reviewed Tuvan translation.
+  postAdErrorDescriptionRequired: "Enter a description.", // TODO: add reviewed Tuvan translation.
+  postAdErrorLocationRequired: "Enter a location.", // TODO: add reviewed Tuvan translation.
+  postAdErrorCategoryRequired: "Choose a category and subcategory.", // TODO: add reviewed Tuvan translation.
+  postAdErrorPriceRequired: "Enter a valid price. Zero is allowed.", // TODO: add reviewed Tuvan translation.
+  postAdErrorHousingTypeRequired: "Choose a housing transaction and property type.", // TODO: add reviewed Tuvan translation.
+  postAdErrorMarketplaceTypeRequired: "Choose a marketplace type.", // TODO: add reviewed Tuvan translation.
+  postAdErrorSaveFailed: "The demo listing could not be saved in this browser.", // TODO: add reviewed Tuvan translation.
+  localListingSellerName: "Demo user", // TODO: add reviewed Tuvan translation.
+  loadingListingMessage: "Loading listing...", // TODO: add reviewed Tuvan translation.
+  localListingNotFoundTitle: "Listing not found", // TODO: add reviewed Tuvan translation.
+  localListingNotFoundMessage: "This local demo listing may have been deleted or browser storage may have been cleared.", // TODO: add reviewed Tuvan translation.
 
   // Categories (each category stores its name, slug, image, and subcategories)
   categories: [

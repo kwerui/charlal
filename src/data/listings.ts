@@ -1,5 +1,7 @@
+import { content } from '@/content/tyv';
+
 export type Listing = {
-  id: number;
+  id: number | string;
   title: string;
   description: string;
   price: number;
@@ -14,7 +16,14 @@ export type Listing = {
   marketplaceType?: string;
 };
 
+export const LOCAL_LISTING_PLACEHOLDER_IMAGE =
+  'https://img.magnific.com/free-photo/hands-holding-colorful-paper-bags_1301-1750.jpg?semt=ais_hybrid&w=740&q=80';
+
 export function formatListingPrice(price: number): string {
+  if (price === 0) {
+    return content.freePriceLabel;
+  }
+
   return new Intl.NumberFormat('ru-RU', {
     style: 'currency',
     currency: 'RUB',

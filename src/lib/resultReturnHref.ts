@@ -39,8 +39,12 @@ export function getSafeResultsHref(
 
   try {
     const parsedHref = new URL(href, 'https://internal.local');
+    const isHomepageRoute =
+      parsedHref.pathname === '/' && parsedHref.search === '' && parsedHref.hash === '';
     const isResultsRoute =
-      parsedHref.pathname === '/search' || parsedHref.pathname.startsWith('/category/');
+      isHomepageRoute ||
+      parsedHref.pathname === '/search' ||
+      parsedHref.pathname.startsWith('/category/');
 
     if (parsedHref.origin !== 'https://internal.local' || !isResultsRoute) {
       return undefined;

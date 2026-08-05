@@ -1,7 +1,6 @@
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
-import ListingCard from '@/app/components/ListingCard';
-import ResultsScrollRestorer from '@/app/components/ResultsScrollRestorer';
+import ListingResults from '@/app/components/ListingResults';
 import { content } from '@/content/tyv';
 import { listings } from '@/data/listings';
 import { buildHrefWithSearchParams } from '@/lib/resultReturnHref';
@@ -66,11 +65,6 @@ export default async function SubcategoryPage({ params, searchParams }: Subcateg
   const selectedSearchQuery = Array.isArray(rawSearchQuery)
     ? rawSearchQuery[0] || ''
     : rawSearchQuery || '';
-  const minPriceValue = Number(selectedMinPrice);
-  const maxPriceValue = Number(selectedMaxPrice);
-  const hasMinPrice = selectedMinPrice !== '' && Number.isFinite(minPriceValue);
-  const hasMaxPrice = selectedMaxPrice !== '' && Number.isFinite(maxPriceValue);
-  const normalizedSearchQuery = selectedSearchQuery.trim().toLowerCase();
   const selectedBuyType =
     category.slug === 'marketplace' && subcategory === 'buy'
       ? marketplaceBuyTypes.find((typeItem) => typeItem.slug === selectedTypeSlug)
@@ -119,47 +113,6 @@ export default async function SubcategoryPage({ params, searchParams }: Subcateg
     showMarketplaceBuyTypes && selectedBuyType && selectedTypeSlug !== 'all-categories'
       ? selectedBuyType.slug
       : '';
-  const filteredListings = listings.filter((listing) => {
-    if (listing.categorySlug !== category.slug) {
-      return false;
-    }
-
-    if (category.slug === 'housing') {
-      if (housingTransaction !== 'all' && listing.transactionType !== housingTransaction) {
-        return false;
-      }
-
-      if (
-        selectedHousingPropertyType !== 'all' &&
-        listing.propertyType !== selectedHousingPropertyType
-      ) {
-        return false;
-      }
-    } else if (!isAllPage && listing.subcategorySlug !== subcategory) {
-      return false;
-    }
-
-    if (selectedMarketplaceType && listing.marketplaceType !== selectedMarketplaceType) {
-      return false;
-    }
-
-    if (hasMinPrice && listing.price < minPriceValue) {
-      return false;
-    }
-
-    if (hasMaxPrice && listing.price > maxPriceValue) {
-      return false;
-    }
-
-    if (
-      normalizedSearchQuery &&
-      !`${listing.title} ${listing.location} ${listing.description}`.toLowerCase().includes(normalizedSearchQuery)
-    ) {
-      return false;
-    }
-
-    return true;
-  });
   const preservedHousingParams: Record<string, string> = {};
   const preservedListingFilterParams: Record<string, string> = {
     q: selectedSearchQuery,
@@ -254,26 +207,21 @@ export default async function SubcategoryPage({ params, searchParams }: Subcateg
             preservedSearchParams={preservedSearchParams}
           />
 
-          <div className="results-summary" aria-live="polite">
-            <p>
-              {content.resultsCountLabel}: {filteredListings.length}
-            </p>
-          </div>
-
-          {filteredListings.length > 0 ? (
-            <div className="listings-grid">
-              {filteredListings.map((listing) => (
-                <ListingCard key={listing.id} listing={listing} fromHref={resultsHref} />
-              ))}
-            </div>
-          ) : (
-            <div className="empty-results" role="status">
-              <h3>{content.emptyResultsTitle}</h3>
-              <p>{content.emptyResultsMessage}</p>
-            </div>
-          )}
-
-          <ResultsScrollRestorer resultsHref={resultsHref} />
+          <ListingResults
+            builtInListings={listings}
+            criteria={{
+              categorySlug: category.slug,
+              subcategorySlug: subcategory,
+              isAllPage,
+              housingTransaction,
+              housingPropertyType: selectedHousingPropertyType,
+              marketplaceType: selectedMarketplaceType,
+              minPrice: selectedMinPrice,
+              maxPrice: selectedMaxPrice,
+              searchQuery: selectedSearchQuery,
+            }}
+            resultsHref={resultsHref}
+          />
         </div>
       </section>
     </div>

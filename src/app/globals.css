@@ -817,6 +817,11 @@ body {
   background: #fee2e2;
 }
 
+.form-error ul {
+  margin: 0;
+  padding-left: 18px;
+}
+
 .form-success {
   color: #166534;
   background: #dcfce7;
@@ -968,6 +973,7 @@ body {
   box-shadow: var(--shadow);
 }
 
+.empty-results h1,
 .empty-results h2,
 .empty-results h3 {
   margin: 0 0 8px;

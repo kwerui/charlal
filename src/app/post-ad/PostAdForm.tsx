@@ -4,11 +4,19 @@ import { useRouter } from 'next/navigation';
 import type { FormEvent } from 'react';
 import { useEffect, useState, useSyncExternalStore } from 'react';
 import { content } from '@/content/tyv';
+import type { Listing } from '@/data/listings';
+import { listings, LOCAL_LISTING_PLACEHOLDER_IMAGE } from '@/data/listings';
 import {
+  getDemoUser,
   getDemoAuthServerSnapshot,
   getDemoAuthSnapshot,
   subscribeToDemoAuth,
 } from '@/lib/demoAuth';
+import {
+  addLocalListing,
+  createLocalListingId,
+  readLocalListings,
+} from '@/lib/localListings';
 
 type Props = {
   categories: CategoryOption[];
@@ -27,14 +35,23 @@ type CategoryOption = {
   buyTypes?: NestedOption[];
 };
 
+function optionExists(options: NestedOption[] | undefined, slug: string): boolean {
+  return Boolean(options?.some((option) => option.slug === slug));
+}
+
 export default function PostAdForm({ categories }: Props) {
   const router = useRouter();
   const [successMessage, setSuccessMessage] = useState('');
+  const [errors, setErrors] = useState<string[]>([]);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [selectedCategorySlug, setSelectedCategorySlug] = useState('');
+  const [selectedSubcategorySlug, setSelectedSubcategorySlug] = useState('');
   const selectedCategory = categories.find((category) => category.slug === selectedCategorySlug);
   const hasSubcategories = Boolean(selectedCategory?.subcategories.length);
-  const hasTypes = Boolean(selectedCategory?.types?.length);
-  const hasBuyTypes = Boolean(selectedCategory?.buyTypes?.length);
+  const hasTypes = selectedCategory?.slug === 'housing' && Boolean(selectedCategory.types?.length);
+  const hasBuyTypes = selectedCategory?.slug === 'marketplace' && selectedSubcategorySlug === 'buy';
+  const marketplaceBuyTypes =
+    selectedCategory?.buyTypes?.filter((buyType) => buyType.slug !== 'all-categories') || [];
   const signedIn = useSyncExternalStore(
     subscribeToDemoAuth,
     getDemoAuthSnapshot,
@@ -47,11 +64,129 @@ export default function PostAdForm({ categories }: Props) {
     }
   }, [router, signedIn]);
 
+  function handleCategoryChange(categorySlug: string): void {
+    setSelectedCategorySlug(categorySlug);
+    setSelectedSubcategorySlug('');
+    setErrors([]);
+  }
+
+  function getFormValue(formData: FormData, name: string): string {
+    const value = formData.get(name);
+    return typeof value === 'string' ? value.trim() : '';
+  }
+
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    setSuccessMessage(content.postAdSuccessMessage);
-    event.currentTarget.reset();
-    setSelectedCategorySlug('');
+    setErrors([]);
+    setSuccessMessage('');
+
+    if (isSubmitting) {
+      return;
+    }
+
+    const formData = new FormData(event.currentTarget);
+    const title = getFormValue(formData, 'title');
+    const description = getFormValue(formData, 'description');
+    const location = getFormValue(formData, 'location');
+    const categorySlug = getFormValue(formData, 'category');
+    const selectedFormCategory = categories.find((category) => category.slug === categorySlug);
+    const subcategorySlug = selectedFormCategory?.subcategories.length
+      ? getFormValue(formData, 'subcategory')
+      : 'all';
+    const priceText = getFormValue(formData, 'price');
+    const price = Number(priceText);
+    const typeSlug = getFormValue(formData, 'type');
+    const buyTypeSlug = getFormValue(formData, 'buyType');
+    const validationErrors: string[] = [];
+
+    if (!title) {
+      validationErrors.push(content.postAdErrorTitleRequired);
+    }
+
+    if (!description) {
+      validationErrors.push(content.postAdErrorDescriptionRequired);
+    }
+
+    if (!location) {
+      validationErrors.push(content.postAdErrorLocationRequired);
+    }
+
+    const validSubcategory =
+      selectedFormCategory && selectedFormCategory.subcategories.length > 0
+        ? optionExists(selectedFormCategory.subcategories, subcategorySlug)
+        : subcategorySlug === 'all';
+    const formMarketplaceBuyTypes =
+      selectedFormCategory?.buyTypes?.filter((buyType) => buyType.slug !== 'all-categories') ||
+      [];
+    const validHousingType =
+      categorySlug === 'housing' && optionExists(selectedFormCategory?.types, typeSlug);
+    const validMarketplaceType =
+      categorySlug === 'marketplace' &&
+      subcategorySlug === 'buy' &&
+      formMarketplaceBuyTypes.some((buyType) => buyType.slug === buyTypeSlug);
+
+    if (!selectedFormCategory || !subcategorySlug || !validSubcategory) {
+      validationErrors.push(content.postAdErrorCategoryRequired);
+    }
+
+    if (priceText === '' || !Number.isFinite(price) || price < 0) {
+      validationErrors.push(content.postAdErrorPriceRequired);
+    }
+
+    if (categorySlug === 'housing' && !validHousingType) {
+      validationErrors.push(content.postAdErrorHousingTypeRequired);
+    }
+
+    if (categorySlug === 'marketplace' && subcategorySlug === 'buy' && !validMarketplaceType) {
+      validationErrors.push(content.postAdErrorMarketplaceTypeRequired);
+    }
+
+    if (validationErrors.length > 0) {
+      setErrors(validationErrors);
+      return;
+    }
+
+    setIsSubmitting(true);
+
+    try {
+      const localListings = readLocalListings();
+      const id = createLocalListingId([
+        ...listings.map((listing) => listing.id),
+        ...localListings.map((listing) => listing.id),
+      ]);
+      const demoUser = getDemoUser();
+      const newListing: Listing = {
+        id,
+        title,
+        description,
+        price,
+        location,
+        categorySlug,
+        subcategorySlug,
+        // TODO: replace this placeholder with real image upload when a backend is added.
+        image: LOCAL_LISTING_PLACEHOLDER_IMAGE,
+        sellerName: demoUser?.email || content.localListingSellerName,
+        datePosted: new Date().toISOString().slice(0, 10),
+      };
+
+      if (categorySlug === 'housing') {
+        newListing.transactionType = subcategorySlug === 'rent' ? 'rent' : 'sale';
+        newListing.propertyType = typeSlug as Listing['propertyType'];
+      }
+
+      if (categorySlug === 'marketplace' && subcategorySlug === 'buy') {
+        newListing.marketplaceType = buyTypeSlug;
+      }
+
+      // DEMO ONLY: local ads exist only in this browser, are not shared with
+      // other users/devices, and may disappear if browser storage is cleared.
+      addLocalListing(newListing);
+      setSuccessMessage(content.postAdSuccessMessage);
+      router.push(`/listing/${id}`);
+    } catch {
+      setErrors([content.postAdErrorSaveFailed]);
+      setIsSubmitting(false);
+    }
   }
 
   if (!signedIn) {
@@ -59,7 +194,7 @@ export default function PostAdForm({ categories }: Props) {
   }
 
   return (
-    <form className="post-ad-form" onSubmit={handleSubmit}>
+    <form className="post-ad-form" onSubmit={handleSubmit} noValidate>
       <label className="form-field" htmlFor="listing-title">
         <span>{content.listingTitleLabel}</span>
         <input id="listing-title" name="title" type="text" required />
@@ -72,7 +207,7 @@ export default function PostAdForm({ categories }: Props) {
           name="category"
           required
           value={selectedCategorySlug}
-          onChange={(event) => setSelectedCategorySlug(event.target.value)}
+          onChange={(event) => handleCategoryChange(event.target.value)}
         >
           <option value="" disabled>
             {content.listingCategoryPlaceholder}
@@ -88,7 +223,16 @@ export default function PostAdForm({ categories }: Props) {
       {hasSubcategories ? (
         <label className="form-field" htmlFor="listing-subcategory">
           <span>{content.listingSubcategoryLabel}</span>
-          <select id="listing-subcategory" name="subcategory" required defaultValue="">
+          <select
+            id="listing-subcategory"
+            name="subcategory"
+            required
+            value={selectedSubcategorySlug}
+            onChange={(event) => {
+              setSelectedSubcategorySlug(event.target.value);
+              setErrors([]);
+            }}
+          >
             <option value="" disabled>
               {content.listingSubcategoryPlaceholder}
             </option>
@@ -124,7 +268,7 @@ export default function PostAdForm({ categories }: Props) {
             <option value="" disabled>
               {content.listingBuyTypePlaceholder}
             </option>
-            {selectedCategory?.buyTypes?.map((buyType) => (
+            {marketplaceBuyTypes.map((buyType) => (
               <option key={buyType.slug} value={buyType.slug}>
                 {buyType.name}
               </option>
@@ -162,8 +306,22 @@ export default function PostAdForm({ categories }: Props) {
         </p>
       ) : null}
 
-      <button type="submit" className="search-button form-submit-button">
-        {content.postAdSubmitButton}
+      {errors.length > 0 ? (
+        <div className="form-error" role="alert" aria-live="assertive">
+          <ul>
+            {errors.map((error) => (
+              <li key={error}>{error}</li>
+            ))}
+          </ul>
+        </div>
+      ) : null}
+
+      <button
+        type="submit"
+        className="search-button form-submit-button"
+        disabled={isSubmitting}
+      >
+        {isSubmitting ? content.postAdSubmittingButton : content.postAdSubmitButton}
       </button>
     </form>
   );
