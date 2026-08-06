@@ -2,6 +2,7 @@ const ACTIVE_LISTING_NAVIGATION_KEY = 'charlal-active-listing-navigation';
 const RESTORE_INTENT_KEY = 'charlal-restore-results-scroll';
 const SCROLL_KEY_PREFIX = 'charlal-results-scroll:';
 const MAX_SCROLL_AGE_MS = 30 * 60 * 1000;
+const NEAR_BOTTOM_TOLERANCE_PX = 32;
 
 type StoredListingNavigation = {
   resultsHref: string;
@@ -11,6 +12,15 @@ type StoredListingNavigation = {
 
 type StoredScrollPosition = StoredListingNavigation & {
   scrollY: number;
+  maximumScrollY: number;
+  nearBottom: boolean;
+};
+
+export type SavedResultsScrollPosition = {
+  scrollY: number;
+  maximumScrollY: number;
+  nearBottom: boolean;
+  savedAt: number;
 };
 
 type StoredRestoreIntent = {
@@ -24,6 +34,10 @@ function isBrowser(): boolean {
 
 function getScrollStorageKey(resultsHref: string): string {
   return `${SCROLL_KEY_PREFIX}${resultsHref}`;
+}
+
+function getMaximumScrollY(): number {
+  return Math.max(0, document.documentElement.scrollHeight - window.innerHeight);
 }
 
 function readJson<T>(key: string): T | undefined {
@@ -45,11 +59,15 @@ export function saveResultsScrollPosition(resultsHref: string, listingHref: stri
   }
 
   const savedAt = Date.now();
+  const maximumScrollY = getMaximumScrollY();
+  const scrollY = window.scrollY;
   const scrollPosition: StoredScrollPosition = {
     resultsHref,
     targetHref: listingHref,
     savedAt,
-    scrollY: window.scrollY,
+    scrollY,
+    maximumScrollY,
+    nearBottom: maximumScrollY - scrollY <= NEAR_BOTTOM_TOLERANCE_PX,
   };
   const listingNavigation: StoredListingNavigation = {
     resultsHref,
@@ -126,4 +144,55 @@ export function takeResultsScrollPosition(resultsHref: string): number | undefin
   }
 
   return scrollPosition.scrollY;
+}
+
+export function hasFreshResultsScrollRestoreIntent(resultsHref: string): boolean {
+  if (!isBrowser()) {
+    return false;
+  }
+
+  const restoreIntent = readJson<StoredRestoreIntent>(RESTORE_INTENT_KEY);
+
+  return Boolean(
+    restoreIntent &&
+      restoreIntent.resultsHref === resultsHref &&
+      isFresh(restoreIntent.requestedAt)
+  );
+}
+
+export function getSavedResultsScrollPosition(
+  resultsHref: string
+): SavedResultsScrollPosition | undefined {
+  if (!isBrowser()) {
+    return undefined;
+  }
+
+  const scrollPosition = readJson<StoredScrollPosition>(
+    getScrollStorageKey(resultsHref)
+  );
+
+  if (
+    !scrollPosition ||
+    scrollPosition.resultsHref !== resultsHref ||
+    !isFresh(scrollPosition.savedAt)
+  ) {
+    return undefined;
+  }
+
+  const maximumScrollY =
+    typeof scrollPosition.maximumScrollY === 'number' &&
+    Number.isFinite(scrollPosition.maximumScrollY)
+      ? Math.max(0, scrollPosition.maximumScrollY)
+      : Math.max(0, scrollPosition.scrollY);
+  const nearBottom =
+    typeof scrollPosition.nearBottom === 'boolean'
+      ? scrollPosition.nearBottom
+      : maximumScrollY - scrollPosition.scrollY <= NEAR_BOTTOM_TOLERANCE_PX;
+
+  return {
+    scrollY: scrollPosition.scrollY,
+    maximumScrollY,
+    nearBottom,
+    savedAt: scrollPosition.savedAt,
+  };
 }

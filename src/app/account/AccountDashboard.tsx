@@ -2,7 +2,8 @@
 
 import { useRouter } from 'next/navigation';
 import type { FormEvent } from 'react';
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import AccountNativeHistoryRestorer from '@/app/account/AccountNativeHistoryRestorer';
 import AccountRefreshScrollManager from '@/app/account/AccountRefreshScrollManager';
 import ListingCard from '@/app/components/ListingCard';
 import ResultsScrollRestorer from '@/app/components/ResultsScrollRestorer';
@@ -32,6 +33,7 @@ import { useDemoAuthStatus } from '@/lib/useDemoAuthStatus';
 
 export default function AccountDashboard() {
   const router = useRouter();
+  const accountContentRef = useRef<HTMLDivElement | null>(null);
   const { status: authStatus, user: currentUser } = useDemoAuthStatus();
   const ownerId = getDemoUserOwnerId(currentUser);
   const [ownedListings, setOwnedListings] = useState<Listing[]>([]);
@@ -201,10 +203,19 @@ export default function AccountDashboard() {
     Boolean(currentUser) &&
     Boolean(ownerId) &&
     listingSectionsLoaded;
+  const canHoldVisualRestoration =
+    authStatus === 'authenticated' &&
+    Boolean(currentUser) &&
+    Boolean(ownerId);
 
   if (!accountReady || !currentUser || !ownerId) {
     return (
       <>
+        <AccountNativeHistoryRestorer
+          accountReady={accountReady}
+          canHoldVisualRestoration={canHoldVisualRestoration}
+          contentRef={accountContentRef}
+        />
         <AccountRefreshScrollManager ready={false} />
         <p className="page-description">{content.checkingAuthMessage}</p>
       </>
@@ -212,7 +223,7 @@ export default function AccountDashboard() {
   }
 
   return (
-    <div className="account-content">
+    <div className="account-content" ref={accountContentRef}>
       <section className="account-info" aria-labelledby="account-info-title">
         <h3 id="account-info-title">{content.accountInfoTitle}</h3>
         <p>
@@ -398,6 +409,11 @@ export default function AccountDashboard() {
         )}
       </section>
       <AccountRefreshScrollManager ready={accountReady} />
+      <AccountNativeHistoryRestorer
+        accountReady={accountReady}
+        canHoldVisualRestoration={canHoldVisualRestoration}
+        contentRef={accountContentRef}
+      />
       <ResultsScrollRestorer resultsHref="/account" />
     </div>
   );

@@ -5,6 +5,8 @@ import {
   saveAccountRefreshScrollPosition,
   takeAccountRefreshScrollPosition,
 } from '@/lib/accountRefreshScrollStorage';
+import { hasFreshNativeHistoryTraversalIntent } from '@/lib/nativeHistoryIntentStorage';
+import { hasFreshResultsScrollRestoreIntent } from '@/lib/resultsScrollStorage';
 
 type Props = {
   ready: boolean;
@@ -27,6 +29,13 @@ export default function AccountRefreshScrollManager({ ready }: Props) {
 
   useLayoutEffect(() => {
     if (!ready) {
+      return undefined;
+    }
+
+    if (
+      hasFreshNativeHistoryTraversalIntent() ||
+      hasFreshResultsScrollRestoreIntent('/account')
+    ) {
       return undefined;
     }
 

@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
+import NativeHistoryIntentMarker from './components/NativeHistoryIntentMarker';
 import SiteHeader from './components/SiteHeader';
 import "./globals.css";
 
@@ -26,6 +27,7 @@ export default function RootLayout({
   return (
     <html lang="en" className={`${geistSans.variable} ${geistMono.variable}`}>
       <body>
+        <NativeHistoryIntentMarker />
         <SiteHeader />
         {children}
       </body>

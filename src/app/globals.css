@@ -719,6 +719,10 @@ body {
   box-shadow: var(--shadow-lg);
 }
 
+.account-page[data-account-native-restoring="true"] .account-panel {
+  visibility: hidden;
+}
+
 .form-panel,
 .account-panel {
   width: min(100%, 760px);

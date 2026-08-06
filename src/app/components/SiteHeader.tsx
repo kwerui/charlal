@@ -11,6 +11,7 @@ import {
   getDemoUser,
   subscribeToDemoAuth,
 } from '@/lib/demoAuth';
+import { clearNativeHistoryTraversalIntent } from '@/lib/nativeHistoryIntentStorage';
 
 export default function SiteHeader() {
   const router = useRouter();
@@ -46,7 +47,11 @@ export default function SiteHeader() {
       <nav className="header-actions" aria-label={content.headerActionsLabel}>
         {signedIn ? (
           <>
-            <Link href="/account" className="header-button secondary-header-button">
+            <Link
+              href="/account"
+              className="header-button secondary-header-button"
+              onClick={clearNativeHistoryTraversalIntent}
+            >
               {content.headerAccount}
             </Link>
             <button type="button" className="header-button secondary-header-button" onClick={handleSignOut}>
