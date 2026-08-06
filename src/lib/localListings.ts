@@ -42,6 +42,7 @@ function isLocalListing(value: unknown): value is StorageListing {
     typeof listing.image === 'string' &&
     typeof listing.sellerName === 'string' &&
     typeof listing.datePosted === 'string' &&
+    (listing.updatedAt === undefined || typeof listing.updatedAt === 'string') &&
     (listing.ownerId === undefined || typeof listing.ownerId === 'string')
   );
 }
@@ -200,6 +201,109 @@ export function updateLocalListingSellerNamesForOwner(
   }
 
   return changedCount;
+}
+
+type LocalListingUpdate = Pick<
+  Listing,
+  | 'title'
+  | 'description'
+  | 'price'
+  | 'location'
+  | 'categorySlug'
+  | 'subcategorySlug'
+  | 'image'
+  | 'sellerName'
+  | 'updatedAt'
+> &
+  Partial<
+    Pick<
+      Listing,
+      'transactionType' | 'propertyType' | 'marketplaceType'
+    >
+  >;
+
+export type UpdateLocalListingResult =
+  | {
+      ok: true;
+      listing: Listing;
+    }
+  | {
+      ok: false;
+      reason: 'not-found' | 'not-owned';
+    };
+
+export function updateLocalListingOwnedBy(
+  listingId: string | number,
+  ownerId: string,
+  updates: LocalListingUpdate
+): UpdateLocalListingResult {
+  const safeOwnerId = ownerId.trim();
+
+  if (!safeOwnerId || typeof listingId !== 'string' || !listingId.startsWith('local-')) {
+    return {
+      ok: false,
+      reason: 'not-found',
+    };
+  }
+
+  const currentListings = readLocalListings();
+  const listing = currentListings.find((item) => item.id === listingId);
+
+  if (!listing) {
+    return {
+      ok: false,
+      reason: 'not-found',
+    };
+  }
+
+  if (!isListingOwnedByOwnerId(listing, safeOwnerId)) {
+    return {
+      ok: false,
+      reason: 'not-owned',
+    };
+  }
+
+  const updatedListing: Listing = {
+    ...listing,
+    title: updates.title,
+    description: updates.description,
+    price: updates.price,
+    location: updates.location,
+    categorySlug: updates.categorySlug,
+    subcategorySlug: updates.subcategorySlug,
+    image: updates.image,
+    sellerName: updates.sellerName,
+    updatedAt: updates.updatedAt,
+  };
+
+  if (updates.transactionType) {
+    updatedListing.transactionType = updates.transactionType;
+  } else {
+    delete updatedListing.transactionType;
+  }
+
+  if (updates.propertyType) {
+    updatedListing.propertyType = updates.propertyType;
+  } else {
+    delete updatedListing.propertyType;
+  }
+
+  if (updates.marketplaceType) {
+    updatedListing.marketplaceType = updates.marketplaceType;
+  } else {
+    delete updatedListing.marketplaceType;
+  }
+
+  writeLocalListings(
+    currentListings.map((item) =>
+      item.id === listingId ? updatedListing : item
+    )
+  );
+
+  return {
+    ok: true,
+    listing: updatedListing,
+  };
 }
 
 export function migrateLocalListingOwnerId(

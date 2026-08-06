@@ -1,5 +1,6 @@
 import Image from 'next/image';
 import BackToResultsLink from '@/app/components/BackToResultsLink';
+import ListingDetailOwnerActions from '@/app/components/ListingDetailOwnerActions';
 import { content } from '@/content/tyv';
 import type { Listing } from '@/data/listings';
 import { formatListingPrice } from '@/data/listings';
@@ -90,6 +91,12 @@ export default function ListingDetailView({
               <dt>{content.listingDetailDatePostedLabel}</dt>
               <dd>{listing.datePosted}</dd>
             </div>
+            {listing.updatedAt ? (
+              <div>
+                <dt>{content.listingDetailUpdatedAtLabel}</dt>
+                <dd>{listing.updatedAt}</dd>
+              </div>
+            ) : null}
             <div>
               <dt>{content.listingDetailCategoryLabel}</dt>
               <dd>{category?.name || listing.categorySlug}</dd>
@@ -123,9 +130,7 @@ export default function ListingDetailView({
             <p>{listing.description}</p>
           </section>
 
-          <button type="button" className="search-button listing-contact-button">
-            {content.contactSellerButton}
-          </button>
+          <ListingDetailOwnerActions listing={listing} />
         </section>
       </div>
     </article>

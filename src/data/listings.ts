@@ -11,6 +11,7 @@ export type Listing = {
   image: string;
   sellerName: string;
   datePosted: string;
+  updatedAt?: string;
   ownerId?: string;
   transactionType?: 'sale' | 'rent';
   propertyType?: 'apartments' | 'land' | 'commercial' | 'storage';

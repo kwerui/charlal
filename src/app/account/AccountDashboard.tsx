@@ -1,5 +1,6 @@
 'use client';
 
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import type { FormEvent } from 'react';
 import { useEffect, useMemo, useRef, useState } from 'react';
@@ -297,7 +298,7 @@ export default function AccountDashboard() {
             <div className="delete-confirmation-actions">
               <button
                 type="button"
-                className="secondary-button"
+                className="listing-management-button listing-management-button--edit"
                 onClick={cancelDelete}
                 disabled={isDeleting}
               >
@@ -305,7 +306,7 @@ export default function AccountDashboard() {
               </button>
               <button
                 type="button"
-                className="danger-button"
+                className="listing-management-button listing-management-button--delete"
                 onClick={confirmDelete}
                 disabled={isDeleting || !deleteTargetStillOwned}
               >
@@ -320,14 +321,22 @@ export default function AccountDashboard() {
             {ownedListings.map((listing) => (
               <article key={String(listing.id)} className="my-ad-item">
                 <ListingCard listing={listing} fromHref="/account" />
-                <button
-                  type="button"
-                  className="danger-button my-ad-delete-button"
-                  onClick={() => startDelete(listing)}
-                  disabled={isDeleting}
-                >
-                  {content.deleteAdvertisementButton}
-                </button>
+                <div className="my-ad-actions">
+                  <Link
+                    href={`/account/listings/${listing.id}/edit`}
+                    className="listing-management-button listing-management-button--edit my-ad-edit-button"
+                  >
+                    {content.editAdvertisementButton}
+                  </Link>
+                  <button
+                    type="button"
+                    className="listing-management-button listing-management-button--delete my-ad-delete-button"
+                    onClick={() => startDelete(listing)}
+                    disabled={isDeleting}
+                  >
+                    {content.deleteAdvertisementButton}
+                  </button>
+                </div>
               </article>
             ))}
           </div>

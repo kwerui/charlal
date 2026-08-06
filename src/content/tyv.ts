@@ -68,42 +68,53 @@ export const content = {
   listingDetailPropertyTypeLabel: "Property type / Өнчү-хөреңгиниң хевири",
   listingDetailTransactionTypeLabel: "Transaction type / Транзакцияның хевири",
   listingDetailMarketplaceTypeLabel: "Marketplace type / Рынок хевири",
+  listingDetailUpdatedAtLabel: "Last updated / Сөөлгү катап чаарткан", // TODO: add reviewed Tuvan translation.
   contactSellerButton: "Contact seller / Садыгжы-биле харылзажыңар",
   backToHomepage: "Back to homepage / Кол арынче", // TODO: add reviewed Tuvan translation.
-  backToAccount: "Back to account", // TODO: add reviewed Tuvan translation.
+  backToAccount: "Back to account / Аккаунтче эглип келир", // TODO: add reviewed Tuvan translation.
   backToResults: "Back to results / Түңнелдерже эглип келир",
 
   // Account
   accountKicker: "Demo account", // TODO: add reviewed Tuvan translation.
-  accountTitle: "Account", // TODO: add reviewed Tuvan translation.
-  accountInfoTitle: "Account information", // TODO: add reviewed Tuvan translation.
-  accountEmailLabel: "Signed in as", // TODO: add reviewed Tuvan translation.
-  accountPublicNameLabel: "Public name", // TODO: add reviewed Tuvan translation.
-  accountPublicNameTitle: "Change public name", // TODO: add reviewed Tuvan translation.
-  accountPublicNameHelp: "This name is shown publicly on advertisements instead of your email.", // TODO: add reviewed Tuvan translation.
-  accountPublicNamePlaceholder: "Enter a public seller name", // TODO: add reviewed Tuvan translation.
-  accountSaveNameButton: "Save name", // TODO: add reviewed Tuvan translation.
-  accountPublicNameSavedMessage: "Public name saved.", // TODO: add reviewed Tuvan translation.
-  accountPublicNameRequiredMessage: "Enter a public name before posting an advertisement.", // TODO: add reviewed Tuvan translation.
-  publicSellerFallbackLabel: "Seller", // TODO: add reviewed Tuvan translation.
-  myAdvertisementsTitle: "My advertisements", // TODO: add reviewed Tuvan translation.
-  myAdvertisementsCountLabel: "My advertisements", // TODO: add reviewed Tuvan translation.
-  noAdvertisementsPostedTitle: "No advertisements posted", // TODO: add reviewed Tuvan translation.
-  noAdvertisementsPostedMessage: "Advertisements you create while signed in will appear here.", // TODO: add reviewed Tuvan translation.
-  olderUnassignedAdvertisementsTitle: "Older unassigned advertisements", // TODO: add reviewed Tuvan translation.
-  olderUnassignedAdvertisementsCountLabel: "Older unassigned advertisements", // TODO: add reviewed Tuvan translation.
+  accountTitle: "Account / Аккаунт", // TODO: add reviewed Tuvan translation.
+  accountInfoTitle: "Account information / Аккаунт дугайында медээ", // TODO: add reviewed Tuvan translation.
+  accountEmailLabel: "Signed in as / Кылдыр кирген", // TODO: add reviewed Tuvan translation.
+  accountPublicNameLabel: "Public name / Хөй-ниити ады", // TODO: add reviewed Tuvan translation.
+  accountPublicNameTitle: "Change public name / Хөй-ниити адын өскертир", // TODO: add reviewed Tuvan translation.
+  accountPublicNameHelp: "This name is shown publicly on advertisements instead of your email. / Бо ат силерниң электроннуг почтаңарның орнунга чарлалдарда хөй-ниитиге көстүп турар.", // TODO: add reviewed Tuvan translation.
+  accountPublicNamePlaceholder: "Enter a public seller name / Хөй-ниити садыгжы адын киирер", // TODO: add reviewed Tuvan translation.
+  accountSaveNameButton: "Save name / Адын кадагала", // TODO: add reviewed Tuvan translation.
+  accountPublicNameSavedMessage: "Public name saved. / Хөй-ниити ады камгалаттынган.", // TODO: add reviewed Tuvan translation.
+  accountPublicNameRequiredMessage: "Enter a public name before posting an advertisement. / Чарлал үндүрер мурнунда хөй-ниити адын киирер.", // TODO: add reviewed Tuvan translation.
+  publicSellerFallbackLabel: "Seller / Садыгжы", // TODO: add reviewed Tuvan translation.
+  myAdvertisementsTitle: "My advertisements / Мээң чарлалдарым", // TODO: add reviewed Tuvan translation.
+  myAdvertisementsCountLabel: "My advertisements / Мээң чарлалдарым", // TODO: add reviewed Tuvan translation.
+  noAdvertisementsPostedTitle: "No advertisements posted / Чарлал чок", // TODO: add reviewed Tuvan translation.
+  noAdvertisementsPostedMessage: "Advertisements you create while signed in will appear here. / Кирип тургаш кылган чарлалдарыңар мында көстүп кээр.", // TODO: add reviewed Tuvan translation.
+  olderUnassignedAdvertisementsTitle: "Older unassigned advertisements / Эрги аңгылаттынмаан чарлалдар", // TODO: add reviewed Tuvan translation.
+  olderUnassignedAdvertisementsCountLabel: "Older unassigned advertisements / Эрги аңгылаттынмаан чарлалдар", // TODO: add reviewed Tuvan translation.
   noUnassignedAdvertisementsMessage: "Older demo advertisements without an owner will appear here.", // TODO: add reviewed Tuvan translation.
-  claimAdvertisementButton: "Claim advertisement", // TODO: add reviewed Tuvan translation.
-  confirmClaimAdvertisementTitle: "Confirm claim", // TODO: add reviewed Tuvan translation.
-  confirmClaimAdvertisementMessage: "Claim this older advertisement?", // TODO: add reviewed Tuvan translation.
-  advertisementClaimedMessage: "Advertisement claimed.", // TODO: add reviewed Tuvan translation.
-  advertisementClaimFailedMessage: "This advertisement could not be claimed.", // TODO: add reviewed Tuvan translation.
-  deleteAdvertisementButton: "Delete advertisement", // TODO: add reviewed Tuvan translation.
-  confirmDeleteAdvertisementTitle: "Confirm deletion", // TODO: add reviewed Tuvan translation.
-  confirmDeleteAdvertisementMessage: "Delete this advertisement?", // TODO: add reviewed Tuvan translation.
-  cancelButton: "Cancel", // TODO: add reviewed Tuvan translation.
-  advertisementDeletedMessage: "Advertisement deleted.", // TODO: add reviewed Tuvan translation.
-  advertisementDeleteFailedMessage: "This advertisement could not be deleted.", // TODO: add reviewed Tuvan translation.
+  claimAdvertisementButton: "Claim advertisement / Негелде чарлал", // TODO: add reviewed Tuvan translation.
+  confirmClaimAdvertisementTitle: "Confirm claim / Негелдени бадыткаар", // TODO: add reviewed Tuvan translation.
+  confirmClaimAdvertisementMessage: "Claim this older advertisement? / Бо эрги чарлалды негеп алыр силер бе?", // TODO: add reviewed Tuvan translation.
+  advertisementClaimedMessage: "Advertisement claimed. / Чарлал айыткан.", // TODO: add reviewed Tuvan translation.
+  advertisementClaimFailedMessage: "This advertisement could not be claimed. / Бо чарлалды негеп шыдаваан.", // TODO: add reviewed Tuvan translation.
+  deleteAdvertisementButton: "Delete advertisement / Чарлалды өжүрүп кааптыңар", // TODO: add reviewed Tuvan translation.
+  confirmDeleteAdvertisementTitle: "Confirm deletion / Өжүргенин бадыткаар", // TODO: add reviewed Tuvan translation.
+  confirmDeleteAdvertisementMessage: "Delete this advertisement? / Бо чарлалды өжүрүп кааптыңар бе?", // TODO: add reviewed Tuvan translation.
+  cancelButton: "Cancel / Узуткаар", // TODO: add reviewed Tuvan translation.
+  advertisementDeletedMessage: "Advertisement deleted. / Чарлал өжүрүп каан.", // TODO: add reviewed Tuvan translation.
+  advertisementDeleteFailedMessage: "This advertisement could not be deleted. / Бо чарлалды өжүрүп шыдаваан.", // TODO: add reviewed Tuvan translation.
+  editAdvertisementButton: "Edit advertisement / Чарлалды өскертир", // TODO: add reviewed Tuvan translation.
+  editAdvertisementTitle: "Edit advertisement / Чарлалды өскертир", // TODO: add reviewed Tuvan translation.
+  editAdvertisementSaveButton: "Save changes / Өскерлиишкиннерни кадагала", // TODO: add reviewed Tuvan translation.
+  editAdvertisementSavingButton: "Saving changes... / Өскерлиишкиннерни кадагалап турар...", // TODO: add reviewed Tuvan translation.
+  editAdvertisementSavedMessage: "Changes saved. / Өскерлиишкиннер кадагалаттынган.", // TODO: add reviewed Tuvan translation.
+  editAdvertisementUnableMessage: "Unable to edit advertisement. / Чарлалды өскертип болбас.", // TODO: add reviewed Tuvan translation.
+  editAdvertisementSaveFailed: "Unable to edit advertisement. / Чарлалды өскертип болбас.", // TODO: add reviewed Tuvan translation.
+  editAdvertisementNotFoundTitle: "Advertisement not found / Чарлал тывылбаан", // TODO: add reviewed Tuvan translation.
+  editAdvertisementNotOwnedTitle: "Unable to edit advertisement / Чарлалды өскертип болбас", // TODO: add reviewed Tuvan translation.
+  editAdvertisementNotOwnedMessage: "You do not own this advertisement. / Бо чарлалдың ээзи эвес силер.", // TODO: add reviewed Tuvan translation.
 
   // Demo authentication
   signInKicker: "Demo account",
@@ -153,19 +164,19 @@ export const content = {
   listingImagePlaceholder: "Image upload will be added later.",
   listingImageRequirements: "You can upload up to 10 photos. Each photo must be less than 6MB. JPG, JPEG, and PNG only. / 10 чедир чуруктарны үндүрүп болур силер. Чурук бүрүзү 6 МБ-дан эвээш болур ужурлуг. Чүгле JPG, JPEG болгаш PNG.",
   postAdSubmitButton: "Submit Ad / Чарлал киирер",
-  postAdSubmittingButton: "Saving ad...", // TODO: add reviewed Tuvan translation.
+  postAdSubmittingButton: "Saving ad... / Рекламаны кадагалап турар...", // TODO: add reviewed Tuvan translation.
   postAdSuccessMessage: "Demo ad submitted. Nothing has been saved yet.",
-  postAdErrorTitleRequired: "Enter a listing title.", // TODO: add reviewed Tuvan translation.
-  postAdErrorDescriptionRequired: "Enter a description.", // TODO: add reviewed Tuvan translation.
-  postAdErrorLocationRequired: "Enter a location.", // TODO: add reviewed Tuvan translation.
-  postAdErrorCategoryRequired: "Choose a category and subcategory.", // TODO: add reviewed Tuvan translation.
-  postAdErrorPriceRequired: "Enter a valid price. Zero is allowed.", // TODO: add reviewed Tuvan translation.
-  postAdErrorHousingTypeRequired: "Choose a housing transaction and property type.", // TODO: add reviewed Tuvan translation.
-  postAdErrorMarketplaceTypeRequired: "Choose a marketplace type.", // TODO: add reviewed Tuvan translation.
+  postAdErrorTitleRequired: "Enter a listing title. / Даңзының адын киирер.", // TODO: add reviewed Tuvan translation.
+  postAdErrorDescriptionRequired: "Enter a description. / Тайылбырны киирер.", // TODO: add reviewed Tuvan translation.
+  postAdErrorLocationRequired: "Enter a location. / Бир-ле черни киирер.", // TODO: add reviewed Tuvan translation.
+  postAdErrorCategoryRequired: "Choose a category and subcategory. / Категория болгаш подкатегория шилип алыңар.", // TODO: add reviewed Tuvan translation.
+  postAdErrorPriceRequired: "Enter a valid price. Zero is allowed. / Шын өртекти киирер. Ноль чөпшээрелдиг.", // TODO: add reviewed Tuvan translation.
+  postAdErrorHousingTypeRequired: "Choose a housing transaction and property type. / Бажың-балгат дугайында садыглажыышкынның хевирин болгаш өнчү-хөреңгиниң хевирин шилип алыңар. ", // TODO: add reviewed Tuvan translation.
+  postAdErrorMarketplaceTypeRequired: "Choose a marketplace type. / Рынок хевирин шилип алыңар.", // TODO: add reviewed Tuvan translation.
   postAdErrorSaveFailed: "The demo listing could not be saved in this browser.", // TODO: add reviewed Tuvan translation.
   localListingSellerName: "Demo user", // TODO: add reviewed Tuvan translation.
-  loadingListingMessage: "Loading listing...", // TODO: add reviewed Tuvan translation.
-  localListingNotFoundTitle: "Listing not found", // TODO: add reviewed Tuvan translation.
+  loadingListingMessage: "Loading listing... / Даңзыны үндүрүп турар...", // TODO: add reviewed Tuvan translation.
+  localListingNotFoundTitle: "Listing not found / Даңзы тывылбаан", // TODO: add reviewed Tuvan translation.
   localListingNotFoundMessage: "This local demo listing may have been deleted or browser storage may have been cleared.", // TODO: add reviewed Tuvan translation.
 
   // Categories (each category stores its name, slug, image, and subcategories)
