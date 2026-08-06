@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import NativeHistoryIntentMarker from './components/NativeHistoryIntentMarker';
 import SiteHeader from './components/SiteHeader';
+import { AuthProvider } from '@/lib/auth/client';
 import "./globals.css";
 
 const geistSans = Geist({
@@ -27,9 +28,11 @@ export default function RootLayout({
   return (
     <html lang="en" className={`${geistSans.variable} ${geistMono.variable}`}>
       <body>
-        <NativeHistoryIntentMarker />
-        <SiteHeader />
-        {children}
+        <AuthProvider>
+          <NativeHistoryIntentMarker />
+          <SiteHeader />
+          {children}
+        </AuthProvider>
       </body>
     </html>
   );

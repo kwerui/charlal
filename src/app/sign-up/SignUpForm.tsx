@@ -5,27 +5,70 @@ import { useRouter } from 'next/navigation';
 import type { FormEvent } from 'react';
 import { useState } from 'react';
 import { content } from '@/content/tyv';
-import { demoSignIn } from '@/lib/demoAuth';
+import {
+  signUpWithEmailPassword,
+  useAuthStatus,
+} from '@/lib/auth/client';
+import {
+  MINIMUM_PASSWORD_LENGTH,
+  isValidProfileDisplayName,
+  sanitizeProfileDisplayName,
+} from '@/lib/auth/types';
 
 type Props = {
   nextPath: string;
 };
 
+function getSignUpErrorMessage(reason: string): string {
+  if (reason === 'rate-limited') {
+    return content.signInRateLimitMessage;
+  }
+
+  if (reason === 'network') {
+    return content.authNetworkFailureMessage;
+  }
+
+  return content.unableCreateAccountMessage;
+}
+
 export default function SignUpForm({ nextPath }: Props) {
   const router = useRouter();
+  const { refreshAuth } = useAuthStatus();
   const [errorMessage, setErrorMessage] = useState('');
+  const [successMessage, setSuccessMessage] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  function handleSubmit(event: FormEvent<HTMLFormElement>) {
+  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    setErrorMessage('');
+    setSuccessMessage('');
 
     const formData = new FormData(event.currentTarget);
-    const username = String(formData.get('username') || '').trim();
+    const displayName = sanitizeProfileDisplayName(
+      String(formData.get('displayName') || '')
+    );
     const email = String(formData.get('email') || '').trim();
     const password = String(formData.get('password') || '');
+    const passwordConfirmation = String(formData.get('passwordConfirmation') || '');
     const agreedToPolicy = formData.get('policy') === 'on';
 
-    if (!username || !email || !password) {
+    if (!displayName || !email || !password || !passwordConfirmation) {
       setErrorMessage(content.signUpErrorRequired);
+      return;
+    }
+
+    if (!isValidProfileDisplayName(displayName)) {
+      setErrorMessage(content.displayNameInvalidMessage);
+      return;
+    }
+
+    if (password.length < MINIMUM_PASSWORD_LENGTH) {
+      setErrorMessage(content.signUpPasswordTooShortMessage);
+      return;
+    }
+
+    if (password !== passwordConfirmation) {
+      setErrorMessage(content.signUpPasswordMismatchMessage);
       return;
     }
 
@@ -34,19 +77,41 @@ export default function SignUpForm({ nextPath }: Props) {
       return;
     }
 
-    // DEMO ONLY: this does not create a real account. The password is never stored.
-    // This is not secure and must be replaced before production use.
-    demoSignIn(email, username);
+    if (isSubmitting) {
+      return;
+    }
+
+    setIsSubmitting(true);
+
+    const signUpResult = await signUpWithEmailPassword({
+      displayName,
+      email,
+      password,
+      nextPath,
+    });
+
+    if (!signUpResult.ok) {
+      setIsSubmitting(false);
+      setErrorMessage(getSignUpErrorMessage(signUpResult.reason));
+      return;
+    }
+
+    if (signUpResult.requiresEmailConfirmation) {
+      setIsSubmitting(false);
+      setSuccessMessage(content.confirmYourEmailMessage);
+      return;
+    }
+
+    await refreshAuth();
+    router.refresh();
     router.replace(nextPath);
   }
 
   return (
     <form className="auth-form" onSubmit={handleSubmit}>
-      <p className="demo-auth-warning">{content.demoAuthWarning}</p>
-
-      <label className="form-field" htmlFor="username">
-        <span>{content.usernameLabel}</span>
-        <input id="username" name="username" type="text" autoComplete="username" required />
+      <label className="form-field" htmlFor="display-name">
+        <span>{content.displayNameLabel}</span>
+        <input id="display-name" name="displayName" type="text" autoComplete="name" required />
       </label>
 
       <label className="form-field" htmlFor="sign-up-email">
@@ -57,6 +122,17 @@ export default function SignUpForm({ nextPath }: Props) {
       <label className="form-field" htmlFor="sign-up-password">
         <span>{content.passwordLabel}</span>
         <input id="sign-up-password" name="password" type="password" autoComplete="new-password" required />
+      </label>
+
+      <label className="form-field" htmlFor="sign-up-password-confirmation">
+        <span>{content.passwordConfirmationLabel}</span>
+        <input
+          id="sign-up-password-confirmation"
+          name="passwordConfirmation"
+          type="password"
+          autoComplete="new-password"
+          required
+        />
       </label>
 
       <label className="checkbox-field policy-checkbox">
@@ -74,7 +150,14 @@ export default function SignUpForm({ nextPath }: Props) {
         </p>
       ) : null}
 
-      <button type="submit" className="search-button form-submit-button">
+      {successMessage ? (
+        <div className="form-success" role="status">
+          <strong>{content.checkYourEmailTitle}</strong>
+          <p>{successMessage}</p>
+        </div>
+      ) : null}
+
+      <button type="submit" className="search-button form-submit-button" disabled={isSubmitting}>
         {content.signUpButton}
       </button>
     </form>

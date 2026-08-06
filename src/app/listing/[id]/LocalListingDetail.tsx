@@ -1,16 +1,11 @@
 'use client';
 
 import Link from 'next/link';
-import { useEffect, useState, useSyncExternalStore } from 'react';
+import { useEffect, useState } from 'react';
 import ListingDetailView from '@/app/components/ListingDetailView';
 import { content } from '@/content/tyv';
 import type { Listing } from '@/data/listings';
-import {
-  getDemoAuthServerSnapshot,
-  getDemoAuthSnapshot,
-  getDemoUser,
-  subscribeToDemoAuth,
-} from '@/lib/demoAuth';
+import { useAuthStatus } from '@/lib/auth/client';
 import {
   findLocalListingById,
   subscribeToLocalListings,
@@ -39,12 +34,7 @@ type Props = {
 
 export default function LocalListingDetail({ id, safeFromHref, categories }: Props) {
   const [listing, setListing] = useState<Listing | null>();
-  const signedIn = useSyncExternalStore(
-    subscribeToDemoAuth,
-    getDemoAuthSnapshot,
-    getDemoAuthServerSnapshot
-  );
-  const currentUser = signedIn ? getDemoUser() : null;
+  const { status: authStatus, user: currentUser } = useAuthStatus();
 
   useEffect(() => {
     function refreshListing(): void {
@@ -89,7 +79,7 @@ export default function LocalListingDetail({ id, safeFromHref, categories }: Pro
   const backHref = safeFromHref || getListingFallbackResultsHref(listing);
   const sellerName = getPublicSellerNameForListing(
     listing,
-    currentUser,
+    authStatus === 'authenticated' ? currentUser : null,
     content.publicSellerFallbackLabel
   );
 

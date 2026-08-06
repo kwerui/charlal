@@ -7,23 +7,20 @@ import ListingForm, { type ListingFormInitialValues } from '@/app/components/Lis
 import { content } from '@/content/tyv';
 import type { Listing } from '@/data/listings';
 import {
-  getDemoUserDisplayName,
-} from '@/lib/demoAuth';
-import {
   findLocalListingById,
   subscribeToLocalListings,
   updateLocalListingOwnedBy,
 } from '@/lib/localListings';
 import { getListingPlaceholder } from '@/lib/listingPlaceholders';
 import {
-  getDemoUserOwnerId,
+  getUserOwnerId,
   isListingOwnedByUser,
 } from '@/lib/listingOwnership';
 import type {
   ListingFormCategory,
   ValidatedListingFormValues,
 } from '@/lib/listingFormValidation';
-import { useDemoAuthStatus } from '@/lib/useDemoAuthStatus';
+import { useAuthStatus } from '@/lib/auth/client';
 
 type Props = {
   id: string;
@@ -47,8 +44,8 @@ function getEditListingInitialValues(listing: Listing): ListingFormInitialValues
 
 export default function EditListingForm({ id, categories }: Props) {
   const router = useRouter();
-  const { status: authStatus, user: currentUser } = useDemoAuthStatus();
-  const ownerId = getDemoUserOwnerId(currentUser);
+  const { status: authStatus, profileStatus, user: currentUser } = useAuthStatus();
+  const ownerId = getUserOwnerId(currentUser);
   const [listing, setListing] = useState<Listing | null>(null);
   const [editStatus, setEditStatus] = useState<EditListingStatus>('checking');
   const [errors, setErrors] = useState<string[]>([]);
@@ -57,12 +54,19 @@ export default function EditListingForm({ id, categories }: Props) {
 
   useEffect(() => {
     if (authStatus === 'unauthenticated') {
-      router.replace(`/sign-in?next=/account/listings/${id}/edit`);
+      router.replace(
+        `/sign-in?next=${encodeURIComponent(`/account/listings/${id}/edit`)}`
+      );
     }
   }, [authStatus, id, router]);
 
   useEffect(() => {
-    if (authStatus !== 'authenticated' || !currentUser || !ownerId) {
+    if (
+      authStatus !== 'authenticated' ||
+      profileStatus !== 'loaded' ||
+      !currentUser ||
+      !ownerId
+    ) {
       return undefined;
     }
 
@@ -98,17 +102,17 @@ export default function EditListingForm({ id, categories }: Props) {
       window.cancelAnimationFrame(frameId);
       unsubscribe();
     };
-  }, [authStatus, currentUser, id, ownerId]);
+  }, [authStatus, currentUser, id, ownerId, profileStatus]);
 
   function handleSubmit(values: ValidatedListingFormValues): void {
     setErrors([]);
     setSuccessMessage('');
 
-    if (!listing || !ownerId || isSubmitting) {
+    if (!listing || !currentUser || !ownerId || isSubmitting) {
       return;
     }
 
-    const publicDisplayName = getDemoUserDisplayName(currentUser);
+    const publicDisplayName = currentUser.displayName.trim();
 
     if (!publicDisplayName) {
       setErrors([content.accountPublicNameRequiredMessage]);
@@ -146,8 +150,24 @@ export default function EditListingForm({ id, categories }: Props) {
     router.push(`/listing/${updateResult.listing.id}?from=/account`);
   }
 
-  if (authStatus !== 'authenticated' || editStatus === 'checking') {
+  if (
+    authStatus !== 'authenticated' ||
+    profileStatus === 'loading' ||
+    editStatus === 'checking'
+  ) {
     return <p className="page-description">{content.checkingAuthMessage}</p>;
+  }
+
+  if (profileStatus === 'error') {
+    return (
+      <div className="empty-results" role="status">
+        <h3>{content.editAdvertisementUnableMessage}</h3>
+        <p>{content.unableLoadProfileMessage}</p>
+        <Link href="/account" className="secondary-button edit-listing-state-link">
+          {content.backToAccount}
+        </Link>
+      </div>
+    );
   }
 
   if (editStatus === 'not-found') {

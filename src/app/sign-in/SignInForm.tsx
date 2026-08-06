@@ -5,38 +5,83 @@ import { useRouter } from 'next/navigation';
 import type { FormEvent } from 'react';
 import { useState } from 'react';
 import { content } from '@/content/tyv';
-import { demoSignIn } from '@/lib/demoAuth';
+import { signInWithEmailPassword, useAuthStatus } from '@/lib/auth/client';
 
 type Props = {
   nextPath: string;
+  initialMessage?: string;
+  initialMessageTone?: 'success' | 'error';
 };
 
-export default function SignInForm({ nextPath }: Props) {
-  const router = useRouter();
-  const [errorMessage, setErrorMessage] = useState('');
+function getSignInErrorMessage(reason: string): string {
+  if (reason === 'invalid-credentials') {
+    return content.signInInvalidCredentialsMessage;
+  }
 
-  function handleSubmit(event: FormEvent<HTMLFormElement>) {
+  if (reason === 'email-not-confirmed') {
+    return content.signInUnconfirmedEmailMessage;
+  }
+
+  if (reason === 'rate-limited') {
+    return content.signInRateLimitMessage;
+  }
+
+  if (reason === 'network') {
+    return content.authNetworkFailureMessage;
+  }
+
+  return content.unableSignInMessage;
+}
+
+export default function SignInForm({
+  nextPath,
+  initialMessage = '',
+  initialMessageTone = 'success',
+}: Props) {
+  const router = useRouter();
+  const { refreshAuth } = useAuthStatus();
+  const [formMessage, setFormMessage] = useState(initialMessage);
+  const [messageTone, setMessageTone] = useState<'success' | 'error'>(
+    initialMessageTone
+  );
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    setFormMessage('');
 
     const formData = new FormData(event.currentTarget);
     const email = String(formData.get('email') || '').trim();
     const password = String(formData.get('password') || '');
 
     if (!email || !password) {
-      setErrorMessage(content.signInErrorRequired);
+      setMessageTone('error');
+      setFormMessage(content.signInErrorRequired);
       return;
     }
 
-    // DEMO ONLY: accepts any non-empty email and password. The password is never stored.
-    // This is not secure and must be replaced before production use.
-    demoSignIn(email);
+    if (isSubmitting) {
+      return;
+    }
+
+    setIsSubmitting(true);
+
+    const signInResult = await signInWithEmailPassword(email, password);
+
+    if (!signInResult.ok) {
+      setIsSubmitting(false);
+      setMessageTone('error');
+      setFormMessage(getSignInErrorMessage(signInResult.reason));
+      return;
+    }
+
+    await refreshAuth();
+    router.refresh();
     router.replace(nextPath);
   }
 
   return (
     <form className="auth-form" onSubmit={handleSubmit}>
-      <p className="demo-auth-warning">{content.demoAuthWarning}</p>
-
       <label className="form-field" htmlFor="email">
         <span>{content.emailLabel}</span>
         <input id="email" name="email" type="email" autoComplete="email" required />
@@ -57,13 +102,16 @@ export default function SignInForm({ nextPath }: Props) {
         </Link>
       </div>
 
-      {errorMessage ? (
-        <p className="form-error" role="alert">
-          {errorMessage}
+      {formMessage ? (
+        <p
+          className={messageTone === 'success' ? 'form-success' : 'form-error'}
+          role={messageTone === 'success' ? 'status' : 'alert'}
+        >
+          {formMessage}
         </p>
       ) : null}
 
-      <button type="submit" className="search-button form-submit-button">
+      <button type="submit" className="search-button form-submit-button" disabled={isSubmitting}>
         {content.signInButton}
       </button>
     </form>

@@ -1,20 +1,11 @@
 import Link from 'next/link';
 import { content } from '@/content/tyv';
+import { getSafeNextPath } from '@/lib/auth/safeNextPath';
 import SignUpForm from './SignUpForm';
 
 type SignUpPageProps = {
   searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 };
-
-function getSafeNextPath(nextValue: string | string[] | undefined) {
-  const nextPath = Array.isArray(nextValue) ? nextValue[0] : nextValue;
-
-  if (!nextPath || !nextPath.startsWith('/') || nextPath.startsWith('//')) {
-    return '/';
-  }
-
-  return nextPath;
-}
 
 export default async function SignUpPage({ searchParams }: SignUpPageProps) {
   const query = await searchParams;

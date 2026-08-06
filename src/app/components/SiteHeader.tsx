@@ -2,25 +2,15 @@
 
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
-import { useSyncExternalStore } from 'react';
 import { content } from '@/content/tyv';
-import {
-  demoSignOut,
-  getDemoAuthServerSnapshot,
-  getDemoAuthSnapshot,
-  getDemoUser,
-  subscribeToDemoAuth,
-} from '@/lib/demoAuth';
+import { useAuthStatus } from '@/lib/auth/client';
 import { clearNativeHistoryTraversalIntent } from '@/lib/nativeHistoryIntentStorage';
 
 export default function SiteHeader() {
   const router = useRouter();
   const pathname = usePathname();
-  const signedIn = useSyncExternalStore(
-    subscribeToDemoAuth,
-    getDemoAuthSnapshot,
-    getDemoAuthServerSnapshot
-  );
+  const { status: authStatus, user, signOut } = useAuthStatus();
+  const signedIn = authStatus === 'authenticated';
 
   function handlePostAdClick() {
     if (signedIn) {
@@ -31,11 +21,12 @@ export default function SiteHeader() {
     router.push('/sign-in?next=/post-ad');
   }
 
-  function handleSignOut() {
-    demoSignOut();
+  async function handleSignOut() {
+    await signOut();
+    router.refresh();
 
-    if (pathname === '/post-ad' || pathname === '/account') {
-      router.replace(`/sign-in?next=${pathname}`);
+    if (pathname === '/post-ad' || pathname === '/account' || pathname.startsWith('/account/')) {
+      router.replace(`/sign-in?next=${encodeURIComponent(pathname)}`);
     }
   }
 
@@ -63,13 +54,18 @@ export default function SiteHeader() {
             {content.headerSignIn}
           </Link>
         )}
-        <button type="button" className="header-button primary-header-button" onClick={handlePostAdClick}>
+        <button
+          type="button"
+          className="header-button primary-header-button"
+          onClick={handlePostAdClick}
+          disabled={authStatus === 'checking'}
+        >
           {content.headerPostAd}
         </button>
       </nav>
-      {signedIn ? (
+      {signedIn && user ? (
         <span className="sr-only">
-          {content.signedInAsLabel} {getDemoUser()?.email}
+          {content.signedInAsLabel} {user.email}
         </span>
       ) : null}
     </header>

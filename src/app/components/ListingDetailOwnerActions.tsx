@@ -3,15 +3,15 @@
 import Link from 'next/link';
 import { content } from '@/content/tyv';
 import type { Listing } from '@/data/listings';
+import { useAuthStatus } from '@/lib/auth/client';
 import { isListingOwnedByUser } from '@/lib/listingOwnership';
-import { useDemoAuthStatus } from '@/lib/useDemoAuthStatus';
 
 type Props = {
   listing: Listing;
 };
 
 export default function ListingDetailOwnerActions({ listing }: Props) {
-  const { status: authStatus, user: currentUser } = useDemoAuthStatus();
+  const { status: authStatus, user: currentUser } = useAuthStatus();
   const isLocalListing = typeof listing.id === 'string' && listing.id.startsWith('local-');
   const isOwnedByCurrentUser =
     authStatus === 'authenticated' &&

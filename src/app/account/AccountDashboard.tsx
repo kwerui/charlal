@@ -15,28 +15,31 @@ import {
   deleteLocalListingOwnedBy,
   getLocalListingsOwnedBy,
   getUnassignedLocalListings,
-  migrateLocalListingOwnerId,
   subscribeToLocalListings,
-  updateLocalListingSellerNamesForOwner,
 } from '@/lib/localListings';
 import {
-  getDemoUserOwnerId,
+  getUserOwnerId,
   isListingOwnedByUser,
-  normalizeOwnerId,
 } from '@/lib/listingOwnership';
 import {
-  DEMO_DISPLAY_NAME_MAX_LENGTH,
-  getDemoUserDisplayName,
-  sanitizeDemoDisplayName,
-  updateDemoDisplayName,
-} from '@/lib/demoAuth';
-import { useDemoAuthStatus } from '@/lib/useDemoAuthStatus';
+  PROFILE_DISPLAY_NAME_MAX_LENGTH,
+  isValidProfileDisplayName,
+  sanitizeProfileDisplayName,
+} from '@/lib/auth/types';
+import { useAuthStatus } from '@/lib/auth/client';
 
 export default function AccountDashboard() {
   const router = useRouter();
   const accountContentRef = useRef<HTMLDivElement | null>(null);
-  const { status: authStatus, user: currentUser } = useDemoAuthStatus();
-  const ownerId = getDemoUserOwnerId(currentUser);
+  const {
+    status: authStatus,
+    profileStatus,
+    legacyMigrationStatus,
+    legacyMigrationCount,
+    user: currentUser,
+    updateDisplayName,
+  } = useAuthStatus();
+  const ownerId = getUserOwnerId(currentUser);
   const [ownedListings, setOwnedListings] = useState<Listing[]>([]);
   const [unassignedListings, setUnassignedListings] = useState<Listing[]>([]);
   const [listingSectionsLoaded, setListingSectionsLoaded] = useState(false);
@@ -58,7 +61,7 @@ export default function AccountDashboard() {
 
   useEffect(() => {
     const frameId = window.requestAnimationFrame(() => {
-      setDisplayNameInput(getDemoUserDisplayName(currentUser));
+      setDisplayNameInput(currentUser?.displayName || '');
     });
 
     return () => {
@@ -75,8 +78,6 @@ export default function AccountDashboard() {
         return;
       }
 
-      const legacyOwnerId = normalizeOwnerId(currentUser.email);
-      migrateLocalListingOwnerId(legacyOwnerId, ownerId);
       setOwnedListings(getLocalListingsOwnedBy(ownerId));
       setUnassignedListings(getUnassignedLocalListings());
       setListingSectionsLoaded(true);
@@ -108,32 +109,39 @@ export default function AccountDashboard() {
     );
   }, [listingToClaim, unassignedListings]);
 
-  function handlePublicNameSubmit(event: FormEvent<HTMLFormElement>): void {
+  async function handlePublicNameSubmit(event: FormEvent<HTMLFormElement>): Promise<void> {
     event.preventDefault();
     setPublicNameMessage('');
     setPublicNameError('');
 
-    const safeDisplayName = sanitizeDemoDisplayName(displayNameInput);
+    const safeDisplayName = sanitizeProfileDisplayName(displayNameInput);
 
-    if (!safeDisplayName) {
-      setPublicNameError(content.accountPublicNameRequiredMessage);
+    if (!isValidProfileDisplayName(safeDisplayName)) {
+      setPublicNameError(
+        safeDisplayName
+          ? content.displayNameInvalidMessage
+          : content.accountPublicNameRequiredMessage
+      );
       return;
     }
 
-    const savedUser = updateDemoDisplayName(safeDisplayName);
+    const updateResult = await updateDisplayName(safeDisplayName);
 
-    if (!savedUser) {
-      setPublicNameError(content.accountPublicNameRequiredMessage);
+    if (!updateResult.ok) {
+      setPublicNameError(
+        updateResult.reason === 'invalid-display-name'
+          ? content.accountPublicNameRequiredMessage
+          : content.accountPublicNameSaveFailedMessage
+      );
       return;
     }
 
     if (ownerId) {
-      updateLocalListingSellerNamesForOwner(ownerId, getDemoUserDisplayName(savedUser));
       setOwnedListings(getLocalListingsOwnedBy(ownerId));
     }
 
-    setDisplayNameInput(getDemoUserDisplayName(savedUser));
-    setPublicNameMessage(content.accountPublicNameSavedMessage);
+    setDisplayNameInput(updateResult.user.displayName);
+    setPublicNameMessage(content.profileUpdatedMessage);
   }
 
   function startDelete(listing: Listing): void {
@@ -201,6 +209,8 @@ export default function AccountDashboard() {
 
   const accountReady =
     authStatus === 'authenticated' &&
+    profileStatus === 'loaded' &&
+    legacyMigrationStatus === 'complete' &&
     Boolean(currentUser) &&
     Boolean(ownerId) &&
     listingSectionsLoaded;
@@ -208,6 +218,23 @@ export default function AccountDashboard() {
     authStatus === 'authenticated' &&
     Boolean(currentUser) &&
     Boolean(ownerId);
+
+  if (authStatus === 'authenticated' && profileStatus === 'error') {
+    return (
+      <>
+        <AccountNativeHistoryRestorer
+          accountReady={false}
+          canHoldVisualRestoration={false}
+          contentRef={accountContentRef}
+        />
+        <AccountRefreshScrollManager ready={false} />
+        <div className="empty-results" role="alert">
+          <h3>{content.unableLoadProfileMessage}</h3>
+          <p>{content.accountProfileLoadFailedMessage}</p>
+        </div>
+      </>
+    );
+  }
 
   if (!accountReady || !currentUser || !ownerId) {
     return (
@@ -233,8 +260,15 @@ export default function AccountDashboard() {
         </p>
         <p>
           <span>{content.accountPublicNameLabel}</span>
-          <strong>{getDemoUserDisplayName(currentUser) || content.publicSellerFallbackLabel}</strong>
+          <strong>{currentUser.displayName || content.publicSellerFallbackLabel}</strong>
         </p>
+        {legacyMigrationCount !== null ? (
+          <p className="form-success" role="status">
+            {legacyMigrationCount > 0
+              ? `${content.importedLocalAdvertisementsMessage}: ${legacyMigrationCount}`
+              : content.noLocalAdvertisementsRequiredMigrationMessage}
+          </p>
+        ) : null}
         <form className="public-name-form" onSubmit={handlePublicNameSubmit} noValidate>
           <label className="form-field" htmlFor="account-public-name">
             <span>{content.accountPublicNameTitle}</span>
@@ -243,7 +277,7 @@ export default function AccountDashboard() {
               name="displayName"
               type="text"
               value={displayNameInput}
-              maxLength={DEMO_DISPLAY_NAME_MAX_LENGTH}
+              maxLength={PROFILE_DISPLAY_NAME_MAX_LENGTH}
               placeholder={content.accountPublicNamePlaceholder}
               onChange={(event) => {
                 setDisplayNameInput(event.target.value);

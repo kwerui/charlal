@@ -22,9 +22,9 @@ This project uses [`next/font`](https://nextjs.org/docs/app/building-your-applic
 
 ## Supabase Setup
 
-This repository is prepared for Supabase infrastructure, but authentication,
-profiles, advertisements, ownership, images, favourites, and messaging still use
-the existing demo/localStorage systems in this phase.
+This repository is prepared for Supabase authentication and profiles.
+Advertisements, ownership records, images, favourites, and messaging are not in
+PostgreSQL yet. Advertisements still use browser localStorage in this phase.
 
 1. Create a Supabase project from the Supabase dashboard.
 2. Open the project, then use the Connect dialog or Project Settings API section
@@ -49,7 +49,74 @@ returns the project URL, keys, cookies, access tokens, or user data. Remove any
 temporary check before production.
 
 Until both public Supabase variables are present, the root `proxy.ts` leaves
-application requests unchanged so the existing demo marketplace remains usable.
+application requests unchanged so local development can still load the app.
+
+### Apply the Profiles SQL
+
+The SQL migration is stored at
+`supabase/migrations/20260806_create_profiles.sql`. The project does not require
+the Supabase CLI for this phase.
+
+1. Open `supabase/migrations/20260806_create_profiles.sql`.
+2. Copy the full SQL into the Supabase dashboard SQL Editor.
+3. Run the SQL.
+4. In Table Editor, confirm `public.profiles` exists with `id`, `display_name`,
+   `created_at`, and `updated_at`.
+5. Confirm RLS is enabled on `public.profiles`.
+6. In Authentication users, create or confirm a test user and verify a matching
+   row appears in `public.profiles`.
+
+The migration creates only the profiles table and profile policies. Listing RLS
+will only exist after listings move from localStorage to PostgreSQL in a future
+phase.
+
+### Configure Auth URLs
+
+In the Supabase dashboard, open Authentication, then URL Configuration.
+
+Set the Site URL for local development:
+
+```text
+http://localhost:3000
+```
+
+Add redirect URLs:
+
+```text
+http://localhost:3000/**
+http://localhost:3001/**
+```
+
+The `localhost:3001` value is optional, but useful when testing a local
+production server on another port.
+
+### Default Confirmation Email
+
+Confirm the Email provider is enabled in Authentication providers.
+
+New Free Supabase projects that use Supabase's default SMTP may not allow Auth
+email template editing. This app supports that locked default template by using
+the standard PKCE confirmation flow.
+
+During sign-up, the app sends Supabase an `emailRedirectTo` URL like
+`/auth/callback?next=/account`. The unchanged Supabase confirmation email first
+confirms the address through Supabase, then redirects back to `/auth/callback`
+with a short-lived `code`. The callback route exchanges that code with
+`supabase.auth.exchangeCodeForSession(code)`, stores the session in cookies, and
+redirects to the safe internal `next` destination.
+
+Custom SMTP can be configured later if you want branded editable templates. The
+older token-hash `/auth/confirm` pattern is retained only as optional
+compatibility for a future custom template that can send `token_hash` links; it
+is not used by the default locked template flow.
+
+Supabase development email delivery can be rate-limited. Test both with email
+confirmation enabled and disabled:
+
+- With confirmation enabled, registration should show "Check your email" and not
+  treat the user as signed in until confirmation succeeds.
+- With confirmation disabled, registration may create a session immediately and
+  continue to the safe internal `next` destination.
 
 ## Learn More
 

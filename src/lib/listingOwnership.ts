@@ -1,15 +1,12 @@
 import type { Listing } from '@/data/listings';
-import {
-  getDemoUserDisplayName,
-  type DemoUser,
-} from '@/lib/demoAuth';
+import type { AppUser } from '@/lib/auth/types';
 
 export function normalizeOwnerId(email: string): string {
   return email.trim().toLocaleLowerCase();
 }
 
-export function getDemoUserOwnerId(user: DemoUser | null): string | undefined {
-  const userId = user?.userId.trim();
+export function getUserOwnerId(user: AppUser | null): string | undefined {
+  const userId = user?.id.trim();
 
   return userId || undefined;
 }
@@ -18,8 +15,8 @@ export function isListingOwnedByOwnerId(listing: Listing, ownerId: string): bool
   return listing.ownerId === ownerId;
 }
 
-export function isListingOwnedByUser(listing: Listing, user: DemoUser | null): boolean {
-  const ownerId = getDemoUserOwnerId(user);
+export function isListingOwnedByUser(listing: Listing, user: AppUser | null): boolean {
+  const ownerId = getUserOwnerId(user);
 
   return Boolean(ownerId && isListingOwnedByOwnerId(listing, ownerId));
 }
@@ -30,11 +27,11 @@ export function isEmailLike(value: string): boolean {
 
 export function getPublicSellerNameForListing(
   listing: Listing,
-  currentUser: DemoUser | null,
+  currentUser: AppUser | null,
   fallbackSellerName: string
 ): string {
   if (isListingOwnedByUser(listing, currentUser)) {
-    const displayName = getDemoUserDisplayName(currentUser);
+    const displayName = currentUser?.displayName.trim();
 
     if (displayName) {
       return displayName;

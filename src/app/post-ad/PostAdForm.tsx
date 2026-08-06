@@ -7,21 +7,16 @@ import { content } from '@/content/tyv';
 import type { Listing } from '@/data/listings';
 import { listings } from '@/data/listings';
 import {
-  getDemoUserDisplayName,
-  getDemoUser,
-} from '@/lib/demoAuth';
-import {
   addLocalListing,
   createLocalListingId,
   readLocalListings,
 } from '@/lib/localListings';
 import { getListingPlaceholder } from '@/lib/listingPlaceholders';
-import { getDemoUserOwnerId } from '@/lib/listingOwnership';
 import type {
   ListingFormCategory,
   ValidatedListingFormValues,
 } from '@/lib/listingFormValidation';
-import { useDemoAuthStatus } from '@/lib/useDemoAuthStatus';
+import { useAuthStatus } from '@/lib/auth/client';
 
 type Props = {
   categories: ListingFormCategory[];
@@ -32,7 +27,7 @@ export default function PostAdForm({ categories }: Props) {
   const [successMessage, setSuccessMessage] = useState('');
   const [errors, setErrors] = useState<string[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const { status: authStatus } = useDemoAuthStatus();
+  const { status: authStatus, profileStatus, user: currentUser } = useAuthStatus();
 
   useEffect(() => {
     if (authStatus === 'unauthenticated') {
@@ -48,9 +43,8 @@ export default function PostAdForm({ categories }: Props) {
       return;
     }
 
-    const demoUser = getDemoUser();
-    const ownerId = getDemoUserOwnerId(demoUser);
-    const publicDisplayName = getDemoUserDisplayName(demoUser);
+    const ownerId = currentUser?.id;
+    const publicDisplayName = currentUser?.displayName.trim() || '';
     const validationErrors: string[] = [];
 
     if (!publicDisplayName) {
@@ -104,7 +98,11 @@ export default function PostAdForm({ categories }: Props) {
     }
   }
 
-  if (authStatus !== 'authenticated') {
+  if (authStatus === 'authenticated' && profileStatus === 'error') {
+    return <p className="form-error" role="alert">{content.unableLoadProfileMessage}</p>;
+  }
+
+  if (authStatus !== 'authenticated' || profileStatus !== 'loaded' || !currentUser) {
     return <p className="page-description">{content.checkingAuthMessage}</p>;
   }
 

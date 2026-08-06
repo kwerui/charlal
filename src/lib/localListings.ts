@@ -342,6 +342,52 @@ export function migrateLocalListingOwnerId(
   return changedCount;
 }
 
+export function migrateLocalListingsFromLegacyOwner({
+  legacyOwnerId,
+  newOwnerId,
+  publicDisplayName,
+}: {
+  legacyOwnerId: string;
+  newOwnerId: string;
+  publicDisplayName: string;
+}): number {
+  const safeLegacyOwnerId = legacyOwnerId.trim();
+  const safeNewOwnerId = newOwnerId.trim();
+  const safeDisplayName = publicDisplayName.trim();
+
+  if (
+    !safeLegacyOwnerId ||
+    !safeNewOwnerId ||
+    !safeDisplayName ||
+    safeLegacyOwnerId === safeNewOwnerId
+  ) {
+    return 0;
+  }
+
+  const currentListings = readLocalListings();
+  let changedCount = 0;
+
+  const nextListings = currentListings.map((listing) => {
+    if (listing.ownerId !== safeLegacyOwnerId) {
+      return listing;
+    }
+
+    changedCount += 1;
+
+    return {
+      ...listing,
+      ownerId: safeNewOwnerId,
+      sellerName: safeDisplayName,
+    };
+  });
+
+  if (changedCount > 0) {
+    writeLocalListings(nextListings);
+  }
+
+  return changedCount;
+}
+
 export function deleteLocalListingOwnedBy(
   listingId: string | number,
   ownerId: string

@@ -1,24 +1,17 @@
 import Link from 'next/link';
 import { content } from '@/content/tyv';
+import { getSafeNextPath } from '@/lib/auth/safeNextPath';
 import SignInForm from './SignInForm';
 
 type SignInPageProps = {
   searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 };
 
-function getSafeNextPath(nextValue: string | string[] | undefined) {
-  const nextPath = Array.isArray(nextValue) ? nextValue[0] : nextValue;
-
-  if (!nextPath || !nextPath.startsWith('/') || nextPath.startsWith('//')) {
-    return '/';
-  }
-
-  return nextPath;
-}
-
 export default async function SignInPage({ searchParams }: SignInPageProps) {
   const query = await searchParams;
   const nextPath = getSafeNextPath(query.next);
+  const confirmationFailed = query.error === 'confirmation';
+  const emailConfirmed = query.confirmed === '1';
 
   return (
     <main className="auth-page">
@@ -35,7 +28,17 @@ export default async function SignInPage({ searchParams }: SignInPageProps) {
             </Link>
           </p>
         </div>
-        <SignInForm nextPath={nextPath} />
+        <SignInForm
+          nextPath={nextPath}
+          initialMessage={
+            emailConfirmed
+              ? content.emailConfirmedMessage
+              : confirmationFailed
+              ? content.confirmationInvalidMessage
+              : ''
+          }
+          initialMessageTone={emailConfirmed ? 'success' : 'error'}
+        />
       </section>
     </main>
   );
