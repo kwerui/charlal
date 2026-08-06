@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 420" role="img" aria-labelledby="title desc">
+  <title id="title">Auto placeholder</title>
+  <desc id="desc">Simple car illustration placeholder.</desc>
+  <rect width="640" height="420" fill="#ecfeff"/>
+  <path d="M154 248 200 162h240l46 86" fill="#ffffff"/>
+  <rect x="118" y="228" width="404" height="92" rx="28" fill="#0891b2"/>
+  <path d="M218 182h204l28 54H190z" fill="#cffafe"/>
+  <circle cx="214" cy="324" r="38" fill="#164e63"/>
+  <circle cx="426" cy="324" r="38" fill="#164e63"/>
+  <circle cx="214" cy="324" r="16" fill="#a5f3fc"/>
+  <circle cx="426" cy="324" r="16" fill="#a5f3fc"/>
+</svg>

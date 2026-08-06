@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 420" role="img" aria-labelledby="title desc">
+  <title id="title">Housing placeholder</title>
+  <desc id="desc">Simple house illustration placeholder.</desc>
+  <rect width="640" height="420" fill="#eef2ff"/>
+  <rect x="86" y="246" width="468" height="110" rx="18" fill="#dbeafe"/>
+  <path d="M116 236 320 82l204 154v120H116z" fill="#ffffff"/>
+  <path d="M116 236 320 82l204 154" fill="none" stroke="#2563eb" stroke-width="28" stroke-linecap="round" stroke-linejoin="round"/>
+  <rect x="268" y="242" width="104" height="114" rx="10" fill="#1d4ed8"/>
+  <rect x="156" y="258" width="72" height="62" rx="10" fill="#bfdbfe"/>
+  <rect x="412" y="258" width="72" height="62" rx="10" fill="#bfdbfe"/>
+</svg>

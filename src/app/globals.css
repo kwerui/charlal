@@ -865,7 +865,8 @@ body {
 
 .account-content,
 .account-info,
-.my-ads-section {
+.my-ads-section,
+.public-name-form {
   display: grid;
   gap: 18px;
 }
@@ -900,6 +901,18 @@ body {
   color: var(--text-dark);
 }
 
+.public-name-form {
+  gap: 12px;
+  margin-top: 4px;
+}
+
+.account-help-text {
+  margin: 0;
+  color: var(--text-light);
+  font-size: 14px;
+  line-height: 1.5;
+}
+
 .my-ads-heading {
   display: grid;
   gap: 4px;
@@ -920,6 +933,10 @@ body {
 }
 
 .my-ad-delete-button {
+  width: 100%;
+}
+
+.my-ad-claim-button {
   width: 100%;
 }
 

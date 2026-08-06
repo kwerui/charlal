@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 420" role="img" aria-labelledby="title desc">
+  <title id="title">Jobs placeholder</title>
+  <desc id="desc">Simple briefcase illustration placeholder.</desc>
+  <rect width="640" height="420" fill="#fff7ed"/>
+  <rect x="142" y="148" width="356" height="204" rx="24" fill="#ffffff"/>
+  <path d="M254 148v-28c0-24 18-42 42-42h48c24 0 42 18 42 42v28" fill="none" stroke="#ea580c" stroke-width="24"/>
+  <rect x="142" y="194" width="356" height="70" fill="#fed7aa"/>
+  <rect x="288" y="236" width="64" height="36" rx="10" fill="#f97316"/>
+</svg>

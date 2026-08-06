@@ -2,22 +2,22 @@
 
 import { useRouter } from 'next/navigation';
 import type { FormEvent } from 'react';
-import { useEffect, useState, useSyncExternalStore } from 'react';
+import { useEffect, useState } from 'react';
 import { content } from '@/content/tyv';
 import type { Listing } from '@/data/listings';
-import { listings, LOCAL_LISTING_PLACEHOLDER_IMAGE } from '@/data/listings';
+import { listings } from '@/data/listings';
 import {
+  getDemoUserDisplayName,
   getDemoUser,
-  getDemoAuthServerSnapshot,
-  getDemoAuthSnapshot,
-  subscribeToDemoAuth,
 } from '@/lib/demoAuth';
 import {
   addLocalListing,
   createLocalListingId,
   readLocalListings,
 } from '@/lib/localListings';
+import { getListingPlaceholder } from '@/lib/listingPlaceholders';
 import { getDemoUserOwnerId } from '@/lib/listingOwnership';
+import { useDemoAuthStatus } from '@/lib/useDemoAuthStatus';
 
 type Props = {
   categories: CategoryOption[];
@@ -53,17 +53,13 @@ export default function PostAdForm({ categories }: Props) {
   const hasBuyTypes = selectedCategory?.slug === 'marketplace' && selectedSubcategorySlug === 'buy';
   const marketplaceBuyTypes =
     selectedCategory?.buyTypes?.filter((buyType) => buyType.slug !== 'all-categories') || [];
-  const signedIn = useSyncExternalStore(
-    subscribeToDemoAuth,
-    getDemoAuthSnapshot,
-    getDemoAuthServerSnapshot
-  );
+  const { status: authStatus } = useDemoAuthStatus();
 
   useEffect(() => {
-    if (!signedIn) {
+    if (authStatus === 'unauthenticated') {
       router.replace('/sign-in?next=/post-ad');
     }
-  }, [router, signedIn]);
+  }, [authStatus, router]);
 
   function handleCategoryChange(categorySlug: string): void {
     setSelectedCategorySlug(categorySlug);
@@ -98,6 +94,9 @@ export default function PostAdForm({ categories }: Props) {
     const price = Number(priceText);
     const typeSlug = getFormValue(formData, 'type');
     const buyTypeSlug = getFormValue(formData, 'buyType');
+    const demoUser = getDemoUser();
+    const ownerId = getDemoUserOwnerId(demoUser);
+    const publicDisplayName = getDemoUserDisplayName(demoUser);
     const validationErrors: string[] = [];
 
     if (!title) {
@@ -142,6 +141,14 @@ export default function PostAdForm({ categories }: Props) {
       validationErrors.push(content.postAdErrorMarketplaceTypeRequired);
     }
 
+    if (!publicDisplayName) {
+      validationErrors.push(content.accountPublicNameRequiredMessage);
+    }
+
+    if (!ownerId) {
+      validationErrors.push(content.postAdErrorSaveFailed);
+    }
+
     if (validationErrors.length > 0) {
       setErrors(validationErrors);
       return;
@@ -155,14 +162,6 @@ export default function PostAdForm({ categories }: Props) {
         ...listings.map((listing) => listing.id),
         ...localListings.map((listing) => listing.id),
       ]);
-      const demoUser = getDemoUser();
-      const ownerId = getDemoUserOwnerId(demoUser);
-
-      if (!ownerId) {
-        setErrors([content.postAdErrorSaveFailed]);
-        setIsSubmitting(false);
-        return;
-      }
 
       const newListing: Listing = {
         id,
@@ -173,8 +172,19 @@ export default function PostAdForm({ categories }: Props) {
         categorySlug,
         subcategorySlug,
         // TODO: replace this placeholder with real image upload when a backend is added.
-        image: LOCAL_LISTING_PLACEHOLDER_IMAGE,
-        sellerName: demoUser?.email || content.localListingSellerName,
+        image: getListingPlaceholder({
+          categorySlug,
+          subcategorySlug,
+          propertyType:
+            categorySlug === 'housing'
+              ? (typeSlug as Listing['propertyType'])
+              : undefined,
+          marketplaceType:
+            categorySlug === 'marketplace' && subcategorySlug === 'buy'
+              ? buyTypeSlug
+              : undefined,
+        }),
+        sellerName: publicDisplayName,
         datePosted: new Date().toISOString().slice(0, 10),
         ownerId,
       };
@@ -199,7 +209,7 @@ export default function PostAdForm({ categories }: Props) {
     }
   }
 
-  if (!signedIn) {
+  if (authStatus !== 'authenticated') {
     return <p className="page-description">{content.checkingAuthMessage}</p>;
   }
 

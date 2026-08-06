@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 420" role="img" aria-labelledby="title desc">
+  <title id="title">Marketplace placeholder</title>
+  <desc id="desc">Simple shopping bag illustration placeholder.</desc>
+  <rect width="640" height="420" fill="#f0fdf4"/>
+  <rect x="154" y="126" width="332" height="230" rx="28" fill="#ffffff"/>
+  <path d="M240 164c0-48 32-82 80-82s80 34 80 82" fill="none" stroke="#16a34a" stroke-width="26" stroke-linecap="round"/>
+  <path d="m154 170 28-44h276l28 44" fill="#bbf7d0"/>
+  <rect x="200" y="216" width="240" height="18" rx="9" fill="#22c55e"/>
+  <rect x="200" y="262" width="166" height="18" rx="9" fill="#86efac"/>
+</svg>

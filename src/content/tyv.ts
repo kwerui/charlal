@@ -12,15 +12,15 @@ export const content = {
   headerActionsLabel: "Account actions / Аккаунттуң ажыл-чорудулгазы",
   headerSignIn: "Sign In / Кирер",
   headerSignOut: "Sign Out / Үнер",
-  headerAccount: "Account", // TODO: add reviewed Tuvan translation.
+  headerAccount: "Account / Аккаунт", // TODO: add reviewed Tuvan translation.
   headerPostAd: "Post Ad / Чарлалдан үндүрер",
   signedInAsLabel: "Signed in as / Кылдыр кирген",
   
   // Search
   searchPlaceholder: "Чүнү дилеп тур силер бээр парлаптыңар",
-  searchInputLabel: "Search listings", // TODO: add reviewed Tuvan translation.
+  searchInputLabel: "Search listings / Даңзыларны дилеп тывар", // TODO: add reviewed Tuvan translation.
   searchButton: "Дилээр",
-  searchResultsTitle: "Search results", // TODO: add reviewed Tuvan translation.
+  searchResultsTitle: "Search results / Дилээшкинниң түңнелдери", // TODO: add reviewed Tuvan translation.
   
   // Category navigation
   categorySectionTitle: "Категорияларже",
@@ -78,10 +78,26 @@ export const content = {
   accountTitle: "Account", // TODO: add reviewed Tuvan translation.
   accountInfoTitle: "Account information", // TODO: add reviewed Tuvan translation.
   accountEmailLabel: "Signed in as", // TODO: add reviewed Tuvan translation.
+  accountPublicNameLabel: "Public name", // TODO: add reviewed Tuvan translation.
+  accountPublicNameTitle: "Change public name", // TODO: add reviewed Tuvan translation.
+  accountPublicNameHelp: "This name is shown publicly on advertisements instead of your email.", // TODO: add reviewed Tuvan translation.
+  accountPublicNamePlaceholder: "Enter a public seller name", // TODO: add reviewed Tuvan translation.
+  accountSaveNameButton: "Save name", // TODO: add reviewed Tuvan translation.
+  accountPublicNameSavedMessage: "Public name saved.", // TODO: add reviewed Tuvan translation.
+  accountPublicNameRequiredMessage: "Enter a public name before posting an advertisement.", // TODO: add reviewed Tuvan translation.
+  publicSellerFallbackLabel: "Seller", // TODO: add reviewed Tuvan translation.
   myAdvertisementsTitle: "My advertisements", // TODO: add reviewed Tuvan translation.
   myAdvertisementsCountLabel: "My advertisements", // TODO: add reviewed Tuvan translation.
   noAdvertisementsPostedTitle: "No advertisements posted", // TODO: add reviewed Tuvan translation.
   noAdvertisementsPostedMessage: "Advertisements you create while signed in will appear here.", // TODO: add reviewed Tuvan translation.
+  olderUnassignedAdvertisementsTitle: "Older unassigned advertisements", // TODO: add reviewed Tuvan translation.
+  olderUnassignedAdvertisementsCountLabel: "Older unassigned advertisements", // TODO: add reviewed Tuvan translation.
+  noUnassignedAdvertisementsMessage: "Older demo advertisements without an owner will appear here.", // TODO: add reviewed Tuvan translation.
+  claimAdvertisementButton: "Claim advertisement", // TODO: add reviewed Tuvan translation.
+  confirmClaimAdvertisementTitle: "Confirm claim", // TODO: add reviewed Tuvan translation.
+  confirmClaimAdvertisementMessage: "Claim this older advertisement?", // TODO: add reviewed Tuvan translation.
+  advertisementClaimedMessage: "Advertisement claimed.", // TODO: add reviewed Tuvan translation.
+  advertisementClaimFailedMessage: "This advertisement could not be claimed.", // TODO: add reviewed Tuvan translation.
   deleteAdvertisementButton: "Delete advertisement", // TODO: add reviewed Tuvan translation.
   confirmDeleteAdvertisementTitle: "Confirm deletion", // TODO: add reviewed Tuvan translation.
   confirmDeleteAdvertisementMessage: "Delete this advertisement?", // TODO: add reviewed Tuvan translation.
@@ -138,7 +154,7 @@ export const content = {
   listingImageRequirements: "You can upload up to 10 photos. Each photo must be less than 6MB. JPG, JPEG, and PNG only. / 10 чедир чуруктарны үндүрүп болур силер. Чурук бүрүзү 6 МБ-дан эвээш болур ужурлуг. Чүгле JPG, JPEG болгаш PNG.",
   postAdSubmitButton: "Submit Ad / Чарлал киирер",
   postAdSubmittingButton: "Saving ad...", // TODO: add reviewed Tuvan translation.
-  postAdSuccessMessage: "Demo ad saved in this browser.", // TODO: add reviewed Tuvan translation.
+  postAdSuccessMessage: "Demo ad submitted. Nothing has been saved yet.",
   postAdErrorTitleRequired: "Enter a listing title.", // TODO: add reviewed Tuvan translation.
   postAdErrorDescriptionRequired: "Enter a description.", // TODO: add reviewed Tuvan translation.
   postAdErrorLocationRequired: "Enter a location.", // TODO: add reviewed Tuvan translation.

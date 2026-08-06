@@ -3,6 +3,7 @@ import BackToResultsLink from '@/app/components/BackToResultsLink';
 import { content } from '@/content/tyv';
 import type { Listing } from '@/data/listings';
 import { formatListingPrice } from '@/data/listings';
+import { resolveListingImage } from '@/lib/listingPlaceholders';
 
 type TypeOption = {
   name: string;
@@ -21,9 +22,17 @@ type Props = {
   listing: Listing;
   categories: CategoryWithTypeOptions[];
   backHref: string;
+  sellerName?: string;
 };
 
-export default function ListingDetailView({ listing, categories, backHref }: Props) {
+export default function ListingDetailView({
+  listing,
+  categories,
+  backHref,
+  sellerName,
+}: Props) {
+  const listingImage = resolveListingImage(listing);
+  const publicSellerName = sellerName || listing.sellerName;
   const backLabel =
     backHref === '/'
       ? content.backToHomepage
@@ -59,7 +68,7 @@ export default function ListingDetailView({ listing, categories, backHref }: Pro
         <div className="listing-detail-image-wrapper">
           <Image
             className="listing-detail-image"
-            src={listing.image}
+            src={listingImage}
             alt={listing.title}
             fill
             sizes="(max-width: 768px) 100vw, 55vw"
@@ -75,7 +84,7 @@ export default function ListingDetailView({ listing, categories, backHref }: Pro
           <dl className="listing-detail-meta">
             <div>
               <dt>{content.listingDetailSellerLabel}</dt>
-              <dd>{listing.sellerName}</dd>
+              <dd>{publicSellerName}</dd>
             </div>
             <div>
               <dt>{content.listingDetailDatePostedLabel}</dt>

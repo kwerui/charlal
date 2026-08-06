@@ -140,6 +140,104 @@ export function getLocalListingsOwnedBy(ownerId: string): Listing[] {
   );
 }
 
+export function getUnassignedLocalListings(): Listing[] {
+  return readLocalListings().filter((listing) => !listing.ownerId);
+}
+
+export function claimUnassignedLocalListingForOwner(
+  listingId: string | number,
+  ownerId: string
+): boolean {
+  const currentListings = readLocalListings();
+  const listing = currentListings.find((item) => item.id === listingId);
+
+  if (!listing || listing.ownerId) {
+    return false;
+  }
+
+  writeLocalListings(
+    currentListings.map((item) =>
+      item.id === listingId ? { ...item, ownerId } : item
+    )
+  );
+
+  return true;
+}
+
+export function updateLocalListingSellerNamesForOwner(
+  ownerId: string,
+  publicDisplayName: string
+): number {
+  const safeOwnerId = ownerId.trim();
+  const safeDisplayName = publicDisplayName.trim();
+
+  if (!safeOwnerId || !safeDisplayName) {
+    return 0;
+  }
+
+  const currentListings = readLocalListings();
+  let changedCount = 0;
+
+  const nextListings = currentListings.map((listing) => {
+    if (!isListingOwnedByOwnerId(listing, safeOwnerId)) {
+      return listing;
+    }
+
+    if (listing.sellerName === safeDisplayName) {
+      return listing;
+    }
+
+    changedCount += 1;
+
+    return {
+      ...listing,
+      sellerName: safeDisplayName,
+    };
+  });
+
+  if (changedCount > 0) {
+    writeLocalListings(nextListings);
+  }
+
+  return changedCount;
+}
+
+export function migrateLocalListingOwnerId(
+  legacyOwnerId: string,
+  stableOwnerId: string
+): number {
+  const safeLegacyOwnerId = legacyOwnerId.trim().toLocaleLowerCase();
+  const safeStableOwnerId = stableOwnerId.trim();
+
+  if (!safeLegacyOwnerId || !safeStableOwnerId || safeLegacyOwnerId === safeStableOwnerId) {
+    return 0;
+  }
+
+  const currentListings = readLocalListings();
+  let changedCount = 0;
+
+  const nextListings = currentListings.map((listing) => {
+    const storedOwnerId = listing.ownerId?.trim().toLocaleLowerCase();
+
+    if (storedOwnerId !== safeLegacyOwnerId) {
+      return listing;
+    }
+
+    changedCount += 1;
+
+    return {
+      ...listing,
+      ownerId: safeStableOwnerId,
+    };
+  });
+
+  if (changedCount > 0) {
+    writeLocalListings(nextListings);
+  }
+
+  return changedCount;
+}
+
 export function deleteLocalListingOwnedBy(
   listingId: string | number,
   ownerId: string

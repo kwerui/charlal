@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 420" role="img" aria-labelledby="title desc">
+  <title id="title">Services placeholder</title>
+  <desc id="desc">Simple tools illustration placeholder.</desc>
+  <rect width="640" height="420" fill="#f8fafc"/>
+  <circle cx="218" cy="164" r="58" fill="#e2e8f0"/>
+  <path d="m206 208-62 62 48 48 62-62" fill="#475569"/>
+  <path d="M396 104 506 214 384 336 274 226z" fill="#ffffff"/>
+  <path d="M396 104 506 214 384 336 274 226z" fill="none" stroke="#0f766e" stroke-width="24" stroke-linejoin="round"/>
+  <path d="m338 226 58-58 52 52-58 58z" fill="#99f6e4"/>
+</svg>

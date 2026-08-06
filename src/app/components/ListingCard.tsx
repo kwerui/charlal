@@ -4,6 +4,7 @@ import ListingCardLink from '@/app/components/ListingCardLink';
 import { content } from '@/content/tyv';
 import type { Listing } from '@/data/listings';
 import { formatListingPrice } from '@/data/listings';
+import { resolveListingImage } from '@/lib/listingPlaceholders';
 
 type Props = {
   listing: Listing;
@@ -12,6 +13,7 @@ type Props = {
 
 export default function ListingCard({ listing, fromHref }: Props) {
   const listingPath = `/listing/${listing.id}`;
+  const listingImage = resolveListingImage(listing);
   const listingHref = fromHref
     ? {
         pathname: listingPath,
@@ -24,7 +26,7 @@ export default function ListingCard({ listing, fromHref }: Props) {
       <span className="listing-image-wrapper">
         <Image
           className="listing-image"
-          src={listing.image}
+          src={listingImage}
           alt={listing.title}
           fill
           sizes="(max-width: 768px) 100vw, 33vw"

@@ -36,7 +36,7 @@ export default function SignUpForm({ nextPath }: Props) {
 
     // DEMO ONLY: this does not create a real account. The password is never stored.
     // This is not secure and must be replaced before production use.
-    demoSignIn(email);
+    demoSignIn(email, username);
     router.replace(nextPath);
   }
 

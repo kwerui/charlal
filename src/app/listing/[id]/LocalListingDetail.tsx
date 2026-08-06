@@ -1,15 +1,22 @@
 'use client';
 
 import Link from 'next/link';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useSyncExternalStore } from 'react';
 import ListingDetailView from '@/app/components/ListingDetailView';
 import { content } from '@/content/tyv';
 import type { Listing } from '@/data/listings';
+import {
+  getDemoAuthServerSnapshot,
+  getDemoAuthSnapshot,
+  getDemoUser,
+  subscribeToDemoAuth,
+} from '@/lib/demoAuth';
 import {
   findLocalListingById,
   subscribeToLocalListings,
 } from '@/lib/localListings';
 import { getListingFallbackResultsHref } from '@/lib/listingRoutes';
+import { getPublicSellerNameForListing } from '@/lib/listingOwnership';
 
 type TypeOption = {
   name: string;
@@ -32,6 +39,12 @@ type Props = {
 
 export default function LocalListingDetail({ id, safeFromHref, categories }: Props) {
   const [listing, setListing] = useState<Listing | null>();
+  const signedIn = useSyncExternalStore(
+    subscribeToDemoAuth,
+    getDemoAuthSnapshot,
+    getDemoAuthServerSnapshot
+  );
+  const currentUser = signedIn ? getDemoUser() : null;
 
   useEffect(() => {
     function refreshListing(): void {
@@ -74,10 +87,20 @@ export default function LocalListingDetail({ id, safeFromHref, categories }: Pro
   }
 
   const backHref = safeFromHref || getListingFallbackResultsHref(listing);
+  const sellerName = getPublicSellerNameForListing(
+    listing,
+    currentUser,
+    content.publicSellerFallbackLabel
+  );
 
   return (
     <div className="app-container">
-      <ListingDetailView listing={listing} categories={categories} backHref={backHref} />
+      <ListingDetailView
+        listing={listing}
+        categories={categories}
+        backHref={backHref}
+        sellerName={sellerName}
+      />
     </div>
   );
 }

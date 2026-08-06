@@ -41,9 +41,13 @@ export function getSafeResultsHref(
     const parsedHref = new URL(href, 'https://internal.local');
     const isHomepageRoute =
       parsedHref.pathname === '/' && parsedHref.search === '' && parsedHref.hash === '';
+    const isAccountRoute =
+      parsedHref.pathname === '/account' &&
+      parsedHref.search === '' &&
+      parsedHref.hash === '';
     const isResultsRoute =
       isHomepageRoute ||
-      parsedHref.pathname === '/account' ||
+      isAccountRoute ||
       parsedHref.pathname === '/search' ||
       parsedHref.pathname.startsWith('/category/');
 
