@@ -20,6 +20,37 @@ You can start editing the page by modifying `app/page.tsx`. The page auto-update
 
 This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
 
+## Supabase Setup
+
+This repository is prepared for Supabase infrastructure, but authentication,
+profiles, advertisements, ownership, images, favourites, and messaging still use
+the existing demo/localStorage systems in this phase.
+
+1. Create a Supabase project from the Supabase dashboard.
+2. Open the project, then use the Connect dialog or Project Settings API section
+   to find the Project URL and Publishable key.
+3. Create `.env.local` in the project root:
+
+```bash
+NEXT_PUBLIC_SUPABASE_URL=your_project_url
+NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=your_publishable_key
+```
+
+Do not commit `.env.local`; it is ignored by Git. `.env.example` contains only
+empty placeholders for the required variable names.
+
+Restart the development server after editing environment variables so Next.js
+loads the new values.
+
+To verify local setup during development, call
+`verifySupabaseClientsForDevelopment()` from `src/lib/supabase/verify.ts` in a
+temporary local-only check. It returns only success/failure metadata and never
+returns the project URL, keys, cookies, access tokens, or user data. Remove any
+temporary check before production.
+
+Until both public Supabase variables are present, the root `proxy.ts` leaves
+application requests unchanged so the existing demo marketplace remains usable.
+
 ## Learn More
 
 To learn more about Next.js, take a look at the following resources:
