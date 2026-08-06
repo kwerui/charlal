@@ -7,7 +7,7 @@
 
 export const content = {
   // Header
-  siteName: "Charlal.ru",
+  siteName: "Charlal.org",
   homeLinkLabel: "Кол арынче",
   headerActionsLabel: "Account actions / Аккаунттуң ажыл-чорудулгазы",
   headerSignIn: "Sign In / Кирер",
