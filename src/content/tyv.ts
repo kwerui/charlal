@@ -25,7 +25,7 @@ export const content = {
   // Category navigation
   categorySectionTitle: "Категорияларже",
   categoryPageTitle: "Категориялар", // TODO: review translation
-  subcategoriesTitle: "Дайындар", // TODO: review translation
+  subcategoriesTitle: "Дайындар / Subcategories title", // TODO: review translation
   servicesSearchPlaceholder: "Электрик дээн ышкаш кылдыр парлаптыңар",
   marketplaceSearchPlaceholder: "Тон дээн ышкаш кылдыр парлаптыңар",
   categorySearchButton: "Дилээр",
@@ -61,7 +61,7 @@ export const content = {
   emptyResultsMessage: "Try changing or clearing the filters. / Фильтрлерни өскертип азы арыглап көрүңер",
   listingDatabaseUnavailableTitle: "Listings unavailable / Даңзылар чок", // TODO: add reviewed Tuvan translation.
   databaseListingsLoadFailedMessage: "Unable to load the latest advertisements. / Сөөлгү чарлалдарны үндүрүп шыдаваан.", // TODO: add reviewed Tuvan translation.
-  freePriceLabel: "Free / Халас", // TODO: add reviewed Tuvan translation.
+  freePriceLabel: "Free / Халас",
   listingDetailDescriptionTitle: "Description / Тодарадып бижиири",
   listingDetailSellerLabel: "Seller / Садыгжы",
   listingDetailDatePostedLabel: "Date posted / үндүрген хүнү",
@@ -72,7 +72,31 @@ export const content = {
   listingDetailMarketplaceTypeLabel: "Marketplace type / Рынок хевири",
   listingDetailUpdatedAtLabel: "Last updated / Сөөлгү катап чаарткан", // TODO: add reviewed Tuvan translation.
   contactSellerButton: "Contact seller / Садыгжы-биле харылзажыңар",
-  backToHomepage: "Back to homepage / Кол арынче", // TODO: add reviewed Tuvan translation.
+  messageSellerTitle: "Message seller", // TODO: add reviewed Tuvan translation.
+  messagesTitle: "Messages", // TODO: add reviewed Tuvan translation.
+  noConversationsTitle: "No conversations yet", // TODO: add reviewed Tuvan translation.
+  noConversationsMessage: "Messages with buyers and sellers will appear here.", // TODO: add reviewed Tuvan translation.
+  writeMessageLabel: "Write a message", // TODO: add reviewed Tuvan translation.
+  sendMessageButton: "Send message", // TODO: add reviewed Tuvan translation.
+  sendingMessageButton: "Sending...", // TODO: add reviewed Tuvan translation.
+  continueConversationButton: "Continue conversation", // TODO: add reviewed Tuvan translation.
+  backToMessages: "Back to messages", // TODO: add reviewed Tuvan translation.
+  advertisementNoLongerAvailableMessage: "Advertisement no longer available", // TODO: add reviewed Tuvan translation.
+  demoListingMessagingUnavailableMessage: "Messaging unavailable for this demo listing", // TODO: add reviewed Tuvan translation.
+  messagingCannotMessageSelfMessage: "You cannot message yourself", // TODO: add reviewed Tuvan translation.
+  unableStartConversationMessage: "Unable to start conversation", // TODO: add reviewed Tuvan translation.
+  unableLoadConversationsMessage: "Unable to load conversations", // TODO: add reviewed Tuvan translation.
+  unableLoadMessagesMessage: "Unable to load messages", // TODO: add reviewed Tuvan translation.
+  unableSendMessageMessage: "Unable to send message", // TODO: add reviewed Tuvan translation.
+  messageEmptyMessage: "Message must not be empty", // TODO: add reviewed Tuvan translation.
+  messageTooLongMessage: "Message is too long", // TODO: add reviewed Tuvan translation.
+  unreadMessagesLabel: "Unread messages", // TODO: add reviewed Tuvan translation.
+  newMessageLabel: "New", // TODO: add reviewed Tuvan translation.
+  retryButton: "Retry", // TODO: add reviewed Tuvan translation.
+  noUnreadMessagesLabel: "No unread messages", // TODO: add reviewed Tuvan translation.
+  markedAsReadMessage: "Marked as read", // TODO: add reviewed Tuvan translation.
+  unableUpdateMessageStatusMessage: "Unable to update message status", // TODO: add reviewed Tuvan translation.
+  backToHomepage: "Back to homepage / Кол арынче",
   backToAccount: "Back to account / Аккаунтче эглип келир", // TODO: add reviewed Tuvan translation.
   backToResults: "Back to results / Түңнелдерже эглип келир",
 

@@ -22,9 +22,10 @@ export default function ListingDetailOwnerActions({
   initialViewerState,
 }: Props) {
   const { status: authStatus, user: currentUser } = useAuthStatus();
-  const isUserCreatedListing = typeof listing.id === 'string';
-  const canBeOwnedByViewer = isUserCreatedListing && Boolean(listing.ownerId);
-  const viewerState: ListingDetailViewerState = !canBeOwnedByViewer
+  const isDatabaseListing =
+    typeof listing.id === 'string' && listing.id.startsWith('db-');
+  const hasDatabaseSeller = isDatabaseListing && Boolean(listing.ownerId);
+  const viewerState: ListingDetailViewerState = !hasDatabaseSeller
     ? 'signed-out'
     : authStatus === 'authenticated'
     ? isListingOwnedByUser(listing, currentUser)
@@ -34,7 +35,7 @@ export default function ListingDetailOwnerActions({
     ? 'signed-out'
     : initialViewerState;
 
-  if (canBeOwnedByViewer && viewerState === 'owner') {
+  if (hasDatabaseSeller && viewerState === 'owner') {
     return (
       <div className="listing-detail-actions">
         <Link
@@ -55,11 +56,24 @@ export default function ListingDetailOwnerActions({
     );
   }
 
+  if (hasDatabaseSeller) {
+    return (
+      <div className="listing-detail-actions">
+        <Link
+          href={`/contact/${listing.id}`}
+          className="search-button listing-contact-button"
+        >
+          {content.contactSellerButton}
+        </Link>
+      </div>
+    );
+  }
+
   return (
     <div className="listing-detail-actions">
-      <button type="button" className="search-button listing-contact-button">
-        {content.contactSellerButton}
-      </button>
+      <p className="listing-messaging-unavailable">
+        {content.demoListingMessagingUnavailableMessage}
+      </p>
     </div>
   );
 }

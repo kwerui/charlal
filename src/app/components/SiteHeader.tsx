@@ -6,11 +6,40 @@ import { content } from '@/content/tyv';
 import { useAuthStatus } from '@/lib/auth/client';
 import { clearNativeHistoryTraversalIntent } from '@/lib/nativeHistoryIntentStorage';
 
-export default function SiteHeader() {
+type Props = {
+  initialAuthStatus:
+    | 'authenticated'
+    | 'signed-out'
+    | 'profile-error'
+    | 'unresolved';
+  initialUnreadConversationCount: number;
+};
+
+function formatUnreadBadge(count: number): string {
+  return count > 99 ? '99+' : String(count);
+}
+
+export default function SiteHeader({
+  initialAuthStatus,
+  initialUnreadConversationCount,
+}: Props) {
   const router = useRouter();
   const pathname = usePathname();
   const { status: authStatus, user, signOut } = useAuthStatus();
-  const signedIn = authStatus === 'authenticated';
+  const signedIn =
+    authStatus === 'authenticated' ||
+    (authStatus === 'checking' && initialAuthStatus === 'authenticated');
+  const unreadConversationCount = signedIn
+    ? initialUnreadConversationCount
+    : 0;
+  const messagesLabel =
+    unreadConversationCount > 0
+      ? `${content.messagesTitle}, ${unreadConversationCount} ${
+          unreadConversationCount === 1
+            ? 'unread conversation'
+            : 'unread conversations'
+        }`
+      : content.messagesTitle;
 
   function handlePostAdClick() {
     if (signedIn) {
@@ -25,7 +54,12 @@ export default function SiteHeader() {
     await signOut();
     router.refresh();
 
-    if (pathname === '/post-ad' || pathname === '/account' || pathname.startsWith('/account/')) {
+    if (
+      pathname === '/post-ad' ||
+      pathname === '/account' ||
+      pathname.startsWith('/account/') ||
+      pathname.startsWith('/contact/')
+    ) {
       router.replace(`/sign-in?next=${encodeURIComponent(pathname)}`);
     }
   }
@@ -38,6 +72,18 @@ export default function SiteHeader() {
       <nav className="header-actions" aria-label={content.headerActionsLabel}>
         {signedIn ? (
           <>
+            <Link
+              href="/account/messages"
+              className="header-button secondary-header-button header-messages-button"
+              aria-label={messagesLabel}
+            >
+              <span>{content.messagesTitle}</span>
+              {unreadConversationCount > 0 ? (
+                <span className="header-unread-badge" aria-hidden="true">
+                  {formatUnreadBadge(unreadConversationCount)}
+                </span>
+              ) : null}
+            </Link>
             <Link
               href="/account"
               className="header-button secondary-header-button"

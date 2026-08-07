@@ -22,9 +22,10 @@ This project uses [`next/font`](https://nextjs.org/docs/app/building-your-applic
 
 ## Supabase Setup
 
-This repository uses Supabase authentication, profiles, and PostgreSQL-backed
-user-created advertisements. Built-in demo listings still live in source code.
-Images, favourites, and messaging are not implemented in Supabase yet.
+This repository uses Supabase authentication, profiles, PostgreSQL-backed
+user-created advertisements, and private seller/buyer messaging. Built-in demo
+listings still live in source code. Images, favourites, Realtime delivery,
+unread badges, attachments, and notifications are not implemented yet.
 
 1. Create a Supabase project from the Supabase dashboard.
 2. Open the project, then use the Connect dialog or Project Settings API section
@@ -69,10 +70,47 @@ Editor.
 8. Copy the full SQL into the SQL Editor and run it after the profiles SQL.
 9. Confirm `public.listings` exists and RLS is enabled.
 10. Confirm policies exist for public reads and owner-only insert/update/delete.
+11. Open `supabase/migrations/20260808_create_messaging.sql`.
+12. Copy the full SQL into the SQL Editor and run it after the listings SQL.
+13. Open `supabase/migrations/20260809_fix_messaging_inbox_and_unread.sql`.
+14. Copy the full SQL into the SQL Editor and run it after the messaging SQL.
+15. Confirm `public.conversations`, `public.messages`, and
+    `public.conversation_reads` exist.
+16. Confirm RLS is enabled on all messaging tables.
+17. In Database > Policies, inspect the conversation and message policies:
+    participants can select their conversations/messages, authenticated
+    participants can insert messages, and anonymous users have no messaging
+    access.
 
 The listings migration creates the `public.listings` table, constraints, owner
 policies, indexes for owner/category/date reads, and triggers that keep seller
 display names in sync with `public.profiles`.
+
+The messaging migration creates `public.conversations`, `public.messages`,
+participant-only RLS, minimal grants, message timestamp triggers, a controlled
+`public.start_listing_conversation()` function. The follow-up messaging repair
+migration adds durable read state in `public.conversation_reads`, fixes
+`public.list_conversation_summaries()` for the inbox, adds
+`public.count_unread_conversations()` for the header badge, and adds
+`public.mark_conversation_read()` for clearing unread state when a thread is
+opened. Conversation rows store listing-title and display-name snapshots. If a
+listing is deleted, `listing_id` is set to `null`, but the conversation and
+messages remain available to the buyer and seller with the original listing
+title snapshot.
+
+When a profile display name changes, the profile synchronization trigger updates
+listing seller names and conversation buyer/seller display-name snapshots. Email
+addresses are not copied into listings, conversations, or messages.
+
+To test messaging, create two confirmed Supabase accounts. Sign in as one user
+and create an advertisement, then sign in as the second user, open that database
+listing, and use Contact seller. The first message creates or reuses a single
+buyer/listing conversation and redirects to the thread. Both users can open
+Account > Messages or the header Messages link to view the inbox. During this
+phase, the sender sees new messages immediately; the recipient should refresh,
+navigate, or revisit Messages to see replies and unread badge changes. Supabase
+Realtime live delivery, push/email notifications, read receipts, attachments,
+and typing indicators are planned for a later phase.
 
 ### Advertisement Storage
 

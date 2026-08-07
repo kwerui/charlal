@@ -38,6 +38,7 @@ type Props = {
   initialOwnedListings: Listing[];
   initialListingsLoaded: boolean;
   initialListingsError: boolean;
+  initialUnreadConversationCount: number;
 };
 
 type RefreshListingSectionsOptions = {
@@ -50,6 +51,7 @@ export default function AccountDashboard({
   initialOwnedListings,
   initialListingsLoaded,
   initialListingsError,
+  initialUnreadConversationCount,
 }: Props) {
   const router = useRouter();
   const accountContentRef = useRef<HTMLDivElement | null>(null);
@@ -404,6 +406,18 @@ export default function AccountDashboard({
             {renderedUser.displayName || content.publicSellerFallbackLabel}
           </strong>
         </p>
+        <div className="account-quick-actions">
+          <Link href="/account/messages" className="secondary-button account-messages-link">
+            <span>{content.messagesTitle}</span>
+            {initialUnreadConversationCount > 0 ? (
+              <span className="header-unread-badge">
+                {initialUnreadConversationCount > 99
+                  ? '99+'
+                  : initialUnreadConversationCount}
+              </span>
+            ) : null}
+          </Link>
+        </div>
         {legacyMigrationError ? (
           <p
             className="account-status-message account-status-message--error"
