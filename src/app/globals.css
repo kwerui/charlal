@@ -1010,6 +1010,103 @@ body {
   background: #dcfce7;
 }
 
+.account-status-message {
+  margin: 0;
+  padding: 10px 12px;
+  border-radius: 8px;
+  border: 1px solid transparent;
+  font-weight: 800;
+  line-height: 1.45;
+}
+
+.account-status-message a,
+.account-status-message a:link,
+.account-status-message a:visited {
+  color: inherit;
+  font-weight: 800;
+}
+
+.account-status-message a:hover,
+.account-status-message a:focus-visible {
+  color: inherit;
+  text-decoration: underline;
+}
+
+.account-status-message.account-status-message--success {
+  background: #dcfce7;
+  color: #14532d;
+  border-color: #86efac;
+}
+
+.account-status-message.account-status-message--error {
+  background: #fee2e2;
+  color: #7f1d1d;
+  border-color: #fca5a5;
+}
+
+.account-loading-skeleton,
+.edit-listing-loading-skeleton {
+  width: 100%;
+  border-radius: 8px;
+  border: 1px solid var(--border-color);
+  background:
+    linear-gradient(90deg, transparent, rgba(148,163,184,0.12), transparent),
+    var(--bg-light);
+  display: grid;
+  align-content: start;
+  gap: 16px;
+  padding: 18px;
+}
+
+.account-loading-skeleton {
+  min-height: 420px;
+}
+
+.edit-listing-loading-skeleton {
+  min-height: 520px;
+}
+
+.account-loading-skeleton-row,
+.account-loading-skeleton-card,
+.edit-listing-loading-skeleton-row,
+.edit-listing-loading-skeleton-block {
+  border-radius: 8px;
+  background: rgba(148, 163, 184, 0.24);
+}
+
+.account-loading-skeleton-row,
+.edit-listing-loading-skeleton-row {
+  height: 22px;
+  width: min(100%, 420px);
+}
+
+.account-loading-skeleton-row--short,
+.edit-listing-loading-skeleton-row--short {
+  width: min(70%, 280px);
+}
+
+.account-loading-skeleton-card {
+  min-height: 120px;
+}
+
+.edit-listing-loading-skeleton-block {
+  min-height: 180px;
+}
+
+@media (prefers-color-scheme: dark) {
+  .account-status-message.account-status-message--success {
+    background: #052e16;
+    color: #bbf7d0;
+    border-color: #166534;
+  }
+
+  .account-status-message.account-status-message--error {
+    background: #450a0a;
+    color: #fecaca;
+    border-color: #991b1b;
+  }
+}
+
 .form-submit-button {
   width: 100%;
 }
@@ -1113,6 +1210,11 @@ body {
   border: 1px solid var(--border-color);
   border-radius: 8px;
   background: var(--bg-light);
+}
+
+.my-ad-delete-confirmation {
+  border-color: rgba(220, 38, 38, 0.34);
+  background: rgba(220, 38, 38, 0.06);
 }
 
 .delete-confirmation-actions {
@@ -1380,10 +1482,60 @@ body {
 .listing-detail-actions {
   display: grid;
   gap: 10px;
+  min-height: 48px;
 }
 
-.listing-detail-edit-button {
+.listing-detail-action-skeleton {
   width: 100%;
+  min-height: 48px;
+  border-radius: 8px;
+  border: 1px solid var(--border-color);
+  background: var(--bg-light);
+}
+
+.listing-detail-owner-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  min-height: 48px;
+  padding: 12px 18px;
+  border-radius: 8px;
+  border: 1px solid var(--primary-hover);
+  font-family: inherit;
+  font-size: 16px;
+  font-weight: 800;
+  line-height: 1.2;
+  text-align: center;
+  text-decoration: none;
+  cursor: pointer;
+  transition:
+    background-color 0.2s,
+    border-color 0.2s,
+    box-shadow 0.2s,
+    color 0.2s;
+}
+
+.listing-detail-owner-button--edit,
+.listing-detail-owner-button--edit:link,
+.listing-detail-owner-button--edit:visited {
+  background: var(--primary-color);
+  color: #fff;
+}
+
+.listing-detail-owner-button--edit:hover {
+  background: var(--primary-hover);
+  color: #fff;
+}
+
+.listing-detail-owner-button--edit:active {
+  background: #1e40af;
+  color: #fff;
+}
+
+.listing-detail-owner-button--edit:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 4px rgba(37,99,235,0.22);
 }
 
 /* ===== RESPONSIVE DESIGN ===== */

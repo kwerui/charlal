@@ -6,28 +6,30 @@ import { useEffect, useState } from 'react';
 import ListingForm, { type ListingFormInitialValues } from '@/app/components/ListingForm';
 import { content } from '@/content/tyv';
 import type { Listing } from '@/data/listings';
-import {
-  findLocalListingById,
-  subscribeToLocalListings,
-  updateLocalListingOwnedBy,
-} from '@/lib/localListings';
-import { getListingPlaceholder } from '@/lib/listingPlaceholders';
-import {
-  getUserOwnerId,
-  isListingOwnedByUser,
-} from '@/lib/listingOwnership';
+import { getUserOwnerId } from '@/lib/listingOwnership';
 import type {
   ListingFormCategory,
   ValidatedListingFormValues,
 } from '@/lib/listingFormValidation';
 import { useAuthStatus } from '@/lib/auth/client';
+import {
+  findOwnedDatabaseListingById,
+  updateDatabaseListingOwnedBy,
+} from '@/lib/supabase/listingsClient';
 
 type Props = {
   id: string;
   categories: ListingFormCategory[];
+  initialEditStatus: EditListingStatus;
+  initialListing: Listing | null;
 };
 
-type EditListingStatus = 'checking' | 'ready' | 'not-found' | 'not-owned';
+type EditListingStatus =
+  | 'checking'
+  | 'ready'
+  | 'not-found'
+  | 'not-owned'
+  | 'unavailable';
 
 function getEditListingInitialValues(listing: Listing): ListingFormInitialValues {
   return {
@@ -42,12 +44,18 @@ function getEditListingInitialValues(listing: Listing): ListingFormInitialValues
   };
 }
 
-export default function EditListingForm({ id, categories }: Props) {
+export default function EditListingForm({
+  id,
+  categories,
+  initialEditStatus,
+  initialListing,
+}: Props) {
   const router = useRouter();
   const { status: authStatus, profileStatus, user: currentUser } = useAuthStatus();
   const ownerId = getUserOwnerId(currentUser);
-  const [listing, setListing] = useState<Listing | null>(null);
-  const [editStatus, setEditStatus] = useState<EditListingStatus>('checking');
+  const [listing, setListing] = useState<Listing | null>(initialListing);
+  const [editStatus, setEditStatus] =
+    useState<EditListingStatus>(initialEditStatus);
   const [errors, setErrors] = useState<string[]>([]);
   const [successMessage, setSuccessMessage] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -70,41 +78,40 @@ export default function EditListingForm({ id, categories }: Props) {
       return undefined;
     }
 
-    function refreshListing(): void {
-      if (!id.startsWith('local-')) {
-        setListing(null);
-        setEditStatus('not-owned');
+    let active = true;
+    const safeOwnerId = ownerId;
+
+    async function refreshListing(): Promise<void> {
+      const result = await findOwnedDatabaseListingById(id, safeOwnerId);
+
+      if (!active) {
         return;
       }
 
-      const localListing = findLocalListingById(id);
-
-      if (!localListing) {
+      if (!result.ok) {
         setListing(null);
-        setEditStatus('not-found');
+        setEditStatus(
+          result.reason === 'database-unavailable'
+            ? 'unavailable'
+            : result.reason === 'not-found'
+            ? 'not-found'
+            : 'not-owned'
+        );
         return;
       }
 
-      if (!isListingOwnedByUser(localListing, currentUser)) {
-        setListing(null);
-        setEditStatus('not-owned');
-        return;
-      }
-
-      setListing(localListing);
+      setListing(result.listing);
       setEditStatus('ready');
     }
 
-    const frameId = window.requestAnimationFrame(refreshListing);
-    const unsubscribe = subscribeToLocalListings(refreshListing);
+    void refreshListing();
 
     return () => {
-      window.cancelAnimationFrame(frameId);
-      unsubscribe();
+      active = false;
     };
   }, [authStatus, currentUser, id, ownerId, profileStatus]);
 
-  function handleSubmit(values: ValidatedListingFormValues): void {
+  async function handleSubmit(values: ValidatedListingFormValues): Promise<void> {
     setErrors([]);
     setSuccessMessage('');
 
@@ -121,20 +128,11 @@ export default function EditListingForm({ id, categories }: Props) {
 
     setIsSubmitting(true);
 
-    const updateResult = updateLocalListingOwnedBy(listing.id, ownerId, {
-      title: values.title,
-      description: values.description,
-      price: values.price,
-      location: values.location,
-      categorySlug: values.categorySlug,
-      subcategorySlug: values.subcategorySlug,
-      image: getListingPlaceholder(values),
-      sellerName: publicDisplayName,
-      updatedAt: new Date().toISOString().slice(0, 10),
-      ...(values.transactionType ? { transactionType: values.transactionType } : {}),
-      ...(values.propertyType ? { propertyType: values.propertyType } : {}),
-      ...(values.marketplaceType ? { marketplaceType: values.marketplaceType } : {}),
-    });
+    const updateResult = await updateDatabaseListingOwnedBy(
+      String(listing.id),
+      ownerId,
+      values
+    );
 
     if (!updateResult.ok) {
       setIsSubmitting(false);
@@ -150,15 +148,18 @@ export default function EditListingForm({ id, categories }: Props) {
     router.push(`/listing/${updateResult.listing.id}?from=/account`);
   }
 
-  if (
-    authStatus !== 'authenticated' ||
-    profileStatus === 'loading' ||
-    editStatus === 'checking'
-  ) {
-    return <p className="page-description">{content.checkingAuthMessage}</p>;
+  if (authStatus === 'unauthenticated' || editStatus === 'checking') {
+    return (
+      <div className="edit-listing-loading-skeleton" aria-busy="true">
+        <div className="edit-listing-loading-skeleton-row" />
+        <div className="edit-listing-loading-skeleton-row" />
+        <div className="edit-listing-loading-skeleton-block" />
+        <div className="edit-listing-loading-skeleton-row edit-listing-loading-skeleton-row--short" />
+      </div>
+    );
   }
 
-  if (profileStatus === 'error') {
+  if (authStatus === 'authenticated' && profileStatus === 'error') {
     return (
       <div className="empty-results" role="status">
         <h3>{content.editAdvertisementUnableMessage}</h3>
@@ -175,6 +176,18 @@ export default function EditListingForm({ id, categories }: Props) {
       <div className="empty-results" role="status">
         <h3>{content.editAdvertisementNotFoundTitle}</h3>
         <p>{content.editAdvertisementUnableMessage}</p>
+        <Link href="/account" className="secondary-button edit-listing-state-link">
+          {content.backToAccount}
+        </Link>
+      </div>
+    );
+  }
+
+  if (editStatus === 'unavailable') {
+    return (
+      <div className="empty-results" role="alert">
+        <h3>{content.editAdvertisementUnableMessage}</h3>
+        <p>{content.databaseListingsLoadFailedMessage}</p>
         <Link href="/account" className="secondary-button edit-listing-state-link">
           {content.backToAccount}
         </Link>

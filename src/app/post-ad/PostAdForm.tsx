@@ -4,19 +4,12 @@ import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import ListingForm from '@/app/components/ListingForm';
 import { content } from '@/content/tyv';
-import type { Listing } from '@/data/listings';
-import { listings } from '@/data/listings';
-import {
-  addLocalListing,
-  createLocalListingId,
-  readLocalListings,
-} from '@/lib/localListings';
-import { getListingPlaceholder } from '@/lib/listingPlaceholders';
 import type {
   ListingFormCategory,
   ValidatedListingFormValues,
 } from '@/lib/listingFormValidation';
 import { useAuthStatus } from '@/lib/auth/client';
+import { createDatabaseListingFromFormValues } from '@/lib/supabase/listingsClient';
 
 type Props = {
   categories: ListingFormCategory[];
@@ -35,7 +28,7 @@ export default function PostAdForm({ categories }: Props) {
     }
   }, [authStatus, router]);
 
-  function handleSubmit(values: ValidatedListingFormValues): void {
+  async function handleSubmit(values: ValidatedListingFormValues): Promise<void> {
     setErrors([]);
     setSuccessMessage('');
 
@@ -63,35 +56,16 @@ export default function PostAdForm({ categories }: Props) {
     setIsSubmitting(true);
 
     try {
-      const localListings = readLocalListings();
-      const id = createLocalListingId([
-        ...listings.map((listing) => listing.id),
-        ...localListings.map((listing) => listing.id),
-      ]);
+      const createResult = await createDatabaseListingFromFormValues(values);
 
-      const newListing: Listing = {
-        id,
-        title: values.title,
-        description: values.description,
-        price: values.price,
-        location: values.location,
-        categorySlug: values.categorySlug,
-        subcategorySlug: values.subcategorySlug,
-        // TODO: replace this placeholder with real image upload when a backend is added.
-        image: getListingPlaceholder(values),
-        sellerName: publicDisplayName,
-        datePosted: new Date().toISOString().slice(0, 10),
-        ownerId,
-        ...(values.transactionType ? { transactionType: values.transactionType } : {}),
-        ...(values.propertyType ? { propertyType: values.propertyType } : {}),
-        ...(values.marketplaceType ? { marketplaceType: values.marketplaceType } : {}),
-      };
+      if (!createResult.ok) {
+        setErrors([content.postAdErrorSaveFailed]);
+        setIsSubmitting(false);
+        return;
+      }
 
-      // DEMO ONLY: local ads exist only in this browser, are not shared with
-      // other users/devices, and may disappear if browser storage is cleared.
-      addLocalListing(newListing);
       setSuccessMessage(content.postAdSuccessMessage);
-      router.push(`/listing/${id}`);
+      router.push(`/listing/${createResult.listing.id}`);
     } catch {
       setErrors([content.postAdErrorSaveFailed]);
       setIsSubmitting(false);

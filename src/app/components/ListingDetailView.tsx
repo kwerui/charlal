@@ -1,6 +1,8 @@
 import Image from 'next/image';
 import BackToResultsLink from '@/app/components/BackToResultsLink';
-import ListingDetailOwnerActions from '@/app/components/ListingDetailOwnerActions';
+import ListingDetailOwnerActions, {
+  type ListingDetailViewerState,
+} from '@/app/components/ListingDetailOwnerActions';
 import { content } from '@/content/tyv';
 import type { Listing } from '@/data/listings';
 import { formatListingPrice } from '@/data/listings';
@@ -24,6 +26,7 @@ type Props = {
   categories: CategoryWithTypeOptions[];
   backHref: string;
   sellerName?: string;
+  initialViewerState: ListingDetailViewerState;
 };
 
 export default function ListingDetailView({
@@ -31,6 +34,7 @@ export default function ListingDetailView({
   categories,
   backHref,
   sellerName,
+  initialViewerState,
 }: Props) {
   const listingImage = resolveListingImage(listing);
   const publicSellerName = sellerName || listing.sellerName;
@@ -130,7 +134,10 @@ export default function ListingDetailView({
             <p>{listing.description}</p>
           </section>
 
-          <ListingDetailOwnerActions listing={listing} />
+          <ListingDetailOwnerActions
+            listing={listing}
+            initialViewerState={initialViewerState}
+          />
         </section>
       </div>
     </article>

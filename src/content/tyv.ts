@@ -59,6 +59,8 @@ export const content = {
   resultsCountLabel: "Matching listings / Таарыштырган даңзылар",
   emptyResultsTitle: "No listings found / Данзылдар тывылбаан",
   emptyResultsMessage: "Try changing or clearing the filters. / Фильтрлерни өскертип азы арыглап көрүңер",
+  listingDatabaseUnavailableTitle: "Listings unavailable / Даңзылар чок", // TODO: add reviewed Tuvan translation.
+  databaseListingsLoadFailedMessage: "Unable to load the latest advertisements. / Сөөлгү чарлалдарны үндүрүп шыдаваан.", // TODO: add reviewed Tuvan translation.
   freePriceLabel: "Free / Халас", // TODO: add reviewed Tuvan translation.
   listingDetailDescriptionTitle: "Description / Тодарадып бижиири",
   listingDetailSellerLabel: "Seller / Садыгжы",
@@ -75,7 +77,7 @@ export const content = {
   backToResults: "Back to results / Түңнелдерже эглип келир",
 
   // Account
-  accountKicker: "Account", // TODO: add reviewed Tuvan translation.
+  accountKicker: "Account / Аккаунт", // TODO: add reviewed Tuvan translation.
   accountTitle: "Account / Аккаунт", // TODO: add reviewed Tuvan translation.
   accountInfoTitle: "Account information / Аккаунт дугайында медээ", // TODO: add reviewed Tuvan translation.
   accountEmailLabel: "Signed in as / Кылдыр кирген", // TODO: add reviewed Tuvan translation.
@@ -86,12 +88,13 @@ export const content = {
   accountSaveNameButton: "Save name / Адын кадагала", // TODO: add reviewed Tuvan translation.
   accountPublicNameSavedMessage: "Public name saved. / Хөй-ниити ады камгалаттынган.", // TODO: add reviewed Tuvan translation.
   accountPublicNameRequiredMessage: "Enter a public name before posting an advertisement. / Чарлал үндүрер мурнунда хөй-ниити адын киирер.", // TODO: add reviewed Tuvan translation.
-  accountPublicNameSaveFailedMessage: "Unable to update public name.", // TODO: add reviewed Tuvan translation.
-  accountProfileLoadFailedMessage: "Your account is signed in, but the profile could not be loaded.", // TODO: add reviewed Tuvan translation.
-  unableLoadProfileMessage: "Unable to load profile", // TODO: add reviewed Tuvan translation.
-  profileUpdatedMessage: "Profile updated.", // TODO: add reviewed Tuvan translation.
-  importedLocalAdvertisementsMessage: "Imported local advertisements", // TODO: add reviewed Tuvan translation.
-  noLocalAdvertisementsRequiredMigrationMessage: "No local advertisements required migration.", // TODO: add reviewed Tuvan translation.
+  accountPublicNameSaveFailedMessage: "Unable to update public name. / Хөй-ниити адын чаартып шыдаваан.", // TODO: add reviewed Tuvan translation.
+  accountProfileLoadFailedMessage: "Your account is signed in, but the profile could not be loaded. / Силерниң аккаунтуңар кирген, ынчалза-даа профильди үндүрүп шыдаваан.", // TODO: add reviewed Tuvan translation.
+  unableLoadProfileMessage: "Unable to load profile / Профильди үндүрүп шыдаваан", // TODO: add reviewed Tuvan translation.
+  profileUpdatedMessage: "Profile updated. / Профиль чаарттынган.", // TODO: add reviewed Tuvan translation.
+  importedLocalAdvertisementsMessage: "Imported local advertisements / Импорттуг тус черниң чарлалдары", // TODO: add reviewed Tuvan translation.
+  noLocalAdvertisementsRequiredMigrationMessage: "No local advertisements required migration. / Тус черниң чарлалдары көжүп чоруурун негевес.", // TODO: add reviewed Tuvan translation.
+  localAdvertisementsImportFailedMessage: "Some local advertisements could not be imported. They remain in this browser and can be retried later. / Чамдык тус ​​черниң чарлалдарын киирип шыдаваан. Олар бо браузерде артып каар болгаш соонда катап шенеп болур.", // TODO: add reviewed Tuvan translation.
   publicSellerFallbackLabel: "Seller / Садыгжы", // TODO: add reviewed Tuvan translation.
   myAdvertisementsTitle: "My advertisements / Мээң чарлалдарым", // TODO: add reviewed Tuvan translation.
   myAdvertisementsCountLabel: "My advertisements / Мээң чарлалдарым", // TODO: add reviewed Tuvan translation.
@@ -123,34 +126,34 @@ export const content = {
   editAdvertisementNotOwnedMessage: "You do not own this advertisement. / Бо чарлалдың ээзи эвес силер.", // TODO: add reviewed Tuvan translation.
 
   // Authentication
-  signInKicker: "Account", // TODO: add reviewed Tuvan translation.
+  signInKicker: "Account / Аккаунт", // TODO: add reviewed Tuvan translation.
   signInTitle: "Sign In / Кирер",
   signInRegisterPrompt: "New here? / Мында чаа бе?",
   signInRegisterLink: "Register / Бүрүткээр",
-  signUpKicker: "Account", // TODO: add reviewed Tuvan translation.
+  signUpKicker: "Account / Аккаунт", // TODO: add reviewed Tuvan translation.
   signUpTitle: "Sign Up / Бижидип алыңар",
   signUpSignInPrompt: "Already have an account? / Аккаунтуңар бар бе?",
   signUpSignInLink: "Sign in here / Мында кирип алыңар",
   usernameLabel: "Username / Ажыглакчы ады",
-  displayNameLabel: "Display name", // TODO: add reviewed Tuvan translation.
-  displayNameInvalidMessage: "Enter a public display name that is not an email address.", // TODO: add reviewed Tuvan translation.
-  passwordConfirmationLabel: "Confirm password", // TODO: add reviewed Tuvan translation.
+  displayNameLabel: "Display name / Көргүзер ат", // TODO: add reviewed Tuvan translation.
+  displayNameInvalidMessage: "Enter a public display name that is not an email address. / Электроннуг почта адрези эвес, хөй-ниитиге көргүзер атты киирер.", // TODO: add reviewed Tuvan translation.
+  passwordConfirmationLabel: "Confirm password / Парольду бадыткаар", // TODO: add reviewed Tuvan translation.
   policyAgreementLabel: "I agree to the policy.",
   signUpButton: "Sign Up / Бижидип алыңар",
-  signUpErrorRequired: "Enter display name, email, password, and password confirmation to continue.", // TODO: add reviewed Tuvan translation.
+  signUpErrorRequired: "Enter display name, email, password, and password confirmation to continue. / Улаштыр ажылдаар дизе, көргүзер адын, электроннуг почтазын, парольду болгаш парольдуң бадыткалын киирер.", // TODO: add reviewed Tuvan translation.
   signUpErrorPolicy: "Agree to the policy to continue. / Улаштыр политикага чөпшээрежир.",
-  signUpPasswordTooShortMessage: "Password must be at least 8 characters.", // TODO: add reviewed Tuvan translation.
-  signUpPasswordMismatchMessage: "Passwords do not match.", // TODO: add reviewed Tuvan translation.
-  checkYourEmailTitle: "Check your email", // TODO: add reviewed Tuvan translation.
-  confirmYourEmailMessage: "Confirm your email to finish registration.", // TODO: add reviewed Tuvan translation.
-  emailConfirmedMessage: "Email confirmed.", // TODO: add reviewed Tuvan translation.
-  confirmationInvalidMessage: "Confirmation link invalid or expired.", // TODO: add reviewed Tuvan translation.
-  unableSignInMessage: "Unable to sign in.", // TODO: add reviewed Tuvan translation.
-  unableCreateAccountMessage: "Unable to create account.", // TODO: add reviewed Tuvan translation.
-  signInInvalidCredentialsMessage: "The email or password is incorrect.", // TODO: add reviewed Tuvan translation.
-  signInUnconfirmedEmailMessage: "Confirm your email before signing in.", // TODO: add reviewed Tuvan translation.
-  signInRateLimitMessage: "Please wait before trying again.", // TODO: add reviewed Tuvan translation.
-  authNetworkFailureMessage: "Network request failed. Check your connection and try again.", // TODO: add reviewed Tuvan translation.
+  signUpPasswordTooShortMessage: "Password must be at least 8 characters. / Пароль 8 демдектен эвээш эвес болур ужурлуг.", // TODO: add reviewed Tuvan translation.
+  signUpPasswordMismatchMessage: "Passwords do not match. / Парольдар дүүшпес.", // TODO: add reviewed Tuvan translation.
+  checkYourEmailTitle: "Check your email / Электроннуг почтаңарны хынап көрүңер", // TODO: add reviewed Tuvan translation.
+  confirmYourEmailMessage: "Confirm your email to finish registration. / Бүрүткелди доозарынга электроннуг почтаңарны бадыткаңар.", // TODO: add reviewed Tuvan translation.
+  emailConfirmedMessage: "Email confirmed. / Электроннуг почта бадыткаан.", // TODO: add reviewed Tuvan translation.
+  confirmationInvalidMessage: "Confirmation link invalid or expired. / Бадыткал ссылказы шын эвес азы хуусаазы эрткен.", // TODO: add reviewed Tuvan translation.
+  unableSignInMessage: "Unable to sign in. / Кирип шыдаваан.", // TODO: add reviewed Tuvan translation.
+  unableCreateAccountMessage: "Unable to create account. / Аккаунт тургузуп шыдаваан.", // TODO: add reviewed Tuvan translation.
+  signInInvalidCredentialsMessage: "The email or password is incorrect. / Электроннуг почта азы пароль шын эвес.", // TODO: add reviewed Tuvan translation.
+  signInUnconfirmedEmailMessage: "Confirm your email before signing in. / Кирер мурнунда электроннуг почтаңарны бадыткаңар.", // TODO: add reviewed Tuvan translation.
+  signInRateLimitMessage: "Please wait before trying again. / Катап шенээр мурнунда манап көрүңерем.", // TODO: add reviewed Tuvan translation.
+  authNetworkFailureMessage: "Network request failed. Check your connection and try again. / Сеткил дилээ үрелген. Холбааңарны хынап алгаш, катап шенеп көрүңер.", // TODO: add reviewed Tuvan translation.
   forgotPasswordKicker: "Demo account",
   forgotPasswordTitle: "Forgot Password / Парольду уттупкан",
   forgotPasswordSubmitButton: "Send reset instructions / Эгидер дугайында айтыышкыннарны чорудуптуңар",
@@ -169,7 +172,7 @@ export const content = {
   postAdKicker: "Marketplace / Рынок",
   postAdTitle: "Post Ad / Чарлалдан үндүрер",
   checkingAuthMessage: "Checking sign-in...", // TODO: add reviewed Tuvan translation.
-  listingTitleLabel: "Listing title",
+  listingTitleLabel: "Listing title / Даңзы ады",
   listingCategoryLabel: "Category / Категория",
   listingCategoryPlaceholder: "Choose a category / Категория шилип алыңар",
   listingSubcategoryLabel: "Subcategory / Подкатегория",
@@ -186,7 +189,7 @@ export const content = {
   listingImageRequirements: "You can upload up to 10 photos. Each photo must be less than 6MB. JPG, JPEG, and PNG only. / 10 чедир чуруктарны үндүрүп болур силер. Чурук бүрүзү 6 МБ-дан эвээш болур ужурлуг. Чүгле JPG, JPEG болгаш PNG.",
   postAdSubmitButton: "Submit Ad / Чарлал киирер",
   postAdSubmittingButton: "Saving ad... / Рекламаны кадагалап турар...", // TODO: add reviewed Tuvan translation.
-  postAdSuccessMessage: "Advertisement saved in this browser.", // TODO: add reviewed Tuvan translation.
+  postAdSuccessMessage: "Advertisement saved. / Чарлал камгалаттынган.", // TODO: add reviewed Tuvan translation.
   postAdErrorTitleRequired: "Enter a listing title. / Даңзының адын киирер.", // TODO: add reviewed Tuvan translation.
   postAdErrorDescriptionRequired: "Enter a description. / Тайылбырны киирер.", // TODO: add reviewed Tuvan translation.
   postAdErrorLocationRequired: "Enter a location. / Бир-ле черни киирер.", // TODO: add reviewed Tuvan translation.
@@ -194,7 +197,7 @@ export const content = {
   postAdErrorPriceRequired: "Enter a valid price. Zero is allowed. / Шын өртекти киирер. Ноль чөпшээрелдиг.", // TODO: add reviewed Tuvan translation.
   postAdErrorHousingTypeRequired: "Choose a housing transaction and property type. / Бажың-балгат дугайында садыглажыышкынның хевирин болгаш өнчү-хөреңгиниң хевирин шилип алыңар. ", // TODO: add reviewed Tuvan translation.
   postAdErrorMarketplaceTypeRequired: "Choose a marketplace type. / Рынок хевирин шилип алыңар.", // TODO: add reviewed Tuvan translation.
-  postAdErrorSaveFailed: "The demo listing could not be saved in this browser.", // TODO: add reviewed Tuvan translation.
+  postAdErrorSaveFailed: "The advertisement could not be saved. / Чарлалды камгалап шыдаваан.", // TODO: add reviewed Tuvan translation.
   localListingSellerName: "Demo user", // TODO: add reviewed Tuvan translation.
   loadingListingMessage: "Loading listing... / Даңзыны үндүрүп турар...", // TODO: add reviewed Tuvan translation.
   localListingNotFoundTitle: "Listing not found / Даңзы тывылбаан", // TODO: add reviewed Tuvan translation.

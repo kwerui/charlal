@@ -165,6 +165,26 @@ export function claimUnassignedLocalListingForOwner(
   return true;
 }
 
+export function removeLocalListingsById(listingIds: Iterable<string | number>): number {
+  const idsToRemove = new Set(Array.from(listingIds, (id) => String(id)));
+
+  if (idsToRemove.size === 0) {
+    return 0;
+  }
+
+  const currentListings = readLocalListings();
+  const nextListings = currentListings.filter(
+    (listing) => !idsToRemove.has(String(listing.id))
+  );
+  const removedCount = currentListings.length - nextListings.length;
+
+  if (removedCount > 0) {
+    writeLocalListings(nextListings);
+  }
+
+  return removedCount;
+}
+
 export function updateLocalListingSellerNamesForOwner(
   ownerId: string,
   publicDisplayName: string

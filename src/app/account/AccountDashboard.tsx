@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import type { FormEvent } from 'react';
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import AccountNativeHistoryRestorer from '@/app/account/AccountNativeHistoryRestorer';
 import AccountRefreshScrollManager from '@/app/account/AccountRefreshScrollManager';
 import ListingCard from '@/app/components/ListingCard';
@@ -11,10 +11,8 @@ import ResultsScrollRestorer from '@/app/components/ResultsScrollRestorer';
 import { content } from '@/content/tyv';
 import type { Listing } from '@/data/listings';
 import {
-  claimUnassignedLocalListingForOwner,
-  deleteLocalListingOwnedBy,
-  getLocalListingsOwnedBy,
   getUnassignedLocalListings,
+  removeLocalListingsById,
   subscribeToLocalListings,
 } from '@/lib/localListings';
 import {
@@ -23,12 +21,36 @@ import {
 } from '@/lib/listingOwnership';
 import {
   PROFILE_DISPLAY_NAME_MAX_LENGTH,
+  type AppUser,
   isValidProfileDisplayName,
   sanitizeProfileDisplayName,
 } from '@/lib/auth/types';
 import { useAuthStatus } from '@/lib/auth/client';
+import {
+  createDatabaseListingFromExistingListing,
+  deleteDatabaseListingOwnedBy,
+  listOwnedDatabaseListings,
+} from '@/lib/supabase/listingsClient';
 
-export default function AccountDashboard() {
+type Props = {
+  initialAuthStatus: 'signed-in' | 'unresolved';
+  initialUser: AppUser | null;
+  initialOwnedListings: Listing[];
+  initialListingsLoaded: boolean;
+  initialListingsError: boolean;
+};
+
+type RefreshListingSectionsOptions = {
+  force?: boolean;
+};
+
+export default function AccountDashboard({
+  initialAuthStatus,
+  initialUser,
+  initialOwnedListings,
+  initialListingsLoaded,
+  initialListingsError,
+}: Props) {
   const router = useRouter();
   const accountContentRef = useRef<HTMLDivElement | null>(null);
   const {
@@ -36,22 +58,41 @@ export default function AccountDashboard() {
     profileStatus,
     legacyMigrationStatus,
     legacyMigrationCount,
+    legacyMigrationError,
     user: currentUser,
     updateDisplayName,
   } = useAuthStatus();
-  const ownerId = getUserOwnerId(currentUser);
-  const [ownedListings, setOwnedListings] = useState<Listing[]>([]);
+  const accountUser =
+    authStatus === 'unauthenticated' ? null : currentUser ?? initialUser;
+  const ownerId = getUserOwnerId(accountUser);
+  const hasUsableInitialListings = Boolean(
+    initialUser && initialListingsLoaded && !initialListingsError
+  );
+  const initialListingRefreshSettledRef = useRef(false);
+  const [ownedListings, setOwnedListings] =
+    useState<Listing[]>(initialOwnedListings);
   const [unassignedListings, setUnassignedListings] = useState<Listing[]>([]);
-  const [listingSectionsLoaded, setListingSectionsLoaded] = useState(false);
-  const [displayNameInput, setDisplayNameInput] = useState('');
+  const [listingSectionsLoaded, setListingSectionsLoaded] =
+    useState(initialListingsLoaded);
+  const [listingSectionsError, setListingSectionsError] = useState(
+    initialListingsError ? content.databaseListingsLoadFailedMessage : ''
+  );
+  const [displayNameInput, setDisplayNameInput] = useState(
+    initialUser?.displayName || ''
+  );
   const [publicNameMessage, setPublicNameMessage] = useState('');
   const [publicNameError, setPublicNameError] = useState('');
   const [listingToDelete, setListingToDelete] = useState<Listing | null>(null);
   const [listingToClaim, setListingToClaim] = useState<Listing | null>(null);
   const [deleteMessage, setDeleteMessage] = useState('');
+  const [deleteErrorListingId, setDeleteErrorListingId] = useState<string | null>(
+    null
+  );
+  const [deleteErrorMessage, setDeleteErrorMessage] = useState('');
   const [claimMessage, setClaimMessage] = useState('');
   const [isDeleting, setIsDeleting] = useState(false);
   const [isClaiming, setIsClaiming] = useState(false);
+  const deleteConfirmationRefs = useRef<Record<string, HTMLElement | null>>({});
 
   useEffect(() => {
     if (authStatus === 'unauthenticated') {
@@ -61,45 +102,122 @@ export default function AccountDashboard() {
 
   useEffect(() => {
     const frameId = window.requestAnimationFrame(() => {
-      setDisplayNameInput(currentUser?.displayName || '');
+      setDisplayNameInput(accountUser?.displayName || '');
     });
 
     return () => {
       window.cancelAnimationFrame(frameId);
     };
-  }, [currentUser]);
+  }, [accountUser]);
 
-  useEffect(() => {
-    function refreshListingSections(): void {
-      if (authStatus !== 'authenticated' || !currentUser || !ownerId) {
-        setOwnedListings([]);
-        setUnassignedListings(getUnassignedLocalListings());
-        setListingSectionsLoaded(false);
-        return;
-      }
+  const refreshListingSections = useCallback(async (
+    options: RefreshListingSectionsOptions = {}
+  ) => {
+    setUnassignedListings(getUnassignedLocalListings());
 
-      setOwnedListings(getLocalListingsOwnedBy(ownerId));
-      setUnassignedListings(getUnassignedLocalListings());
-      setListingSectionsLoaded(true);
+    if (authStatus === 'unauthenticated') {
+      setOwnedListings([]);
+      setListingSectionsLoaded(false);
+      setListingSectionsError('');
+      return;
     }
 
-    const frameId = window.requestAnimationFrame(refreshListingSections);
-    const unsubscribe = subscribeToLocalListings(refreshListingSections);
+    if (!accountUser || !ownerId) {
+      setListingSectionsLoaded(initialListingsLoaded);
+      return;
+    }
+
+    if (legacyMigrationStatus !== 'complete') {
+      setListingSectionsLoaded(initialListingsLoaded);
+      return;
+    }
+
+    if (
+      !options.force &&
+      hasUsableInitialListings &&
+      !initialListingRefreshSettledRef.current &&
+      legacyMigrationCount === 0 &&
+      !legacyMigrationError
+    ) {
+      initialListingRefreshSettledRef.current = true;
+      setListingSectionsLoaded(true);
+      return;
+    }
+
+    initialListingRefreshSettledRef.current = true;
+    const ownedListingsResult = await listOwnedDatabaseListings(ownerId);
+
+    if (ownedListingsResult.ok) {
+      setOwnedListings(ownedListingsResult.listings);
+      setListingSectionsError('');
+    } else {
+      setOwnedListings([]);
+      setListingSectionsError(content.databaseListingsLoadFailedMessage);
+    }
+
+    setListingSectionsLoaded(true);
+  }, [
+    accountUser,
+    authStatus,
+    hasUsableInitialListings,
+    initialListingsLoaded,
+    legacyMigrationCount,
+    legacyMigrationError,
+    legacyMigrationStatus,
+    ownerId,
+  ]);
+
+  useEffect(() => {
+    function refreshIfActive(): void {
+      void refreshListingSections();
+    }
+
+    const frameId = window.requestAnimationFrame(refreshIfActive);
+    const unsubscribe = subscribeToLocalListings(refreshIfActive);
 
     return () => {
       window.cancelAnimationFrame(frameId);
       unsubscribe();
     };
-  }, [authStatus, currentUser, ownerId]);
+  }, [refreshListingSections]);
+
+  useEffect(() => {
+    if (!listingToDelete) {
+      return;
+    }
+
+    const frameId = window.requestAnimationFrame(() => {
+      const confirmation =
+        deleteConfirmationRefs.current[String(listingToDelete.id)];
+
+      if (!confirmation) {
+        return;
+      }
+
+      const rect = confirmation.getBoundingClientRect();
+      const outsideViewport = rect.top < 0 || rect.bottom > window.innerHeight;
+
+      if (outsideViewport) {
+        confirmation.scrollIntoView({
+          behavior: 'auto',
+          block: 'nearest',
+        });
+      }
+    });
+
+    return () => {
+      window.cancelAnimationFrame(frameId);
+    };
+  }, [listingToDelete]);
 
   const deleteTargetStillOwned = useMemo(() => {
     return Boolean(
       listingToDelete &&
-        currentUser &&
-        isListingOwnedByUser(listingToDelete, currentUser) &&
+        accountUser &&
+        isListingOwnedByUser(listingToDelete, accountUser) &&
         ownedListings.some((listing) => listing.id === listingToDelete.id)
     );
-  }, [currentUser, listingToDelete, ownedListings]);
+  }, [accountUser, listingToDelete, ownedListings]);
 
   const claimTargetStillUnassigned = useMemo(() => {
     return Boolean(
@@ -136,9 +254,7 @@ export default function AccountDashboard() {
       return;
     }
 
-    if (ownerId) {
-      setOwnedListings(getLocalListingsOwnedBy(ownerId));
-    }
+    void refreshListingSections({ force: true });
 
     setDisplayNameInput(updateResult.user.displayName);
     setPublicNameMessage(content.profileUpdatedMessage);
@@ -146,33 +262,42 @@ export default function AccountDashboard() {
 
   function startDelete(listing: Listing): void {
     setDeleteMessage('');
+    setDeleteErrorListingId(null);
+    setDeleteErrorMessage('');
     setListingToDelete(listing);
   }
 
   function cancelDelete(): void {
     if (!isDeleting) {
       setListingToDelete(null);
+      setDeleteErrorListingId(null);
+      setDeleteErrorMessage('');
     }
   }
 
-  function confirmDelete(): void {
+  async function confirmDelete(): Promise<void> {
     if (!listingToDelete || !ownerId || isDeleting) {
       return;
     }
 
     setIsDeleting(true);
-    const deleted = deleteLocalListingOwnedBy(listingToDelete.id, ownerId);
+    const deleteResult = await deleteDatabaseListingOwnedBy(
+      String(listingToDelete.id),
+      ownerId
+    );
     setIsDeleting(false);
 
-    if (deleted) {
-      setOwnedListings(getLocalListingsOwnedBy(ownerId));
+    if (deleteResult.ok) {
+      await refreshListingSections({ force: true });
       setListingToDelete(null);
+      setDeleteErrorListingId(null);
+      setDeleteErrorMessage('');
       setDeleteMessage(content.advertisementDeletedMessage);
       return;
     }
 
-    setDeleteMessage(content.advertisementDeleteFailedMessage);
-    setListingToDelete(null);
+    setDeleteErrorListingId(String(listingToDelete.id));
+    setDeleteErrorMessage(content.advertisementDeleteFailedMessage);
   }
 
   function startClaim(listing: Listing): void {
@@ -186,18 +311,22 @@ export default function AccountDashboard() {
     }
   }
 
-  function confirmClaim(): void {
-    if (!listingToClaim || !ownerId || isClaiming) {
+  async function confirmClaim(): Promise<void> {
+    if (!listingToClaim || !ownerId || !currentUser || isClaiming) {
       return;
     }
 
     setIsClaiming(true);
-    const claimed = claimUnassignedLocalListingForOwner(listingToClaim.id, ownerId);
+    const claimResult = await createDatabaseListingFromExistingListing({
+      ...listingToClaim,
+      ownerId,
+      sellerName: currentUser.displayName,
+    });
     setIsClaiming(false);
 
-    if (claimed) {
-      setOwnedListings(getLocalListingsOwnedBy(ownerId));
-      setUnassignedListings(getUnassignedLocalListings());
+    if (claimResult.ok) {
+      removeLocalListingsById([listingToClaim.id]);
+      await refreshListingSections({ force: true });
       setListingToClaim(null);
       setClaimMessage(content.advertisementClaimedMessage);
       return;
@@ -215,9 +344,11 @@ export default function AccountDashboard() {
     Boolean(ownerId) &&
     listingSectionsLoaded;
   const canHoldVisualRestoration =
-    authStatus === 'authenticated' &&
-    Boolean(currentUser) &&
+    authStatus !== 'unauthenticated' &&
+    Boolean(accountUser) &&
     Boolean(ownerId);
+  const canRenderAccount = Boolean(accountUser) && Boolean(ownerId);
+  const renderedUser = canRenderAccount ? accountUser : null;
 
   if (authStatus === 'authenticated' && profileStatus === 'error') {
     return (
@@ -236,7 +367,7 @@ export default function AccountDashboard() {
     );
   }
 
-  if (!accountReady || !currentUser || !ownerId) {
+  if (!renderedUser) {
     return (
       <>
         <AccountNativeHistoryRestorer
@@ -245,7 +376,16 @@ export default function AccountDashboard() {
           contentRef={accountContentRef}
         />
         <AccountRefreshScrollManager ready={false} />
-        <p className="page-description">{content.checkingAuthMessage}</p>
+        <div
+          className="account-loading-skeleton"
+          aria-busy="true"
+          data-initial-auth-status={initialAuthStatus}
+        >
+          <div className="account-loading-skeleton-row" />
+          <div className="account-loading-skeleton-row account-loading-skeleton-row--short" />
+          <div className="account-loading-skeleton-card" />
+          <div className="account-loading-skeleton-card" />
+        </div>
       </>
     );
   }
@@ -256,14 +396,27 @@ export default function AccountDashboard() {
         <h3 id="account-info-title">{content.accountInfoTitle}</h3>
         <p>
           <span>{content.accountEmailLabel}</span>
-          <strong>{currentUser.email}</strong>
+          <strong>{renderedUser.email}</strong>
         </p>
         <p>
           <span>{content.accountPublicNameLabel}</span>
-          <strong>{currentUser.displayName || content.publicSellerFallbackLabel}</strong>
+          <strong>
+            {renderedUser.displayName || content.publicSellerFallbackLabel}
+          </strong>
         </p>
+        {legacyMigrationError ? (
+          <p
+            className="account-status-message account-status-message--error"
+            role="alert"
+          >
+            {content.localAdvertisementsImportFailedMessage}
+          </p>
+        ) : null}
         {legacyMigrationCount !== null ? (
-          <p className="form-success" role="status">
+          <p
+            className="account-status-message account-status-message--success"
+            role="status"
+          >
             {legacyMigrationCount > 0
               ? `${content.importedLocalAdvertisementsMessage}: ${legacyMigrationCount}`
               : content.noLocalAdvertisementsRequiredMigrationMessage}
@@ -289,12 +442,18 @@ export default function AccountDashboard() {
           </label>
           <p className="account-help-text">{content.accountPublicNameHelp}</p>
           {publicNameMessage ? (
-            <p className="form-success" role="status">
+            <p
+              className="account-status-message account-status-message--success"
+              role="status"
+            >
               {publicNameMessage}
             </p>
           ) : null}
           {publicNameError ? (
-            <p className="form-error" role="alert">
+            <p
+              className="account-status-message account-status-message--error"
+              role="alert"
+            >
               {publicNameError}
             </p>
           ) : null}
@@ -318,61 +477,83 @@ export default function AccountDashboard() {
           </p>
         ) : null}
 
-        {listingToDelete ? (
-          <section
-            className="delete-confirmation"
-            role="dialog"
-            aria-modal="true"
-            aria-labelledby="delete-ad-title"
-          >
-            <h4 id="delete-ad-title">{content.confirmDeleteAdvertisementTitle}</h4>
-            <p>
-              {content.confirmDeleteAdvertisementMessage} {listingToDelete.title}
-            </p>
-            <div className="delete-confirmation-actions">
-              <button
-                type="button"
-                className="listing-management-button listing-management-button--edit"
-                onClick={cancelDelete}
-                disabled={isDeleting}
-              >
-                {content.cancelButton}
-              </button>
-              <button
-                type="button"
-                className="listing-management-button listing-management-button--delete"
-                onClick={confirmDelete}
-                disabled={isDeleting || !deleteTargetStillOwned}
-              >
-                {content.deleteAdvertisementButton}
-              </button>
-            </div>
-          </section>
+        {listingSectionsError ? (
+          <p className="form-error" role="alert">
+            {listingSectionsError}
+          </p>
         ) : null}
 
         {ownedListings.length > 0 ? (
           <div className="my-ads-grid">
-            {ownedListings.map((listing) => (
-              <article key={String(listing.id)} className="my-ad-item">
-                <ListingCard listing={listing} fromHref="/account" />
-                <div className="my-ad-actions">
-                  <Link
-                    href={`/account/listings/${listing.id}/edit`}
-                    className="listing-management-button listing-management-button--edit my-ad-edit-button"
-                  >
-                    {content.editAdvertisementButton}
-                  </Link>
-                  <button
-                    type="button"
-                    className="listing-management-button listing-management-button--delete my-ad-delete-button"
-                    onClick={() => startDelete(listing)}
-                    disabled={isDeleting}
-                  >
-                    {content.deleteAdvertisementButton}
-                  </button>
-                </div>
-              </article>
-            ))}
+            {ownedListings.map((listing) => {
+              const listingId = String(listing.id);
+              const confirmingThisListing = listingToDelete?.id === listing.id;
+              const deleteErrorForThisListing =
+                deleteErrorListingId === listingId && deleteErrorMessage;
+              const deleteConfirmationTitleId = `delete-ad-title-${listingId}`;
+
+              return (
+                <article key={listingId} className="my-ad-item">
+                  <ListingCard listing={listing} fromHref="/account" />
+                  <div className="my-ad-actions">
+                    <Link
+                      href={`/account/listings/${listing.id}/edit`}
+                      className="listing-management-button listing-management-button--edit my-ad-edit-button"
+                    >
+                      {content.editAdvertisementButton}
+                    </Link>
+                    <button
+                      type="button"
+                      className="listing-management-button listing-management-button--delete my-ad-delete-button"
+                      onClick={() => startDelete(listing)}
+                      disabled={isDeleting}
+                    >
+                      {content.deleteAdvertisementButton}
+                    </button>
+                  </div>
+                  {confirmingThisListing ? (
+                    <section
+                      className="delete-confirmation my-ad-delete-confirmation"
+                      role="group"
+                      aria-labelledby={deleteConfirmationTitleId}
+                      ref={(element) => {
+                        deleteConfirmationRefs.current[listingId] = element;
+                      }}
+                    >
+                      <h4 id={deleteConfirmationTitleId}>
+                        {content.confirmDeleteAdvertisementTitle}
+                      </h4>
+                      <p>
+                        {content.confirmDeleteAdvertisementMessage} {listing.title}
+                      </p>
+                      {deleteErrorForThisListing ? (
+                        <p className="form-error" role="alert">
+                          {deleteErrorForThisListing}
+                        </p>
+                      ) : null}
+                      <div className="delete-confirmation-actions">
+                        <button
+                          type="button"
+                          className="listing-management-button listing-management-button--edit"
+                          onClick={cancelDelete}
+                          disabled={isDeleting}
+                        >
+                          {content.cancelButton}
+                        </button>
+                        <button
+                          type="button"
+                          className="listing-management-button listing-management-button--delete"
+                          onClick={confirmDelete}
+                          disabled={isDeleting || !deleteTargetStillOwned}
+                        >
+                          {content.deleteAdvertisementButton}
+                        </button>
+                      </div>
+                    </section>
+                  ) : null}
+                </article>
+              );
+            })}
           </div>
         ) : (
           <div className="empty-results" role="status">

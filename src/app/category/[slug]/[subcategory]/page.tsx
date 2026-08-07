@@ -4,6 +4,7 @@ import ListingResults from '@/app/components/ListingResults';
 import { content } from '@/content/tyv';
 import { listings } from '@/data/listings';
 import { buildHrefWithSearchParams } from '@/lib/resultReturnHref';
+import { listPublicDatabaseListings } from '@/lib/supabase/listingsServer';
 import HousingFilterControls from './HousingFilterControls';
 import MarketplaceBuyTypeDropdown from './MarketplaceBuyTypeDropdown';
 import PriceFilterControls from './PriceFilterControls';
@@ -156,6 +157,13 @@ export default async function SubcategoryPage({ params, searchParams }: Subcateg
     minPrice: selectedMinPrice,
     maxPrice: selectedMaxPrice,
   };
+  const databaseListingsResult = await listPublicDatabaseListings();
+  const databaseListings = databaseListingsResult.ok
+    ? databaseListingsResult.listings
+    : [];
+  const databaseError = databaseListingsResult.ok
+    ? ''
+    : content.databaseListingsLoadFailedMessage;
 
   return (
     <div className="app-container">
@@ -209,6 +217,8 @@ export default async function SubcategoryPage({ params, searchParams }: Subcateg
 
           <ListingResults
             builtInListings={listings}
+            databaseListings={databaseListings}
+            databaseError={databaseError}
             criteria={{
               categorySlug: category.slug,
               subcategorySlug: subcategory,

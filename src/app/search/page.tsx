@@ -3,6 +3,7 @@ import SearchForm from '@/app/components/SearchForm';
 import { content } from '@/content/tyv';
 import { listings } from '@/data/listings';
 import { buildHrefWithSearchParams } from '@/lib/resultReturnHref';
+import { listPublicDatabaseListings } from '@/lib/supabase/listingsServer';
 
 type SearchPageProps = {
   searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
@@ -15,6 +16,13 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
     ? rawSearchQuery[0] || ''
     : rawSearchQuery || '';
   const resultsHref = buildHrefWithSearchParams('/search', query);
+  const databaseListingsResult = await listPublicDatabaseListings();
+  const databaseListings = databaseListingsResult.ok
+    ? databaseListingsResult.listings
+    : [];
+  const databaseError = databaseListingsResult.ok
+    ? ''
+    : content.databaseListingsLoadFailedMessage;
 
   return (
     <div className="app-container">
@@ -30,6 +38,8 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
 
         <ListingResults
           builtInListings={listings}
+          databaseListings={databaseListings}
+          databaseError={databaseError}
           criteria={{ searchQuery }}
           resultsHref={resultsHref}
           emptyHeadingLevel="h2"

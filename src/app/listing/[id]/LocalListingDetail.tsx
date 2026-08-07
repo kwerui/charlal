@@ -11,7 +11,10 @@ import {
   subscribeToLocalListings,
 } from '@/lib/localListings';
 import { getListingFallbackResultsHref } from '@/lib/listingRoutes';
-import { getPublicSellerNameForListing } from '@/lib/listingOwnership';
+import {
+  getPublicSellerNameForListing,
+  isListingOwnedByUser,
+} from '@/lib/listingOwnership';
 
 type TypeOption = {
   name: string;
@@ -77,11 +80,19 @@ export default function LocalListingDetail({ id, safeFromHref, categories }: Pro
   }
 
   const backHref = safeFromHref || getListingFallbackResultsHref(listing);
+  const authenticatedUser =
+    authStatus === 'authenticated' ? currentUser : null;
   const sellerName = getPublicSellerNameForListing(
     listing,
-    authStatus === 'authenticated' ? currentUser : null,
+    authenticatedUser,
     content.publicSellerFallbackLabel
   );
+  const initialViewerState =
+    listing.ownerId && authenticatedUser
+      ? isListingOwnedByUser(listing, authenticatedUser)
+        ? 'owner'
+        : 'signed-in-non-owner'
+      : 'signed-out';
 
   return (
     <div className="app-container">
@@ -90,6 +101,7 @@ export default function LocalListingDetail({ id, safeFromHref, categories }: Pro
         categories={categories}
         backHref={backHref}
         sellerName={sellerName}
+        initialViewerState={initialViewerState}
       />
     </div>
   );

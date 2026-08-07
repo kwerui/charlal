@@ -11,8 +11,8 @@ import {
   type ReactNode,
 } from 'react';
 import { createClient } from '@/lib/supabase/client';
-import { updateLocalListingSellerNamesForOwner } from '@/lib/localListings';
 import { migrateLegacyDemoListingsForUser } from '@/lib/auth/legacyDemoMigration';
+import type { LocalListingImportResult } from '@/lib/auth/legacyDemoMigration';
 import {
   isValidProfileDisplayName,
   sanitizeProfileDisplayName,
@@ -47,6 +47,7 @@ type AuthContextValue = {
   profileStatus: ProfileStatus;
   legacyMigrationStatus: LegacyMigrationStatus;
   legacyMigrationCount: number | null;
+  legacyMigrationError: boolean;
   user: AppUser | null;
   profile: AppProfile | null;
   refreshAuth: () => Promise<void>;
@@ -55,6 +56,18 @@ type AuthContextValue = {
 };
 
 const AuthContext = createContext<AuthContextValue | undefined>(undefined);
+
+type ResolvedAuthState = {
+  status: AuthStatus;
+  profileStatus: ProfileStatus;
+  legacyMigrationStatus: LegacyMigrationStatus;
+  legacyMigrationCount: number | null;
+  legacyMigrationError: boolean;
+  user: AppUser | null;
+  profile: AppProfile | null;
+};
+
+let cachedAuthState: ResolvedAuthState | null = null;
 
 function isProfileRow(value: unknown): value is {
   id: string;
@@ -211,7 +224,7 @@ async function resolveCurrentAuthState(): Promise<{
   };
 }
 
-async function runLegacyMigration(user: AppUser): Promise<number> {
+async function runLegacyMigration(user: AppUser): Promise<LocalListingImportResult> {
   return migrateLegacyDemoListingsForUser(user);
 }
 
@@ -286,21 +299,35 @@ export async function signUpWithEmailPassword({
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const supabase = useMemo(() => createClient(), []);
-  const [status, setStatus] = useState<AuthStatus>('checking');
-  const [profileStatus, setProfileStatus] = useState<ProfileStatus>('idle');
-  const [legacyMigrationStatus, setLegacyMigrationStatus] =
-    useState<LegacyMigrationStatus>('idle');
-  const [legacyMigrationCount, setLegacyMigrationCount] = useState<number | null>(
-    null
+  const [status, setStatus] = useState<AuthStatus>(
+    cachedAuthState?.status || 'checking'
   );
-  const [user, setUser] = useState<AppUser | null>(null);
-  const [profile, setProfile] = useState<AppProfile | null>(null);
+  const [profileStatus, setProfileStatus] = useState<ProfileStatus>(
+    cachedAuthState?.profileStatus || 'idle'
+  );
+  const [legacyMigrationStatus, setLegacyMigrationStatus] =
+    useState<LegacyMigrationStatus>(
+      cachedAuthState?.legacyMigrationStatus || 'idle'
+    );
+  const [legacyMigrationCount, setLegacyMigrationCount] = useState<number | null>(
+    cachedAuthState?.legacyMigrationCount ?? null
+  );
+  const [legacyMigrationError, setLegacyMigrationError] = useState(
+    cachedAuthState?.legacyMigrationError || false
+  );
+  const [user, setUser] = useState<AppUser | null>(cachedAuthState?.user || null);
+  const [profile, setProfile] = useState<AppProfile | null>(
+    cachedAuthState?.profile || null
+  );
 
   const refreshAuth = useCallback(async () => {
-    setStatus('checking');
-    setProfileStatus('loading');
-    setLegacyMigrationStatus('idle');
-    setLegacyMigrationCount(null);
+    if (!cachedAuthState) {
+      setStatus('checking');
+      setProfileStatus('loading');
+      setLegacyMigrationStatus('idle');
+      setLegacyMigrationCount(null);
+      setLegacyMigrationError(false);
+    }
 
     const nextState = await resolveCurrentAuthState();
 
@@ -312,17 +339,38 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (nextState.status !== 'authenticated' || !nextState.user) {
       setLegacyMigrationStatus('complete');
       setLegacyMigrationCount(null);
+      setLegacyMigrationError(false);
+      cachedAuthState = {
+        ...nextState,
+        legacyMigrationStatus: 'complete',
+        legacyMigrationCount: null,
+        legacyMigrationError: false,
+      };
       return;
     }
 
     setLegacyMigrationStatus('running');
 
     try {
-      const migratedCount = await runLegacyMigration(nextState.user);
+      const migrationResult = await runLegacyMigration(nextState.user);
 
-      setLegacyMigrationCount(migratedCount);
+      setLegacyMigrationCount(migrationResult.importedCount);
+      setLegacyMigrationError(!migrationResult.ok);
+      cachedAuthState = {
+        ...nextState,
+        legacyMigrationStatus: 'complete',
+        legacyMigrationCount: migrationResult.importedCount,
+        legacyMigrationError: !migrationResult.ok,
+      };
     } catch {
       setLegacyMigrationCount(0);
+      setLegacyMigrationError(true);
+      cachedAuthState = {
+        ...nextState,
+        legacyMigrationStatus: 'complete',
+        legacyMigrationCount: 0,
+        legacyMigrationError: true,
+      };
     } finally {
       setLegacyMigrationStatus('complete');
     }
@@ -361,8 +409,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setProfileStatus('idle');
     setLegacyMigrationStatus('complete');
     setLegacyMigrationCount(null);
+    setLegacyMigrationError(false);
     setUser(null);
     setProfile(null);
+    cachedAuthState = {
+      status: 'unauthenticated',
+      profileStatus: 'idle',
+      legacyMigrationStatus: 'complete',
+      legacyMigrationCount: null,
+      legacyMigrationError: false,
+      user: null,
+      profile: null,
+    };
   }
 
   async function updateDisplayName(
@@ -391,9 +449,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       displayName: nextProfile.displayName,
     };
 
-    updateLocalListingSellerNamesForOwner(nextUser.id, nextUser.displayName);
     setProfile(nextProfile);
     setUser(nextUser);
+    cachedAuthState = cachedAuthState
+      ? {
+          ...cachedAuthState,
+          user: nextUser,
+          profile: nextProfile,
+        }
+      : null;
 
     return { ok: true, user: nextUser };
   }
@@ -403,6 +467,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     profileStatus,
     legacyMigrationStatus,
     legacyMigrationCount,
+    legacyMigrationError,
     user,
     profile,
     refreshAuth,

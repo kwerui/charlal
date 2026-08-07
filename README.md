@@ -22,9 +22,9 @@ This project uses [`next/font`](https://nextjs.org/docs/app/building-your-applic
 
 ## Supabase Setup
 
-This repository is prepared for Supabase authentication and profiles.
-Advertisements, ownership records, images, favourites, and messaging are not in
-PostgreSQL yet. Advertisements still use browser localStorage in this phase.
+This repository uses Supabase authentication, profiles, and PostgreSQL-backed
+user-created advertisements. Built-in demo listings still live in source code.
+Images, favourites, and messaging are not implemented in Supabase yet.
 
 1. Create a Supabase project from the Supabase dashboard.
 2. Open the project, then use the Connect dialog or Project Settings API section
@@ -51,11 +51,11 @@ temporary check before production.
 Until both public Supabase variables are present, the root `proxy.ts` leaves
 application requests unchanged so local development can still load the app.
 
-### Apply the Profiles SQL
+### Apply the SQL Migrations
 
-The SQL migration is stored at
-`supabase/migrations/20260806_create_profiles.sql`. The project does not require
-the Supabase CLI for this phase.
+The SQL migrations are stored in `supabase/migrations/`. The project does not
+require the Supabase CLI; you can apply the files manually in the dashboard SQL
+Editor.
 
 1. Open `supabase/migrations/20260806_create_profiles.sql`.
 2. Copy the full SQL into the Supabase dashboard SQL Editor.
@@ -65,10 +65,37 @@ the Supabase CLI for this phase.
 5. Confirm RLS is enabled on `public.profiles`.
 6. In Authentication users, create or confirm a test user and verify a matching
    row appears in `public.profiles`.
+7. Open `supabase/migrations/20260807_create_listings.sql`.
+8. Copy the full SQL into the SQL Editor and run it after the profiles SQL.
+9. Confirm `public.listings` exists and RLS is enabled.
+10. Confirm policies exist for public reads and owner-only insert/update/delete.
 
-The migration creates only the profiles table and profile policies. Listing RLS
-will only exist after listings move from localStorage to PostgreSQL in a future
-phase.
+The listings migration creates the `public.listings` table, constraints, owner
+policies, indexes for owner/category/date reads, and triggers that keep seller
+display names in sync with `public.profiles`.
+
+### Advertisement Storage
+
+New advertisements are written to `public.listings` through Supabase RLS. The
+database assigns ownership from the authenticated Supabase user via `auth.uid()`
+and derives the public seller display name from `public.profiles`; the browser
+form never submits an owner ID or seller email.
+
+The app still reads old browser-local advertisements from
+`tuva-marketplace:user-listings:v1` only for migration and recovery:
+
+- After sign-in, eligible local advertisements owned by the current Supabase UUID
+  or by the exact matching legacy demo user ID are imported once into
+  `public.listings`.
+- A local advertisement is removed from browser storage only after its database
+  insert succeeds.
+- Older unassigned local advertisements remain visible in Account until the
+  signed-in user explicitly claims one; claiming inserts it into PostgreSQL and
+  then removes only that local copy.
+- Failed imports remain in browser storage and can be retried later.
+
+The import completion marker is browser-local and idempotent:
+`charlal:supabase-listing-imports:v1`.
 
 ### Configure Auth URLs
 

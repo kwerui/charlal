@@ -3,12 +3,21 @@ import ListingResults from '@/app/components/ListingResults';
 import SearchForm from '@/app/components/SearchForm';
 import { content } from '@/content/tyv';
 import { listings } from '@/data/listings';
+import { listPublicDatabaseListings } from '@/lib/supabase/listingsServer';
 
 /**
  * Tuvan Marketplace Homepage
  */
 
-export default function Home(): React.ReactNode {
+export default async function Home(): Promise<React.ReactNode> {
+  const databaseListingsResult = await listPublicDatabaseListings();
+  const databaseListings = databaseListingsResult.ok
+    ? databaseListingsResult.listings
+    : [];
+  const databaseError = databaseListingsResult.ok
+    ? ''
+    : content.databaseListingsLoadFailedMessage;
+
   return (
     <div className="app-container">
       <SearchForm />
@@ -34,6 +43,8 @@ export default function Home(): React.ReactNode {
       <section className="listings-section">
         <ListingResults
           builtInListings={listings}
+          databaseListings={databaseListings}
+          databaseError={databaseError}
           resultsHref="/"
           limit={6}
           showResultsSummary={false}

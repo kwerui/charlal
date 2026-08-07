@@ -6,24 +6,40 @@ import type { Listing } from '@/data/listings';
 import { useAuthStatus } from '@/lib/auth/client';
 import { isListingOwnedByUser } from '@/lib/listingOwnership';
 
+export type ListingDetailViewerState =
+  | 'owner'
+  | 'signed-in-non-owner'
+  | 'signed-out'
+  | 'unresolved';
+
 type Props = {
   listing: Listing;
+  initialViewerState: ListingDetailViewerState;
 };
 
-export default function ListingDetailOwnerActions({ listing }: Props) {
+export default function ListingDetailOwnerActions({
+  listing,
+  initialViewerState,
+}: Props) {
   const { status: authStatus, user: currentUser } = useAuthStatus();
-  const isLocalListing = typeof listing.id === 'string' && listing.id.startsWith('local-');
-  const isOwnedByCurrentUser =
-    authStatus === 'authenticated' &&
-    isLocalListing &&
-    isListingOwnedByUser(listing, currentUser);
+  const isUserCreatedListing = typeof listing.id === 'string';
+  const canBeOwnedByViewer = isUserCreatedListing && Boolean(listing.ownerId);
+  const viewerState: ListingDetailViewerState = !canBeOwnedByViewer
+    ? 'signed-out'
+    : authStatus === 'authenticated'
+    ? isListingOwnedByUser(listing, currentUser)
+      ? 'owner'
+      : 'signed-in-non-owner'
+    : authStatus === 'unauthenticated'
+    ? 'signed-out'
+    : initialViewerState;
 
-  if (isOwnedByCurrentUser) {
+  if (canBeOwnedByViewer && viewerState === 'owner') {
     return (
       <div className="listing-detail-actions">
         <Link
           href={`/account/listings/${listing.id}/edit`}
-          className="listing-management-button listing-management-button--edit listing-detail-edit-button"
+          className="listing-detail-owner-button listing-detail-owner-button--edit"
         >
           {content.editAdvertisementButton}
         </Link>
@@ -31,8 +47,12 @@ export default function ListingDetailOwnerActions({ listing }: Props) {
     );
   }
 
-  if (authStatus === 'checking' && isLocalListing && listing.ownerId) {
-    return <div className="listing-detail-actions" aria-busy="true" />;
+  if (viewerState === 'unresolved') {
+    return (
+      <div className="listing-detail-actions" aria-busy="true">
+        <div className="listing-detail-action-skeleton" aria-hidden="true" />
+      </div>
+    );
   }
 
   return (

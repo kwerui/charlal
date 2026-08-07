@@ -1,19 +1,17 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo } from 'react';
 import ListingCard from '@/app/components/ListingCard';
 import ResultsScrollRestorer from '@/app/components/ResultsScrollRestorer';
 import { content } from '@/content/tyv';
 import type { Listing } from '@/data/listings';
-import {
-  combineListings,
-  readLocalListings,
-  subscribeToLocalListings,
-} from '@/lib/localListings';
+import { combineListings } from '@/lib/localListings';
 import { filterListings, type ListingFilterCriteria } from '@/lib/listingFilters';
 
 type Props = {
   builtInListings: Listing[];
+  databaseListings?: Listing[];
+  databaseError?: string;
   criteria?: ListingFilterCriteria;
   resultsHref?: string;
   limit?: number;
@@ -25,6 +23,8 @@ type Props = {
 
 export default function ListingResults({
   builtInListings,
+  databaseListings = [],
+  databaseError = '',
   criteria = {},
   resultsHref,
   limit,
@@ -33,27 +33,15 @@ export default function ListingResults({
   emptyHeadingLevel = 'h3',
   requireSearchQuery = false,
 }: Props) {
-  const [localListings, setLocalListings] = useState<Listing[]>([]);
-
-  useEffect(() => {
-    function refreshLocalListings(): void {
-      setLocalListings(readLocalListings());
-    }
-
-    refreshLocalListings();
-
-    return subscribeToLocalListings(refreshLocalListings);
-  }, []);
-
   const matchingListings = useMemo(() => {
     if (requireSearchQuery && !criteria.searchQuery?.trim()) {
       return [];
     }
 
-    const combinedListings = combineListings(builtInListings, localListings);
+    const combinedListings = combineListings(builtInListings, databaseListings);
 
     return filterListings(combinedListings, criteria);
-  }, [builtInListings, criteria, localListings, requireSearchQuery]);
+  }, [builtInListings, criteria, databaseListings, requireSearchQuery]);
 
   const visibleListings =
     typeof limit === 'number' ? matchingListings.slice(0, limit) : matchingListings;
@@ -67,6 +55,12 @@ export default function ListingResults({
             {content.resultsCountLabel}: {matchingListings.length}
           </p>
         </div>
+      ) : null}
+
+      {databaseError ? (
+        <p className="form-error" role="alert">
+          {databaseError}
+        </p>
       ) : null}
 
       {visibleListings.length > 0 ? (
