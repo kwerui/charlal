@@ -93,10 +93,6 @@ export default function SignInForm({
       </label>
 
       <div className="auth-options-row">
-        <label className="checkbox-field">
-          <input type="checkbox" name="remember" />
-          <span>{content.rememberMeLabel}</span>
-        </label>
         <Link href="/forgot-password" className="inline-link">
           {content.forgotPasswordLink}
         </Link>

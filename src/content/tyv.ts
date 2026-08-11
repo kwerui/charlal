@@ -195,7 +195,6 @@ export const content = {
   backToSignInLink: "Back to sign in / Кирер дээш дедир",
   emailLabel: "Email/Электроннуг чагаа",
   passwordLabel: "Password / Парольду",
-  rememberMeLabel: "Remember me / Мени сактып кел",
   forgotPasswordLink: "Forgot password? / Парольду уттупкан бе?",
   signInButton: "Sign In / Кирер",
   signInErrorRequired: "Enter both email and password to continue. / Улаштыр уламчылаар дизе, электроннуг почтаны болгаш парольду киирер.",
