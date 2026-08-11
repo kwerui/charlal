@@ -160,6 +160,29 @@ export function hasFreshResultsScrollRestoreIntent(resultsHref: string): boolean
   );
 }
 
+export function hasActiveResultsNavigation(resultsHref: string): boolean {
+  if (!isBrowser()) {
+    return false;
+  }
+
+  const currentHref = `${window.location.pathname}${window.location.search}`;
+  const activeNavigation = readJson<StoredListingNavigation>(
+    ACTIVE_LISTING_NAVIGATION_KEY
+  );
+
+  if (
+    !activeNavigation ||
+    activeNavigation.resultsHref !== resultsHref ||
+    activeNavigation.targetHref !== currentHref ||
+    !isFresh(activeNavigation.savedAt)
+  ) {
+    window.sessionStorage.removeItem(ACTIVE_LISTING_NAVIGATION_KEY);
+    return false;
+  }
+
+  return true;
+}
+
 export function getSavedResultsScrollPosition(
   resultsHref: string
 ): SavedResultsScrollPosition | undefined {

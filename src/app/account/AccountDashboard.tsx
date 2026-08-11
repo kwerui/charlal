@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import type { FormEvent } from 'react';
+import type { FormEvent, MouseEvent } from 'react';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import AccountNativeHistoryRestorer from '@/app/account/AccountNativeHistoryRestorer';
 import AccountRefreshScrollManager from '@/app/account/AccountRefreshScrollManager';
@@ -32,6 +32,7 @@ import {
   deleteDatabaseListingOwnedBy,
   listOwnedDatabaseListings,
 } from '@/lib/supabase/listingsClient';
+import { saveResultsScrollPosition } from '@/lib/resultsScrollStorage';
 
 type Props = {
   initialAuthStatus: 'signed-in' | 'unresolved';
@@ -313,6 +314,17 @@ export default function AccountDashboard({
     }
   }
 
+  function saveAccountScrollForEdit(
+    event: MouseEvent<HTMLAnchorElement>
+  ): void {
+    const targetUrl = new URL(event.currentTarget.href);
+
+    saveResultsScrollPosition(
+      '/account',
+      `${targetUrl.pathname}${targetUrl.search}`
+    );
+  }
+
   async function confirmClaim(): Promise<void> {
     if (!listingToClaim || !ownerId || !currentUser || isClaiming) {
       return;
@@ -511,8 +523,9 @@ export default function AccountDashboard({
                   <ListingCard listing={listing} fromHref="/account" />
                   <div className="my-ad-actions">
                     <Link
-                      href={`/account/listings/${listing.id}/edit`}
+                      href={`/account/listings/${listing.id}/edit?from=/account`}
                       className="listing-management-button listing-management-button--edit my-ad-edit-button"
+                      onClick={saveAccountScrollForEdit}
                     >
                       {content.editAdvertisementButton}
                     </Link>

@@ -16,12 +16,14 @@ import {
   findOwnedDatabaseListingById,
   updateDatabaseListingOwnedBy,
 } from '@/lib/supabase/listingsClient';
+import { hasActiveResultsNavigation } from '@/lib/resultsScrollStorage';
 
 type Props = {
   id: string;
   categories: ListingFormCategory[];
   initialEditStatus: EditListingStatus;
   initialListing: Listing | null;
+  editOrigin: '/account' | null;
 };
 
 type EditListingStatus =
@@ -49,6 +51,7 @@ export default function EditListingForm({
   categories,
   initialEditStatus,
   initialListing,
+  editOrigin,
 }: Props) {
   const router = useRouter();
   const { status: authStatus, profileStatus, user: currentUser } = useAuthStatus();
@@ -148,6 +151,15 @@ export default function EditListingForm({
     router.push(`/listing/${updateResult.listing.id}?from=/account`);
   }
 
+  function handleCancel(): void {
+    if (editOrigin === '/account' && hasActiveResultsNavigation('/account')) {
+      router.back();
+      return;
+    }
+
+    router.push('/account');
+  }
+
   if (authStatus === 'unauthenticated' || editStatus === 'checking') {
     return (
       <div className="edit-listing-loading-skeleton" aria-busy="true">
@@ -218,6 +230,7 @@ export default function EditListingForm({
       externalErrors={errors}
       successMessage={successMessage}
       cancelHref="/account"
+      onCancel={handleCancel}
       onSubmit={handleSubmit}
     />
   );

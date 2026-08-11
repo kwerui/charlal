@@ -7,10 +7,24 @@ import EditListingForm from './EditListingForm';
 
 type EditListingPageProps = {
   params: Promise<{ id: string }>;
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 };
 
-export default async function EditListingPage({ params }: EditListingPageProps) {
+function getSafeEditOrigin(
+  fromValue: string | string[] | undefined
+): '/account' | null {
+  const fromPath = Array.isArray(fromValue) ? fromValue[0] : fromValue;
+
+  return fromPath === '/account' ? '/account' : null;
+}
+
+export default async function EditListingPage({
+  params,
+  searchParams,
+}: EditListingPageProps) {
   const { id } = await params;
+  const query = await searchParams;
+  const editOrigin = getSafeEditOrigin(query.from);
   const viewer = await getCurrentViewerId();
 
   if (viewer.status === 'signed-out') {
@@ -54,6 +68,7 @@ export default async function EditListingPage({ params }: EditListingPageProps) 
           categories={content.categories}
           initialEditStatus={initialEditState}
           initialListing={initialListing}
+          editOrigin={editOrigin}
         />
       </section>
     </main>

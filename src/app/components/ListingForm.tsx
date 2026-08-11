@@ -33,6 +33,7 @@ type Props = {
   externalErrors: string[];
   successMessage?: string;
   cancelHref?: string;
+  onCancel?: () => void;
   onSubmit: (values: ValidatedListingFormValues) => void;
 };
 
@@ -46,6 +47,7 @@ export default function ListingForm({
   externalErrors,
   successMessage,
   cancelHref,
+  onCancel,
   onSubmit,
 }: Props) {
   const [validationErrors, setValidationErrors] = useState<string[]>([]);
@@ -278,7 +280,15 @@ export default function ListingForm({
       ) : null}
 
       <div className="listing-form-actions">
-        {cancelHref ? (
+        {onCancel ? (
+          <button
+            type="button"
+            className="listing-form-action listing-form-action--secondary"
+            onClick={onCancel}
+          >
+            {content.cancelButton}
+          </button>
+        ) : cancelHref ? (
           <Link
             href={cancelHref}
             className="listing-form-action listing-form-action--secondary"
