@@ -21,10 +21,14 @@ import {
   isListingOwnedByUser,
 } from '@/lib/listingOwnership';
 import {
+  PROFILE_BIO_MAX_LENGTH,
   PROFILE_DISPLAY_NAME_MAX_LENGTH,
+  PROFILE_LOCATION_MAX_LENGTH,
   type AppUser,
+  type AppProfile,
   isValidProfileDisplayName,
   sanitizeProfileDisplayName,
+  sanitizeOptionalProfileText,
 } from '@/lib/auth/types';
 import { useAuthStatus } from '@/lib/auth/client';
 import {
@@ -37,6 +41,7 @@ import { saveResultsScrollPosition } from '@/lib/resultsScrollStorage';
 type Props = {
   initialAuthStatus: 'signed-in' | 'unresolved';
   initialUser: AppUser | null;
+  initialProfile: AppProfile | null;
   initialOwnedListings: Listing[];
   initialListingsLoaded: boolean;
   initialListingsError: boolean;
@@ -49,6 +54,7 @@ type RefreshListingSectionsOptions = {
 export default function AccountDashboard({
   initialAuthStatus,
   initialUser,
+  initialProfile,
   initialOwnedListings,
   initialListingsLoaded,
   initialListingsError,
@@ -62,11 +68,14 @@ export default function AccountDashboard({
     legacyMigrationCount,
     legacyMigrationError,
     user: currentUser,
-    updateDisplayName,
+    profile: currentProfile,
+    updateProfile,
   } = useAuthStatus();
   const { unreadConversationCount } = useMessagingRealtime();
   const accountUser =
     authStatus === 'unauthenticated' ? null : currentUser ?? initialUser;
+  const accountProfile =
+    authStatus === 'unauthenticated' ? null : currentProfile ?? initialProfile;
   const ownerId = getUserOwnerId(accountUser);
   const hasUsableInitialListings = Boolean(
     initialUser && initialListingsLoaded && !initialListingsError
@@ -82,6 +91,10 @@ export default function AccountDashboard({
   );
   const [displayNameInput, setDisplayNameInput] = useState(
     initialUser?.displayName || ''
+  );
+  const [bioInput, setBioInput] = useState(initialProfile?.bio || '');
+  const [locationInput, setLocationInput] = useState(
+    initialProfile?.location || ''
   );
   const [publicNameMessage, setPublicNameMessage] = useState('');
   const [publicNameError, setPublicNameError] = useState('');
@@ -106,12 +119,14 @@ export default function AccountDashboard({
   useEffect(() => {
     const frameId = window.requestAnimationFrame(() => {
       setDisplayNameInput(accountUser?.displayName || '');
+      setBioInput(accountProfile?.bio || '');
+      setLocationInput(accountProfile?.location || '');
     });
 
     return () => {
       window.cancelAnimationFrame(frameId);
     };
-  }, [accountUser]);
+  }, [accountProfile, accountUser]);
 
   const refreshListingSections = useCallback(async (
     options: RefreshListingSectionsOptions = {}
@@ -236,6 +251,8 @@ export default function AccountDashboard({
     setPublicNameError('');
 
     const safeDisplayName = sanitizeProfileDisplayName(displayNameInput);
+    const trimmedBio = bioInput.trim();
+    const trimmedLocation = locationInput.trim();
 
     if (!isValidProfileDisplayName(safeDisplayName)) {
       setPublicNameError(
@@ -246,12 +263,26 @@ export default function AccountDashboard({
       return;
     }
 
-    const updateResult = await updateDisplayName(safeDisplayName);
+    if (
+      trimmedBio.length > PROFILE_BIO_MAX_LENGTH ||
+      trimmedLocation.length > PROFILE_LOCATION_MAX_LENGTH
+    ) {
+      setPublicNameError(content.accountProfileDetailsInvalidMessage);
+      return;
+    }
+
+    const updateResult = await updateProfile({
+      displayName: safeDisplayName,
+      bio: bioInput,
+      location: locationInput,
+    });
 
     if (!updateResult.ok) {
       setPublicNameError(
         updateResult.reason === 'invalid-display-name'
           ? content.accountPublicNameRequiredMessage
+          : updateResult.reason === 'invalid-profile-details'
+          ? content.accountProfileDetailsInvalidMessage
           : content.accountPublicNameSaveFailedMessage
       );
       return;
@@ -260,6 +291,15 @@ export default function AccountDashboard({
     void refreshListingSections({ force: true });
 
     setDisplayNameInput(updateResult.user.displayName);
+    setBioInput(
+      sanitizeOptionalProfileText(updateResult.profile.bio || '', PROFILE_BIO_MAX_LENGTH) || ''
+    );
+    setLocationInput(
+      sanitizeOptionalProfileText(
+        updateResult.profile.location || '',
+        PROFILE_LOCATION_MAX_LENGTH
+      ) || ''
+    );
     setPublicNameMessage(content.profileUpdatedMessage);
   }
 
@@ -419,6 +459,14 @@ export default function AccountDashboard({
           </strong>
         </p>
         <div className="account-quick-actions">
+          {accountProfile?.publicSlug ? (
+            <Link
+              href={`/seller/${accountProfile.publicSlug}`}
+              className="secondary-button account-public-profile-link"
+            >
+              {content.viewPublicProfileLabel}
+            </Link>
+          ) : null}
           <Link href="/account/messages" className="secondary-button account-messages-link">
             <span>{content.messagesTitle}</span>
             {unreadConversationCount > 0 ? (
@@ -467,6 +515,37 @@ export default function AccountDashboard({
             />
           </label>
           <p className="account-help-text">{content.accountPublicNameHelp}</p>
+          <label className="form-field" htmlFor="account-profile-bio">
+            <span>{content.bioLabel}</span>
+            <textarea
+              id="account-profile-bio"
+              name="bio"
+              value={bioInput}
+              maxLength={PROFILE_BIO_MAX_LENGTH}
+              rows={4}
+              onChange={(event) => {
+                setBioInput(event.target.value);
+                setPublicNameError('');
+                setPublicNameMessage('');
+              }}
+            />
+          </label>
+          <label className="form-field" htmlFor="account-profile-location">
+            <span>{content.profileLocationLabel}</span>
+            <input
+              id="account-profile-location"
+              name="location"
+              type="text"
+              value={locationInput}
+              maxLength={PROFILE_LOCATION_MAX_LENGTH}
+              onChange={(event) => {
+                setLocationInput(event.target.value);
+                setPublicNameError('');
+                setPublicNameMessage('');
+              }}
+            />
+          </label>
+          <p className="account-help-text">{content.publicLocationHelp}</p>
           {publicNameMessage ? (
             <p
               className="account-status-message account-status-message--success"
@@ -484,7 +563,7 @@ export default function AccountDashboard({
             </p>
           ) : null}
           <button type="submit" className="search-button">
-            {content.accountSaveNameButton}
+            {content.accountSaveProfileButton}
           </button>
         </form>
       </section>

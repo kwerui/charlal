@@ -49,7 +49,8 @@ export function getSafeResultsHref(
       isHomepageRoute ||
       isAccountRoute ||
       parsedHref.pathname === '/search' ||
-      parsedHref.pathname.startsWith('/category/');
+      parsedHref.pathname.startsWith('/category/') ||
+      parsedHref.pathname.startsWith('/seller/');
 
     if (parsedHref.origin !== 'https://internal.local' || !isResultsRoute) {
       return undefined;

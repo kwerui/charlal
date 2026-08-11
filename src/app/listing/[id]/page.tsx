@@ -9,7 +9,10 @@ import {
 import type { ListingDetailViewerState } from '@/app/components/ListingDetailOwnerActions';
 import { getListingFallbackResultsHref } from '@/lib/listingRoutes';
 import { getSafeResultsHref } from '@/lib/resultReturnHref';
-import { getPublicDatabaseListingById } from '@/lib/supabase/listingsServer';
+import {
+  getPublicDatabaseListingById,
+  getPublicSellerSlugForListingId,
+} from '@/lib/supabase/listingsServer';
 import LocalListingDetail from './LocalListingDetail';
 
 type ListingPageProps = {
@@ -84,12 +87,18 @@ export default async function ListingPage({ params, searchParams }: ListingPageP
   }
 
   const listing = databaseListingResult.listing;
-  const viewer = await getCurrentViewerId();
+  const [viewer, sellerSlugResult] = await Promise.all([
+    getCurrentViewerId(),
+    getPublicSellerSlugForListingId(String(listing.id)),
+  ]);
   const initialViewerState = getListingDetailViewerState(
     listing.ownerId,
     viewer
   );
   const backHref = safeFromHref || getListingFallbackResultsHref(listing);
+  const sellerPublicSlug = sellerSlugResult.ok
+    ? sellerSlugResult.publicSlug
+    : null;
 
   return (
     <div className="app-container">
@@ -97,6 +106,7 @@ export default async function ListingPage({ params, searchParams }: ListingPageP
         listing={listing}
         categories={content.categories}
         backHref={backHref}
+        sellerPublicSlug={sellerPublicSlug}
         initialViewerState={initialViewerState}
       />
     </div>

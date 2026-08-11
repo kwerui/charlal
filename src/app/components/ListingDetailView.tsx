@@ -1,4 +1,5 @@
 import Image from 'next/image';
+import Link from 'next/link';
 import BackToResultsLink from '@/app/components/BackToResultsLink';
 import ListingDetailOwnerActions, {
   type ListingDetailViewerState,
@@ -26,6 +27,7 @@ type Props = {
   categories: CategoryWithTypeOptions[];
   backHref: string;
   sellerName?: string;
+  sellerPublicSlug?: string | null;
   initialViewerState: ListingDetailViewerState;
 };
 
@@ -34,6 +36,7 @@ export default function ListingDetailView({
   categories,
   backHref,
   sellerName,
+  sellerPublicSlug,
   initialViewerState,
 }: Props) {
   const listingImage = resolveListingImage(listing);
@@ -43,6 +46,8 @@ export default function ListingDetailView({
       ? content.backToHomepage
       : backHref === '/account'
       ? content.backToAccount
+      : backHref.startsWith('/seller/')
+      ? content.backToSellerProfile
       : content.backToResults;
   const category = categories.find(
     (item) => item.slug === listing.categorySlug
@@ -89,7 +94,18 @@ export default function ListingDetailView({
           <dl className="listing-detail-meta">
             <div>
               <dt>{content.listingDetailSellerLabel}</dt>
-              <dd>{publicSellerName}</dd>
+              <dd>
+                {sellerPublicSlug ? (
+                  <Link
+                    href={`/seller/${sellerPublicSlug}`}
+                    className="listing-detail-seller-link"
+                  >
+                    {publicSellerName}
+                  </Link>
+                ) : (
+                  publicSellerName
+                )}
+              </dd>
             </div>
             <div>
               <dt>{content.listingDetailDatePostedLabel}</dt>

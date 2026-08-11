@@ -14,8 +14,11 @@ import { createClient } from '@/lib/supabase/client';
 import { migrateLegacyDemoListingsForUser } from '@/lib/auth/legacyDemoMigration';
 import type { LocalListingImportResult } from '@/lib/auth/legacyDemoMigration';
 import {
+  PROFILE_BIO_MAX_LENGTH,
+  PROFILE_LOCATION_MAX_LENGTH,
   isValidProfileDisplayName,
   sanitizeProfileDisplayName,
+  sanitizeOptionalProfileText,
   type AppProfile,
   type AppUser,
   type AuthStatus,
@@ -39,8 +42,17 @@ type SignUpResult =
   | { ok: false; reason: AuthFailureReason };
 
 type ProfileUpdateResult =
-  | { ok: true; user: AppUser }
-  | { ok: false; reason: 'invalid-display-name' | 'unable-to-update' };
+  | { ok: true; user: AppUser; profile: AppProfile }
+  | {
+      ok: false;
+      reason: 'invalid-display-name' | 'invalid-profile-details' | 'unable-to-update';
+    };
+
+type ProfileUpdateValues = {
+  displayName: string;
+  bio: string;
+  location: string;
+};
 
 type AuthContextValue = {
   status: AuthStatus;
@@ -52,7 +64,7 @@ type AuthContextValue = {
   profile: AppProfile | null;
   refreshAuth: () => Promise<void>;
   signOut: () => Promise<void>;
-  updateDisplayName: (displayName: string) => Promise<ProfileUpdateResult>;
+  updateProfile: (values: ProfileUpdateValues) => Promise<ProfileUpdateResult>;
 };
 
 const AuthContext = createContext<AuthContextValue | undefined>(undefined);
@@ -72,6 +84,9 @@ let cachedAuthState: ResolvedAuthState | null = null;
 function isProfileRow(value: unknown): value is {
   id: string;
   display_name: string;
+  public_slug: string;
+  bio: string | null;
+  location: string | null;
   created_at: string;
   updated_at: string;
 } {
@@ -82,6 +97,9 @@ function isProfileRow(value: unknown): value is {
   const profile = value as Partial<{
     id: unknown;
     display_name: unknown;
+    public_slug: unknown;
+    bio: unknown;
+    location: unknown;
     created_at: unknown;
     updated_at: unknown;
   }>;
@@ -89,6 +107,9 @@ function isProfileRow(value: unknown): value is {
   return (
     typeof profile.id === 'string' &&
     typeof profile.display_name === 'string' &&
+    typeof profile.public_slug === 'string' &&
+    (profile.bio === null || typeof profile.bio === 'string') &&
+    (profile.location === null || typeof profile.location === 'string') &&
     typeof profile.created_at === 'string' &&
     typeof profile.updated_at === 'string'
   );
@@ -97,12 +118,18 @@ function isProfileRow(value: unknown): value is {
 function mapProfile(profile: {
   id: string;
   display_name: string;
+  public_slug: string;
+  bio: string | null;
+  location: string | null;
   created_at: string;
   updated_at: string;
 }): AppProfile {
   return {
     id: profile.id,
     displayName: profile.display_name,
+    publicSlug: profile.public_slug,
+    bio: profile.bio,
+    location: profile.location,
     createdAt: profile.created_at,
     updatedAt: profile.updated_at,
   };
@@ -175,7 +202,7 @@ async function loadProfile(userId: string): Promise<AppProfile | null> {
   const supabase = createClient();
   const { data, error } = await supabase
     .from('profiles')
-    .select('id, display_name, created_at, updated_at')
+    .select('id, display_name, public_slug, bio, location, created_at, updated_at')
     .eq('id', userId)
     .maybeSingle();
 
@@ -423,20 +450,41 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     };
   }
 
-  async function updateDisplayName(
-    displayName: string
+  async function updateProfile(
+    values: ProfileUpdateValues
   ): Promise<ProfileUpdateResult> {
-    const safeDisplayName = sanitizeProfileDisplayName(displayName);
+    const safeDisplayName = sanitizeProfileDisplayName(values.displayName);
+    const trimmedBio = values.bio.trim();
+    const trimmedLocation = values.location.trim();
+    const safeBio = sanitizeOptionalProfileText(
+      values.bio,
+      PROFILE_BIO_MAX_LENGTH
+    );
+    const safeLocation = sanitizeOptionalProfileText(
+      values.location,
+      PROFILE_LOCATION_MAX_LENGTH
+    );
 
     if (!isValidProfileDisplayName(safeDisplayName) || !user) {
       return { ok: false, reason: 'invalid-display-name' };
     }
 
+    if (
+      trimmedBio.length > PROFILE_BIO_MAX_LENGTH ||
+      trimmedLocation.length > PROFILE_LOCATION_MAX_LENGTH
+    ) {
+      return { ok: false, reason: 'invalid-profile-details' };
+    }
+
     const { data, error } = await supabase
       .from('profiles')
-      .update({ display_name: safeDisplayName })
+      .update({
+        display_name: safeDisplayName,
+        bio: safeBio,
+        location: safeLocation,
+      })
       .eq('id', user.id)
-      .select('id, display_name, created_at, updated_at')
+      .select('id, display_name, public_slug, bio, location, created_at, updated_at')
       .single();
 
     if (error || !isProfileRow(data)) {
@@ -459,7 +507,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         }
       : null;
 
-    return { ok: true, user: nextUser };
+    return { ok: true, user: nextUser, profile: nextProfile };
   }
 
   const value: AuthContextValue = {
@@ -472,7 +520,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     profile,
     refreshAuth,
     signOut,
-    updateDisplayName,
+    updateProfile,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

@@ -32,6 +32,9 @@ export default async function AccountPage() {
           initialUser={
             authResult.status === 'authenticated' ? authResult.user : null
           }
+          initialProfile={
+            authResult.status === 'authenticated' ? authResult.profile : null
+          }
           initialOwnedListings={
             ownedListingsResult?.ok ? ownedListingsResult.listings : []
           }

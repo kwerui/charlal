@@ -5,6 +5,9 @@ import type { ValidatedListingFormValues } from '@/lib/listingFormValidation';
 export const DATABASE_LISTING_SELECT_COLUMNS =
   'id, owner_id, seller_display_name, title, description, price, location, category, subcategory, transaction_type, property_type, marketplace_type, created_at, updated_at';
 
+export const PUBLIC_DATABASE_LISTING_SELECT_COLUMNS =
+  'id, seller_display_name, title, description, price, location, category, subcategory, transaction_type, property_type, marketplace_type, created_at, updated_at';
+
 export type DatabaseListingRow = {
   id: string;
   owner_id: string;
@@ -21,6 +24,8 @@ export type DatabaseListingRow = {
   created_at: string;
   updated_at: string;
 };
+
+export type PublicDatabaseListingRow = Omit<DatabaseListingRow, 'owner_id'>;
 
 export type DatabaseListingInsert = {
   id?: string;
@@ -84,6 +89,44 @@ export function isDatabaseListingRowArray(value: unknown): value is DatabaseList
   return Array.isArray(value) && value.every(isDatabaseListingRow);
 }
 
+export function isPublicDatabaseListingRow(
+  value: unknown
+): value is PublicDatabaseListingRow {
+  if (!value || typeof value !== 'object') {
+    return false;
+  }
+
+  const row = value as Partial<Record<keyof PublicDatabaseListingRow, unknown>>;
+  const price =
+    typeof row.price === 'number'
+      ? row.price
+      : typeof row.price === 'string'
+      ? Number(row.price)
+      : Number.NaN;
+
+  return (
+    typeof row.id === 'string' &&
+    typeof row.seller_display_name === 'string' &&
+    typeof row.title === 'string' &&
+    typeof row.description === 'string' &&
+    Number.isFinite(price) &&
+    typeof row.location === 'string' &&
+    typeof row.category === 'string' &&
+    typeof row.subcategory === 'string' &&
+    (row.transaction_type === null || typeof row.transaction_type === 'string') &&
+    (row.property_type === null || typeof row.property_type === 'string') &&
+    (row.marketplace_type === null || typeof row.marketplace_type === 'string') &&
+    typeof row.created_at === 'string' &&
+    typeof row.updated_at === 'string'
+  );
+}
+
+export function isPublicDatabaseListingRowArray(
+  value: unknown
+): value is PublicDatabaseListingRow[] {
+  return Array.isArray(value) && value.every(isPublicDatabaseListingRow);
+}
+
 function toDateLabel(timestamp: string): string {
   return timestamp.slice(0, 10);
 }
@@ -100,6 +143,14 @@ function hasMeaningfulUpdate(createdAt: string, updatedAt: string): boolean {
 }
 
 export function databaseRowToListing(row: DatabaseListingRow): Listing {
+  const listing = publicDatabaseRowToListing(row);
+
+  listing.ownerId = row.owner_id;
+
+  return listing;
+}
+
+export function publicDatabaseRowToListing(row: PublicDatabaseListingRow): Listing {
   const listingData = {
     categorySlug: row.category,
     subcategorySlug: row.subcategory,
@@ -117,7 +168,6 @@ export function databaseRowToListing(row: DatabaseListingRow): Listing {
     image: getListingPlaceholder(listingData),
     sellerName: row.seller_display_name,
     datePosted: toDateLabel(row.created_at),
-    ownerId: row.owner_id,
   };
 
   if (hasMeaningfulUpdate(row.created_at, row.updated_at)) {
@@ -146,6 +196,12 @@ export function databaseRowToListing(row: DatabaseListingRow): Listing {
 
 export function databaseRowsToListings(rows: DatabaseListingRow[]): Listing[] {
   return rows.map(databaseRowToListing);
+}
+
+export function publicDatabaseRowsToListings(
+  rows: PublicDatabaseListingRow[]
+): Listing[] {
+  return rows.map(publicDatabaseRowToListing);
 }
 
 function toTimestampFromDateLabel(dateLabel: string): string | undefined {

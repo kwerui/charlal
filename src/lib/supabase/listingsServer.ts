@@ -29,6 +29,16 @@ export type DatabaseListingDetailResult =
       reason: 'database-unavailable';
     };
 
+export type PublicSellerSlugResult =
+  | {
+      ok: true;
+      publicSlug: string | null;
+    }
+  | {
+      ok: false;
+      reason: 'database-unavailable';
+    };
+
 export async function listPublicDatabaseListings(): Promise<DatabaseListingReadResult> {
   await connection();
 
@@ -109,5 +119,31 @@ export async function getPublicDatabaseListingById(
   return {
     ok: true,
     listing: databaseRowToListing(data),
+  };
+}
+
+export async function getPublicSellerSlugForListingId(
+  listingId: string
+): Promise<PublicSellerSlugResult> {
+  await connection();
+
+  const safeListingId = listingId.trim();
+
+  if (!safeListingId || /^\d+$/.test(safeListingId)) {
+    return { ok: true, publicSlug: null };
+  }
+
+  const supabase = await createClient();
+  const { data, error } = await supabase.rpc('get_listing_public_seller_slug', {
+    p_listing_id: safeListingId,
+  });
+
+  if (error) {
+    return { ok: false, reason: 'database-unavailable' };
+  }
+
+  return {
+    ok: true,
+    publicSlug: typeof data === 'string' ? data : null,
   };
 }

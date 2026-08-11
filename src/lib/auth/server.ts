@@ -33,6 +33,9 @@ export type CurrentUserResult =
 function isProfileRow(value: unknown): value is {
   id: string;
   display_name: string;
+  public_slug: string;
+  bio: string | null;
+  location: string | null;
   created_at: string;
   updated_at: string;
 } {
@@ -43,6 +46,9 @@ function isProfileRow(value: unknown): value is {
   const profile = value as Partial<{
     id: unknown;
     display_name: unknown;
+    public_slug: unknown;
+    bio: unknown;
+    location: unknown;
     created_at: unknown;
     updated_at: unknown;
   }>;
@@ -50,6 +56,9 @@ function isProfileRow(value: unknown): value is {
   return (
     typeof profile.id === 'string' &&
     typeof profile.display_name === 'string' &&
+    typeof profile.public_slug === 'string' &&
+    (profile.bio === null || typeof profile.bio === 'string') &&
+    (profile.location === null || typeof profile.location === 'string') &&
     typeof profile.created_at === 'string' &&
     typeof profile.updated_at === 'string'
   );
@@ -124,7 +133,7 @@ export async function getCurrentUserResult(): Promise<CurrentUserResult> {
 
   const { data, error } = await supabase
     .from('profiles')
-    .select('id, display_name, created_at, updated_at')
+    .select('id, display_name, public_slug, bio, location, created_at, updated_at')
     .eq('id', claimsData.claims.sub)
     .maybeSingle();
 
@@ -135,6 +144,9 @@ export async function getCurrentUserResult(): Promise<CurrentUserResult> {
   const profile = {
     id: data.id,
     displayName: data.display_name,
+    publicSlug: data.public_slug,
+    bio: data.bio,
+    location: data.location,
     createdAt: data.created_at,
     updatedAt: data.updated_at,
   };

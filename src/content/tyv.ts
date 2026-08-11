@@ -71,6 +71,15 @@ export const content = {
   listingDetailTransactionTypeLabel: "Transaction type / Транзакцияның хевири",
   listingDetailMarketplaceTypeLabel: "Marketplace type / Рынок хевири",
   listingDetailUpdatedAtLabel: "Last updated / Сөөлгү катап чаарткан", // TODO: add reviewed Tuvan translation.
+  sellerProfileTitle: "Seller profile", // TODO: add reviewed Tuvan translation.
+  memberSinceLabel: "Member since", // TODO: add reviewed Tuvan translation.
+  activeListingsTitle: "Active listings", // TODO: add reviewed Tuvan translation.
+  noActiveSellerListingsMessage: "No active listings from this seller.", // TODO: add reviewed Tuvan translation.
+  bioLabel: "Bio", // TODO: add reviewed Tuvan translation.
+  profileLocationLabel: "Location", // TODO: add reviewed Tuvan translation.
+  viewPublicProfileLabel: "View public profile", // TODO: add reviewed Tuvan translation.
+  publicLocationHelp: "Public city or region only; do not enter a street address.", // TODO: add reviewed Tuvan translation.
+  sellerProfileUnavailableTitle: "Seller profile unavailable", // TODO: add reviewed Tuvan translation.
   contactSellerButton: "Contact seller / Садыгжы-биле харылзажыңар",
   messageSellerTitle: "Message seller / Медээ садыгжы", // TODO: add reviewed Tuvan translation.
   messagesTitle: "Messages / Медээлер", // TODO: add reviewed Tuvan translation.
@@ -107,6 +116,7 @@ export const content = {
   jumpToNewestMessageButton: "Jump to newest message / Эң чаа медээже шилчиир", // TODO: add reviewed Tuvan translation.
   backToHomepage: "Back to homepage / Кол арынче",
   backToAccount: "Back to account / Аккаунтче эглип келир", // TODO: add reviewed Tuvan translation.
+  backToSellerProfile: "Back to seller profile", // TODO: add reviewed Tuvan translation.
   backToResults: "Back to results / Түңнелдерже эглип келир",
 
   // Account
@@ -118,10 +128,11 @@ export const content = {
   accountPublicNameTitle: "Change public name / Хөй-ниити адын өскертир", // TODO: add reviewed Tuvan translation.
   accountPublicNameHelp: "This name is shown publicly on advertisements instead of your email. / Бо ат силерниң электроннуг почтаңарның орнунга чарлалдарда хөй-ниитиге көстүп турар.", // TODO: add reviewed Tuvan translation.
   accountPublicNamePlaceholder: "Enter a public seller name / Хөй-ниити садыгжы адын киирер", // TODO: add reviewed Tuvan translation.
-  accountSaveNameButton: "Save name / Адын кадагала", // TODO: add reviewed Tuvan translation.
+  accountSaveProfileButton: "Save profile", // TODO: add reviewed Tuvan translation.
   accountPublicNameSavedMessage: "Public name saved. / Хөй-ниити ады камгалаттынган.", // TODO: add reviewed Tuvan translation.
   accountPublicNameRequiredMessage: "Enter a public name before posting an advertisement. / Чарлал үндүрер мурнунда хөй-ниити адын киирер.", // TODO: add reviewed Tuvan translation.
   accountPublicNameSaveFailedMessage: "Unable to update public name. / Хөй-ниити адын чаартып шыдаваан.", // TODO: add reviewed Tuvan translation.
+  accountProfileDetailsInvalidMessage: "Bio or location is too long.", // TODO: add reviewed Tuvan translation.
   accountProfileLoadFailedMessage: "Your account is signed in, but the profile could not be loaded. / Силерниң аккаунтуңар кирген, ынчалза-даа профильди үндүрүп шыдаваан.", // TODO: add reviewed Tuvan translation.
   unableLoadProfileMessage: "Unable to load profile / Профильди үндүрүп шыдаваан", // TODO: add reviewed Tuvan translation.
   profileUpdatedMessage: "Profile updated. / Профиль чаарттынган.", // TODO: add reviewed Tuvan translation.
