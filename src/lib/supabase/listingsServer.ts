@@ -7,6 +7,10 @@ import {
   isDatabaseListingRow,
   isDatabaseListingRowArray,
 } from '@/lib/listingDatabaseTypes';
+import {
+  attachImageRowsToListings,
+  listListingImageRowsForListingIds,
+} from '@/lib/supabase/listingImages';
 import { createClient } from '@/lib/supabase/server';
 
 export type DatabaseListingReadResult =
@@ -52,9 +56,15 @@ export async function listPublicDatabaseListings(): Promise<DatabaseListingReadR
     return { ok: false, reason: 'database-unavailable' };
   }
 
+  const listings = databaseRowsToListings(data);
+  const imageRows = await listListingImageRowsForListingIds(
+    supabase,
+    listings.map((listing) => String(listing.id))
+  );
+
   return {
     ok: true,
-    listings: databaseRowsToListings(data),
+    listings: attachImageRowsToListings(listings, imageRows),
   };
 }
 
@@ -80,9 +90,15 @@ export async function listOwnedDatabaseListingsForOwner(
     return { ok: false, reason: 'database-unavailable' };
   }
 
+  const listings = databaseRowsToListings(data);
+  const imageRows = await listListingImageRowsForListingIds(
+    supabase,
+    listings.map((listing) => String(listing.id))
+  );
+
   return {
     ok: true,
-    listings: databaseRowsToListings(data),
+    listings: attachImageRowsToListings(listings, imageRows),
   };
 }
 
@@ -116,9 +132,14 @@ export async function getPublicDatabaseListingById(
     return { ok: false, reason: 'database-unavailable' };
   }
 
+  const listing = databaseRowToListing(data);
+  const imageRows = await listListingImageRowsForListingIds(supabase, [
+    String(listing.id),
+  ]);
+
   return {
     ok: true,
-    listing: databaseRowToListing(data),
+    listing: attachImageRowsToListings([listing], imageRows)[0] || listing,
   };
 }
 

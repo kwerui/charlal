@@ -1,9 +1,10 @@
 'use client';
 
 import Link from 'next/link';
-import type { FormEvent } from 'react';
-import { useState } from 'react';
+import type { ChangeEvent, FormEvent } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { content } from '@/content/tyv';
+import type { ListingImage } from '@/data/listings';
 import {
   getListingFormValues,
   type ListingFormCategory,
@@ -11,6 +12,13 @@ import {
   type ValidatedListingFormValues,
   validateListingFormValues,
 } from '@/lib/listingFormValidation';
+import type { ListingPhotoFormItem } from '@/lib/listingPhotoForm';
+import {
+  LISTING_IMAGE_ACCEPT,
+  LISTING_IMAGE_MIME_TYPES,
+  MAX_LISTING_IMAGE_BYTES,
+  MAX_LISTING_IMAGES,
+} from '@/lib/supabase/listingImages';
 
 export type ListingFormInitialValues = {
   title: string;
@@ -33,9 +41,26 @@ type Props = {
   externalErrors: string[];
   successMessage?: string;
   cancelHref?: string;
+  initialImages?: ListingImage[];
   onCancel?: () => void;
-  onSubmit: (values: ValidatedListingFormValues) => void;
+  onSubmit: (
+    values: ValidatedListingFormValues,
+    photos: ListingPhotoFormItem[]
+  ) => void;
 };
+
+function initialImageToPhotoItem(image: ListingImage): ListingPhotoFormItem | null {
+  if (!image.storagePath) {
+    return null;
+  }
+
+  return {
+    id: image.id,
+    kind: 'existing',
+    url: image.url,
+    storagePath: image.storagePath,
+  };
+}
 
 export default function ListingForm({
   mode,
@@ -47,10 +72,19 @@ export default function ListingForm({
   externalErrors,
   successMessage,
   cancelHref,
+  initialImages = [],
   onCancel,
   onSubmit,
 }: Props) {
   const [validationErrors, setValidationErrors] = useState<string[]>([]);
+  const [photoErrors, setPhotoErrors] = useState<string[]>([]);
+  const [photos, setPhotos] = useState<ListingPhotoFormItem[]>(
+    initialImages
+      .map(initialImageToPhotoItem)
+      .filter((photo): photo is ListingPhotoFormItem => Boolean(photo))
+      .slice(0, MAX_LISTING_IMAGES)
+  );
+  const photosRef = useRef(photos);
   const [selectedCategorySlug, setSelectedCategorySlug] = useState(
     initialValues?.categorySlug || ''
   );
@@ -70,10 +104,28 @@ export default function ListingForm({
     selectedCategory?.slug === 'marketplace' && selectedSubcategorySlug === 'buy';
   const marketplaceBuyTypes =
     selectedCategory?.buyTypes?.filter((buyType) => buyType.slug !== 'all-categories') || [];
-  const errors = [...validationErrors, ...externalErrors];
+  const errors = [...validationErrors, ...photoErrors, ...externalErrors];
+
+  useEffect(() => {
+    photosRef.current = photos;
+  }, [photos]);
+
+  useEffect(() => {
+    return () => {
+      for (const photo of photosRef.current) {
+        if (photo.kind === 'new') {
+          URL.revokeObjectURL(photo.url);
+        }
+      }
+    };
+  }, []);
 
   function clearValidationErrors(): void {
     setValidationErrors([]);
+  }
+
+  function clearPhotoErrors(): void {
+    setPhotoErrors([]);
   }
 
   function handleCategoryChange(categorySlug: string): void {
@@ -108,7 +160,85 @@ export default function ListingForm({
       return;
     }
 
-    onSubmit(validationResult.values);
+    onSubmit(validationResult.values, photos);
+  }
+
+  function handlePhotoSelection(event: ChangeEvent<HTMLInputElement>): void {
+    clearPhotoErrors();
+
+    const selectedFiles = Array.from(event.target.files || []);
+
+    if (selectedFiles.length === 0) {
+      return;
+    }
+
+    const nextErrors: string[] = [];
+    const remainingSlots = MAX_LISTING_IMAGES - photos.length;
+    const acceptedFiles = selectedFiles.slice(0, Math.max(remainingSlots, 0));
+
+    if (selectedFiles.length > remainingSlots) {
+      nextErrors.push(content.listingPhotoMaximumMessage);
+    }
+
+    const nextPhotos: ListingPhotoFormItem[] = [];
+
+    for (const file of acceptedFiles) {
+      if (!(LISTING_IMAGE_MIME_TYPES as readonly string[]).includes(file.type)) {
+        nextErrors.push(`${file.name}: ${content.listingPhotoUnsupportedTypeMessage}`);
+        continue;
+      }
+
+      if (file.size > MAX_LISTING_IMAGE_BYTES) {
+        nextErrors.push(`${file.name}: ${content.listingPhotoTooLargeMessage}`);
+        continue;
+      }
+
+      nextPhotos.push({
+        id: crypto.randomUUID(),
+        kind: 'new',
+        file,
+        url: URL.createObjectURL(file),
+      });
+    }
+
+    setPhotos((currentPhotos) => [...currentPhotos, ...nextPhotos]);
+    setPhotoErrors(nextErrors);
+    event.target.value = '';
+  }
+
+  function removePhoto(photoId: string): void {
+    clearPhotoErrors();
+    setPhotos((currentPhotos) => {
+      const photoToRemove = currentPhotos.find((photo) => photo.id === photoId);
+
+      if (photoToRemove?.kind === 'new') {
+        URL.revokeObjectURL(photoToRemove.url);
+      }
+
+      return currentPhotos.filter((photo) => photo.id !== photoId);
+    });
+  }
+
+  function movePhoto(photoId: string, direction: -1 | 1): void {
+    clearPhotoErrors();
+    setPhotos((currentPhotos) => {
+      const currentIndex = currentPhotos.findIndex((photo) => photo.id === photoId);
+      const nextIndex = currentIndex + direction;
+
+      if (
+        currentIndex < 0 ||
+        nextIndex < 0 ||
+        nextIndex >= currentPhotos.length
+      ) {
+        return currentPhotos;
+      }
+
+      const nextPhotos = [...currentPhotos];
+      const [photo] = nextPhotos.splice(currentIndex, 1);
+
+      nextPhotos.splice(nextIndex, 0, photo);
+      return nextPhotos;
+    });
   }
 
   return (
@@ -255,10 +385,83 @@ export default function ListingForm({
         />
       </label>
 
-      <div className="disabled-upload-section form-field-full" aria-disabled="true">
-        <span className="filter-label">{content.listingImageLabel}</span>
-        <div className="disabled-upload-box">
-          <span>{content.listingImagePlaceholder}</span>
+      <div className="listing-photo-section form-field-full">
+        <div className="listing-photo-heading">
+          <span className="filter-label">{content.listingPhotosLabel}</span>
+          <small>{content.listingPhotosHelp}</small>
+        </div>
+        <label className="listing-photo-picker" htmlFor="listing-photos">
+          <span>{content.addPhotosButton}</span>
+          <input
+            id="listing-photos"
+            type="file"
+            accept={LISTING_IMAGE_ACCEPT}
+            multiple
+            onChange={handlePhotoSelection}
+            disabled={isSubmitting || photos.length >= MAX_LISTING_IMAGES}
+          />
+        </label>
+        {photos.length > 0 ? (
+          <ul className="listing-photo-grid" aria-label={content.listingPhotosLabel}>
+            {photos.map((photo, index) => {
+              const photoNumber = index + 1;
+              const totalPhotos = photos.length;
+
+              return (
+                <li key={photo.id} className="listing-photo-item">
+                  <div className="listing-photo-preview">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                      src={photo.url}
+                      alt={content.listingPhotoAltTemplate
+                        .replace('{current}', String(photoNumber))
+                        .replace('{total}', String(totalPhotos))}
+                    />
+                    {index === 0 ? (
+                      <span className="listing-photo-cover-badge">
+                        {content.coverPhotoLabel}
+                      </span>
+                    ) : null}
+                  </div>
+                  <div className="listing-photo-controls">
+                    <span className="listing-photo-position">
+                      {content.listingPhotoPositionLabel}: {photoNumber}
+                    </span>
+                    <div className="listing-photo-control-row">
+                      <button
+                        type="button"
+                        className="listing-photo-control"
+                        onClick={() => movePhoto(photo.id, -1)}
+                        disabled={isSubmitting || index === 0}
+                      >
+                        {content.movePhotoEarlierButton}
+                      </button>
+                      <button
+                        type="button"
+                        className="listing-photo-control"
+                        onClick={() => movePhoto(photo.id, 1)}
+                        disabled={isSubmitting || index === photos.length - 1}
+                      >
+                        {content.movePhotoLaterButton}
+                      </button>
+                    </div>
+                    <button
+                      type="button"
+                      className="listing-photo-remove"
+                      onClick={() => removePhoto(photo.id)}
+                      disabled={isSubmitting}
+                    >
+                      {content.removePhotoButton}
+                    </button>
+                  </div>
+                </li>
+              );
+            })}
+          </ul>
+        ) : (
+          <p className="listing-photo-empty">{content.listingNoPhotosMessage}</p>
+        )}
+        <div className="listing-photo-requirements">
           <small>{content.listingImageRequirements}</small>
         </div>
       </div>

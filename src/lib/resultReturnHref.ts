@@ -61,3 +61,36 @@ export function getSafeResultsHref(
     return undefined;
   }
 }
+
+export function getSafeEditReturnHref(
+  from: string | string[] | undefined,
+  editPathname: string
+): string | undefined {
+  const href = Array.isArray(from) ? from[0] : from;
+  const safeEditPathname = editPathname.trim();
+
+  if (
+    !href ||
+    !href.startsWith('/') ||
+    href.startsWith('//') ||
+    href.includes('\\') ||
+    !safeEditPathname.startsWith('/')
+  ) {
+    return undefined;
+  }
+
+  try {
+    const parsedHref = new URL(href, 'https://internal.local');
+
+    if (
+      parsedHref.origin !== 'https://internal.local' ||
+      parsedHref.pathname === safeEditPathname
+    ) {
+      return undefined;
+    }
+
+    return `${parsedHref.pathname}${parsedHref.search}${parsedHref.hash}`;
+  } catch {
+    return undefined;
+  }
+}

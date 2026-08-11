@@ -26,6 +26,11 @@ export function getListingPlaceholder(listingData: ListingPlaceholderData): stri
 
 export function resolveListingImage(listing: Listing): string {
   const isLocalListing = typeof listing.id === 'string' && listing.id.startsWith('local-');
+  const uploadedCoverImage = listing.images?.[0]?.url;
+
+  if (uploadedCoverImage) {
+    return uploadedCoverImage;
+  }
 
   if (
     isLocalListing &&

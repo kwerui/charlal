@@ -11,19 +11,28 @@ import type {
   ListingFormCategory,
   ValidatedListingFormValues,
 } from '@/lib/listingFormValidation';
+import type { ListingPhotoFormItem } from '@/lib/listingPhotoForm';
 import { useAuthStatus } from '@/lib/auth/client';
+import { hasActiveEditNavigation } from '@/lib/editNavigationStorage';
+import { recordListingMutationRefreshIntent } from '@/lib/listingMutationRefreshStorage';
 import {
   findOwnedDatabaseListingById,
+  saveDatabaseListingImagesOwnedBy,
   updateDatabaseListingOwnedBy,
 } from '@/lib/supabase/listingsClient';
+import {
+  cleanupUploadedListingPhotos,
+  prepareListingPhotoMetadata,
+} from '@/lib/supabase/listingPhotoUploadsClient';
 import { hasActiveResultsNavigation } from '@/lib/resultsScrollStorage';
+import { revalidateEditedListingRoutes } from './actions';
 
 type Props = {
   id: string;
   categories: ListingFormCategory[];
   initialEditStatus: EditListingStatus;
   initialListing: Listing | null;
-  editOrigin: '/account' | null;
+  editOrigin: string | undefined;
 };
 
 type EditListingStatus =
@@ -114,7 +123,10 @@ export default function EditListingForm({
     };
   }, [authStatus, currentUser, id, ownerId, profileStatus]);
 
-  async function handleSubmit(values: ValidatedListingFormValues): Promise<void> {
+  async function handleSubmit(
+    values: ValidatedListingFormValues,
+    photos: ListingPhotoFormItem[]
+  ): Promise<void> {
     setErrors([]);
     setSuccessMessage('');
 
@@ -147,8 +159,50 @@ export default function EditListingForm({
       return;
     }
 
+    const photoResult = await prepareListingPhotoMetadata(
+      ownerId,
+      String(updateResult.listing.id),
+      photos
+    );
+
+    if (!photoResult.ok) {
+      setIsSubmitting(false);
+      setSuccessMessage(content.editAdvertisementSavedMessage);
+      setErrors([content.unableUploadPhotoMessage]);
+      return;
+    }
+
+    const imageSaveResult = await saveDatabaseListingImagesOwnedBy(
+      String(updateResult.listing.id),
+      ownerId,
+      photoResult.images
+    );
+
+    if (!imageSaveResult.ok) {
+      await cleanupUploadedListingPhotos(photoResult.uploadedStoragePaths);
+      setIsSubmitting(false);
+      setSuccessMessage(content.editAdvertisementSavedMessage);
+      setErrors([content.unableUploadPhotoMessage]);
+      return;
+    }
+
     setSuccessMessage(content.editAdvertisementSavedMessage);
-    router.push(`/listing/${updateResult.listing.id}?from=/account`);
+    await revalidateEditedListingRoutes({
+      listingId: String(imageSaveResult.listing.id),
+    });
+    recordListingMutationRefreshIntent(String(imageSaveResult.listing.id));
+
+    if (editOrigin === '/account' && hasActiveResultsNavigation('/account')) {
+      router.back();
+      return;
+    }
+
+    if (editOrigin && hasActiveEditNavigation(editOrigin)) {
+      router.back();
+      return;
+    }
+
+    router.replace('/account');
   }
 
   function handleCancel(): void {
@@ -157,7 +211,7 @@ export default function EditListingForm({
       return;
     }
 
-    router.push('/account');
+    router.push(editOrigin || '/account');
   }
 
   if (authStatus === 'unauthenticated' || editStatus === 'checking') {
@@ -224,12 +278,13 @@ export default function EditListingForm({
       mode="edit"
       categories={categories}
       initialValues={getEditListingInitialValues(listing)}
+      initialImages={listing.images || []}
       submitButtonLabel={content.editAdvertisementSaveButton}
       submittingButtonLabel={content.editAdvertisementSavingButton}
       isSubmitting={isSubmitting}
       externalErrors={errors}
       successMessage={successMessage}
-      cancelHref="/account"
+      cancelHref={editOrigin || '/account'}
       onCancel={handleCancel}
       onSubmit={handleSubmit}
     />

@@ -2,6 +2,7 @@
 
 import { useMemo } from 'react';
 import ListingCard from '@/app/components/ListingCard';
+import ListingMutationRefreshBoundary from '@/app/components/ListingMutationRefreshBoundary';
 import ResultsScrollRestorer from '@/app/components/ResultsScrollRestorer';
 import { content } from '@/content/tyv';
 import type { Listing } from '@/data/listings';
@@ -49,6 +50,9 @@ export default function ListingResults({
 
   return (
     <>
+      <ListingMutationRefreshBoundary
+        listingIds={databaseListings.map((listing) => String(listing.id))}
+      />
       {showResultsSummary ? (
         <div className="results-summary" aria-live="polite">
           <p>

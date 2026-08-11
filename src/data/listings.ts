@@ -16,6 +16,14 @@ export type Listing = {
   transactionType?: 'sale' | 'rent';
   propertyType?: 'apartments' | 'land' | 'commercial' | 'storage';
   marketplaceType?: string;
+  images?: ListingImage[];
+};
+
+export type ListingImage = {
+  id: string;
+  url: string;
+  position: number;
+  storagePath?: string;
 };
 
 export const LOCAL_LISTING_PLACEHOLDER_IMAGE =

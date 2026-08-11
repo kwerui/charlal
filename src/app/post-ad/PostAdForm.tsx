@@ -8,8 +8,16 @@ import type {
   ListingFormCategory,
   ValidatedListingFormValues,
 } from '@/lib/listingFormValidation';
+import type { ListingPhotoFormItem } from '@/lib/listingPhotoForm';
 import { useAuthStatus } from '@/lib/auth/client';
-import { createDatabaseListingFromFormValues } from '@/lib/supabase/listingsClient';
+import {
+  createDatabaseListingFromFormValues,
+  saveDatabaseListingImagesOwnedBy,
+} from '@/lib/supabase/listingsClient';
+import {
+  cleanupUploadedListingPhotos,
+  prepareListingPhotoMetadata,
+} from '@/lib/supabase/listingPhotoUploadsClient';
 
 type Props = {
   categories: ListingFormCategory[];
@@ -28,7 +36,10 @@ export default function PostAdForm({ categories }: Props) {
     }
   }, [authStatus, router]);
 
-  async function handleSubmit(values: ValidatedListingFormValues): Promise<void> {
+  async function handleSubmit(
+    values: ValidatedListingFormValues,
+    photos: ListingPhotoFormItem[]
+  ): Promise<void> {
     setErrors([]);
     setSuccessMessage('');
 
@@ -53,6 +64,11 @@ export default function PostAdForm({ categories }: Props) {
       return;
     }
 
+    if (!ownerId) {
+      setErrors([content.postAdErrorSaveFailed]);
+      return;
+    }
+
     setIsSubmitting(true);
 
     try {
@@ -62,6 +78,35 @@ export default function PostAdForm({ categories }: Props) {
         setErrors([content.postAdErrorSaveFailed]);
         setIsSubmitting(false);
         return;
+      }
+
+      if (photos.length > 0) {
+        const photoResult = await prepareListingPhotoMetadata(
+          ownerId,
+          String(createResult.listing.id),
+          photos
+        );
+
+        if (!photoResult.ok) {
+          setSuccessMessage(content.postAdSuccessMessage);
+          setErrors([content.listingSavedPhotosFailedMessage]);
+          setIsSubmitting(false);
+          return;
+        }
+
+        const imageSaveResult = await saveDatabaseListingImagesOwnedBy(
+          String(createResult.listing.id),
+          ownerId,
+          photoResult.images
+        );
+
+        if (!imageSaveResult.ok) {
+          await cleanupUploadedListingPhotos(photoResult.uploadedStoragePaths);
+          setSuccessMessage(content.postAdSuccessMessage);
+          setErrors([content.listingSavedPhotosFailedMessage]);
+          setIsSubmitting(false);
+          return;
+        }
       }
 
       setSuccessMessage(content.postAdSuccessMessage);

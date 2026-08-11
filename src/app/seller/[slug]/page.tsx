@@ -1,5 +1,6 @@
 import { notFound } from 'next/navigation';
 import ListingCard from '@/app/components/ListingCard';
+import ListingMutationRefreshBoundary from '@/app/components/ListingMutationRefreshBoundary';
 import ResultsScrollRestorer from '@/app/components/ResultsScrollRestorer';
 import { content } from '@/content/tyv';
 import { getPublicSellerPageBySlug } from '@/lib/supabase/publicSellerProfilesServer';
@@ -47,6 +48,9 @@ export default async function SellerPage({ params }: SellerPageProps) {
 
   return (
     <main className="seller-profile-page">
+      <ListingMutationRefreshBoundary
+        listingIds={listings.map((listing) => String(listing.id))}
+      />
       <ResultsScrollRestorer resultsHref={sellerHref} />
       <section className="seller-profile-header-card" aria-labelledby="seller-profile-title">
         <p className="hero-kicker">{content.sellerProfileTitle}</p>

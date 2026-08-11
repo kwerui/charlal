@@ -24,9 +24,10 @@ This project uses [`next/font`](https://nextjs.org/docs/app/building-your-applic
 
 This repository uses Supabase authentication, profiles, PostgreSQL-backed
 user-created advertisements, and private seller/buyer messaging. Built-in demo
-listings still live in source code. Images, favourites, attachments, push/email
-notifications, typing indicators, and message editing/deletion are not
-implemented yet.
+listings still live in source code. User-created database advertisements can
+use public Supabase Storage listing photos. Favourites, message attachments,
+seller-profile images, push/email notifications, typing indicators, and
+moderation tools are not implemented yet.
 
 1. Create a Supabase project from the Supabase dashboard.
 2. Open the project, then use the Connect dialog or Project Settings API section
@@ -93,6 +94,17 @@ Editor.
 25. In Database > Replication, confirm `public.messages` and
     `public.conversation_reads` are included in the `supabase_realtime`
     publication.
+26. Open `supabase/migrations/20260817_add_listing_images.sql`.
+27. Copy the full SQL into the SQL Editor and run it after the message
+    management SQL.
+28. Confirm the `listing-images` Storage bucket exists, is public, has a 5 MB
+    file-size limit, and allows only `image/jpeg`, `image/png`, and
+    `image/webp`.
+29. Confirm `public.listing_images` exists and RLS is enabled.
+30. In Database > Policies, inspect the `listing_images` and `storage.objects`
+    policies: anonymous visitors can view public listing-image metadata/media,
+    while only authenticated listing owners can insert/reorder/delete metadata
+    and upload/delete matching Storage objects.
 
 The listings migration creates the `public.listings` table, constraints, owner
 policies, indexes for owner/category/date reads, and triggers that keep seller
@@ -116,6 +128,16 @@ duplicate row. Conversation rows store listing-title and display-name snapshots.
 If a listing is deleted, `listing_id` is set to `null`, but the conversation and
 messages remain available to the buyer and seller with the original listing
 title snapshot.
+
+The listing-images migration creates the public `listing-images` bucket and the
+`public.listing_images` metadata table. Image files are stored in Supabase
+Storage under `<listing-id>/<random-file-id>.<extension>`, while PostgreSQL
+stores only the Storage path and display position. The bucket is
+public because listing photos are public marketplace media; do not use it for
+private messages, documents, account-only data, or anything that requires signed
+URLs. Anonymous visitors may view listing images, but anonymous users cannot
+upload, update, or delete Storage objects or image metadata. Owner authorization
+is still enforced through `auth.uid()` and `public.listings.owner_id`.
 
 When a profile display name changes, the profile synchronization trigger updates
 listing seller names and conversation buyer/seller display-name snapshots. Email
@@ -155,6 +177,14 @@ The app still reads old browser-local advertisements from
 
 The import completion marker is browser-local and idempotent:
 `charlal:supabase-listing-imports:v1`.
+
+Listing photos are uploaded only after the advertisement row exists. The app
+supports zero to eight JPEG, PNG, or WebP photos per database listing, with the
+first image used as the cover in cards and the full ordered gallery shown on
+detail pages. If a listing is created but photo upload fails, the listing is
+kept and the owner can open Edit advertisement to retry adding photos. Demo
+source-code listings keep their existing static images and are not migrated to
+Storage.
 
 ### Configure Auth URLs
 

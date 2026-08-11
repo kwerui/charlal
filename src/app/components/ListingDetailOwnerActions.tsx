@@ -1,9 +1,11 @@
 'use client';
 
 import Link from 'next/link';
+import { usePathname, useSearchParams } from 'next/navigation';
 import { content } from '@/content/tyv';
 import type { Listing } from '@/data/listings';
 import { useAuthStatus } from '@/lib/auth/client';
+import { recordEditNavigation } from '@/lib/editNavigationStorage';
 import { isListingOwnedByUser } from '@/lib/listingOwnership';
 
 export type ListingDetailViewerState =
@@ -21,7 +23,14 @@ export default function ListingDetailOwnerActions({
   listing,
   initialViewerState,
 }: Props) {
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
   const { status: authStatus, user: currentUser } = useAuthStatus();
+  const currentSearch = searchParams.toString();
+  const currentHref = currentSearch ? `${pathname}?${currentSearch}` : pathname;
+  const editHref = `/account/listings/${listing.id}/edit?from=${encodeURIComponent(
+    currentHref
+  )}`;
   const isDatabaseListing =
     typeof listing.id === 'string' && listing.id.startsWith('db-');
   const hasDatabaseSeller = isDatabaseListing && Boolean(listing.ownerId);
@@ -39,8 +48,12 @@ export default function ListingDetailOwnerActions({
     return (
       <div className="listing-detail-actions">
         <Link
-          href={`/account/listings/${listing.id}/edit`}
+          href={{
+            pathname: `/account/listings/${listing.id}/edit`,
+            query: { from: currentHref },
+          }}
           className="listing-detail-owner-button listing-detail-owner-button--edit"
+          onClick={() => recordEditNavigation(editHref, currentHref)}
         >
           {content.editAdvertisementButton}
         </Link>

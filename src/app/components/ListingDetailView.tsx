@@ -1,6 +1,7 @@
-import Image from 'next/image';
 import Link from 'next/link';
 import BackToResultsLink from '@/app/components/BackToResultsLink';
+import ListingImageGallery from '@/app/components/ListingImageGallery';
+import ListingMutationRefreshBoundary from '@/app/components/ListingMutationRefreshBoundary';
 import ListingDetailOwnerActions, {
   type ListingDetailViewerState,
 } from '@/app/components/ListingDetailOwnerActions';
@@ -70,21 +71,17 @@ export default function ListingDetailView({
 
   return (
     <article className="listing-detail-page">
+      <ListingMutationRefreshBoundary listingIds={[String(listing.id)]} />
       <BackToResultsLink href={backHref} className="page-back-link">
         {backLabel}
       </BackToResultsLink>
 
       <div className="listing-detail-layout">
-        <div className="listing-detail-image-wrapper">
-          <Image
-            className="listing-detail-image"
-            src={listingImage}
-            alt={listing.title}
-            fill
-            sizes="(max-width: 768px) 100vw, 55vw"
-            priority
-          />
-        </div>
+        <ListingImageGallery
+          images={listing.images || []}
+          fallbackImage={listingImage}
+          listingTitle={listing.title}
+        />
 
         <section className="listing-detail-panel">
           <h1 className="listing-detail-title">{listing.title}</h1>

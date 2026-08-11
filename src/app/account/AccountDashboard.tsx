@@ -20,6 +20,7 @@ import {
   getUserOwnerId,
   isListingOwnedByUser,
 } from '@/lib/listingOwnership';
+import { shouldRefreshForListingMutation } from '@/lib/listingMutationRefreshStorage';
 import {
   PROFILE_BIO_MAX_LENGTH,
   PROFILE_DISPLAY_NAME_MAX_LENGTH,
@@ -198,6 +199,26 @@ export default function AccountDashboard({
       unsubscribe();
     };
   }, [refreshListingSections]);
+
+  useEffect(() => {
+    if (
+      ownedListings.length === 0 ||
+      !shouldRefreshForListingMutation(
+        ownedListings.map((listing) => String(listing.id)),
+        '/account'
+      )
+    ) {
+      return;
+    }
+
+    const frameId = window.requestAnimationFrame(() => {
+      void refreshListingSections({ force: true });
+    });
+
+    return () => {
+      window.cancelAnimationFrame(frameId);
+    };
+  }, [ownedListings, refreshListingSections]);
 
   useEffect(() => {
     if (!listingToDelete) {

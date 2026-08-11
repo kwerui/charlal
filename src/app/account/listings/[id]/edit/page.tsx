@@ -2,6 +2,7 @@ import { redirect } from 'next/navigation';
 import { content } from '@/content/tyv';
 import { listings } from '@/data/listings';
 import { getCurrentViewerId } from '@/lib/auth/server';
+import { getSafeEditReturnHref } from '@/lib/resultReturnHref';
 import { getPublicDatabaseListingById } from '@/lib/supabase/listingsServer';
 import EditListingForm from './EditListingForm';
 
@@ -10,26 +11,19 @@ type EditListingPageProps = {
   searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 };
 
-function getSafeEditOrigin(
-  fromValue: string | string[] | undefined
-): '/account' | null {
-  const fromPath = Array.isArray(fromValue) ? fromValue[0] : fromValue;
-
-  return fromPath === '/account' ? '/account' : null;
-}
-
 export default async function EditListingPage({
   params,
   searchParams,
 }: EditListingPageProps) {
   const { id } = await params;
   const query = await searchParams;
-  const editOrigin = getSafeEditOrigin(query.from);
+  const editPathname = `/account/listings/${id}/edit`;
+  const editOrigin = getSafeEditReturnHref(query.from, editPathname);
   const viewer = await getCurrentViewerId();
 
   if (viewer.status === 'signed-out') {
     redirect(
-      `/sign-in?next=${encodeURIComponent(`/account/listings/${id}/edit`)}`
+      `/sign-in?next=${encodeURIComponent(editPathname)}`
     );
   }
 

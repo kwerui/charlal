@@ -6,6 +6,10 @@ import {
   type PublicDatabaseListingRow,
 } from '@/lib/listingDatabaseTypes';
 import { createClient } from '@/lib/supabase/server';
+import {
+  attachImageRowsToListings,
+  listListingImageRowsForListingIds,
+} from '@/lib/supabase/listingImages';
 
 export type PublicSellerProfile = {
   publicSlug: string;
@@ -114,9 +118,15 @@ export async function getPublicSellerPageBySlug(
     return { ok: false, reason: 'database-unavailable' };
   }
 
+  const listings = publicDatabaseRowsToListings(listingRows);
+  const imageRows = await listListingImageRowsForListingIds(
+    supabase,
+    listings.map((listing) => String(listing.id))
+  );
+
   return {
     ok: true,
     profile: mapPublicSellerProfileRow(profileRow),
-    listings: publicDatabaseRowsToListings(listingRows),
+    listings: attachImageRowsToListings(listings, imageRows),
   };
 }

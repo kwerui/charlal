@@ -71,15 +71,15 @@ export const content = {
   listingDetailTransactionTypeLabel: "Transaction type / Транзакцияның хевири",
   listingDetailMarketplaceTypeLabel: "Marketplace type / Рынок хевири",
   listingDetailUpdatedAtLabel: "Last updated / Сөөлгү катап чаарткан", // TODO: add reviewed Tuvan translation.
-  sellerProfileTitle: "Seller profile", // TODO: add reviewed Tuvan translation.
-  memberSinceLabel: "Member since", // TODO: add reviewed Tuvan translation.
-  activeListingsTitle: "Active listings", // TODO: add reviewed Tuvan translation.
-  noActiveSellerListingsMessage: "No active listings from this seller.", // TODO: add reviewed Tuvan translation.
-  bioLabel: "Bio", // TODO: add reviewed Tuvan translation.
-  profileLocationLabel: "Location", // TODO: add reviewed Tuvan translation.
-  viewPublicProfileLabel: "View public profile", // TODO: add reviewed Tuvan translation.
-  publicLocationHelp: "Public city or region only; do not enter a street address.", // TODO: add reviewed Tuvan translation.
-  sellerProfileUnavailableTitle: "Seller profile unavailable", // TODO: add reviewed Tuvan translation.
+  sellerProfileTitle: "Seller profile / Садыгжының профили", // TODO: add reviewed Tuvan translation.
+  memberSinceLabel: "Member since / Чылдан эгелеп кежигүн", // TODO: add reviewed Tuvan translation.
+  activeListingsTitle: "Active listings / Ажылдап турар даңзылар", // TODO: add reviewed Tuvan translation.
+  noActiveSellerListingsMessage: "No active listings from this seller. / Бо садыгжыдан ажылдап турар дыңнадыглар чок.", // TODO: add reviewed Tuvan translation.
+  bioLabel: "Bio / Мен дугайымда", // TODO: add reviewed Tuvan translation.
+  profileLocationLabel: "Location / Турар чер", // TODO: add reviewed Tuvan translation.
+  viewPublicProfileLabel: "View public profile / Хөй-ниити профилин көрүңер", // TODO: add reviewed Tuvan translation.
+  publicLocationHelp: "Public city or region only; do not enter a street address. / Чүгле хөй-ниити хоорай азы регион; кудумчу адрезин киирбес.", // TODO: add reviewed Tuvan translation.
+  sellerProfileUnavailableTitle: "Seller profile unavailable / Садыгжы профили чок", // TODO: add reviewed Tuvan translation.
   contactSellerButton: "Contact seller / Садыгжы-биле харылзажыңар",
   messageSellerTitle: "Message seller / Медээ садыгжы", // TODO: add reviewed Tuvan translation.
   messagesTitle: "Messages / Медээлер", // TODO: add reviewed Tuvan translation.
@@ -114,27 +114,27 @@ export const content = {
   messageDeliveryUnconfirmedMessage: "Message delivery could not be confirmed. Check the conversation before retrying. / Медээниң чедирилгезин бадыткап шыдаваан. Катап шенээр мурнунда чугааны хынап алыңар.", // TODO: add reviewed Tuvan translation.
   newMessagesButton: "New messages / Чаа медээлер", // TODO: add reviewed Tuvan translation.
   jumpToNewestMessageButton: "Jump to newest message / Эң чаа медээже шилчиир", // TODO: add reviewed Tuvan translation.
-  todayLabel: "Today", // TODO: add reviewed Tuvan translation.
-  yesterdayLabel: "Yesterday", // TODO: add reviewed Tuvan translation.
+  todayLabel: "Today / Бо хүн", // TODO: add reviewed Tuvan translation.
+  yesterdayLabel: "Yesterday / Дүүн", // TODO: add reviewed Tuvan translation.
   monthNames: [
-    "January",
-    "February",
-    "March",
-    "April",
-    "May",
-    "June",
-    "July",
-    "August",
-    "September",
-    "October",
-    "November",
-    "December",
+    "January / Январь",
+    "February / Февраль",
+    "March / Март",
+    "April / Апрель",
+    "May / Май",
+    "June / Июнь",
+    "July / Июль",
+    "August / Август",
+    "September / Сентябрь",
+    "October / Октябрь",
+    "November / Ноябрь",
+    "December / Декабрь",
   ], // TODO: add reviewed Tuvan translations.
-  editedMessageLabel: "Edited", // TODO: add reviewed Tuvan translation.
-  messageDeletedLabel: "Message deleted", // TODO: add reviewed Tuvan translation.
-  messageActionsLabel: "Message actions", // TODO: add reviewed Tuvan translation.
-  editMessageButton: "Edit message", // TODO: add reviewed Tuvan translation.
-  saveMessageButton: "Save message", // TODO: add reviewed Tuvan translation.
+  editedMessageLabel: "Edited / Өскерткен", // TODO: add reviewed Tuvan translation.
+  messageDeletedLabel: "Message deleted / Медээни өжүрүп каан", // TODO: add reviewed Tuvan translation.
+  messageActionsLabel: "Message actions / Медээ ажыл-чорудулгазы", // TODO: add reviewed Tuvan translation.
+  editMessageButton: "Edit message / Медээни эде көөр", // TODO: add reviewed Tuvan translation.
+  saveMessageButton: "Save message / Медээни кадагала", // TODO: add reviewed Tuvan translation.
   deleteMessageButton: "Delete message", // TODO: add reviewed Tuvan translation.
   deleteMessageConfirmTitle: "Delete this message?", // TODO: add reviewed Tuvan translation.
   deleteMessageConfirmMessage: "This removes the text for both people in this conversation.", // TODO: add reviewed Tuvan translation.
@@ -258,8 +258,30 @@ export const content = {
   listingPriceLabel: "өртээ",
   listingLocationLabel: "Location / Турар чер",
   listingImageLabel: "Images / Чуруктар",
-  listingImagePlaceholder: "Image upload will be added later.",
-  listingImageRequirements: "You can upload up to 10 photos. Each photo must be less than 6MB. JPG, JPEG, and PNG only. / 10 чедир чуруктарны үндүрүп болур силер. Чурук бүрүзү 6 МБ-дан эвээш болур ужурлуг. Чүгле JPG, JPEG болгаш PNG.",
+  listingPhotosLabel: "Photos / Чуруктар", // TODO: add reviewed Tuvan translation.
+  listingPhotosHelp: "Add up to 8 photos. The first photo will be the cover.", // TODO: add reviewed Tuvan translation.
+  listingImageRequirements: "JPEG, PNG, or WebP only. Maximum 5 MB per photo.", // TODO: add reviewed Tuvan translation.
+  listingNoPhotosMessage: "No photos selected. A category placeholder will be used.", // TODO: add reviewed Tuvan translation.
+  addPhotosButton: "Add photos", // TODO: add reviewed Tuvan translation.
+  coverPhotoLabel: "Cover photo", // TODO: add reviewed Tuvan translation.
+  removePhotoButton: "Remove photo", // TODO: add reviewed Tuvan translation.
+  movePhotoEarlierButton: "Move earlier", // TODO: add reviewed Tuvan translation.
+  movePhotoLaterButton: "Move later", // TODO: add reviewed Tuvan translation.
+  listingPhotoPositionLabel: "Position", // TODO: add reviewed Tuvan translation.
+  listingPhotoMaximumMessage: "A listing can have at most 8 photos.", // TODO: add reviewed Tuvan translation.
+  listingPhotoTooLargeMessage: "Photo is too large. Maximum size is 5 MB.", // TODO: add reviewed Tuvan translation.
+  listingPhotoUnsupportedTypeMessage: "Unsupported photo type. Use JPEG, PNG, or WebP.", // TODO: add reviewed Tuvan translation.
+  listingPhotoAltTemplate: "photo {current} of {total}", // TODO: add reviewed Tuvan translation.
+  viewListingPhotoLabel: "View photo {current} of {total}", // TODO: add reviewed Tuvan translation.
+  openListingPhotoViewerLabel: "Open full photo", // TODO: add reviewed Tuvan translation.
+  listingPhotoViewerTitle: "Listing photo", // TODO: add reviewed Tuvan translation.
+  closeListingPhotoViewerButton: "Close", // TODO: add reviewed Tuvan translation.
+  previousListingPhotoButton: "Previous photo", // TODO: add reviewed Tuvan translation.
+  nextListingPhotoButton: "Next photo", // TODO: add reviewed Tuvan translation.
+  listingPhotoPositionTemplate: "{current} / {total}", // TODO: add reviewed Tuvan translation.
+  uploadingPhotosMessage: "Uploading photos...", // TODO: add reviewed Tuvan translation.
+  unableUploadPhotoMessage: "Unable to upload photo.", // TODO: add reviewed Tuvan translation.
+  listingSavedPhotosFailedMessage: "The advertisement was saved, but some photos could not be uploaded. Open Edit advertisement to try again.", // TODO: add reviewed Tuvan translation.
   postAdSubmitButton: "Submit Ad / Чарлал киирер",
   postAdSubmittingButton: "Saving ad... / Рекламаны кадагалап турар...", // TODO: add reviewed Tuvan translation.
   postAdSuccessMessage: "Advertisement saved. / Чарлал камгалаттынган.", // TODO: add reviewed Tuvan translation.
