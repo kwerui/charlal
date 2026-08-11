@@ -239,7 +239,9 @@ export default function ConversationThread({
   const markReadRequestedRef = useRef(false);
   const hasSubscribedRef = useRef(false);
   const shouldScrollToBottomRef = useRef(true);
+  const initialThreadRevealRef = useRef(false);
   const messageHistoryRef = useRef<HTMLDivElement | null>(null);
+  const messageFormRef = useRef<HTMLFormElement | null>(null);
   const textareaRef = useRef<HTMLTextAreaElement | null>(null);
   const mountedRef = useRef(false);
   const sendAttemptRef = useRef(0);
@@ -278,6 +280,7 @@ export default function ConversationThread({
         : null;
 
   useEffect(() => {
+    initialThreadRevealRef.current = false;
     mountedRef.current = true;
 
     return () => {
@@ -285,7 +288,7 @@ export default function ConversationThread({
       sendAttemptRef.current += 1;
       pendingDeliveryRef.current = null;
     };
-  }, []);
+  }, [conversation.id]);
 
   useEffect(() => {
     threadStatusRef.current = threadStatus;
@@ -587,12 +590,23 @@ export default function ConversationThread({
     const animationFrame = window.requestAnimationFrame(() => {
       scrollHistoryToBottom(messageHistoryRef.current);
       setShowNewMessagesButton(false);
+
+      if (!initialThreadRevealRef.current) {
+        initialThreadRevealRef.current = true;
+
+        window.requestAnimationFrame(() => {
+          messageFormRef.current?.scrollIntoView({
+            block: 'nearest',
+            behavior: 'auto',
+          });
+        });
+      }
     });
 
     return () => {
       window.cancelAnimationFrame(animationFrame);
     };
-  }, [messages.length]);
+  }, [conversation.id, messages.length]);
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -791,7 +805,12 @@ export default function ConversationThread({
         </p>
       ) : null}
 
-      <form className="message-form" onSubmit={handleSubmit} noValidate>
+      <form
+        ref={messageFormRef}
+        className="message-form"
+        onSubmit={handleSubmit}
+        noValidate
+      >
         <label className="form-field" htmlFor="thread-message-body">
           <span>{content.writeMessageLabel}</span>
           <textarea
