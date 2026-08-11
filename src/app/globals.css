@@ -2262,6 +2262,18 @@ body {
   box-shadow: 0 0 0 4px rgba(37,99,235,0.18);
 }
 
+.message-action-error {
+  margin: 0;
+  padding: 10px 12px;
+  border-radius: 8px;
+  border: 1px solid #dc2626;
+  background: #fee2e2;
+  color: #7f1d1d;
+  font-size: 14px;
+  font-weight: 800;
+  line-height: 1.35;
+}
+
 @media (prefers-color-scheme: dark) {
   .message-confirmation-backdrop {
     background: rgba(2,6,23,0.62);
@@ -2292,6 +2304,12 @@ body {
     border-color: rgba(226,232,240,0.38);
     background: #334155;
     color: #f8fafc;
+  }
+
+  .message-action-error {
+    border-color: #f87171;
+    background: #450a0a;
+    color: #fecaca;
   }
 }
 

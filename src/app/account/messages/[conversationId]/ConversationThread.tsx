@@ -370,6 +370,8 @@ export default function ConversationThread({
   const messageHistoryRef = useRef<HTMLDivElement | null>(null);
   const messageFormRef = useRef<HTMLFormElement | null>(null);
   const textareaRef = useRef<HTMLTextAreaElement | null>(null);
+  const editContainerRef = useRef<HTMLFormElement | null>(null);
+  const editTextareaRef = useRef<HTMLTextAreaElement | null>(null);
   const confirmationDialogRef = useRef<HTMLDivElement | null>(null);
   const conversationDeleteButtonRef = useRef<HTMLButtonElement | null>(null);
   const messageActionTriggerRefs = useRef<Map<string, HTMLButtonElement>>(
@@ -507,6 +509,37 @@ export default function ConversationThread({
       window.cancelAnimationFrame(focusFrame);
     };
   }, [confirmationDialog]);
+
+  useEffect(() => {
+    if (!editingMessageId) {
+      return;
+    }
+
+    const animationFrame = window.requestAnimationFrame(() => {
+      const historyElement = messageHistoryRef.current;
+      const editElement = editContainerRef.current;
+
+      if (historyElement && editElement) {
+        const historyRect = historyElement.getBoundingClientRect();
+        const editRect = editElement.getBoundingClientRect();
+        const scrollPadding = 10;
+
+        if (editRect.top < historyRect.top + scrollPadding) {
+          historyElement.scrollTop -=
+            historyRect.top + scrollPadding - editRect.top;
+        } else if (editRect.bottom > historyRect.bottom - scrollPadding) {
+          historyElement.scrollTop +=
+            editRect.bottom - (historyRect.bottom - scrollPadding);
+        }
+      }
+
+      editTextareaRef.current?.focus({ preventScroll: true });
+    });
+
+    return () => {
+      window.cancelAnimationFrame(animationFrame);
+    };
+  }, [editingMessageId]);
 
   useEffect(() => {
     threadStatusRef.current = threadStatus;
@@ -1080,6 +1113,7 @@ export default function ConversationThread({
     setDeletingMessageId(null);
 
     if (!result.ok) {
+      setConfirmationDialog(null);
       setMessageActionError(content.unableDeleteMessageMessage);
       return;
     }
@@ -1199,11 +1233,16 @@ export default function ConversationThread({
                 }
               >
                 {isEditing && !isDeleted ? (
-                  <form className="message-edit-form" onSubmit={handleEditMessage}>
+                  <form
+                    ref={editContainerRef}
+                    className="message-edit-form"
+                    onSubmit={handleEditMessage}
+                  >
                     <label className="sr-only" htmlFor={`edit-message-${message.id}`}>
                       {content.editMessageButton}
                     </label>
                     <textarea
+                      ref={editTextareaRef}
                       id={`edit-message-${message.id}`}
                       value={editBody}
                       maxLength={MESSAGE_BODY_MAX_LENGTH}
@@ -1322,6 +1361,12 @@ export default function ConversationThread({
       {readStatusError ? (
         <p className="form-error" role="alert">
           {readStatusError}
+        </p>
+      ) : null}
+
+      {messageActionError && !editingMessageId ? (
+        <p className="message-action-error" role="alert">
+          {messageActionError}
         </p>
       ) : null}
 

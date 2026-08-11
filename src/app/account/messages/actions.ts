@@ -18,6 +18,7 @@ import {
   startListingConversation,
   type MessagingFailureReason,
 } from '@/lib/supabase/messagingServer';
+import type { CurrentUserResult } from '@/lib/auth/server';
 
 export type StartConversationActionResult =
   | {
@@ -72,6 +73,31 @@ export type ConversationThreadSnapshotActionResult =
       reason: MessagingFailureReason;
     };
 
+type MessagingActionStage =
+  | 'invalid_input'
+  | 'no_authenticated_user'
+  | 'rpc_error'
+  | 'success';
+
+function logMessagingActionDiagnostic(input: {
+  operation: string;
+  stage: MessagingActionStage;
+  code?: string;
+  message?: string;
+  authResult?: CurrentUserResult;
+}): void {
+  if (process.env.NODE_ENV === 'production') {
+    return;
+  }
+
+  console.warn(`[Messaging] ${input.operation} ${input.stage}`, {
+    stage: input.stage,
+    code: input.code || 'none',
+    message: (input.message || 'none').replace(/[\r\n\t]+/g, ' ').slice(0, 180),
+    userResolved: input.authResult?.status === 'authenticated',
+  });
+}
+
 export async function startConversationAction(input: {
   listingId: string;
   body: string;
@@ -102,7 +128,24 @@ export async function sendMessageAction(input: {
   const authResult = await getCurrentUserResult();
 
   if (authResult.status !== 'authenticated') {
+    logMessagingActionDiagnostic({
+      operation: 'sendMessageAction',
+      stage: 'no_authenticated_user',
+      code: authResult.status,
+      message: 'Server action did not resolve an authenticated user.',
+      authResult,
+    });
     return { ok: false, reason: 'unauthenticated' };
+  }
+
+  if (!input.conversationId || !input.body || !input.clientAttemptId) {
+    logMessagingActionDiagnostic({
+      operation: 'sendMessageAction',
+      stage: 'invalid_input',
+      code: 'missing_required_field',
+      message: 'Message action input is missing a required field.',
+      authResult,
+    });
   }
 
   const result = await sendConversationMessage(
@@ -112,6 +155,13 @@ export async function sendMessageAction(input: {
   );
 
   if (!result.ok) {
+    logMessagingActionDiagnostic({
+      operation: 'sendMessageAction',
+      stage: 'rpc_error',
+      code: result.reason,
+      message: 'sendConversationMessage returned a failure result.',
+      authResult,
+    });
     return result;
   }
 
@@ -129,12 +179,36 @@ export async function editMessageAction(input: {
   const authResult = await getCurrentUserResult();
 
   if (authResult.status !== 'authenticated') {
+    logMessagingActionDiagnostic({
+      operation: 'editMessageAction',
+      stage: 'no_authenticated_user',
+      code: authResult.status,
+      message: 'Server action did not resolve an authenticated user.',
+      authResult,
+    });
     return { ok: false, reason: 'unauthenticated' };
+  }
+
+  if (!input.conversationId || !input.messageId || !input.body) {
+    logMessagingActionDiagnostic({
+      operation: 'editMessageAction',
+      stage: 'invalid_input',
+      code: 'missing_required_field',
+      message: 'Edit action input is missing a required field.',
+      authResult,
+    });
   }
 
   const result = await editConversationMessage(input.messageId, input.body);
 
   if (!result.ok) {
+    logMessagingActionDiagnostic({
+      operation: 'editMessageAction',
+      stage: 'rpc_error',
+      code: result.reason,
+      message: 'editConversationMessage returned a failure result.',
+      authResult,
+    });
     return result;
   }
 
@@ -151,12 +225,36 @@ export async function deleteMessageAction(input: {
   const authResult = await getCurrentUserResult();
 
   if (authResult.status !== 'authenticated') {
+    logMessagingActionDiagnostic({
+      operation: 'deleteMessageAction',
+      stage: 'no_authenticated_user',
+      code: authResult.status,
+      message: 'Server action did not resolve an authenticated user.',
+      authResult,
+    });
     return { ok: false, reason: 'unauthenticated' };
+  }
+
+  if (!input.conversationId || !input.messageId) {
+    logMessagingActionDiagnostic({
+      operation: 'deleteMessageAction',
+      stage: 'invalid_input',
+      code: 'missing_required_field',
+      message: 'Delete action input is missing a required field.',
+      authResult,
+    });
   }
 
   const result = await deleteConversationMessage(input.messageId);
 
   if (!result.ok) {
+    logMessagingActionDiagnostic({
+      operation: 'deleteMessageAction',
+      stage: 'rpc_error',
+      code: result.reason,
+      message: 'deleteConversationMessage returned a failure result.',
+      authResult,
+    });
     return result;
   }
 
