@@ -3,13 +3,7 @@ import { redirect } from 'next/navigation';
 import { content } from '@/content/tyv';
 import { getCurrentUserResult } from '@/lib/auth/server';
 import { listCurrentUserConversationSummaries } from '@/lib/supabase/messagingServer';
-
-function formatMessageDate(value: string): string {
-  return new Intl.DateTimeFormat('en', {
-    dateStyle: 'medium',
-    timeStyle: 'short',
-  }).format(new Date(value));
-}
+import MessagesInbox from './MessagesInbox';
 
 export default async function MessagesPage() {
   const authResult = await getCurrentUserResult();
@@ -54,52 +48,8 @@ export default async function MessagesPage() {
               {content.retryButton}
             </Link>
           </div>
-        ) : conversationsResult.conversations.length > 0 ? (
-          <div className="messages-inbox-list">
-            {conversationsResult.conversations.map((conversation) => {
-              const hasUnreadMessages = conversation.unreadCount > 0;
-
-              return (
-                <Link
-                  key={conversation.id}
-                  href={`/account/messages/${conversation.id}`}
-                  className={
-                    hasUnreadMessages
-                      ? 'conversation-summary-card conversation-summary-card--unread'
-                      : 'conversation-summary-card'
-                  }
-                >
-                  <span className="conversation-summary-title">
-                    {conversation.listingTitle}
-                  </span>
-                  <span className="conversation-summary-participant">
-                    {conversation.otherParticipantDisplayName}
-                  </span>
-                  <span className="conversation-summary-preview">
-                    {conversation.lastMessagePreview}
-                  </span>
-                  <span className="conversation-summary-meta">
-                    <time
-                      className="conversation-summary-time"
-                      dateTime={conversation.lastMessageAt}
-                    >
-                      {formatMessageDate(conversation.lastMessageAt)}
-                    </time>
-                    {hasUnreadMessages ? (
-                      <span className="conversation-new-label">
-                        {content.newMessageLabel}
-                      </span>
-                    ) : null}
-                  </span>
-                </Link>
-              );
-            })}
-          </div>
         ) : (
-          <div className="empty-results" role="status">
-            <h2>{content.noConversationsTitle}</h2>
-            <p>{content.noConversationsMessage}</p>
-          </div>
+          <MessagesInbox initialConversations={conversationsResult.conversations} />
         )}
       </section>
     </main>

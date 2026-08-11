@@ -72,30 +72,39 @@ export const content = {
   listingDetailMarketplaceTypeLabel: "Marketplace type / Рынок хевири",
   listingDetailUpdatedAtLabel: "Last updated / Сөөлгү катап чаарткан", // TODO: add reviewed Tuvan translation.
   contactSellerButton: "Contact seller / Садыгжы-биле харылзажыңар",
-  messageSellerTitle: "Message seller", // TODO: add reviewed Tuvan translation.
-  messagesTitle: "Messages", // TODO: add reviewed Tuvan translation.
-  noConversationsTitle: "No conversations yet", // TODO: add reviewed Tuvan translation.
+  messageSellerTitle: "Message seller / Медээ садыгжы", // TODO: add reviewed Tuvan translation.
+  messagesTitle: "Messages / Медээлер", // TODO: add reviewed Tuvan translation.
+  noConversationsTitle: "No conversations yet / Амдыызында чугаалар чок", // TODO: add reviewed Tuvan translation.
   noConversationsMessage: "Messages with buyers and sellers will appear here.", // TODO: add reviewed Tuvan translation.
-  writeMessageLabel: "Write a message", // TODO: add reviewed Tuvan translation.
-  sendMessageButton: "Send message", // TODO: add reviewed Tuvan translation.
-  sendingMessageButton: "Sending...", // TODO: add reviewed Tuvan translation.
-  continueConversationButton: "Continue conversation", // TODO: add reviewed Tuvan translation.
-  backToMessages: "Back to messages", // TODO: add reviewed Tuvan translation.
-  advertisementNoLongerAvailableMessage: "Advertisement no longer available", // TODO: add reviewed Tuvan translation.
+  writeMessageLabel: "Write a message / Медээ бижиир", // TODO: add reviewed Tuvan translation.
+  sendMessageButton: "Send message / Медээ чоргуз", // TODO: add reviewed Tuvan translation.
+  sendingMessageButton: "Sending... / Чорудуп турар...", // TODO: add reviewed Tuvan translation.
+  continueConversationButton: "Continue conversation / Чугааны уламчылаар", // TODO: add reviewed Tuvan translation.
+  backToMessages: "Back to messages / Медээлерже эглип келир", // TODO: add reviewed Tuvan translation.
+  advertisementNoLongerAvailableMessage: "Advertisement no longer available / Чарлал ам чок", // TODO: add reviewed Tuvan translation.
   demoListingMessagingUnavailableMessage: "Messaging unavailable for this demo listing", // TODO: add reviewed Tuvan translation.
-  messagingCannotMessageSelfMessage: "You cannot message yourself", // TODO: add reviewed Tuvan translation.
-  unableStartConversationMessage: "Unable to start conversation", // TODO: add reviewed Tuvan translation.
-  unableLoadConversationsMessage: "Unable to load conversations", // TODO: add reviewed Tuvan translation.
-  unableLoadMessagesMessage: "Unable to load messages", // TODO: add reviewed Tuvan translation.
-  unableSendMessageMessage: "Unable to send message", // TODO: add reviewed Tuvan translation.
-  messageEmptyMessage: "Message must not be empty", // TODO: add reviewed Tuvan translation.
-  messageTooLongMessage: "Message is too long", // TODO: add reviewed Tuvan translation.
-  unreadMessagesLabel: "Unread messages", // TODO: add reviewed Tuvan translation.
-  newMessageLabel: "New", // TODO: add reviewed Tuvan translation.
-  retryButton: "Retry", // TODO: add reviewed Tuvan translation.
-  noUnreadMessagesLabel: "No unread messages", // TODO: add reviewed Tuvan translation.
-  markedAsReadMessage: "Marked as read", // TODO: add reviewed Tuvan translation.
-  unableUpdateMessageStatusMessage: "Unable to update message status", // TODO: add reviewed Tuvan translation.
+  messagingCannotMessageSelfMessage: "You cannot message yourself / Бодуңга чагаа бижип шыдавас сен", // TODO: add reviewed Tuvan translation.
+  unableStartConversationMessage: "Unable to start conversation / Чугааны эгелеп шыдаваан", // TODO: add reviewed Tuvan translation.
+  unableLoadConversationsMessage: "Unable to load conversations / Чугааларны үндүрүп шыдаваан", // TODO: add reviewed Tuvan translation.
+  unableLoadMessagesMessage: "Unable to load messages / Медээлерни үндүрүп шыдаваан", // TODO: add reviewed Tuvan translation.
+  unableSendMessageMessage: "Unable to send message / Медээ чорудуп шыдаваан", // TODO: add reviewed Tuvan translation.
+  messageEmptyMessage: "Message must not be empty / Медээ куруг болбас ужурлуг", // TODO: add reviewed Tuvan translation.
+  messageTooLongMessage: "Message is too long / Медээ дыка узун", // TODO: add reviewed Tuvan translation.
+  unreadMessagesLabel: "Unread messages / Номчуттунмаан медээлер", // TODO: add reviewed Tuvan translation.
+  newMessageLabel: "New / Чаа", // TODO: add reviewed Tuvan translation.
+  retryButton: "Retry / Катап шенеп көрүңер", // TODO: add reviewed Tuvan translation.
+  noUnreadMessagesLabel: "No unread messages / Номчуттунмаан медээлер чок", // TODO: add reviewed Tuvan translation.
+  markedAsReadMessage: "Marked as read / Номчаан кылдыр демдеглээн", // TODO: add reviewed Tuvan translation.
+  unableUpdateMessageStatusMessage: "Unable to update message status / Медээниң байдалын чаартып шыдаваан", // TODO: add reviewed Tuvan translation.
+  sentMessageReceiptLabel: "Sent / Чоргускан", // TODO: add reviewed Tuvan translation.
+  readMessageReceiptLabel: "Read / Номчуур", // TODO: add reviewed Tuvan translation.
+  reconnectingLabel: "Reconnecting / Катап кожуп турар", // TODO: add reviewed Tuvan translation.
+  liveUpdatesUnavailableMessage: "Live updates unavailable — refresh to check for messages. / Дорт дамчыдылгалар чок — медээлерни хынаар дээш чаартыңар.", // TODO: add reviewed Tuvan translation.
+  offlineThreadStatusMessage: "You are offline. Messages will update when the connection returns. / Силер офлайн силер. Кажан харылзаа эглип кээрге, медээлер чаартынып кээр.", // TODO: add reviewed Tuvan translation.
+  offlineBeforeSendMessage: "You are offline. Reconnect before sending. / Силер офлайн силер. Чорудар мурнунда катап кожуп алыңар.", // TODO: add reviewed Tuvan translation.
+  messageDeliveryUnconfirmedMessage: "Message delivery could not be confirmed. Check the conversation before retrying. / Медээниң чедирилгезин бадыткап шыдаваан. Катап шенээр мурнунда чугааны хынап алыңар.", // TODO: add reviewed Tuvan translation.
+  newMessagesButton: "New messages / Чаа медээлер", // TODO: add reviewed Tuvan translation.
+  jumpToNewestMessageButton: "Jump to newest message / Эң чаа медээже шилчиир", // TODO: add reviewed Tuvan translation.
   backToHomepage: "Back to homepage / Кол арынче",
   backToAccount: "Back to account / Аккаунтче эглип келир", // TODO: add reviewed Tuvan translation.
   backToResults: "Back to results / Түңнелдерже эглип келир",

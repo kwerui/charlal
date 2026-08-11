@@ -1,9 +1,15 @@
 'use server';
 
 import { revalidatePath } from 'next/cache';
-import type { AppMessage } from '@/lib/messagingTypes';
+import type {
+  AppConversationRead,
+  AppConversationSummary,
+  AppMessage,
+} from '@/lib/messagingTypes';
 import { getCurrentUserResult } from '@/lib/auth/server';
 import {
+  getCurrentUserConversationThread,
+  listCurrentUserConversationSummaries,
   markConversationRead,
   sendConversationMessage,
   startListingConversation,
@@ -39,6 +45,28 @@ export type MarkConversationReadActionResult =
       reason: MessagingFailureReason;
     };
 
+export type MessagingSnapshotActionResult =
+  | {
+      ok: true;
+      unreadConversationCount: number;
+      conversations: AppConversationSummary[];
+    }
+  | {
+      ok: false;
+      reason: MessagingFailureReason;
+    };
+
+export type ConversationThreadSnapshotActionResult =
+  | {
+      ok: true;
+      messages: AppMessage[];
+      readMarkers: AppConversationRead[];
+    }
+  | {
+      ok: false;
+      reason: MessagingFailureReason;
+    };
+
 export async function startConversationAction(input: {
   listingId: string;
   body: string;
@@ -64,6 +92,7 @@ export async function startConversationAction(input: {
 export async function sendMessageAction(input: {
   conversationId: string;
   body: string;
+  clientAttemptId: string;
 }): Promise<SendMessageActionResult> {
   const authResult = await getCurrentUserResult();
 
@@ -71,7 +100,11 @@ export async function sendMessageAction(input: {
     return { ok: false, reason: 'unauthenticated' };
   }
 
-  const result = await sendConversationMessage(input.conversationId, input.body);
+  const result = await sendConversationMessage(
+    input.conversationId,
+    input.body,
+    input.clientAttemptId
+  );
 
   if (!result.ok) {
     return result;
@@ -102,4 +135,48 @@ export async function markConversationReadAction(
   revalidatePath(`/account/messages/${conversationId}`);
 
   return result;
+}
+
+export async function getMessagingSnapshotAction(): Promise<MessagingSnapshotActionResult> {
+  const authResult = await getCurrentUserResult();
+
+  if (authResult.status !== 'authenticated') {
+    return { ok: false, reason: 'unauthenticated' };
+  }
+
+  const conversationsResult = await listCurrentUserConversationSummaries();
+
+  if (!conversationsResult.ok) {
+    return conversationsResult;
+  }
+
+  return {
+    ok: true,
+    conversations: conversationsResult.conversations,
+    unreadConversationCount: conversationsResult.conversations.filter(
+      (conversation) => conversation.unreadCount > 0
+    ).length,
+  };
+}
+
+export async function getConversationThreadSnapshotAction(
+  conversationId: string
+): Promise<ConversationThreadSnapshotActionResult> {
+  const authResult = await getCurrentUserResult();
+
+  if (authResult.status !== 'authenticated') {
+    return { ok: false, reason: 'unauthenticated' };
+  }
+
+  const threadResult = await getCurrentUserConversationThread(conversationId);
+
+  if (!threadResult.ok) {
+    return threadResult;
+  }
+
+  return {
+    ok: true,
+    messages: threadResult.messages,
+    readMarkers: threadResult.readMarkers,
+  };
 }

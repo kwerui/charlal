@@ -2,7 +2,10 @@ export const CONVERSATION_SELECT_COLUMNS =
   'id, listing_id, listing_title_snapshot, buyer_id, seller_id, buyer_display_name, seller_display_name, created_at, updated_at, last_message_at';
 
 export const MESSAGE_SELECT_COLUMNS =
-  'id, conversation_id, sender_id, body, created_at';
+  'id, conversation_id, sender_id, body, created_at, client_attempt_id';
+
+export const CONVERSATION_READ_SELECT_COLUMNS =
+  'conversation_id, user_id, last_read_at';
 
 export const MESSAGE_BODY_MAX_LENGTH = 2000;
 
@@ -35,6 +38,13 @@ export type DatabaseMessageRow = {
   sender_id: string;
   body: string;
   created_at: string;
+  client_attempt_id: string | null;
+};
+
+export type DatabaseConversationReadRow = {
+  conversation_id: string;
+  user_id: string;
+  last_read_at: string;
 };
 
 export type AppConversation = {
@@ -66,6 +76,13 @@ export type AppMessage = {
   senderId: string;
   body: string;
   createdAt: string;
+  clientAttemptId: string | null;
+};
+
+export type AppConversationRead = {
+  conversationId: string;
+  userId: string;
+  lastReadAt: string;
 };
 
 function isRecord(value: unknown): value is Record<string, unknown> {
@@ -127,7 +144,23 @@ export function isDatabaseMessageRow(value: unknown): value is DatabaseMessageRo
     typeof value.conversation_id === 'string' &&
     typeof value.sender_id === 'string' &&
     typeof value.body === 'string' &&
-    typeof value.created_at === 'string'
+    typeof value.created_at === 'string' &&
+    (typeof value.client_attempt_id === 'string' ||
+      value.client_attempt_id === null)
+  );
+}
+
+export function isDatabaseConversationReadRow(
+  value: unknown
+): value is DatabaseConversationReadRow {
+  if (!isRecord(value)) {
+    return false;
+  }
+
+  return (
+    typeof value.conversation_id === 'string' &&
+    typeof value.user_id === 'string' &&
+    typeof value.last_read_at === 'string'
   );
 }
 
@@ -135,6 +168,12 @@ export function isDatabaseMessageRowArray(
   value: unknown
 ): value is DatabaseMessageRow[] {
   return Array.isArray(value) && value.every(isDatabaseMessageRow);
+}
+
+export function isDatabaseConversationReadRowArray(
+  value: unknown
+): value is DatabaseConversationReadRow[] {
+  return Array.isArray(value) && value.every(isDatabaseConversationReadRow);
 }
 
 export function databaseConversationRowToApp(
@@ -175,5 +214,16 @@ export function databaseMessageRowToApp(row: DatabaseMessageRow): AppMessage {
     senderId: row.sender_id,
     body: row.body,
     createdAt: row.created_at,
+    clientAttemptId: row.client_attempt_id,
+  };
+}
+
+export function databaseConversationReadRowToApp(
+  row: DatabaseConversationReadRow
+): AppConversationRead {
+  return {
+    conversationId: row.conversation_id,
+    userId: row.user_id,
+    lastReadAt: row.last_read_at,
   };
 }

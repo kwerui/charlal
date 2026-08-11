@@ -10,6 +10,7 @@ import ListingCard from '@/app/components/ListingCard';
 import ResultsScrollRestorer from '@/app/components/ResultsScrollRestorer';
 import { content } from '@/content/tyv';
 import type { Listing } from '@/data/listings';
+import { useMessagingRealtime } from '@/lib/messagingRealtime';
 import {
   getUnassignedLocalListings,
   removeLocalListingsById,
@@ -38,7 +39,6 @@ type Props = {
   initialOwnedListings: Listing[];
   initialListingsLoaded: boolean;
   initialListingsError: boolean;
-  initialUnreadConversationCount: number;
 };
 
 type RefreshListingSectionsOptions = {
@@ -51,7 +51,6 @@ export default function AccountDashboard({
   initialOwnedListings,
   initialListingsLoaded,
   initialListingsError,
-  initialUnreadConversationCount,
 }: Props) {
   const router = useRouter();
   const accountContentRef = useRef<HTMLDivElement | null>(null);
@@ -64,6 +63,7 @@ export default function AccountDashboard({
     user: currentUser,
     updateDisplayName,
   } = useAuthStatus();
+  const { unreadConversationCount } = useMessagingRealtime();
   const accountUser =
     authStatus === 'unauthenticated' ? null : currentUser ?? initialUser;
   const ownerId = getUserOwnerId(accountUser);
@@ -409,11 +409,11 @@ export default function AccountDashboard({
         <div className="account-quick-actions">
           <Link href="/account/messages" className="secondary-button account-messages-link">
             <span>{content.messagesTitle}</span>
-            {initialUnreadConversationCount > 0 ? (
+            {unreadConversationCount > 0 ? (
               <span className="header-unread-badge">
-                {initialUnreadConversationCount > 99
+                {unreadConversationCount > 99
                   ? '99+'
-                  : initialUnreadConversationCount}
+                  : unreadConversationCount}
               </span>
             ) : null}
           </Link>

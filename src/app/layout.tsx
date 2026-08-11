@@ -4,6 +4,7 @@ import NativeHistoryIntentMarker from './components/NativeHistoryIntentMarker';
 import SiteHeader from './components/SiteHeader';
 import { AuthProvider } from '@/lib/auth/client';
 import { getCurrentUserResult } from '@/lib/auth/server';
+import { MessagingRealtimeProvider } from '@/lib/messagingRealtime';
 import { countCurrentUserUnreadConversations } from '@/lib/supabase/messagingServer';
 import "./globals.css";
 
@@ -39,12 +40,13 @@ export default async function RootLayout({
     <html lang="en" className={`${geistSans.variable} ${geistMono.variable}`}>
       <body>
         <AuthProvider>
-          <NativeHistoryIntentMarker />
-          <SiteHeader
-            initialAuthStatus={authResult.status}
+          <MessagingRealtimeProvider
             initialUnreadConversationCount={initialUnreadConversationCount}
-          />
-          {children}
+          >
+            <NativeHistoryIntentMarker />
+            <SiteHeader initialAuthStatus={authResult.status} />
+            {children}
+          </MessagingRealtimeProvider>
         </AuthProvider>
       </body>
     </html>

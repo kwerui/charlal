@@ -51,6 +51,7 @@ export default async function ConversationPage({
           <ConversationThread
             conversation={threadResult.conversation}
             initialMessages={threadResult.messages}
+            initialReadMarkers={threadResult.readMarkers}
             currentUserId={authResult.user.id}
           />
         )}

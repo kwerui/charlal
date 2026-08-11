@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { content } from '@/content/tyv';
 import { useAuthStatus } from '@/lib/auth/client';
+import { useMessagingRealtime } from '@/lib/messagingRealtime';
 import { clearNativeHistoryTraversalIntent } from '@/lib/nativeHistoryIntentStorage';
 
 type Props = {
@@ -12,7 +13,6 @@ type Props = {
     | 'signed-out'
     | 'profile-error'
     | 'unresolved';
-  initialUnreadConversationCount: number;
 };
 
 function formatUnreadBadge(count: number): string {
@@ -21,16 +21,17 @@ function formatUnreadBadge(count: number): string {
 
 export default function SiteHeader({
   initialAuthStatus,
-  initialUnreadConversationCount,
 }: Props) {
   const router = useRouter();
   const pathname = usePathname();
   const { status: authStatus, user, signOut } = useAuthStatus();
+  const { unreadConversationCount: liveUnreadConversationCount } =
+    useMessagingRealtime();
   const signedIn =
     authStatus === 'authenticated' ||
     (authStatus === 'checking' && initialAuthStatus === 'authenticated');
   const unreadConversationCount = signedIn
-    ? initialUnreadConversationCount
+    ? liveUnreadConversationCount
     : 0;
   const messagesLabel =
     unreadConversationCount > 0

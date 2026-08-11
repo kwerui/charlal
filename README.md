@@ -24,8 +24,9 @@ This project uses [`next/font`](https://nextjs.org/docs/app/building-your-applic
 
 This repository uses Supabase authentication, profiles, PostgreSQL-backed
 user-created advertisements, and private seller/buyer messaging. Built-in demo
-listings still live in source code. Images, favourites, Realtime delivery,
-unread badges, attachments, and notifications are not implemented yet.
+listings still live in source code. Images, favourites, attachments, push/email
+notifications, typing indicators, and message editing/deletion are not
+implemented yet.
 
 1. Create a Supabase project from the Supabase dashboard.
 2. Open the project, then use the Connect dialog or Project Settings API section
@@ -74,13 +75,24 @@ Editor.
 12. Copy the full SQL into the SQL Editor and run it after the listings SQL.
 13. Open `supabase/migrations/20260809_fix_messaging_inbox_and_unread.sql`.
 14. Copy the full SQL into the SQL Editor and run it after the messaging SQL.
-15. Confirm `public.conversations`, `public.messages`, and
+15. Open `supabase/migrations/20260810_enable_messaging_realtime_and_receipts.sql`.
+16. Copy the full SQL into the SQL Editor and run it after the inbox/unread SQL.
+17. Open `supabase/migrations/20260811_add_message_send_idempotency.sql`.
+18. Copy the full SQL into the SQL Editor and run it after the Realtime SQL.
+19. Open `supabase/migrations/20260812_fix_idempotent_message_send.sql`.
+20. Copy the full SQL into the SQL Editor and run it after the idempotency SQL.
+21. Confirm `public.conversations`, `public.messages`, and
     `public.conversation_reads` exist.
-16. Confirm RLS is enabled on all messaging tables.
-17. In Database > Policies, inspect the conversation and message policies:
+22. Confirm `public.messages.client_attempt_id` exists and the partial unique
+    index on conversation, sender, and client attempt exists.
+23. Confirm RLS is enabled on all messaging tables.
+24. In Database > Policies, inspect the conversation and message policies:
     participants can select their conversations/messages, authenticated
     participants can insert messages, and anonymous users have no messaging
     access.
+25. In Database > Replication, confirm `public.messages` and
+    `public.conversation_reads` are included in the `supabase_realtime`
+    publication.
 
 The listings migration creates the `public.listings` table, constraints, owner
 policies, indexes for owner/category/date reads, and triggers that keep seller
@@ -93,8 +105,15 @@ migration adds durable read state in `public.conversation_reads`, fixes
 `public.list_conversation_summaries()` for the inbox, adds
 `public.count_unread_conversations()` for the header badge, and adds
 `public.mark_conversation_read()` for clearing unread state when a thread is
-opened. Conversation rows store listing-title and display-name snapshots. If a
-listing is deleted, `listing_id` is set to `null`, but the conversation and
+opened. The Phase 4B Realtime migration adds `public.messages` and
+`public.conversation_reads` to the Supabase Realtime publication and allows
+conversation participants to select both participants' read markers, so senders
+can see whether their newest outgoing message is Sent or Read. The follow-up
+idempotency migration adds nullable `client_attempt_id` values to messages and
+a controlled `public.send_conversation_message()` function so retrying the same
+uncertain send attempt reuses the existing message instead of inserting a
+duplicate row. Conversation rows store listing-title and display-name snapshots.
+If a listing is deleted, `listing_id` is set to `null`, but the conversation and
 messages remain available to the buyer and seller with the original listing
 title snapshot.
 
@@ -107,10 +126,12 @@ and create an advertisement, then sign in as the second user, open that database
 listing, and use Contact seller. The first message creates or reuses a single
 buyer/listing conversation and redirects to the thread. Both users can open
 Account > Messages or the header Messages link to view the inbox. During this
-phase, the sender sees new messages immediately; the recipient should refresh,
-navigate, or revisit Messages to see replies and unread badge changes. Supabase
-Realtime live delivery, push/email notifications, read receipts, attachments,
-and typing indicators are planned for a later phase.
+phase, Supabase Realtime updates the active thread, header unread badge, and
+Messages inbox after database message/read-marker changes. Sender-visible read
+receipts are shown only for the sender's newest outgoing message. If the live
+connection is unavailable, refresh the thread or inbox to check for messages.
+Push/email notifications, attachments, typing indicators, and moderation tools
+are planned for later phases.
 
 ### Advertisement Storage
 

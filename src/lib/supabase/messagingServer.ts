@@ -1,15 +1,19 @@
 import { connection } from 'next/server';
 import {
   CONVERSATION_SELECT_COLUMNS,
+  CONVERSATION_READ_SELECT_COLUMNS,
   MESSAGE_SELECT_COLUMNS,
   MESSAGE_BODY_MAX_LENGTH,
+  databaseConversationReadRowToApp,
   databaseConversationRowToApp,
   databaseConversationSummaryRowToApp,
   databaseMessageRowToApp,
+  isDatabaseConversationReadRowArray,
   isDatabaseConversationRow,
   isDatabaseConversationSummaryRowArray,
   isDatabaseMessageRow,
   isDatabaseMessageRowArray,
+  type AppConversationRead,
   type AppConversation,
   type AppConversationSummary,
   type AppMessage,
@@ -60,6 +64,7 @@ export type ConversationThreadResult =
       ok: true;
       conversation: AppConversation;
       messages: AppMessage[];
+      readMarkers: AppConversationRead[];
     }
   | {
       ok: false;
@@ -349,10 +354,23 @@ export async function getCurrentUserConversationThread(
     };
   }
 
+  const { data: readMarkerData, error: readMarkerError } = await supabase
+    .from('conversation_reads')
+    .select(CONVERSATION_READ_SELECT_COLUMNS)
+    .eq('conversation_id', safeConversationId);
+
+  if (readMarkerError || !isDatabaseConversationReadRowArray(readMarkerData)) {
+    return {
+      ok: false,
+      reason: classifyMessagingError(readMarkerError?.message),
+    };
+  }
+
   return {
     ok: true,
     conversation: databaseConversationRowToApp(conversationData),
     messages: messageData.map(databaseMessageRowToApp),
+    readMarkers: readMarkerData.map(databaseConversationReadRowToApp),
   };
 }
 
@@ -390,12 +408,14 @@ export async function markConversationRead(
 
 export async function sendConversationMessage(
   conversationId: string,
-  body: string
+  body: string,
+  clientAttemptId: string
 ): Promise<SendMessageResult> {
   await connection();
 
   const safeConversationId = conversationId.trim();
   const safeBody = normalizeMessageBody(body);
+  const safeClientAttemptId = clientAttemptId.trim();
   const validationError = validateMessageBody(safeBody);
 
   if (!safeConversationId) {
@@ -407,16 +427,27 @@ export async function sendConversationMessage(
   }
 
   const supabase = await createClient();
-  const { data, error } = await supabase
-    .from('messages')
-    .insert({
-      conversation_id: safeConversationId,
-      body: safeBody,
-    })
-    .select(MESSAGE_SELECT_COLUMNS)
-    .single();
+  const { data, error } = await supabase.rpc('send_conversation_message', {
+    p_conversation_id: safeConversationId,
+    p_body: safeBody,
+    p_client_attempt_id: safeClientAttemptId || null,
+  });
 
-  if (error || !isDatabaseMessageRow(data)) {
+  if (
+    error ||
+    !Array.isArray(data) ||
+    data.length !== 1 ||
+    !isDatabaseMessageRow(data[0])
+  ) {
+    await logMessagingDiagnostic({
+      operation: 'send_conversation_message',
+      error: error || {
+        code: 'mapping_failed',
+        message: 'Send message RPC returned an unexpected row shape.',
+      },
+      userResolved: await hasResolvedUserForDiagnostic(supabase),
+    });
+
     return {
       ok: false,
       reason: classifyMessagingError(error?.message),
@@ -425,6 +456,6 @@ export async function sendConversationMessage(
 
   return {
     ok: true,
-    message: databaseMessageRowToApp(data),
+    message: databaseMessageRowToApp(data[0]),
   };
 }

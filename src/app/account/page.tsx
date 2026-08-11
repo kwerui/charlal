@@ -1,7 +1,6 @@
 import { redirect } from 'next/navigation';
 import { content } from '@/content/tyv';
 import { getCurrentUserResult } from '@/lib/auth/server';
-import { countCurrentUserUnreadConversations } from '@/lib/supabase/messagingServer';
 import { listOwnedDatabaseListingsForOwner } from '@/lib/supabase/listingsServer';
 import AccountDashboard from './AccountDashboard';
 
@@ -15,10 +14,6 @@ export default async function AccountPage() {
   const ownedListingsResult =
     authResult.status === 'authenticated'
       ? await listOwnedDatabaseListingsForOwner(authResult.user.id)
-      : null;
-  const unreadCountResult =
-    authResult.status === 'authenticated'
-      ? await countCurrentUserUnreadConversations()
       : null;
 
   return (
@@ -44,9 +39,6 @@ export default async function AccountPage() {
           initialListingsError={Boolean(
             ownedListingsResult && !ownedListingsResult.ok
           )}
-          initialUnreadConversationCount={
-            unreadCountResult?.ok ? unreadCountResult.count : 0
-          }
         />
       </section>
     </main>
