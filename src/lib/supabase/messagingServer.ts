@@ -2,7 +2,6 @@ import { connection } from 'next/server';
 import {
   CONVERSATION_SELECT_COLUMNS,
   CONVERSATION_READ_SELECT_COLUMNS,
-  MESSAGE_SELECT_COLUMNS,
   MESSAGE_BODY_MAX_LENGTH,
   databaseConversationReadRowToApp,
   databaseConversationRowToApp,
@@ -81,6 +80,8 @@ export type SendMessageResult =
       reason: MessagingFailureReason;
     };
 
+export type MessageMutationResult = SendMessageResult;
+
 export type MarkConversationReadResult =
   | {
       ok: true;
@@ -89,6 +90,8 @@ export type MarkConversationReadResult =
       ok: false;
       reason: MessagingFailureReason;
     };
+
+export type HideConversationResult = MarkConversationReadResult;
 
 function normalizeMessageBody(body: string): string {
   return body.trim();
@@ -156,6 +159,13 @@ function classifyMessagingError(message: string | undefined): MessagingFailureRe
 
   if (safeMessage.includes('message body is too long')) {
     return 'message-too-long';
+  }
+
+  if (
+    safeMessage.includes('message is unavailable') ||
+    safeMessage.includes('deleted messages cannot be changed')
+  ) {
+    return 'not-found';
   }
 
   if (safeMessage.includes('cannot message yourself')) {
@@ -341,11 +351,12 @@ export async function getCurrentUserConversationThread(
     return { ok: false, reason: 'database-unavailable' };
   }
 
-  const { data: messageData, error: messageError } = await supabase
-    .from('messages')
-    .select(MESSAGE_SELECT_COLUMNS)
-    .eq('conversation_id', safeConversationId)
-    .order('created_at', { ascending: true });
+  const { data: messageData, error: messageError } = await supabase.rpc(
+    'get_conversation_messages',
+    {
+      p_conversation_id: safeConversationId,
+    }
+  );
 
   if (messageError || !isDatabaseMessageRowArray(messageData)) {
     return {
@@ -458,4 +469,130 @@ export async function sendConversationMessage(
     ok: true,
     message: databaseMessageRowToApp(data[0]),
   };
+}
+
+export async function editConversationMessage(
+  messageId: string,
+  body: string
+): Promise<MessageMutationResult> {
+  await connection();
+
+  const safeMessageId = messageId.trim();
+  const safeBody = normalizeMessageBody(body);
+  const validationError = validateMessageBody(safeBody);
+
+  if (!safeMessageId) {
+    return { ok: false, reason: 'not-found' };
+  }
+
+  if (validationError) {
+    return { ok: false, reason: validationError };
+  }
+
+  const supabase = await createClient();
+  const { data, error } = await supabase.rpc('edit_conversation_message', {
+    p_message_id: safeMessageId,
+    p_body: safeBody,
+  });
+
+  if (
+    error ||
+    !Array.isArray(data) ||
+    data.length !== 1 ||
+    !isDatabaseMessageRow(data[0])
+  ) {
+    await logMessagingDiagnostic({
+      operation: 'edit_conversation_message',
+      error: error || {
+        code: 'mapping_failed',
+        message: 'Edit message RPC returned an unexpected row shape.',
+      },
+      userResolved: await hasResolvedUserForDiagnostic(supabase),
+    });
+
+    return {
+      ok: false,
+      reason: classifyMessagingError(error?.message),
+    };
+  }
+
+  return {
+    ok: true,
+    message: databaseMessageRowToApp(data[0]),
+  };
+}
+
+export async function deleteConversationMessage(
+  messageId: string
+): Promise<MessageMutationResult> {
+  await connection();
+
+  const safeMessageId = messageId.trim();
+
+  if (!safeMessageId) {
+    return { ok: false, reason: 'not-found' };
+  }
+
+  const supabase = await createClient();
+  const { data, error } = await supabase.rpc('delete_conversation_message', {
+    p_message_id: safeMessageId,
+  });
+
+  if (
+    error ||
+    !Array.isArray(data) ||
+    data.length !== 1 ||
+    !isDatabaseMessageRow(data[0])
+  ) {
+    await logMessagingDiagnostic({
+      operation: 'delete_conversation_message',
+      error: error || {
+        code: 'mapping_failed',
+        message: 'Delete message RPC returned an unexpected row shape.',
+      },
+      userResolved: await hasResolvedUserForDiagnostic(supabase),
+    });
+
+    return {
+      ok: false,
+      reason: classifyMessagingError(error?.message),
+    };
+  }
+
+  return {
+    ok: true,
+    message: databaseMessageRowToApp(data[0]),
+  };
+}
+
+export async function hideConversationForCurrentUser(
+  conversationId: string
+): Promise<HideConversationResult> {
+  await connection();
+
+  const safeConversationId = conversationId.trim();
+
+  if (!safeConversationId) {
+    return { ok: false, reason: 'not-found' };
+  }
+
+  const supabase = await createClient();
+  const { error } = await supabase.rpc('hide_conversation_for_current_user', {
+    p_conversation_id: safeConversationId,
+  });
+
+  if (error) {
+    await logMessagingDiagnostic({
+      operation: 'hide_conversation_for_current_user',
+      error,
+      userResolved: await hasResolvedUserForDiagnostic(supabase),
+    });
+
+    return {
+      ok: false,
+      reason: classifyMessagingError(error.message),
+    };
+  }
+
+  return { ok: true };
 }

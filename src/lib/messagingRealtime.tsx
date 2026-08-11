@@ -173,6 +173,15 @@ export function MessagingRealtimeProvider({
       .on(
         'postgres_changes',
         {
+          event: 'UPDATE',
+          schema: 'public',
+          table: 'messages',
+        },
+        requestSnapshotRefresh
+      )
+      .on(
+        'postgres_changes',
+        {
           event: 'INSERT',
           schema: 'public',
           table: 'conversation_reads',
@@ -185,6 +194,24 @@ export function MessagingRealtimeProvider({
           event: 'UPDATE',
           schema: 'public',
           table: 'conversation_reads',
+        },
+        requestSnapshotRefresh
+      )
+      .on(
+        'postgres_changes',
+        {
+          event: 'INSERT',
+          schema: 'public',
+          table: 'conversation_user_state',
+        },
+        requestSnapshotRefresh
+      )
+      .on(
+        'postgres_changes',
+        {
+          event: 'UPDATE',
+          schema: 'public',
+          table: 'conversation_user_state',
         },
         requestSnapshotRefresh
       )

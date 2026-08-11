@@ -114,6 +114,36 @@ export const content = {
   messageDeliveryUnconfirmedMessage: "Message delivery could not be confirmed. Check the conversation before retrying. / Медээниң чедирилгезин бадыткап шыдаваан. Катап шенээр мурнунда чугааны хынап алыңар.", // TODO: add reviewed Tuvan translation.
   newMessagesButton: "New messages / Чаа медээлер", // TODO: add reviewed Tuvan translation.
   jumpToNewestMessageButton: "Jump to newest message / Эң чаа медээже шилчиир", // TODO: add reviewed Tuvan translation.
+  todayLabel: "Today", // TODO: add reviewed Tuvan translation.
+  yesterdayLabel: "Yesterday", // TODO: add reviewed Tuvan translation.
+  monthNames: [
+    "January",
+    "February",
+    "March",
+    "April",
+    "May",
+    "June",
+    "July",
+    "August",
+    "September",
+    "October",
+    "November",
+    "December",
+  ], // TODO: add reviewed Tuvan translations.
+  editedMessageLabel: "Edited", // TODO: add reviewed Tuvan translation.
+  messageDeletedLabel: "Message deleted", // TODO: add reviewed Tuvan translation.
+  messageActionsLabel: "Message actions", // TODO: add reviewed Tuvan translation.
+  editMessageButton: "Edit message", // TODO: add reviewed Tuvan translation.
+  saveMessageButton: "Save message", // TODO: add reviewed Tuvan translation.
+  deleteMessageButton: "Delete message", // TODO: add reviewed Tuvan translation.
+  deleteMessageConfirmTitle: "Delete this message?", // TODO: add reviewed Tuvan translation.
+  deleteMessageConfirmMessage: "This removes the text for both people in this conversation.", // TODO: add reviewed Tuvan translation.
+  deleteConversationButton: "Delete conversation", // TODO: add reviewed Tuvan translation.
+  deleteConversationConfirmTitle: "Delete this conversation?", // TODO: add reviewed Tuvan translation.
+  deleteConversationConfirmMessage: "This hides the conversation only for you. A new message from the other person will bring it back.", // TODO: add reviewed Tuvan translation.
+  unableEditMessageMessage: "Unable to edit message", // TODO: add reviewed Tuvan translation.
+  unableDeleteMessageMessage: "Unable to delete message", // TODO: add reviewed Tuvan translation.
+  unableDeleteConversationMessage: "Unable to delete conversation", // TODO: add reviewed Tuvan translation.
   backToHomepage: "Back to homepage / Кол арынче",
   backToAccount: "Back to account / Аккаунтче эглип келир", // TODO: add reviewed Tuvan translation.
   backToSellerProfile: "Back to seller profile", // TODO: add reviewed Tuvan translation.

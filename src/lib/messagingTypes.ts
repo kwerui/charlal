@@ -2,10 +2,13 @@ export const CONVERSATION_SELECT_COLUMNS =
   'id, listing_id, listing_title_snapshot, buyer_id, seller_id, buyer_display_name, seller_display_name, created_at, updated_at, last_message_at';
 
 export const MESSAGE_SELECT_COLUMNS =
-  'id, conversation_id, sender_id, body, created_at, client_attempt_id';
+  'id, conversation_id, sender_id, body, created_at, client_attempt_id, edited_at, deleted_at';
 
 export const CONVERSATION_READ_SELECT_COLUMNS =
   'conversation_id, user_id, last_read_at';
+
+export const CONVERSATION_USER_STATE_SELECT_COLUMNS =
+  'conversation_id, user_id, hidden_at';
 
 export const MESSAGE_BODY_MAX_LENGTH = 2000;
 
@@ -30,6 +33,7 @@ export type DatabaseConversationSummaryRow = {
   last_message_preview: string;
   last_message_at: string;
   unread_count: number;
+  last_message_deleted: boolean;
 };
 
 export type DatabaseMessageRow = {
@@ -39,12 +43,20 @@ export type DatabaseMessageRow = {
   body: string;
   created_at: string;
   client_attempt_id: string | null;
+  edited_at: string | null;
+  deleted_at: string | null;
 };
 
 export type DatabaseConversationReadRow = {
   conversation_id: string;
   user_id: string;
   last_read_at: string;
+};
+
+export type DatabaseConversationUserStateRow = {
+  conversation_id: string;
+  user_id: string;
+  hidden_at: string | null;
 };
 
 export type AppConversation = {
@@ -68,6 +80,7 @@ export type AppConversationSummary = {
   lastMessagePreview: string;
   lastMessageAt: string;
   unreadCount: number;
+  lastMessageDeleted: boolean;
 };
 
 export type AppMessage = {
@@ -77,12 +90,20 @@ export type AppMessage = {
   body: string;
   createdAt: string;
   clientAttemptId: string | null;
+  editedAt: string | null;
+  deletedAt: string | null;
 };
 
 export type AppConversationRead = {
   conversationId: string;
   userId: string;
   lastReadAt: string;
+};
+
+export type AppConversationUserState = {
+  conversationId: string;
+  userId: string;
+  hiddenAt: string | null;
 };
 
 function isRecord(value: unknown): value is Record<string, unknown> {
@@ -124,7 +145,8 @@ export function isDatabaseConversationSummaryRow(
     typeof value.other_participant_display_name === 'string' &&
     typeof value.last_message_preview === 'string' &&
     typeof value.last_message_at === 'string' &&
-    typeof value.unread_count === 'number'
+    typeof value.unread_count === 'number' &&
+    typeof value.last_message_deleted === 'boolean'
   );
 }
 
@@ -146,7 +168,9 @@ export function isDatabaseMessageRow(value: unknown): value is DatabaseMessageRo
     typeof value.body === 'string' &&
     typeof value.created_at === 'string' &&
     (typeof value.client_attempt_id === 'string' ||
-      value.client_attempt_id === null)
+      value.client_attempt_id === null) &&
+    (typeof value.edited_at === 'string' || value.edited_at === null) &&
+    (typeof value.deleted_at === 'string' || value.deleted_at === null)
   );
 }
 
@@ -164,6 +188,20 @@ export function isDatabaseConversationReadRow(
   );
 }
 
+export function isDatabaseConversationUserStateRow(
+  value: unknown
+): value is DatabaseConversationUserStateRow {
+  if (!isRecord(value)) {
+    return false;
+  }
+
+  return (
+    typeof value.conversation_id === 'string' &&
+    typeof value.user_id === 'string' &&
+    (typeof value.hidden_at === 'string' || value.hidden_at === null)
+  );
+}
+
 export function isDatabaseMessageRowArray(
   value: unknown
 ): value is DatabaseMessageRow[] {
@@ -174,6 +212,12 @@ export function isDatabaseConversationReadRowArray(
   value: unknown
 ): value is DatabaseConversationReadRow[] {
   return Array.isArray(value) && value.every(isDatabaseConversationReadRow);
+}
+
+export function isDatabaseConversationUserStateRowArray(
+  value: unknown
+): value is DatabaseConversationUserStateRow[] {
+  return Array.isArray(value) && value.every(isDatabaseConversationUserStateRow);
 }
 
 export function databaseConversationRowToApp(
@@ -204,6 +248,7 @@ export function databaseConversationSummaryRowToApp(
     lastMessagePreview: row.last_message_preview,
     lastMessageAt: row.last_message_at,
     unreadCount: row.unread_count,
+    lastMessageDeleted: row.last_message_deleted,
   };
 }
 
@@ -215,6 +260,8 @@ export function databaseMessageRowToApp(row: DatabaseMessageRow): AppMessage {
     body: row.body,
     createdAt: row.created_at,
     clientAttemptId: row.client_attempt_id,
+    editedAt: row.edited_at,
+    deletedAt: row.deleted_at,
   };
 }
 
@@ -225,5 +272,15 @@ export function databaseConversationReadRowToApp(
     conversationId: row.conversation_id,
     userId: row.user_id,
     lastReadAt: row.last_read_at,
+  };
+}
+
+export function databaseConversationUserStateRowToApp(
+  row: DatabaseConversationUserStateRow
+): AppConversationUserState {
+  return {
+    conversationId: row.conversation_id,
+    userId: row.user_id,
+    hiddenAt: row.hidden_at,
   };
 }

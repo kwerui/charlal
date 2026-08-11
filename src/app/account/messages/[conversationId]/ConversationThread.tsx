@@ -5,10 +5,14 @@ import type {
   RealtimePostgresUpdatePayload,
 } from '@supabase/realtime-js';
 import Link from 'next/link';
-import type { FormEvent } from 'react';
+import { useRouter } from 'next/navigation';
+import type { CSSProperties, FormEvent } from 'react';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
+  deleteMessageAction,
+  editMessageAction,
   getConversationThreadSnapshotAction,
+  hideConversationAction,
   markConversationReadAction,
   sendMessageAction,
 } from '@/app/account/messages/actions';
@@ -58,13 +62,80 @@ type PendingDelivery = {
   clientAttemptId: string;
 };
 
-const SEND_CONFIRMATION_TIMEOUT_MS = 12000;
+type MessageMenuOverlay = {
+  messageId: string;
+  top: number;
+  left: number;
+};
 
-function formatMessageDate(value: string): string {
+type ConfirmationDialogState =
+  | {
+      kind: 'message';
+      messageId: string;
+    }
+  | {
+      kind: 'conversation';
+    };
+
+const SEND_CONFIRMATION_TIMEOUT_MS = 12000;
+const MESSAGE_MENU_WIDTH = 152;
+const MESSAGE_MENU_HEIGHT = 78;
+const VIEWPORT_OVERLAY_GUTTER = 12;
+
+function formatMessageTime(value: string, useLocalTime: boolean): string {
   return new Intl.DateTimeFormat('en', {
-    dateStyle: 'medium',
-    timeStyle: 'short',
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: false,
+    timeZone: useLocalTime ? undefined : 'UTC',
   }).format(new Date(value));
+}
+
+function getDateParts(value: string, useLocalTime: boolean) {
+  const date = new Date(value);
+
+  return {
+    year: useLocalTime ? date.getFullYear() : date.getUTCFullYear(),
+    month: useLocalTime ? date.getMonth() : date.getUTCMonth(),
+    day: useLocalTime ? date.getDate() : date.getUTCDate(),
+  };
+}
+
+function getDateKey(value: string, useLocalTime: boolean): string {
+  const parts = getDateParts(value, useLocalTime);
+  const month = String(parts.month + 1).padStart(2, '0');
+  const day = String(parts.day).padStart(2, '0');
+
+  return `${parts.year}-${month}-${day}`;
+}
+
+function getRelativeDateKey(offsetDays: number, useLocalTime: boolean): string {
+  const date = new Date();
+
+  if (useLocalTime) {
+    date.setDate(date.getDate() - offsetDays);
+  } else {
+    date.setUTCDate(date.getUTCDate() - offsetDays);
+  }
+
+  return getDateKey(date.toISOString(), useLocalTime);
+}
+
+function formatMessageDateDivider(value: string, useLocalTime: boolean): string {
+  const dateKey = getDateKey(value, useLocalTime);
+
+  if (dateKey === getRelativeDateKey(0, useLocalTime)) {
+    return content.todayLabel;
+  }
+
+  if (dateKey === getRelativeDateKey(1, useLocalTime)) {
+    return content.yesterdayLabel;
+  }
+
+  const parts = getDateParts(value, useLocalTime);
+  const monthName = content.monthNames[parts.month] || '';
+
+  return `${parts.day} ${monthName} ${parts.year}`.trim();
 }
 
 function getSendErrorMessage(reason: string): string {
@@ -96,6 +167,19 @@ function mergeMessage(
 ): AppMessage[] {
   if (currentMessages.some((message) => message.id === nextMessage.id)) {
     return currentMessages;
+  }
+
+  return [...currentMessages, nextMessage].sort(compareMessagesByCreatedAt);
+}
+
+function upsertMessage(
+  currentMessages: AppMessage[],
+  nextMessage: AppMessage
+): AppMessage[] {
+  if (currentMessages.some((message) => message.id === nextMessage.id)) {
+    return currentMessages
+      .map((message) => (message.id === nextMessage.id ? nextMessage : message))
+      .sort(compareMessagesByCreatedAt);
   }
 
   return [...currentMessages, nextMessage].sort(compareMessagesByCreatedAt);
@@ -142,6 +226,33 @@ function scrollHistoryToBottom(historyElement: HTMLDivElement | null): void {
   }
 
   historyElement.scrollTop = historyElement.scrollHeight;
+}
+
+function getMenuOverlayPosition(triggerElement: HTMLElement): {
+  top: number;
+  left: number;
+} {
+  const rect = triggerElement.getBoundingClientRect();
+  const bubbleRect =
+    triggerElement.closest('.message-bubble')?.getBoundingClientRect() || rect;
+  const viewportWidth = window.innerWidth;
+  const viewportHeight = window.innerHeight;
+  const maxLeft = viewportWidth - MESSAGE_MENU_WIDTH - VIEWPORT_OVERLAY_GUTTER;
+  const belowTop = bubbleRect.bottom + 6;
+  const aboveTop = bubbleRect.top - MESSAGE_MENU_HEIGHT - 6;
+  const hasRoomBelow =
+    belowTop + MESSAGE_MENU_HEIGHT <= viewportHeight - VIEWPORT_OVERLAY_GUTTER;
+
+  return {
+    top: Math.max(
+      VIEWPORT_OVERLAY_GUTTER,
+      hasRoomBelow ? belowTop : Math.max(VIEWPORT_OVERLAY_GUTTER, aboveTop)
+    ),
+    left: Math.min(
+      Math.max(VIEWPORT_OVERLAY_GUTTER, bubbleRect.right - MESSAGE_MENU_WIDTH),
+      Math.max(VIEWPORT_OVERLAY_GUTTER, maxLeft)
+    ),
+  };
 }
 
 function getConnectionStatusMessage(status: VisibleConnectionStatus): string {
@@ -222,6 +333,7 @@ export default function ConversationThread({
   initialReadMarkers,
   currentUserId,
 }: Props) {
+  const router = useRouter();
   const supabase = useMemo(() => createClient(), []);
   const { refreshMessagingState } = useMessagingRealtime();
   const [messages, setMessages] = useState(() =>
@@ -233,9 +345,24 @@ export default function ConversationThread({
   const [readStatusError, setReadStatusError] = useState('');
   const [sendStatus, setSendStatus] = useState<SendStatus>('idle');
   const [isBrowserOnline, setIsBrowserOnline] = useState(true);
+  const [useLocalTime, setUseLocalTime] = useState(false);
   const [threadStatus, setThreadStatus] =
     useState<ThreadRealtimeStatus>('idle');
   const [showNewMessagesButton, setShowNewMessagesButton] = useState(false);
+  const [messageMenuOverlay, setMessageMenuOverlay] =
+    useState<MessageMenuOverlay | null>(null);
+  const [editingMessageId, setEditingMessageId] = useState<string | null>(null);
+  const [editBody, setEditBody] = useState('');
+  const [editingSubmittingMessageId, setEditingSubmittingMessageId] =
+    useState<string | null>(null);
+  const [confirmationDialog, setConfirmationDialog] =
+    useState<ConfirmationDialogState | null>(null);
+  const [deletingMessageId, setDeletingMessageId] = useState<string | null>(
+    null
+  );
+  const [messageActionError, setMessageActionError] = useState('');
+  const [isDeletingConversation, setIsDeletingConversation] = useState(false);
+  const [deleteConversationError, setDeleteConversationError] = useState('');
   const markReadRequestedRef = useRef(false);
   const hasSubscribedRef = useRef(false);
   const shouldScrollToBottomRef = useRef(true);
@@ -243,6 +370,11 @@ export default function ConversationThread({
   const messageHistoryRef = useRef<HTMLDivElement | null>(null);
   const messageFormRef = useRef<HTMLFormElement | null>(null);
   const textareaRef = useRef<HTMLTextAreaElement | null>(null);
+  const confirmationDialogRef = useRef<HTMLDivElement | null>(null);
+  const conversationDeleteButtonRef = useRef<HTMLButtonElement | null>(null);
+  const messageActionTriggerRefs = useRef<Map<string, HTMLButtonElement>>(
+    new Map()
+  );
   const mountedRef = useRef(false);
   const sendAttemptRef = useRef(0);
   const sendStatusRef = useRef<SendStatus>('idle');
@@ -263,7 +395,10 @@ export default function ConversationThread({
       : conversation.buyerId;
   const latestOwnMessage = useMemo(() => {
     return [...messages]
-      .filter((message) => message.senderId === currentUserId)
+      .filter(
+        (message) =>
+          message.senderId === currentUserId && message.deletedAt === null
+      )
       .sort(compareMessagesByCreatedAt)
       .at(-1);
   }, [currentUserId, messages]);
@@ -279,16 +414,99 @@ export default function ConversationThread({
         ? 'reconnecting'
         : null;
 
+  const closeConfirmationDialog = useCallback((): void => {
+    const previousDialog = confirmationDialog;
+
+    setConfirmationDialog(null);
+    setMessageActionError('');
+    setDeleteConversationError('');
+
+    window.requestAnimationFrame(() => {
+      if (previousDialog?.kind === 'message') {
+        messageActionTriggerRefs.current.get(previousDialog.messageId)?.focus();
+        return;
+      }
+
+      if (previousDialog?.kind === 'conversation') {
+        conversationDeleteButtonRef.current?.focus();
+      }
+    });
+  }, [confirmationDialog]);
+
   useEffect(() => {
     initialThreadRevealRef.current = false;
     mountedRef.current = true;
+    const localTimeFrame = window.requestAnimationFrame(() => {
+      setUseLocalTime(true);
+    });
 
     return () => {
+      window.cancelAnimationFrame(localTimeFrame);
       mountedRef.current = false;
       sendAttemptRef.current += 1;
       pendingDeliveryRef.current = null;
     };
   }, [conversation.id]);
+
+  useEffect(() => {
+    const messageHistoryElement = messageHistoryRef.current;
+
+    function handlePointerDown(event: PointerEvent): void {
+      if (
+        event.target instanceof Element &&
+        event.target.closest(
+          '.message-actions-menu, .message-actions-trigger, .message-actions-menu-list--floating, .message-confirmation-dialog'
+        )
+      ) {
+        return;
+      }
+
+      setMessageMenuOverlay(null);
+    }
+
+    function handleMessageMenuScroll(): void {
+      setMessageMenuOverlay(null);
+    }
+
+    function handleKeyDown(event: KeyboardEvent): void {
+      if (event.key !== 'Escape') {
+        return;
+      }
+
+      if (confirmationDialog) {
+        closeConfirmationDialog();
+        return;
+      }
+
+      setMessageMenuOverlay(null);
+    }
+
+    document.addEventListener('pointerdown', handlePointerDown);
+    document.addEventListener('keydown', handleKeyDown);
+    messageHistoryElement?.addEventListener('scroll', handleMessageMenuScroll);
+    window.addEventListener('scroll', handleMessageMenuScroll, true);
+
+    return () => {
+      document.removeEventListener('pointerdown', handlePointerDown);
+      document.removeEventListener('keydown', handleKeyDown);
+      messageHistoryElement?.removeEventListener('scroll', handleMessageMenuScroll);
+      window.removeEventListener('scroll', handleMessageMenuScroll, true);
+    };
+  }, [closeConfirmationDialog, confirmationDialog]);
+
+  useEffect(() => {
+    if (!confirmationDialog) {
+      return;
+    }
+
+    const focusFrame = window.requestAnimationFrame(() => {
+      confirmationDialogRef.current?.focus();
+    });
+
+    return () => {
+      window.cancelAnimationFrame(focusFrame);
+    };
+  }, [confirmationDialog]);
 
   useEffect(() => {
     threadStatusRef.current = threadStatus;
@@ -463,6 +681,27 @@ export default function ConversationThread({
       }
     }
 
+    function handleMessageUpdate(
+      payload: RealtimePostgresUpdatePayload<DatabaseMessageRow>
+    ) {
+      if (
+        !active ||
+        activeThreadChannelGenerationRef.current !== channelGeneration ||
+        !isDatabaseMessageRow(payload.new)
+      ) {
+        return;
+      }
+
+      const nextMessage = databaseMessageRowToApp(payload.new);
+
+      threadStatusVersionRef.current += 1;
+      setThreadStatus('subscribed');
+      setMessages((currentMessages) =>
+        upsertMessage(currentMessages, nextMessage)
+      );
+      void refreshMessagingState();
+    }
+
     function handleReadMarkerChange(
       payload:
         | RealtimePostgresInsertPayload<DatabaseConversationReadRow>
@@ -497,6 +736,16 @@ export default function ConversationThread({
           filter: `conversation_id=eq.${conversation.id}`,
         },
         handleIncomingMessage
+      )
+      .on<DatabaseMessageRow>(
+        'postgres_changes',
+        {
+          event: 'UPDATE',
+          schema: 'public',
+          table: 'messages',
+          filter: `conversation_id=eq.${conversation.id}`,
+        },
+        handleMessageUpdate
       )
       .on<DatabaseConversationReadRow>(
         'postgres_changes',
@@ -577,6 +826,7 @@ export default function ConversationThread({
     conversation.id,
     currentUserId,
     markThreadRead,
+    refreshMessagingState,
     supabase,
     threadReconnectGeneration,
     updateSendStatus,
@@ -711,6 +961,162 @@ export default function ConversationThread({
     }
   }
 
+  function startEditingMessage(message: AppMessage): void {
+    setEditingMessageId(message.id);
+    setEditBody(message.body);
+    setMessageMenuOverlay(null);
+    setConfirmationDialog(null);
+    setMessageActionError('');
+  }
+
+  function openMessageActions(
+    messageId: string,
+    triggerElement: HTMLButtonElement
+  ): void {
+    setConfirmationDialog(null);
+    setMessageActionError('');
+    setMessageMenuOverlay((currentOverlay) => {
+      if (currentOverlay?.messageId === messageId) {
+        return null;
+      }
+
+      return {
+        messageId,
+        ...getMenuOverlayPosition(triggerElement),
+      };
+    });
+  }
+
+  function openMessageDeleteConfirmation(messageId: string): void {
+    setMessageMenuOverlay(null);
+    setEditingMessageId(null);
+    setEditBody('');
+    setMessageActionError('');
+    setConfirmationDialog({
+      kind: 'message',
+      messageId,
+    });
+  }
+
+  function openConversationDeleteConfirmation(): void {
+    setMessageMenuOverlay(null);
+    setDeleteConversationError('');
+    setConfirmationDialog({
+      kind: 'conversation',
+    });
+  }
+
+  async function handleEditMessage(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+
+    if (!editingMessageId || editingSubmittingMessageId) {
+      return;
+    }
+
+    const safeBody = editBody.trim();
+
+    if (!safeBody) {
+      setMessageActionError(content.messageEmptyMessage);
+      return;
+    }
+
+    if (safeBody.length > MESSAGE_BODY_MAX_LENGTH) {
+      setMessageActionError(content.messageTooLongMessage);
+      return;
+    }
+
+    setEditingSubmittingMessageId(editingMessageId);
+    setMessageActionError('');
+
+    const result = await editMessageAction({
+      conversationId: conversation.id,
+      messageId: editingMessageId,
+      body: safeBody,
+    });
+
+    if (!mountedRef.current) {
+      return;
+    }
+
+    setEditingSubmittingMessageId(null);
+
+    if (!result.ok) {
+      setMessageActionError(
+        result.reason === 'empty-message'
+          ? content.messageEmptyMessage
+          : result.reason === 'message-too-long'
+            ? content.messageTooLongMessage
+            : content.unableEditMessageMessage
+      );
+      return;
+    }
+
+    setMessages((currentMessages) =>
+      upsertMessage(currentMessages, result.message)
+    );
+    setEditingMessageId(null);
+    setEditBody('');
+    setMessageActionError('');
+    void refreshMessagingState();
+  }
+
+  async function handleDeleteMessage(messageId: string): Promise<void> {
+    if (deletingMessageId) {
+      return;
+    }
+
+    setDeletingMessageId(messageId);
+    setMessageActionError('');
+
+    const result = await deleteMessageAction({
+      conversationId: conversation.id,
+      messageId,
+    });
+
+    if (!mountedRef.current) {
+      return;
+    }
+
+    setDeletingMessageId(null);
+
+    if (!result.ok) {
+      setMessageActionError(content.unableDeleteMessageMessage);
+      return;
+    }
+
+    setMessages((currentMessages) =>
+      upsertMessage(currentMessages, result.message)
+    );
+    closeConfirmationDialog();
+    setMessageActionError('');
+    void refreshMessagingState();
+  }
+
+  async function handleDeleteConversation(): Promise<void> {
+    if (isDeletingConversation) {
+      return;
+    }
+
+    setIsDeletingConversation(true);
+    setDeleteConversationError('');
+
+    const result = await hideConversationAction(conversation.id);
+
+    if (!mountedRef.current) {
+      return;
+    }
+
+    setIsDeletingConversation(false);
+
+    if (!result.ok) {
+      setDeleteConversationError(content.unableDeleteConversationMessage);
+      return;
+    }
+
+    void refreshMessagingState();
+    router.push('/account/messages');
+  }
+
   return (
     <div className="conversation-thread">
       <div className="conversation-thread-heading">
@@ -719,15 +1125,28 @@ export default function ConversationThread({
           <h1>{conversation.listingTitle}</h1>
           <p>{otherParticipantName}</p>
         </div>
-        {conversation.listingId ? (
-          <Link href={`/listing/${conversation.listingId}`} className="secondary-button">
-            {content.openListingLabel}
-          </Link>
-        ) : (
-          <p className="conversation-listing-unavailable">
-            {content.advertisementNoLongerAvailableMessage}
-          </p>
-        )}
+        <div className="conversation-heading-actions">
+          {conversation.listingId ? (
+            <Link href={`/listing/${conversation.listingId}`} className="secondary-button">
+              {content.openListingLabel}
+            </Link>
+          ) : (
+            <p className="conversation-listing-unavailable">
+              {content.advertisementNoLongerAvailableMessage}
+            </p>
+          )}
+          <div className="conversation-delete-control">
+            <button
+              ref={conversationDeleteButtonRef}
+              type="button"
+              className="secondary-button conversation-delete-button"
+              onClick={openConversationDeleteConfirmation}
+              aria-expanded={confirmationDialog?.kind === 'conversation'}
+            >
+              {content.deleteConversationButton}
+            </button>
+          </div>
+        </div>
       </div>
 
       {visibleConnectionStatus ? (
@@ -746,41 +1165,142 @@ export default function ConversationThread({
         aria-live="polite"
         tabIndex={0}
       >
-        {messages.map((message) => {
+        {messages.map((message, index) => {
           const isOwnMessage = message.senderId === currentUserId;
           const isLatestOwnMessage = latestOwnMessage?.id === message.id;
+          const isDeleted = message.deletedAt !== null;
+          const isEditing = editingMessageId === message.id;
+          const messageDateKey = getDateKey(message.createdAt, useLocalTime);
+          const previousMessage = index > 0 ? messages[index - 1] : null;
+          const previousDateKey = previousMessage
+            ? getDateKey(previousMessage.createdAt, useLocalTime)
+            : null;
           const readByOtherParticipant =
             Boolean(otherReadMarker) &&
             Date.parse(otherReadMarker?.lastReadAt || '') >=
               Date.parse(message.createdAt);
 
           return (
-            <article
-              key={message.id}
-              className={
-                isOwnMessage
-                  ? 'message-bubble message-bubble--own'
-                  : 'message-bubble message-bubble--other'
-              }
-            >
-              <p>{message.body}</p>
-              <time dateTime={message.createdAt}>
-                {formatMessageDate(message.createdAt)}
-              </time>
-              {isOwnMessage && isLatestOwnMessage ? (
-                <span
-                  className={
-                    readByOtherParticipant
-                      ? 'message-read-receipt message-read-receipt--read'
-                      : 'message-read-receipt'
-                  }
-                >
-                  {readByOtherParticipant
-                    ? content.readMessageReceiptLabel
-                    : content.sentMessageReceiptLabel}
-                </span>
+            <div key={message.id} className="message-list-item">
+              {messageDateKey !== previousDateKey ? (
+                <div className="message-date-divider" role="separator">
+                  {formatMessageDateDivider(message.createdAt, useLocalTime)}
+                </div>
               ) : null}
-            </article>
+              <article
+                className={
+                  isOwnMessage
+                    ? isDeleted
+                      ? 'message-bubble message-bubble--own message-bubble--deleted'
+                      : 'message-bubble message-bubble--own'
+                    : isDeleted
+                      ? 'message-bubble message-bubble--other message-bubble--deleted'
+                      : 'message-bubble message-bubble--other'
+                }
+              >
+                {isEditing && !isDeleted ? (
+                  <form className="message-edit-form" onSubmit={handleEditMessage}>
+                    <label className="sr-only" htmlFor={`edit-message-${message.id}`}>
+                      {content.editMessageButton}
+                    </label>
+                    <textarea
+                      id={`edit-message-${message.id}`}
+                      value={editBody}
+                      maxLength={MESSAGE_BODY_MAX_LENGTH}
+                      rows={3}
+                      onChange={(event) => {
+                        setEditBody(event.target.value);
+                        setMessageActionError('');
+                      }}
+                      required
+                    />
+                    {messageActionError ? (
+                      <p className="form-error" role="alert">
+                        {messageActionError}
+                      </p>
+                    ) : null}
+                    <div className="message-inline-actions">
+                      <button
+                        type="button"
+                        className="secondary-button"
+                        onClick={() => {
+                          setEditingMessageId(null);
+                          setEditBody('');
+                          setMessageActionError('');
+                        }}
+                        disabled={editingSubmittingMessageId === message.id}
+                      >
+                        {content.cancelButton}
+                      </button>
+                      <button
+                        type="submit"
+                        className="search-button"
+                        disabled={editingSubmittingMessageId === message.id}
+                        aria-busy={editingSubmittingMessageId === message.id}
+                      >
+                        {content.saveMessageButton}
+                      </button>
+                    </div>
+                  </form>
+                ) : (
+                  <>
+                    <p>{isDeleted ? content.messageDeletedLabel : message.body}</p>
+                    <div className="message-meta">
+                      <time dateTime={message.createdAt}>
+                        {formatMessageTime(message.createdAt, useLocalTime)}
+                      </time>
+                      {message.editedAt && !isDeleted ? (
+                        <span className="message-edited-label">
+                          {content.editedMessageLabel}
+                        </span>
+                      ) : null}
+                      {isOwnMessage && isLatestOwnMessage ? (
+                        <span
+                          className={
+                            readByOtherParticipant
+                              ? 'message-read-receipt message-read-receipt--read'
+                              : 'message-read-receipt'
+                          }
+                        >
+                          {readByOtherParticipant
+                            ? content.readMessageReceiptLabel
+                            : content.sentMessageReceiptLabel}
+                        </span>
+                      ) : null}
+                    </div>
+                    {isOwnMessage && !isDeleted ? (
+                      <div className="message-actions-menu">
+                        <button
+                          ref={(element) => {
+                            if (element) {
+                              messageActionTriggerRefs.current.set(
+                                message.id,
+                                element
+                              );
+                              return;
+                            }
+
+                            messageActionTriggerRefs.current.delete(message.id);
+                          }}
+                          type="button"
+                          className="message-actions-trigger"
+                          aria-label={content.messageActionsLabel}
+                          title={content.messageActionsLabel}
+                          aria-expanded={
+                            messageMenuOverlay?.messageId === message.id
+                          }
+                          onClick={(event) =>
+                            openMessageActions(message.id, event.currentTarget)
+                          }
+                        >
+                          •••
+                        </button>
+                      </div>
+                    ) : null}
+                  </>
+                )}
+              </article>
+            </div>
             );
         })}
       </div>
@@ -862,6 +1382,126 @@ export default function ConversationThread({
           </button>
         </div>
       </form>
+
+      {messageMenuOverlay ? (
+        <div
+          className="message-actions-menu-list message-actions-menu-list--floating"
+          style={
+            {
+              '--message-menu-top': `${messageMenuOverlay.top}px`,
+              '--message-menu-left': `${messageMenuOverlay.left}px`,
+            } as CSSProperties
+          }
+        >
+          <button
+            type="button"
+            onClick={() => {
+              const selectedMessage = messages.find(
+                (message) => message.id === messageMenuOverlay.messageId
+              );
+
+              if (selectedMessage) {
+                startEditingMessage(selectedMessage);
+              }
+            }}
+          >
+            {content.editMessageButton}
+          </button>
+          <button
+            type="button"
+            className="message-action-destructive"
+            onClick={() =>
+              openMessageDeleteConfirmation(messageMenuOverlay.messageId)
+            }
+          >
+            {content.deleteMessageButton}
+          </button>
+        </div>
+      ) : null}
+
+      {confirmationDialog ? (
+        <div
+          className="message-confirmation-backdrop"
+          role="presentation"
+          onMouseDown={(event) => {
+            if (event.target === event.currentTarget) {
+              closeConfirmationDialog();
+            }
+          }}
+        >
+          <div
+            ref={confirmationDialogRef}
+            className="message-confirmation-dialog"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="message-confirmation-title"
+            aria-describedby="message-confirmation-description"
+            tabIndex={-1}
+          >
+            <h2 id="message-confirmation-title">
+              {confirmationDialog.kind === 'message'
+                ? content.deleteMessageConfirmTitle
+                : content.deleteConversationConfirmTitle}
+            </h2>
+            <p id="message-confirmation-description">
+              {confirmationDialog.kind === 'message'
+                ? content.deleteMessageConfirmMessage
+                : content.deleteConversationConfirmMessage}
+            </p>
+            {confirmationDialog.kind === 'message' && messageActionError ? (
+              <p className="form-error" role="alert">
+                {messageActionError}
+              </p>
+            ) : null}
+            {confirmationDialog.kind === 'conversation' &&
+            deleteConversationError ? (
+              <p className="form-error" role="alert">
+                {deleteConversationError}
+              </p>
+            ) : null}
+            <div className="message-confirmation-actions">
+              <button
+                type="button"
+                className="message-confirmation-button message-confirmation-button--secondary"
+                onClick={closeConfirmationDialog}
+                disabled={
+                  confirmationDialog.kind === 'message'
+                    ? deletingMessageId === confirmationDialog.messageId
+                    : isDeletingConversation
+                }
+              >
+                {content.cancelButton}
+              </button>
+              <button
+                type="button"
+                className="message-confirmation-button message-confirmation-button--destructive"
+                onClick={() => {
+                  if (confirmationDialog.kind === 'message') {
+                    void handleDeleteMessage(confirmationDialog.messageId);
+                    return;
+                  }
+
+                  void handleDeleteConversation();
+                }}
+                disabled={
+                  confirmationDialog.kind === 'message'
+                    ? deletingMessageId === confirmationDialog.messageId
+                    : isDeletingConversation
+                }
+                aria-busy={
+                  confirmationDialog.kind === 'message'
+                    ? deletingMessageId === confirmationDialog.messageId
+                    : isDeletingConversation
+                }
+              >
+                {confirmationDialog.kind === 'message'
+                  ? content.deleteMessageButton
+                  : content.deleteConversationButton}
+              </button>
+            </div>
+          </div>
+        </div>
+      ) : null}
     </div>
   );
 }

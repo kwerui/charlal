@@ -61,7 +61,7 @@ export default function SiteHeader({
       pathname.startsWith('/account/') ||
       pathname.startsWith('/contact/')
     ) {
-      router.replace(`/sign-in?next=${encodeURIComponent(pathname)}`);
+      router.replace('/sign-in');
     }
   }
 

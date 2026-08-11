@@ -1,17 +1,29 @@
 "use client";
 
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
 import type { FormEvent } from 'react';
 import { useState } from 'react';
 import { content } from '@/content/tyv';
-import { signInWithEmailPassword, useAuthStatus } from '@/lib/auth/client';
+import { signInWithEmailPassword } from '@/lib/auth/client';
 
 type Props = {
   nextPath: string;
   initialMessage?: string;
   initialMessageTone?: 'success' | 'error';
 };
+
+function getAuthenticatedRedirectPath(nextPath: string): string {
+  if (
+    nextPath === '/sign-in' ||
+    nextPath.startsWith('/sign-in?') ||
+    nextPath === '/sign-up' ||
+    nextPath.startsWith('/sign-up?')
+  ) {
+    return '/account';
+  }
+
+  return nextPath;
+}
 
 function getSignInErrorMessage(reason: string): string {
   if (reason === 'invalid-credentials') {
@@ -38,8 +50,6 @@ export default function SignInForm({
   initialMessage = '',
   initialMessageTone = 'success',
 }: Props) {
-  const router = useRouter();
-  const { refreshAuth } = useAuthStatus();
   const [formMessage, setFormMessage] = useState(initialMessage);
   const [messageTone, setMessageTone] = useState<'success' | 'error'>(
     initialMessageTone
@@ -75,9 +85,7 @@ export default function SignInForm({
       return;
     }
 
-    await refreshAuth();
-    router.refresh();
-    router.replace(nextPath);
+    window.location.replace(getAuthenticatedRedirectPath(nextPath));
   }
 
   return (

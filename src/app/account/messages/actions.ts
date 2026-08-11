@@ -8,7 +8,10 @@ import type {
 } from '@/lib/messagingTypes';
 import { getCurrentUserResult } from '@/lib/auth/server';
 import {
+  deleteConversationMessage,
+  editConversationMessage,
   getCurrentUserConversationThread,
+  hideConversationForCurrentUser,
   listCurrentUserConversationSummaries,
   markConversationRead,
   sendConversationMessage,
@@ -35,6 +38,8 @@ export type SendMessageActionResult =
       ok: false;
       reason: MessagingFailureReason;
     };
+
+export type MessageMutationActionResult = SendMessageActionResult;
 
 export type MarkConversationReadActionResult =
   | {
@@ -116,6 +121,51 @@ export async function sendMessageAction(input: {
   return result;
 }
 
+export async function editMessageAction(input: {
+  conversationId: string;
+  messageId: string;
+  body: string;
+}): Promise<MessageMutationActionResult> {
+  const authResult = await getCurrentUserResult();
+
+  if (authResult.status !== 'authenticated') {
+    return { ok: false, reason: 'unauthenticated' };
+  }
+
+  const result = await editConversationMessage(input.messageId, input.body);
+
+  if (!result.ok) {
+    return result;
+  }
+
+  revalidatePath('/account/messages');
+  revalidatePath(`/account/messages/${input.conversationId}`);
+
+  return result;
+}
+
+export async function deleteMessageAction(input: {
+  conversationId: string;
+  messageId: string;
+}): Promise<MessageMutationActionResult> {
+  const authResult = await getCurrentUserResult();
+
+  if (authResult.status !== 'authenticated') {
+    return { ok: false, reason: 'unauthenticated' };
+  }
+
+  const result = await deleteConversationMessage(input.messageId);
+
+  if (!result.ok) {
+    return result;
+  }
+
+  revalidatePath('/account/messages');
+  revalidatePath(`/account/messages/${input.conversationId}`);
+
+  return result;
+}
+
 export async function markConversationReadAction(
   conversationId: string
 ): Promise<MarkConversationReadActionResult> {
@@ -126,6 +176,27 @@ export async function markConversationReadAction(
   }
 
   const result = await markConversationRead(conversationId);
+
+  if (!result.ok) {
+    return result;
+  }
+
+  revalidatePath('/account/messages');
+  revalidatePath(`/account/messages/${conversationId}`);
+
+  return result;
+}
+
+export async function hideConversationAction(
+  conversationId: string
+): Promise<MarkConversationReadActionResult> {
+  const authResult = await getCurrentUserResult();
+
+  if (authResult.status !== 'authenticated') {
+    return { ok: false, reason: 'unauthenticated' };
+  }
+
+  const result = await hideConversationForCurrentUser(conversationId);
 
   if (!result.ok) {
     return result;

@@ -57,7 +57,9 @@ export default function MessagesInbox({ initialConversations }: Props) {
                 {conversation.otherParticipantDisplayName}
               </span>
               <span className="conversation-summary-preview">
-                {conversation.lastMessagePreview}
+                {conversation.lastMessageDeleted
+                  ? content.messageDeletedLabel
+                  : conversation.lastMessagePreview}
               </span>
               <span className="conversation-summary-meta">
                 <time
