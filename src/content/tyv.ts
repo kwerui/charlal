@@ -15,6 +15,142 @@ export const content = {
   headerAccount: "Account / Аккаунт", // TODO: add reviewed Tuvan translation.
   headerPostAd: "Post Ad / Чарлалдан үндүрер",
   signedInAsLabel: "Signed in as / Кылдыр кирген",
+
+  // Footer and public pages
+  siteFooterLabel: "Site footer", // TODO: add reviewed Tuvan translation.
+  siteFooterNavLabel: "Footer links", // TODO: add reviewed Tuvan translation.
+  footerAboutLink: "About", // TODO: add reviewed Tuvan translation.
+  footerTermsLink: "Terms", // TODO: add reviewed Tuvan translation.
+  footerPrivacyLink: "Privacy", // TODO: add reviewed Tuvan translation.
+  footerContactLink: "Contact", // TODO: add reviewed Tuvan translation.
+  legalPageKicker: "Information", // TODO: add reviewed Tuvan translation.
+  privacyPageTitle: "Privacy Policy", // TODO: legal review and reviewed Tuvan translation required.
+  privacyPageIntro: "This page is a placeholder structure for Charlal's future reviewed privacy and personal data policy. It is not final legal text.", // TODO: legal review and reviewed Tuvan translation required.
+  privacyPolicySections: [
+    {
+      title: "Introduction",
+      body: "TODO: Add reviewed legal text explaining the purpose and scope of this policy.",
+    },
+    {
+      title: "Who operates Charlal",
+      body: "TODO: Add reviewed operator, responsible-party, and jurisdiction details when they are available.",
+    },
+    {
+      title: "Information we collect",
+      body: "TODO: Add reviewed legal text describing the categories of information collected.",
+    },
+    {
+      title: "Account information",
+      body: "TODO: Add reviewed legal text covering account registration, profile names, and authentication information.",
+    },
+    {
+      title: "Listings and uploaded photos",
+      body: "TODO: Add reviewed legal text covering advertisement details, listing photos, and public listing content.",
+    },
+    {
+      title: "Messages",
+      body: "TODO: Add reviewed legal text covering private buyer and seller messages.",
+    },
+    {
+      title: "Technical and security information",
+      body: "TODO: Add reviewed legal text covering cookies, security logs, device/browser data, and abuse prevention.",
+    },
+    {
+      title: "Why information is processed",
+      body: "TODO: Add reviewed legal text explaining the purposes and lawful basis for processing where applicable.",
+    },
+    {
+      title: "Who information may be shared with",
+      body: "TODO: Add reviewed legal text covering service providers, legal requests, safety, and required disclosures.",
+    },
+    {
+      title: "Data retention",
+      body: "TODO: Add reviewed legal text explaining how long different kinds of information are kept.",
+    },
+    {
+      title: "Account and data deletion",
+      body: "TODO: Add reviewed legal text explaining how users can request account or data deletion.",
+    },
+    {
+      title: "User rights",
+      body: "TODO: Add reviewed legal text describing applicable access, correction, deletion, and objection rights.",
+    },
+    {
+      title: "Security",
+      body: "TODO: Add reviewed legal text describing security practices without exposing implementation secrets.",
+    },
+    {
+      title: "Changes to this policy",
+      body: "TODO: Add reviewed legal text explaining how policy updates will be communicated.",
+    },
+    {
+      title: "Contact",
+      body: "TODO: Add reviewed official contact details for privacy questions.",
+    },
+  ], // TODO: legal review and reviewed Tuvan translations required.
+  termsPageTitle: "Terms of Use", // TODO: legal review and reviewed Tuvan translation required.
+  termsPageIntro: "This page is a placeholder structure for Charlal's future reviewed user agreement. It is not final legal text.", // TODO: legal review and reviewed Tuvan translation required.
+  termsSections: [
+    {
+      title: "About Charlal",
+      body: "TODO: Add reviewed legal text describing the marketplace service.",
+    },
+    {
+      title: "Eligibility and account use",
+      body: "TODO: Add reviewed legal text covering who may use Charlal and how accounts should be used.",
+    },
+    {
+      title: "Posting advertisements",
+      body: "TODO: Add reviewed legal text covering advertisement posting rules.",
+    },
+    {
+      title: "Prohibited content",
+      body: "TODO: Add reviewed legal text listing prohibited advertisements, content, and conduct.",
+    },
+    {
+      title: "Buyer and seller responsibility",
+      body: "TODO: Add reviewed legal text explaining user responsibility for transactions and communications.",
+    },
+    {
+      title: "Messaging and conduct",
+      body: "TODO: Add reviewed legal text covering acceptable messaging and user conduct.",
+    },
+    {
+      title: "User-generated content",
+      body: "TODO: Add reviewed legal text covering rights and responsibilities for user-created listings, photos, and messages.",
+    },
+    {
+      title: "Account suspension or removal",
+      body: "TODO: Add reviewed legal text covering moderation, suspension, and removal.",
+    },
+    {
+      title: "Service availability",
+      body: "TODO: Add reviewed legal text covering availability, maintenance, and changes to the service.",
+    },
+    {
+      title: "Liability and disputes",
+      body: "TODO: Add reviewed legal text covering liability limits, dispute handling, and applicable law.",
+    },
+    {
+      title: "Changes to these terms",
+      body: "TODO: Add reviewed legal text explaining how terms updates will be handled.",
+    },
+    {
+      title: "Contact",
+      body: "TODO: Add reviewed official contact details for terms questions.",
+    },
+  ], // TODO: legal review and reviewed Tuvan translations required.
+  aboutPageKicker: "About Charlal", // TODO: add reviewed Tuvan translation.
+  aboutPageTitle: "About Charlal", // TODO: add reviewed Tuvan translation.
+  aboutPageBody: [
+    "Charlal is a simple regional marketplace for people to post and discover advertisements in Tuva.",
+    "The goal is to keep buying, selling, and local discovery straightforward for people with different levels of technical confidence.",
+  ], // TODO: add reviewed Tuvan translations.
+  contactPageKicker: "Contact", // TODO: add reviewed Tuvan translation.
+  contactPageTitle: "Contact Charlal", // TODO: add reviewed Tuvan translation.
+  contactPageIntro: "This page is a placeholder for official Charlal contact details. A database-backed contact form is not included yet.", // TODO: add reviewed contact details and Tuvan translation.
+  contactDetailsTitle: "Contact details", // TODO: add reviewed Tuvan translation.
+  contactDetailsPlaceholder: "TODO: Add official email address, phone number, mailing address, or other approved contact details.", // TODO: add reviewed contact details and Tuvan translation.
   
   // Search
   searchPlaceholder: "Чүнү дилеп тур силер бээр парлаптыңар",
@@ -135,18 +271,18 @@ export const content = {
   messageActionsLabel: "Message actions / Медээ ажыл-чорудулгазы", // TODO: add reviewed Tuvan translation.
   editMessageButton: "Edit message / Медээни эде көөр", // TODO: add reviewed Tuvan translation.
   saveMessageButton: "Save message / Медээни кадагала", // TODO: add reviewed Tuvan translation.
-  deleteMessageButton: "Delete message", // TODO: add reviewed Tuvan translation.
-  deleteMessageConfirmTitle: "Delete this message?", // TODO: add reviewed Tuvan translation.
-  deleteMessageConfirmMessage: "This removes the text for both people in this conversation.", // TODO: add reviewed Tuvan translation.
-  deleteConversationButton: "Delete conversation", // TODO: add reviewed Tuvan translation.
-  deleteConversationConfirmTitle: "Delete this conversation?", // TODO: add reviewed Tuvan translation.
-  deleteConversationConfirmMessage: "This hides the conversation only for you. A new message from the other person will bring it back.", // TODO: add reviewed Tuvan translation.
-  unableEditMessageMessage: "Unable to edit message", // TODO: add reviewed Tuvan translation.
-  unableDeleteMessageMessage: "Unable to delete message", // TODO: add reviewed Tuvan translation.
-  unableDeleteConversationMessage: "Unable to delete conversation", // TODO: add reviewed Tuvan translation.
+  deleteMessageButton: "Delete message / Медээни өжүрүп кааптыңар", // TODO: add reviewed Tuvan translation.
+  deleteMessageConfirmTitle: "Delete this message? / Бо медээни өжүрүп кааптыңар бе?", // TODO: add reviewed Tuvan translation.
+  deleteMessageConfirmMessage: "This removes the text for both people in this conversation. / Бо чугаада ийи кижиниң бижиин үндүрер.", // TODO: add reviewed Tuvan translation.
+  deleteConversationButton: "Delete conversation / Чугааны өжүрүп кааптыңар", // TODO: add reviewed Tuvan translation.
+  deleteConversationConfirmTitle: "Delete this conversation? / Бо чугааны өжүрүп кааптыңар бе?", // TODO: add reviewed Tuvan translation.
+  deleteConversationConfirmMessage: "This hides the conversation only for you. A new message from the other person will bring it back. / Бо чугааны чүгле силер дээш чажырып турар. Өске кижиден чаа медээ ону дедир эккээр.", // TODO: add reviewed Tuvan translation.
+  unableEditMessageMessage: "Unable to edit message / Медээни өскертип шыдаваан", // TODO: add reviewed Tuvan translation.
+  unableDeleteMessageMessage: "Unable to delete message / Медээни өжүрүп шыдаваан", // TODO: add reviewed Tuvan translation.
+  unableDeleteConversationMessage: "Unable to delete conversation / Чугааны өжүрүп шыдаваан", // TODO: add reviewed Tuvan translation.
   backToHomepage: "Back to homepage / Кол арынче",
   backToAccount: "Back to account / Аккаунтче эглип келир", // TODO: add reviewed Tuvan translation.
-  backToSellerProfile: "Back to seller profile", // TODO: add reviewed Tuvan translation.
+  backToSellerProfile: "Back to seller profile / Садыгжы профилинге эглип келир", // TODO: add reviewed Tuvan translation.
   backToResults: "Back to results / Түңнелдерже эглип келир",
 
   // Account
@@ -158,11 +294,11 @@ export const content = {
   accountPublicNameTitle: "Change public name / Хөй-ниити адын өскертир", // TODO: add reviewed Tuvan translation.
   accountPublicNameHelp: "This name is shown publicly on advertisements instead of your email. / Бо ат силерниң электроннуг почтаңарның орнунга чарлалдарда хөй-ниитиге көстүп турар.", // TODO: add reviewed Tuvan translation.
   accountPublicNamePlaceholder: "Enter a public seller name / Хөй-ниити садыгжы адын киирер", // TODO: add reviewed Tuvan translation.
-  accountSaveProfileButton: "Save profile", // TODO: add reviewed Tuvan translation.
+  accountSaveProfileButton: "Save profile / Профильди кадагала", // TODO: add reviewed Tuvan translation.
   accountPublicNameSavedMessage: "Public name saved. / Хөй-ниити ады камгалаттынган.", // TODO: add reviewed Tuvan translation.
   accountPublicNameRequiredMessage: "Enter a public name before posting an advertisement. / Чарлал үндүрер мурнунда хөй-ниити адын киирер.", // TODO: add reviewed Tuvan translation.
   accountPublicNameSaveFailedMessage: "Unable to update public name. / Хөй-ниити адын чаартып шыдаваан.", // TODO: add reviewed Tuvan translation.
-  accountProfileDetailsInvalidMessage: "Bio or location is too long.", // TODO: add reviewed Tuvan translation.
+  accountProfileDetailsInvalidMessage: "Bio or location is too long. / 'Силерниң дугайыңарда' азы турар чери дыка узун.", // TODO: add reviewed Tuvan translation.
   accountProfileLoadFailedMessage: "Your account is signed in, but the profile could not be loaded. / Силерниң аккаунтуңар кирген, ынчалза-даа профильди үндүрүп шыдаваан.", // TODO: add reviewed Tuvan translation.
   unableLoadProfileMessage: "Unable to load profile / Профильди үндүрүп шыдаваан", // TODO: add reviewed Tuvan translation.
   profileUpdatedMessage: "Profile updated. / Профиль чаарттынган.", // TODO: add reviewed Tuvan translation.
@@ -212,7 +348,9 @@ export const content = {
   displayNameLabel: "Display name / Көргүзер ат", // TODO: add reviewed Tuvan translation.
   displayNameInvalidMessage: "Enter a public display name that is not an email address. / Электроннуг почта адрези эвес, хөй-ниитиге көргүзер атты киирер.", // TODO: add reviewed Tuvan translation.
   passwordConfirmationLabel: "Confirm password / Парольду бадыткаар", // TODO: add reviewed Tuvan translation.
-  policyAgreementLabel: "I agree to the policy.",
+  policyAgreementPrefix: "By creating an account, I agree to the", // TODO: legal review and reviewed Tuvan translation required.
+  policyAgreementMiddle: "and acknowledge the", // TODO: legal review and reviewed Tuvan translation required.
+  policyAgreementSuffix: ".", // TODO: legal review and reviewed Tuvan translation required.
   signUpButton: "Sign Up / Бижидип алыңар",
   signUpErrorRequired: "Enter display name, email, password, and password confirmation to continue. / Улаштыр ажылдаар дизе, көргүзер адын, электроннуг почтазын, парольду болгаш парольдуң бадыткалын киирер.", // TODO: add reviewed Tuvan translation.
   signUpErrorPolicy: "Agree to the policy to continue. / Улаштыр политикага чөпшээрежир.",

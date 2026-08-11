@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import NativeHistoryIntentMarker from './components/NativeHistoryIntentMarker';
 import SiteHeader from './components/SiteHeader';
+import SiteFooter from './components/SiteFooter';
 import { AuthProvider } from '@/lib/auth/client';
 import { getCurrentUserResult } from '@/lib/auth/server';
 import { MessagingRealtimeProvider } from '@/lib/messagingRealtime';
@@ -46,6 +47,7 @@ export default async function RootLayout({
             <NativeHistoryIntentMarker />
             <SiteHeader initialAuthStatus={authResult.status} />
             {children}
+            <SiteFooter />
           </MessagingRealtimeProvider>
         </AuthProvider>
       </body>

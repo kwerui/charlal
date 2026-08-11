@@ -135,10 +135,20 @@ export default function SignUpForm({ nextPath }: Props) {
         />
       </label>
 
-      <label className="checkbox-field policy-checkbox">
-        <input type="checkbox" name="policy" required />
-        <span>{content.policyAgreementLabel}</span>
-      </label>
+      <div className="checkbox-field policy-checkbox">
+        <input id="policy-agreement" type="checkbox" name="policy" required />
+        <label htmlFor="policy-agreement">
+          {content.policyAgreementPrefix}{' '}
+          <Link href="/terms" className="inline-link">
+            {content.termsPageTitle}
+          </Link>{' '}
+          {content.policyAgreementMiddle}{' '}
+          <Link href="/privacy" className="inline-link">
+            {content.privacyPageTitle}
+          </Link>
+          {content.policyAgreementSuffix}
+        </label>
+      </div>
 
       <Link href="/forgot-password" className="inline-link">
         {content.forgotPasswordLink}
