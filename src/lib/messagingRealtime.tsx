@@ -66,6 +66,11 @@ export function MessagingRealtimeProvider({
   const currentUserIdRef = useRef<string | null>(userId);
   const refreshInFlightRef = useRef(false);
   const refreshAgainRef = useRef(false);
+  const channelStatusVersionRef = useRef(0);
+  const activeChannelGenerationRef = useRef(0);
+  const hasSubscribedRef = useRef(false);
+  const [channelReconnectGeneration, setChannelReconnectGeneration] =
+    useState(0);
 
   useEffect(() => {
     currentUserIdRef.current = userId;
@@ -97,6 +102,10 @@ export function MessagingRealtimeProvider({
               unreadConversationCount: nextSnapshot.unreadConversationCount,
               conversations: nextSnapshot.conversations,
             });
+            setChannelStatus({
+              userId: targetUserId,
+              status: 'subscribed',
+            });
           }
 
           shouldRefreshAgain = refreshAgainRef.current;
@@ -121,10 +130,14 @@ export function MessagingRealtimeProvider({
 
   useEffect(() => {
     if (!userId) {
+      hasSubscribedRef.current = false;
+      activeChannelGenerationRef.current += 1;
       return undefined;
     }
 
     let active = true;
+    const channelGeneration = activeChannelGenerationRef.current + 1;
+    activeChannelGenerationRef.current = channelGeneration;
 
     queueMicrotask(() => {
       if (active) {
@@ -133,7 +146,15 @@ export function MessagingRealtimeProvider({
     });
 
     const requestSnapshotRefresh = () => {
-      if (active) {
+      if (
+        active &&
+        activeChannelGenerationRef.current === channelGeneration
+      ) {
+        channelStatusVersionRef.current += 1;
+        setChannelStatus({
+          userId,
+          status: 'subscribed',
+        });
         void refreshMessagingStateForUser(userId);
       }
     };
@@ -168,11 +189,16 @@ export function MessagingRealtimeProvider({
         requestSnapshotRefresh
       )
       .subscribe((nextStatus) => {
-        if (!active) {
+        if (
+          !active ||
+          activeChannelGenerationRef.current !== channelGeneration
+        ) {
           return;
         }
 
         if (nextStatus === 'SUBSCRIBED') {
+          channelStatusVersionRef.current += 1;
+          hasSubscribedRef.current = true;
           setChannelStatus({
             userId,
             status: 'subscribed',
@@ -181,26 +207,75 @@ export function MessagingRealtimeProvider({
         }
 
         if (nextStatus === 'CHANNEL_ERROR' || nextStatus === 'TIMED_OUT') {
-          setChannelStatus({
-            userId,
-            status: 'unavailable',
+          const statusVersion = channelStatusVersionRef.current + 1;
+          channelStatusVersionRef.current = statusVersion;
+
+          queueMicrotask(() => {
+            if (
+              active &&
+              activeChannelGenerationRef.current === channelGeneration &&
+              channelStatusVersionRef.current === statusVersion
+            ) {
+              setChannelStatus({
+                userId,
+                status: 'unavailable',
+              });
+            }
           });
           return;
         }
 
         if (nextStatus === 'CLOSED') {
-          setChannelStatus({
-            userId,
-            status: 'reconnecting',
+          const statusVersion = channelStatusVersionRef.current + 1;
+          channelStatusVersionRef.current = statusVersion;
+
+          queueMicrotask(() => {
+            if (
+              active &&
+              activeChannelGenerationRef.current === channelGeneration &&
+              channelStatusVersionRef.current === statusVersion
+            ) {
+              setChannelStatus({
+                userId,
+                status: 'reconnecting',
+              });
+            }
           });
         }
       });
 
     return () => {
       active = false;
+      if (activeChannelGenerationRef.current === channelGeneration) {
+        activeChannelGenerationRef.current += 1;
+      }
+      hasSubscribedRef.current = false;
       void supabase.removeChannel(channel);
     };
-  }, [refreshMessagingStateForUser, supabase, userId]);
+  }, [channelReconnectGeneration, refreshMessagingStateForUser, supabase, userId]);
+
+  useEffect(() => {
+    if (!userId) {
+      return undefined;
+    }
+
+    function handleOnline(): void {
+      if (hasSubscribedRef.current) {
+        channelStatusVersionRef.current += 1;
+        setChannelStatus({
+          userId,
+          status: 'reconnecting',
+        });
+        setChannelReconnectGeneration((generation) => generation + 1);
+      }
+    }
+
+    window.addEventListener('online', handleOnline);
+
+    return () => {
+      window.removeEventListener('online', handleOnline);
+    };
+  }, [userId]);
 
   const unreadConversationCount =
     authStatus === 'authenticated' && userId

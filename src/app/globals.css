@@ -1684,10 +1684,13 @@ body {
   gap: 8px;
 }
 
-.conversation-new-label {
+.conversation-new-label,
+.conversation-unread-count-badge {
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   min-height: 24px;
+  min-width: 24px;
   padding: 3px 8px;
   border-radius: 999px;
   border: 1px solid var(--primary-color);
@@ -1696,6 +1699,11 @@ body {
   font-size: 13px;
   font-weight: 900;
   line-height: 1;
+}
+
+.conversation-unread-count-badge {
+  border-color: #dc2626;
+  background: #dc2626;
 }
 
 .messaging-live-status {

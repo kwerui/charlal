@@ -67,8 +67,14 @@ export default function MessagesInbox({ initialConversations }: Props) {
                   {formatMessageDate(conversation.lastMessageAt)}
                 </time>
                 {hasUnreadMessages ? (
-                  <span className="conversation-new-label">
-                    {content.newMessageLabel}
+                  <span
+                    className="conversation-unread-count-badge"
+                    aria-label={`${conversation.unreadCount} ${content.unreadMessagesLabel}`}
+                    title={`${conversation.unreadCount} ${content.unreadMessagesLabel}`}
+                  >
+                    {conversation.unreadCount > 99
+                      ? '99+'
+                      : conversation.unreadCount}
                   </span>
                 ) : null}
               </span>

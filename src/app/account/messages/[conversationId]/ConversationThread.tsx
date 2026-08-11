@@ -246,6 +246,10 @@ export default function ConversationThread({
   const sendStatusRef = useRef<SendStatus>('idle');
   const pendingDeliveryRef = useRef<PendingDelivery | null>(null);
   const threadStatusRef = useRef<ThreadRealtimeStatus>('idle');
+  const threadStatusVersionRef = useRef(0);
+  const activeThreadChannelGenerationRef = useRef(0);
+  const [threadReconnectGeneration, setThreadReconnectGeneration] =
+    useState(0);
   const otherParticipantName = useMemo(() => {
     return conversation.buyerId === currentUserId
       ? conversation.sellerDisplayName
@@ -377,11 +381,10 @@ export default function ConversationThread({
     function handleOnline(): void {
       setIsBrowserOnline(true);
 
-      if (
-        hasSubscribedRef.current &&
-        threadStatusRef.current !== 'subscribed'
-      ) {
+      if (hasSubscribedRef.current) {
+        threadStatusVersionRef.current += 1;
         setThreadStatus('reconnecting');
+        setThreadReconnectGeneration((generation) => generation + 1);
       }
 
       void reconcileThread();
@@ -408,11 +411,17 @@ export default function ConversationThread({
 
   useEffect(() => {
     let active = true;
+    const channelGeneration = activeThreadChannelGenerationRef.current + 1;
+    activeThreadChannelGenerationRef.current = channelGeneration;
 
     function handleIncomingMessage(
       payload: RealtimePostgresInsertPayload<DatabaseMessageRow>
     ) {
-      if (!active || !isDatabaseMessageRow(payload.new)) {
+      if (
+        !active ||
+        activeThreadChannelGenerationRef.current !== channelGeneration ||
+        !isDatabaseMessageRow(payload.new)
+      ) {
         return;
       }
 
@@ -421,6 +430,8 @@ export default function ConversationThread({
         nextMessage.senderId === currentUserId ||
         isNearHistoryBottom(messageHistoryRef.current);
 
+      threadStatusVersionRef.current += 1;
+      setThreadStatus('subscribed');
       shouldScrollToBottomRef.current = shouldAutoScroll;
       setShowNewMessagesButton(
         nextMessage.senderId !== currentUserId && !shouldAutoScroll
@@ -454,10 +465,16 @@ export default function ConversationThread({
         | RealtimePostgresInsertPayload<DatabaseConversationReadRow>
         | RealtimePostgresUpdatePayload<DatabaseConversationReadRow>
     ) {
-      if (!active || !isDatabaseConversationReadRow(payload.new)) {
+      if (
+        !active ||
+        activeThreadChannelGenerationRef.current !== channelGeneration ||
+        !isDatabaseConversationReadRow(payload.new)
+      ) {
         return;
       }
 
+      threadStatusVersionRef.current += 1;
+      setThreadStatus('subscribed');
       setReadMarkers((currentMarkers) =>
         mergeReadMarker(
           currentMarkers,
@@ -499,32 +516,68 @@ export default function ConversationThread({
         handleReadMarkerChange
       )
       .subscribe((nextStatus) => {
-        if (!active) {
+        if (
+          !active ||
+          activeThreadChannelGenerationRef.current !== channelGeneration
+        ) {
           return;
         }
 
         if (nextStatus === 'SUBSCRIBED') {
+          threadStatusVersionRef.current += 1;
           hasSubscribedRef.current = true;
           setThreadStatus('subscribed');
           return;
         }
 
         if (nextStatus === 'CHANNEL_ERROR' || nextStatus === 'TIMED_OUT') {
-          setThreadStatus('unavailable');
+          const statusVersion = threadStatusVersionRef.current + 1;
+          threadStatusVersionRef.current = statusVersion;
+
+          queueMicrotask(() => {
+            if (
+              active &&
+              activeThreadChannelGenerationRef.current === channelGeneration &&
+              threadStatusVersionRef.current === statusVersion
+            ) {
+              setThreadStatus('unavailable');
+            }
+          });
           return;
         }
 
         if (nextStatus === 'CLOSED' && hasSubscribedRef.current) {
-          setThreadStatus('reconnecting');
+          const statusVersion = threadStatusVersionRef.current + 1;
+          threadStatusVersionRef.current = statusVersion;
+
+          queueMicrotask(() => {
+            if (
+              active &&
+              activeThreadChannelGenerationRef.current === channelGeneration &&
+              threadStatusVersionRef.current === statusVersion
+            ) {
+              setThreadStatus('reconnecting');
+            }
+          });
         }
       });
 
     return () => {
       active = false;
+      if (activeThreadChannelGenerationRef.current === channelGeneration) {
+        activeThreadChannelGenerationRef.current += 1;
+      }
       hasSubscribedRef.current = false;
       void supabase.removeChannel(channel);
     };
-  }, [conversation.id, currentUserId, markThreadRead, supabase, updateSendStatus]);
+  }, [
+    conversation.id,
+    currentUserId,
+    markThreadRead,
+    supabase,
+    threadReconnectGeneration,
+    updateSendStatus,
+  ]);
 
   useEffect(() => {
     if (!shouldScrollToBottomRef.current) {
