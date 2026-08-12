@@ -41,6 +41,10 @@ type SignUpResult =
   | { ok: true; requiresEmailConfirmation: boolean }
   | { ok: false; reason: AuthFailureReason };
 
+type EmailActionResult =
+  | { ok: true }
+  | { ok: false; reason: AuthFailureReason };
+
 type ProfileUpdateResult =
   | { ok: true; user: AppUser; profile: AppProfile }
   | {
@@ -283,7 +287,6 @@ export async function signUpWithEmailPassword({
   displayName,
   email,
   password,
-  nextPath,
 }: {
   displayName: string;
   email: string;
@@ -292,11 +295,6 @@ export async function signUpWithEmailPassword({
 }): Promise<SignUpResult> {
   try {
     const supabase = createClient();
-    const origin = window.location.origin;
-    const callbackUrl = new URL('/auth/callback', origin);
-
-    callbackUrl.searchParams.set('next', nextPath);
-
     const { data, error } = await supabase.auth.signUp({
       email,
       password,
@@ -304,7 +302,6 @@ export async function signUpWithEmailPassword({
         data: {
           display_name: displayName,
         },
-        emailRedirectTo: callbackUrl.toString(),
       },
     });
 
@@ -316,6 +313,69 @@ export async function signUpWithEmailPassword({
       ok: true,
       requiresEmailConfirmation: !data.session,
     };
+  } catch (error) {
+    return {
+      ok: false,
+      reason: classifyAuthError(error instanceof Error ? error : null),
+    };
+  }
+}
+
+export async function resendSignupConfirmationEmail(
+  email: string
+): Promise<EmailActionResult> {
+  try {
+    const supabase = createClient();
+    const { error } = await supabase.auth.resend({
+      type: 'signup',
+      email,
+    });
+
+    if (error) {
+      return { ok: false, reason: classifyAuthError(error) };
+    }
+
+    return { ok: true };
+  } catch (error) {
+    return {
+      ok: false,
+      reason: classifyAuthError(error instanceof Error ? error : null),
+    };
+  }
+}
+
+export async function requestPasswordResetEmail(
+  email: string
+): Promise<EmailActionResult> {
+  try {
+    const supabase = createClient();
+    const { error } = await supabase.auth.resetPasswordForEmail(email);
+
+    if (error) {
+      return { ok: false, reason: classifyAuthError(error) };
+    }
+
+    return { ok: true };
+  } catch (error) {
+    return {
+      ok: false,
+      reason: classifyAuthError(error instanceof Error ? error : null),
+    };
+  }
+}
+
+export async function updateCurrentUserPassword(
+  password: string
+): Promise<EmailActionResult> {
+  try {
+    const supabase = createClient();
+    const { error } = await supabase.auth.updateUser({ password });
+
+    if (error) {
+      return { ok: false, reason: classifyAuthError(error) };
+    }
+
+    return { ok: true };
   } catch (error) {
     return {
       ok: false,

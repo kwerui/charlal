@@ -98,7 +98,7 @@ export default function SignUpForm({ nextPath }: Props) {
 
     if (signUpResult.requiresEmailConfirmation) {
       setIsSubmitting(false);
-      setSuccessMessage(content.confirmYourEmailMessage);
+      router.replace('/check-email?type=signup');
       return;
     }
 

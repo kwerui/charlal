@@ -1136,6 +1136,11 @@ body {
   padding-left: 18px;
 }
 
+.form-error p,
+.form-success p {
+  margin: 0;
+}
+
 .form-success {
   color: #166534;
   background: #dcfce7;

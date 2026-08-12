@@ -55,10 +55,13 @@ export default function SignInForm({
     initialMessageTone
   );
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showResendConfirmationLink, setShowResendConfirmationLink] =
+    useState(false);
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setFormMessage('');
+    setShowResendConfirmationLink(false);
 
     const formData = new FormData(event.currentTarget);
     const email = String(formData.get('email') || '').trim();
@@ -82,6 +85,7 @@ export default function SignInForm({
       setIsSubmitting(false);
       setMessageTone('error');
       setFormMessage(getSignInErrorMessage(signInResult.reason));
+      setShowResendConfirmationLink(signInResult.reason === 'email-not-confirmed');
       return;
     }
 
@@ -107,12 +111,17 @@ export default function SignInForm({
       </div>
 
       {formMessage ? (
-        <p
+        <div
           className={messageTone === 'success' ? 'form-success' : 'form-error'}
           role={messageTone === 'success' ? 'status' : 'alert'}
         >
-          {formMessage}
-        </p>
+          <p>{formMessage}</p>
+          {showResendConfirmationLink ? (
+            <Link href="/check-email?type=signup" className="inline-link">
+              {content.resendConfirmationButton}
+            </Link>
+          ) : null}
+        </div>
       ) : null}
 
       <button type="submit" className="search-button form-submit-button" disabled={isSubmitting}>

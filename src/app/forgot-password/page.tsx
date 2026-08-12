@@ -1,8 +1,16 @@
 import Link from 'next/link';
+import { redirect } from 'next/navigation';
 import { content } from '@/content/tyv';
+import { getCurrentUserResult } from '@/lib/auth/server';
 import ForgotPasswordForm from './ForgotPasswordForm';
 
-export default function ForgotPasswordPage() {
+export default async function ForgotPasswordPage() {
+  const authResult = await getCurrentUserResult();
+
+  if (authResult.status === 'authenticated') {
+    redirect('/account');
+  }
+
   return (
     <main className="auth-page">
       <section className="auth-card" aria-labelledby="forgot-password-title">

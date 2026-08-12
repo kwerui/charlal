@@ -253,18 +253,18 @@ export const content = {
   todayLabel: "Today / Бо хүн", // TODO: add reviewed Tuvan translation.
   yesterdayLabel: "Yesterday / Дүүн", // TODO: add reviewed Tuvan translation.
   monthNames: [
-    "January / Январь",
-    "February / Февраль",
-    "March / Март",
-    "April / Апрель",
-    "May / Май",
-    "June / Июнь",
-    "July / Июль",
-    "August / Август",
-    "September / Сентябрь",
-    "October / Октябрь",
-    "November / Ноябрь",
-    "December / Декабрь",
+    "Январь",
+    "Февраль",
+    "Март",
+    "Апрель",
+    "Май",
+    "Июнь",
+    "Июль",
+    "Август",
+    "Сентябрь",
+    "Октябрь",
+    "Ноябрь",
+    "Декабрь",
   ], // TODO: add reviewed Tuvan translations.
   editedMessageLabel: "Edited / Өскерткен", // TODO: add reviewed Tuvan translation.
   messageDeletedLabel: "Message deleted / Медээни өжүрүп каан", // TODO: add reviewed Tuvan translation.
@@ -358,6 +358,13 @@ export const content = {
   signUpPasswordMismatchMessage: "Passwords do not match. / Парольдар дүүшпес.", // TODO: add reviewed Tuvan translation.
   checkYourEmailTitle: "Check your email / Электроннуг почтаңарны хынап көрүңер", // TODO: add reviewed Tuvan translation.
   confirmYourEmailMessage: "Confirm your email to finish registration. / Бүрүткелди доозарынга электроннуг почтаңарны бадыткаңар.", // TODO: add reviewed Tuvan translation.
+  checkEmailKicker: "Email verification", // TODO: add reviewed Tuvan translation.
+  confirmationEmailSentMessage: "We sent a confirmation link to your email address. Open that link to finish creating your account.", // TODO: add reviewed Tuvan translation.
+  resendConfirmationButton: "Resend confirmation email", // TODO: add reviewed Tuvan translation.
+  resendConfirmationSendingButton: "Sending confirmation email...", // TODO: add reviewed Tuvan translation.
+  confirmationEmailResentMessage: "Confirmation email sent. Please check your inbox.", // TODO: add reviewed Tuvan translation.
+  resendConfirmationUnableMessage: "Unable to send another confirmation email.", // TODO: add reviewed Tuvan translation.
+  resendConfirmationEmailRequiredMessage: "Enter your email address to resend the confirmation email.", // TODO: add reviewed Tuvan translation.
   emailConfirmedMessage: "Email confirmed. / Электроннуг почта бадыткаан.", // TODO: add reviewed Tuvan translation.
   confirmationInvalidMessage: "Confirmation link invalid or expired. / Бадыткал ссылказы шын эвес азы хуусаазы эрткен.", // TODO: add reviewed Tuvan translation.
   unableSignInMessage: "Unable to sign in. / Кирип шыдаваан.", // TODO: add reviewed Tuvan translation.
@@ -365,13 +372,29 @@ export const content = {
   signInInvalidCredentialsMessage: "The email or password is incorrect. / Электроннуг почта азы пароль шын эвес.", // TODO: add reviewed Tuvan translation.
   signInUnconfirmedEmailMessage: "Confirm your email before signing in. / Кирер мурнунда электроннуг почтаңарны бадыткаңар.", // TODO: add reviewed Tuvan translation.
   signInRateLimitMessage: "Please wait before trying again. / Катап шенээр мурнунда манап көрүңерем.", // TODO: add reviewed Tuvan translation.
+  authEmailRateLimitMessage: "Please wait before requesting another email.", // TODO: add reviewed Tuvan translation.
   authNetworkFailureMessage: "Network request failed. Check your connection and try again. / Сеткил дилээ үрелген. Холбааңарны хынап алгаш, катап шенеп көрүңер.", // TODO: add reviewed Tuvan translation.
-  forgotPasswordKicker: "Demo account",
+  forgotPasswordKicker: "Account recovery", // TODO: add reviewed Tuvan translation.
   forgotPasswordTitle: "Forgot Password / Парольду уттупкан",
   forgotPasswordSubmitButton: "Send reset instructions / Эгидер дугайында айтыышкыннарны чорудуптуңар",
-  forgotPasswordSuccessMessage: "Demo reset message shown. No email has been sent.",
-  forgotPasswordDemoWarning: "Demo only: this does not send an email yet.",
+  forgotPasswordSubmittingButton: "Sending reset link...", // TODO: add reviewed Tuvan translation.
+  forgotPasswordEmailRequiredMessage: "Enter your email address to request a password reset.", // TODO: add reviewed Tuvan translation.
+  passwordResetEmailSentMessage: "If an account exists for that email address, password reset instructions have been sent.", // TODO: add reviewed Tuvan translation.
+  passwordResetRequestUnableMessage: "Unable to request a password reset.", // TODO: add reviewed Tuvan translation.
   backToSignInLink: "Back to sign in / Кирер дээш дедир",
+  resetPasswordKicker: "Account recovery", // TODO: add reviewed Tuvan translation.
+  resetPasswordTitle: "Reset password", // TODO: add reviewed Tuvan translation.
+  newPasswordLabel: "New password", // TODO: add reviewed Tuvan translation.
+  confirmNewPasswordLabel: "Confirm new password", // TODO: add reviewed Tuvan translation.
+  updatePasswordButton: "Update password", // TODO: add reviewed Tuvan translation.
+  updatePasswordSubmittingButton: "Updating password...", // TODO: add reviewed Tuvan translation.
+  passwordUpdatedMessage: "Password updated.", // TODO: add reviewed Tuvan translation.
+  updatePasswordRequiredMessage: "Enter and confirm your new password.", // TODO: add reviewed Tuvan translation.
+  updatePasswordUnableMessage: "Unable to update password.", // TODO: add reviewed Tuvan translation.
+  invalidResetLinkTitle: "Invalid or expired reset link", // TODO: add reviewed Tuvan translation.
+  invalidResetLinkMessage: "This password reset link is invalid, expired, or has already been used.", // TODO: add reviewed Tuvan translation.
+  requestAnotherResetLink: "Request another reset link", // TODO: add reviewed Tuvan translation.
+  goToAccountButton: "Go to Account", // TODO: add reviewed Tuvan translation.
   emailLabel: "Email/Электроннуг чагаа",
   passwordLabel: "Password / Парольду",
   forgotPasswordLink: "Forgot password? / Парольду уттупкан бе?",

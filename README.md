@@ -206,25 +206,49 @@ http://localhost:3001/**
 The `localhost:3001` value is optional, but useful when testing a local
 production server on another port.
 
-### Default Confirmation Email
+For stricter production configuration later, allow the exact deployed origin:
+
+```text
+https://your-production-domain.example
+```
+
+The token-hash email links below begin at `{{ .SiteURL }}/auth/confirm`, so the
+Site URL must point to the active Charlal origin. Redirect URLs are used when
+Supabase-generated redirect destinations are supplied through auth method
+options; the local wildcards are still convenient for development.
+
+### Confirmation and Recovery Email Links
 
 Confirm the Email provider is enabled in Authentication providers.
 
-New Free Supabase projects that use Supabase's default SMTP may not allow Auth
-email template editing. This app supports that locked default template by using
-the standard PKCE confirmation flow.
+Charlal uses Supabase's SSR token-hash pattern for email confirmation and
+password recovery. The app route `/auth/confirm` verifies the token hash with
+Supabase, stores the returned session in cookies, and then redirects without
+leaving token values in the visible URL.
 
-During sign-up, the app sends Supabase an `emailRedirectTo` URL like
-`/auth/callback?next=/account`. The unchanged Supabase confirmation email first
-confirms the address through Supabase, then redirects back to `/auth/callback`
-with a short-lived `code`. The callback route exchanges that code with
-`supabase.auth.exchangeCodeForSession(code)`, stores the session in cookies, and
-redirects to the safe internal `next` destination.
+In Authentication > Email Templates > Confirm signup, set the confirmation link
+href to:
 
-Custom SMTP can be configured later if you want branded editable templates. The
-older token-hash `/auth/confirm` pattern is retained only as optional
-compatibility for a future custom template that can send `token_hash` links; it
-is not used by the default locked template flow.
+```html
+{{ .SiteURL }}/auth/confirm?token_hash={{ .TokenHash }}&type=email&next=/account
+```
+
+In Authentication > Email Templates > Reset password, set the reset link href
+to:
+
+```html
+{{ .SiteURL }}/auth/confirm?token_hash={{ .TokenHash }}&type=recovery&next=/update-password
+```
+
+Do not put email addresses, user IDs, access tokens, or refresh tokens into
+these URLs. The `next` value is validated by the application and falls back to a
+safe internal destination if it is malformed.
+
+If your Supabase project does not allow template editing while using the default
+SMTP sender, configure custom SMTP first or use a project/email plan that allows
+editing Auth templates. The default `{{ .ConfirmationURL }}` template is not
+compatible with Charlal's server-side confirmation route because it can return
+session data in URL fragments that the server cannot read.
 
 Supabase development email delivery can be rate-limited. Test both with email
 confirmation enabled and disabled:
@@ -233,6 +257,56 @@ confirmation enabled and disabled:
   treat the user as signed in until confirmation succeeds.
 - With confirmation disabled, registration may create a session immediately and
   continue to the safe internal `next` destination.
+
+### Password Recovery Emails
+
+Charlal uses Supabase Auth for password recovery. The Forgot password page calls
+`resetPasswordForEmail()`. The Reset password email template sends the user to
+`/auth/confirm?type=recovery`, where Supabase verifies the recovery token hash.
+Only after successful recovery verification does the app set a short-lived
+non-secret recovery marker and send the user to `/update-password`. The update
+page then calls Supabase `updateUser()` to set the new password.
+
+The Forgot password screen uses a neutral success message:
+
+```text
+If an account exists for that email address, password reset instructions have been sent.
+```
+
+This avoids disclosing whether an email address is registered.
+
+If the reset link is expired, already used, malformed, or missing a valid
+recovery session, `/update-password` shows a controlled invalid-link state with
+links to request another reset or return to sign in.
+
+### Resend Signup Confirmation
+
+The `/check-email?type=signup` page includes a Resend confirmation email form.
+It calls Supabase `auth.resend()` with `type: "signup"`. The resent email uses
+the same Confirm signup template and the same `/auth/confirm` token-hash route.
+Supabase may rate-limit repeated email requests; the UI maps rate-limit
+failures to a simple "Please wait before requesting another email" message.
+
+### Email Templates and SMTP
+
+For production email delivery, configure custom SMTP in the Supabase dashboard:
+
+1. Open Authentication.
+2. Open SMTP Settings.
+3. Add the approved sender address and sender name.
+4. Add SMTP host, port, username, and password.
+5. Keep SMTP credentials out of source files and never put them in
+   `NEXT_PUBLIC_*` variables.
+
+Supabase's default email sender is useful for development/testing, but it is
+rate-limited and best-effort. Verify in the dashboard that:
+
+- Email provider is enabled.
+- Confirm email is enabled if production accounts must verify email ownership.
+- Site URL points to the active Charlal origin.
+- Confirm signup and Reset password templates use the `/auth/confirm` TokenHash
+  links above.
+- SMTP status is configured before production launch.
 
 ## Learn More
 

@@ -1,4 +1,5 @@
 import { NextResponse, type NextRequest } from 'next/server';
+import { PASSWORD_RECOVERY_COOKIE } from '@/lib/auth/recovery';
 import { getSafeNextPath } from '@/lib/auth/safeNextPath';
 import { createClient } from '@/lib/supabase/server';
 
@@ -36,8 +37,27 @@ export async function GET(request: NextRequest) {
     const { error } = await supabase.auth.exchangeCodeForSession(code);
 
     if (!error) {
-      return NextResponse.redirect(new URL(nextPath, origin));
+      const response = NextResponse.redirect(new URL(nextPath, origin));
+
+      if (nextPath === '/update-password') {
+        response.cookies.set(PASSWORD_RECOVERY_COOKIE, '1', {
+          httpOnly: true,
+          maxAge: 10 * 60,
+          path: '/',
+          sameSite: 'lax',
+          secure: origin.startsWith('https://'),
+        });
+      }
+
+      return response;
     }
+  }
+
+  if (nextPath === '/update-password') {
+    const failedRecoveryUrl = new URL('/update-password', origin);
+    failedRecoveryUrl.searchParams.set('error', 'invalid-link');
+
+    return NextResponse.redirect(failedRecoveryUrl);
   }
 
   const failedUrl = new URL('/sign-in', origin);
