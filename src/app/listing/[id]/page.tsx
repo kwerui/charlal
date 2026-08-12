@@ -11,7 +11,7 @@ import { getListingFallbackResultsHref } from '@/lib/listingRoutes';
 import { getSafeResultsHref } from '@/lib/resultReturnHref';
 import {
   getPublicDatabaseListingById,
-  getPublicSellerSlugForListingId,
+  getPublicSellerProfileForListingId,
 } from '@/lib/supabase/listingsServer';
 import LocalListingDetail from './LocalListingDetail';
 
@@ -87,17 +87,17 @@ export default async function ListingPage({ params, searchParams }: ListingPageP
   }
 
   const listing = databaseListingResult.listing;
-  const [viewer, sellerSlugResult] = await Promise.all([
+  const [viewer, sellerProfileResult] = await Promise.all([
     getCurrentViewerId(),
-    getPublicSellerSlugForListingId(String(listing.id)),
+    getPublicSellerProfileForListingId(String(listing.id)),
   ]);
   const initialViewerState = getListingDetailViewerState(
     listing.ownerId,
     viewer
   );
   const backHref = safeFromHref || getListingFallbackResultsHref(listing);
-  const sellerPublicSlug = sellerSlugResult.ok
-    ? sellerSlugResult.publicSlug
+  const sellerPublicProfile = sellerProfileResult.ok
+    ? sellerProfileResult.profile
     : null;
 
   return (
@@ -106,7 +106,12 @@ export default async function ListingPage({ params, searchParams }: ListingPageP
         listing={listing}
         categories={content.categories}
         backHref={backHref}
-        sellerPublicSlug={sellerPublicSlug}
+        sellerPublicSlug={sellerPublicProfile?.publicSlug || null}
+        sellerAvatarPath={sellerPublicProfile?.avatarPath || null}
+        sellerAvatarFocusX={sellerPublicProfile?.avatarFocusX ?? 50}
+        sellerAvatarFocusY={sellerPublicProfile?.avatarFocusY ?? 50}
+        sellerAvatarZoom={sellerPublicProfile?.avatarZoom ?? 100}
+        sellerName={sellerPublicProfile?.displayName || undefined}
         initialViewerState={initialViewerState}
       />
     </div>

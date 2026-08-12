@@ -43,6 +43,53 @@ export type PublicSellerSlugResult =
       reason: 'database-unavailable';
     };
 
+export type ListingPublicSellerProfile = {
+  publicSlug: string;
+  displayName: string;
+  avatarPath: string | null;
+  avatarFocusX: number;
+  avatarFocusY: number;
+  avatarZoom: number;
+};
+
+export type ListingPublicSellerProfileResult =
+  | {
+      ok: true;
+      profile: ListingPublicSellerProfile | null;
+    }
+  | {
+      ok: false;
+      reason: 'database-unavailable';
+    };
+
+type ListingPublicSellerProfileRow = {
+  public_slug: string;
+  display_name: string;
+  avatar_path: string | null;
+  avatar_focus_x: number;
+  avatar_focus_y: number;
+  avatar_zoom: number;
+};
+
+function isListingPublicSellerProfileRow(
+  value: unknown
+): value is ListingPublicSellerProfileRow {
+  if (!value || typeof value !== 'object') {
+    return false;
+  }
+
+  const row = value as Partial<Record<keyof ListingPublicSellerProfileRow, unknown>>;
+
+  return (
+    typeof row.public_slug === 'string' &&
+    typeof row.display_name === 'string' &&
+    (row.avatar_path === null || typeof row.avatar_path === 'string') &&
+    typeof row.avatar_focus_x === 'number' &&
+    typeof row.avatar_focus_y === 'number' &&
+    typeof row.avatar_zoom === 'number'
+  );
+}
+
 export async function listPublicDatabaseListings(): Promise<DatabaseListingReadResult> {
   await connection();
 
@@ -167,5 +214,49 @@ export async function getPublicSellerSlugForListingId(
   return {
     ok: true,
     publicSlug: typeof data === 'string' ? data : null,
+  };
+}
+
+export async function getPublicSellerProfileForListingId(
+  listingId: string
+): Promise<ListingPublicSellerProfileResult> {
+  await connection();
+
+  const safeListingId = listingId.trim();
+
+  if (!safeListingId || /^\d+$/.test(safeListingId)) {
+    return { ok: true, profile: null };
+  }
+
+  const supabase = await createClient();
+  const { data, error } = await supabase.rpc('get_listing_public_seller_profile', {
+    p_listing_id: safeListingId,
+  });
+
+  if (error) {
+    return { ok: false, reason: 'database-unavailable' };
+  }
+
+  const rows = Array.isArray(data) ? data : [];
+  const row = rows[0];
+
+  if (!row) {
+    return { ok: true, profile: null };
+  }
+
+  if (!isListingPublicSellerProfileRow(row)) {
+    return { ok: false, reason: 'database-unavailable' };
+  }
+
+  return {
+    ok: true,
+    profile: {
+      publicSlug: row.public_slug,
+      displayName: row.display_name,
+      avatarPath: row.avatar_path,
+      avatarFocusX: row.avatar_focus_x,
+      avatarFocusY: row.avatar_focus_y,
+      avatarZoom: row.avatar_zoom,
+    },
   };
 }

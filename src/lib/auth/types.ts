@@ -15,6 +15,10 @@ export type AppProfile = {
   publicSlug: string;
   bio: string | null;
   location: string | null;
+  avatarPath: string | null;
+  avatarFocusX: number;
+  avatarFocusY: number;
+  avatarZoom: number;
   createdAt: string;
   updatedAt: string;
 };

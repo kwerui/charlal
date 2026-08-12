@@ -8,6 +8,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import type { CSSProperties, FormEvent } from 'react';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import ProfileAvatar from '@/app/components/ProfileAvatar';
 import {
   deleteMessageAction,
   editMessageAction,
@@ -26,6 +27,7 @@ import {
   isDatabaseMessageRow,
   type AppConversationRead,
   type AppConversation,
+  type AppConversationPublicCounterpart,
   type AppMessage,
   type DatabaseConversationReadRow,
   type DatabaseMessageRow,
@@ -34,6 +36,7 @@ import { createClient } from '@/lib/supabase/client';
 
 type Props = {
   conversation: AppConversation;
+  counterpart: AppConversationPublicCounterpart;
   initialMessages: AppMessage[];
   initialReadMarkers: AppConversationRead[];
   currentUserId: string;
@@ -329,6 +332,7 @@ function withTimeout<T>(
 
 export default function ConversationThread({
   conversation,
+  counterpart,
   initialMessages,
   initialReadMarkers,
   currentUserId,
@@ -386,11 +390,7 @@ export default function ConversationThread({
   const activeThreadChannelGenerationRef = useRef(0);
   const [threadReconnectGeneration, setThreadReconnectGeneration] =
     useState(0);
-  const otherParticipantName = useMemo(() => {
-    return conversation.buyerId === currentUserId
-      ? conversation.sellerDisplayName
-      : conversation.buyerDisplayName;
-  }, [conversation, currentUserId]);
+  const otherParticipantName = counterpart.displayName;
   const otherParticipantId =
     conversation.buyerId === currentUserId
       ? conversation.sellerId
@@ -1154,10 +1154,30 @@ export default function ConversationThread({
   return (
     <div className="conversation-thread">
       <div className="conversation-thread-heading">
-        <div>
+        <div className="conversation-thread-title-block">
           <p className="hero-kicker">{content.messagesTitle}</p>
           <h1>{conversation.listingTitle}</h1>
-          <p>{otherParticipantName}</p>
+          <Link
+            href={`/seller/${counterpart.publicSlug}`}
+            className="conversation-counterpart-link"
+          >
+            <ProfileAvatar
+              avatarPath={counterpart.avatarPath}
+              displayName={counterpart.displayName}
+              size="small"
+              focusX={counterpart.avatarFocusX}
+              focusY={counterpart.avatarFocusY}
+              zoom={counterpart.avatarZoom}
+            />
+            <span className="conversation-counterpart-text">
+              <span className="conversation-counterpart-name">
+                {otherParticipantName}
+              </span>
+              <span className="conversation-view-profile-label">
+                {content.viewPublicProfileLabel}
+              </span>
+            </span>
+          </Link>
         </div>
         <div className="conversation-heading-actions">
           {conversation.listingId ? (

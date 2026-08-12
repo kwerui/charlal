@@ -6,31 +6,38 @@ type SupabaseStorageRemotePattern = {
   pathname: string;
 };
 
-function getSupabaseStorageRemotePattern(): SupabaseStorageRemotePattern | null {
+function getSupabaseStorageRemotePatterns(): SupabaseStorageRemotePattern[] {
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL?.trim();
 
   if (!supabaseUrl) {
-    return null;
+    return [];
   }
 
   try {
     const parsedUrl = new URL(supabaseUrl);
 
     if (parsedUrl.protocol !== 'https:') {
-      return null;
+      return [];
     }
 
-    return {
-      protocol: 'https',
-      hostname: parsedUrl.hostname,
-      pathname: '/storage/v1/object/public/listing-images/**',
-    };
+    return [
+      {
+        protocol: 'https',
+        hostname: parsedUrl.hostname,
+        pathname: '/storage/v1/object/public/listing-images/**',
+      },
+      {
+        protocol: 'https',
+        hostname: parsedUrl.hostname,
+        pathname: '/storage/v1/object/public/profile-avatars/**',
+      },
+    ];
   } catch {
-    return null;
+    return [];
   }
 }
 
-const supabaseStorageRemotePattern = getSupabaseStorageRemotePattern();
+const supabaseStorageRemotePatterns = getSupabaseStorageRemotePatterns();
 
 const nextConfig: NextConfig = {
   images: {
@@ -55,7 +62,7 @@ const nextConfig: NextConfig = {
         hostname: 'thumbs.dreamstime.com',
         pathname: '/**',
       },
-      ...(supabaseStorageRemotePattern ? [supabaseStorageRemotePattern] : []),
+      ...supabaseStorageRemotePatterns,
     ],
   },
 };

@@ -14,6 +14,7 @@ import {
   isDatabaseMessageRowArray,
   type AppConversationRead,
   type AppConversation,
+  type AppConversationPublicCounterpart,
   type AppConversationSummary,
   type AppMessage,
 } from '@/lib/messagingTypes';
@@ -62,6 +63,7 @@ export type ConversationThreadResult =
   | {
       ok: true;
       conversation: AppConversation;
+      counterpart: AppConversationPublicCounterpart;
       messages: AppMessage[];
       readMarkers: AppConversationRead[];
     }
@@ -101,6 +103,49 @@ type SafePostgrestError = {
   code?: string;
   message?: string;
 };
+
+type ConversationPublicCounterpartRow = {
+  display_name: string;
+  public_slug: string;
+  avatar_path: string | null;
+  avatar_focus_x: number;
+  avatar_focus_y: number;
+  avatar_zoom: number;
+};
+
+function isConversationPublicCounterpartRow(
+  value: unknown
+): value is ConversationPublicCounterpartRow {
+  if (!value || typeof value !== 'object') {
+    return false;
+  }
+
+  const row = value as Partial<
+    Record<keyof ConversationPublicCounterpartRow, unknown>
+  >;
+
+  return (
+    typeof row.display_name === 'string' &&
+    typeof row.public_slug === 'string' &&
+    (typeof row.avatar_path === 'string' || row.avatar_path === null) &&
+    typeof row.avatar_focus_x === 'number' &&
+    typeof row.avatar_focus_y === 'number' &&
+    typeof row.avatar_zoom === 'number'
+  );
+}
+
+function conversationPublicCounterpartRowToApp(
+  row: ConversationPublicCounterpartRow
+): AppConversationPublicCounterpart {
+  return {
+    displayName: row.display_name,
+    publicSlug: row.public_slug,
+    avatarPath: row.avatar_path,
+    avatarFocusX: row.avatar_focus_x,
+    avatarFocusY: row.avatar_focus_y,
+    avatarZoom: row.avatar_zoom,
+  };
+}
 
 function sanitizeDiagnosticMessage(message: string | undefined): string {
   return (message || 'Unknown messaging error')
@@ -351,6 +396,26 @@ export async function getCurrentUserConversationThread(
     return { ok: false, reason: 'database-unavailable' };
   }
 
+  const { data: counterpartData, error: counterpartError } = await supabase.rpc(
+    'get_conversation_public_counterpart',
+    {
+      p_conversation_id: safeConversationId,
+    }
+  );
+
+  const counterpartRows = Array.isArray(counterpartData) ? counterpartData : [];
+  const counterpartRow = counterpartRows[0];
+
+  if (
+    counterpartError ||
+    !isConversationPublicCounterpartRow(counterpartRow)
+  ) {
+    return {
+      ok: false,
+      reason: classifyMessagingError(counterpartError?.message),
+    };
+  }
+
   const { data: messageData, error: messageError } = await supabase.rpc(
     'get_conversation_messages',
     {
@@ -380,6 +445,7 @@ export async function getCurrentUserConversationThread(
   return {
     ok: true,
     conversation: databaseConversationRowToApp(conversationData),
+    counterpart: conversationPublicCounterpartRowToApp(counterpartRow),
     messages: messageData.map(databaseMessageRowToApp),
     readMarkers: readMarkerData.map(databaseConversationReadRowToApp),
   };

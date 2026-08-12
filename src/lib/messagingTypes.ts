@@ -30,6 +30,11 @@ export type DatabaseConversationSummaryRow = {
   listing_id: string | null;
   listing_title_snapshot: string;
   other_participant_display_name: string;
+  other_participant_public_slug: string;
+  other_participant_avatar_path: string | null;
+  other_participant_avatar_focus_x: number;
+  other_participant_avatar_focus_y: number;
+  other_participant_avatar_zoom: number;
   last_message_preview: string;
   last_message_at: string;
   unread_count: number;
@@ -72,11 +77,25 @@ export type AppConversation = {
   lastMessageAt: string;
 };
 
+export type AppConversationPublicCounterpart = {
+  displayName: string;
+  publicSlug: string;
+  avatarPath: string | null;
+  avatarFocusX: number;
+  avatarFocusY: number;
+  avatarZoom: number;
+};
+
 export type AppConversationSummary = {
   id: string;
   listingId: string | null;
   listingTitle: string;
   otherParticipantDisplayName: string;
+  otherParticipantPublicSlug: string;
+  otherParticipantAvatarPath: string | null;
+  otherParticipantAvatarFocusX: number;
+  otherParticipantAvatarFocusY: number;
+  otherParticipantAvatarZoom: number;
   lastMessagePreview: string;
   lastMessageAt: string;
   unreadCount: number;
@@ -143,6 +162,12 @@ export function isDatabaseConversationSummaryRow(
     (typeof value.listing_id === 'string' || value.listing_id === null) &&
     typeof value.listing_title_snapshot === 'string' &&
     typeof value.other_participant_display_name === 'string' &&
+    typeof value.other_participant_public_slug === 'string' &&
+    (typeof value.other_participant_avatar_path === 'string' ||
+      value.other_participant_avatar_path === null) &&
+    typeof value.other_participant_avatar_focus_x === 'number' &&
+    typeof value.other_participant_avatar_focus_y === 'number' &&
+    typeof value.other_participant_avatar_zoom === 'number' &&
     typeof value.last_message_preview === 'string' &&
     typeof value.last_message_at === 'string' &&
     typeof value.unread_count === 'number' &&
@@ -245,6 +270,11 @@ export function databaseConversationSummaryRowToApp(
     listingId: row.listing_id,
     listingTitle: row.listing_title_snapshot,
     otherParticipantDisplayName: row.other_participant_display_name,
+    otherParticipantPublicSlug: row.other_participant_public_slug,
+    otherParticipantAvatarPath: row.other_participant_avatar_path,
+    otherParticipantAvatarFocusX: row.other_participant_avatar_focus_x,
+    otherParticipantAvatarFocusY: row.other_participant_avatar_focus_y,
+    otherParticipantAvatarZoom: row.other_participant_avatar_zoom,
     lastMessagePreview: row.last_message_preview,
     lastMessageAt: row.last_message_at,
     unreadCount: row.unread_count,

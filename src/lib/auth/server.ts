@@ -36,6 +36,10 @@ function isProfileRow(value: unknown): value is {
   public_slug: string;
   bio: string | null;
   location: string | null;
+  avatar_path: string | null;
+  avatar_focus_x: number;
+  avatar_focus_y: number;
+  avatar_zoom: number;
   created_at: string;
   updated_at: string;
 } {
@@ -49,6 +53,10 @@ function isProfileRow(value: unknown): value is {
     public_slug: unknown;
     bio: unknown;
     location: unknown;
+    avatar_path: unknown;
+    avatar_focus_x: unknown;
+    avatar_focus_y: unknown;
+    avatar_zoom: unknown;
     created_at: unknown;
     updated_at: unknown;
   }>;
@@ -59,6 +67,10 @@ function isProfileRow(value: unknown): value is {
     typeof profile.public_slug === 'string' &&
     (profile.bio === null || typeof profile.bio === 'string') &&
     (profile.location === null || typeof profile.location === 'string') &&
+    (profile.avatar_path === null || typeof profile.avatar_path === 'string') &&
+    typeof profile.avatar_focus_x === 'number' &&
+    typeof profile.avatar_focus_y === 'number' &&
+    typeof profile.avatar_zoom === 'number' &&
     typeof profile.created_at === 'string' &&
     typeof profile.updated_at === 'string'
   );
@@ -133,7 +145,7 @@ export async function getCurrentUserResult(): Promise<CurrentUserResult> {
 
   const { data, error } = await supabase
     .from('profiles')
-    .select('id, display_name, public_slug, bio, location, created_at, updated_at')
+    .select('id, display_name, public_slug, bio, location, avatar_path, avatar_focus_x, avatar_focus_y, avatar_zoom, created_at, updated_at')
     .eq('id', claimsData.claims.sub)
     .maybeSingle();
 
@@ -147,6 +159,10 @@ export async function getCurrentUserResult(): Promise<CurrentUserResult> {
     publicSlug: data.public_slug,
     bio: data.bio,
     location: data.location,
+    avatarPath: data.avatar_path,
+    avatarFocusX: data.avatar_focus_x,
+    avatarFocusY: data.avatar_focus_y,
+    avatarZoom: data.avatar_zoom,
     createdAt: data.created_at,
     updatedAt: data.updated_at,
   };

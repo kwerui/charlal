@@ -16,6 +16,10 @@ export type PublicSellerProfile = {
   displayName: string;
   bio: string | null;
   location: string | null;
+  avatarPath: string | null;
+  avatarFocusX: number;
+  avatarFocusY: number;
+  avatarZoom: number;
   memberSince: string;
 };
 
@@ -24,6 +28,10 @@ type PublicSellerProfileRow = {
   display_name: string;
   bio: string | null;
   location: string | null;
+  avatar_path: string | null;
+  avatar_focus_x: number;
+  avatar_focus_y: number;
+  avatar_zoom: number;
   member_since: string;
 };
 
@@ -52,6 +60,10 @@ function isPublicSellerProfileRow(value: unknown): value is PublicSellerProfileR
     typeof row.display_name === 'string' &&
     (row.bio === null || typeof row.bio === 'string') &&
     (row.location === null || typeof row.location === 'string') &&
+    (row.avatar_path === null || typeof row.avatar_path === 'string') &&
+    typeof row.avatar_focus_x === 'number' &&
+    typeof row.avatar_focus_y === 'number' &&
+    typeof row.avatar_zoom === 'number' &&
     typeof row.member_since === 'string'
   );
 }
@@ -64,6 +76,10 @@ function mapPublicSellerProfileRow(
     displayName: row.display_name,
     bio: row.bio,
     location: row.location,
+    avatarPath: row.avatar_path,
+    avatarFocusX: row.avatar_focus_x,
+    avatarFocusY: row.avatar_focus_y,
+    avatarZoom: row.avatar_zoom,
     memberSince: row.member_since,
   };
 }
