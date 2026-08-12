@@ -1248,6 +1248,52 @@ body {
   box-shadow: var(--focus-ring);
 }
 
+.listing-status-edit-field {
+  display: grid;
+  gap: 12px;
+  margin: 0;
+  min-inline-size: 0;
+  padding: 14px;
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  background: var(--color-surface-muted);
+}
+
+.listing-status-edit-field .form-field {
+  margin: 0;
+}
+
+.listing-status-help {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+}
+
+.listing-status-help div {
+  display: grid;
+  grid-template-columns: minmax(82px, max-content) minmax(0, 1fr);
+  gap: 8px 12px;
+}
+
+.listing-status-help dt,
+.listing-status-help dd {
+  margin: 0;
+  overflow-wrap: anywhere;
+  line-height: 1.35;
+}
+
+.listing-status-help dt {
+  color: var(--text-dark);
+  font-size: 13px;
+  font-weight: 850;
+}
+
+.listing-status-help dd {
+  color: var(--text-light);
+  font-size: 13px;
+  font-weight: 650;
+}
+
 .form-field-full,
 .disabled-upload-section,
 .listing-photo-section,
@@ -1879,6 +1925,71 @@ body {
   box-shadow: 0 0 0 5px rgba(37,99,235,0.18), var(--shadow-lg);
 }
 
+.listing-status-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: fit-content;
+  min-height: 28px;
+  padding: 4px 9px;
+  border-radius: var(--radius-pill);
+  border: 1px solid var(--border-color);
+  background: var(--color-surface-muted);
+  color: var(--text-dark);
+  font-size: 13px;
+  font-weight: 850;
+  line-height: 1.2;
+}
+
+.listing-status-badge--active {
+  border-color: rgba(21, 128, 61, 0.34);
+  background: var(--color-success-soft);
+  color: var(--color-success);
+}
+
+.listing-status-badge--reserved {
+  border-color: rgba(217, 119, 6, 0.44);
+  background: rgba(217, 119, 6, 0.14);
+  color: #92400e;
+}
+
+.listing-status-badge--sold {
+  border-color: rgba(220, 38, 38, 0.34);
+  background: rgba(220, 38, 38, 0.12);
+  color: #b91c1c;
+}
+
+.listing-status-badge--archived {
+  border-color: rgba(100, 116, 139, 0.34);
+  background: rgba(100, 116, 139, 0.1);
+  color: var(--text-light);
+}
+
+.listing-info .listing-status-badge {
+  display: flex;
+  margin-bottom: 8px;
+}
+
+@media (prefers-color-scheme: dark) {
+  .listing-status-badge--active {
+    border-color: rgba(74, 222, 128, 0.36);
+    background: rgba(74, 222, 128, 0.14);
+    color: #bbf7d0;
+  }
+
+  .listing-status-badge--reserved {
+    border-color: rgba(251, 191, 36, 0.42);
+    background: rgba(251, 191, 36, 0.16);
+    color: #fde68a;
+  }
+   .listing-status-badge--sold {
+    border-color: rgba(248, 113, 113, 0.42);
+    background: rgba(220, 38, 38, 0.16);
+    color: #fca5a5;
+  }
+
+}
+
 .seller-profile-page {
   display: grid;
   gap: 22px;
@@ -2296,6 +2407,17 @@ body {
   font-weight: 700;
 }
 
+.listing-detail-status-note {
+  margin: 0;
+  padding: 12px 14px;
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  background: var(--bg-light);
+  color: var(--text-dark);
+  font-weight: 700;
+  line-height: 1.4;
+}
+
 .listing-detail-meta {
   display: grid;
   gap: 10px;
@@ -2618,6 +2740,8 @@ body {
 
 .message-list {
   display: grid;
+  align-content: start;
+  align-items: start;
   gap: 12px;
   max-height: min(58vh, 620px);
   min-height: min(360px, 48vh);
@@ -3108,6 +3232,11 @@ body {
 
   .post-ad-form {
     grid-template-columns: 1fr;
+  }
+
+  .listing-status-help div {
+    grid-template-columns: 1fr;
+    gap: 2px;
   }
 
   .search-container {

@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import { content } from '@/content/tyv';
-import { listings } from '@/data/listings';
+import { getListingStatus, listings } from '@/data/listings';
 import { getCurrentUserResult } from '@/lib/auth/server';
 import {
   findConversationIdForListing,
@@ -71,6 +71,27 @@ export default async function ContactSellerPage({
   }
 
   const listing = listingResult.listing;
+  const listingStatus = getListingStatus(listing);
+
+  if (listingStatus === 'sold' || listingStatus === 'archived') {
+    return (
+      <main className="form-page">
+        <section className="form-panel" aria-labelledby="contact-seller-title">
+          <div className="empty-results" role="status">
+            <h1 id="contact-seller-title">{content.messageSellerTitle}</h1>
+            <p>
+              {listingStatus === 'sold'
+                ? content.listingSoldMessagingUnavailableMessage
+                : content.listingArchivedMessagingUnavailableMessage}
+            </p>
+            <Link href={`/listing/${listing.id}`} className="secondary-button edit-listing-state-link">
+              {content.backToResults}
+            </Link>
+          </div>
+        </section>
+      </main>
+    );
+  }
 
   if (!listing.ownerId || listing.ownerId === authResult.user.id) {
     return (

@@ -3,9 +3,11 @@
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
+import { updateListingStatusAction } from '@/app/account/listingStatusActions';
 import ListingForm, { type ListingFormInitialValues } from '@/app/components/ListingForm';
 import { content } from '@/content/tyv';
-import type { Listing } from '@/data/listings';
+import type { Listing, ListingStatus } from '@/data/listings';
+import { getListingStatus } from '@/data/listings';
 import { getUserOwnerId } from '@/lib/listingOwnership';
 import type {
   ListingFormCategory,
@@ -71,6 +73,9 @@ export default function EditListingForm({
   const [errors, setErrors] = useState<string[]>([]);
   const [successMessage, setSuccessMessage] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [selectedStatus, setSelectedStatus] = useState<ListingStatus>(
+    initialListing ? getListingStatus(initialListing) : 'active'
+  );
 
   useEffect(() => {
     if (authStatus === 'unauthenticated') {
@@ -113,6 +118,7 @@ export default function EditListingForm({
       }
 
       setListing(result.listing);
+      setSelectedStatus(getListingStatus(result.listing));
       setEditStatus('ready');
     }
 
@@ -134,6 +140,7 @@ export default function EditListingForm({
       return;
     }
 
+    const originalStatus = getListingStatus(listing);
     const publicDisplayName = currentUser.displayName.trim();
 
     if (!publicDisplayName) {
@@ -184,6 +191,21 @@ export default function EditListingForm({
       setSuccessMessage(content.editAdvertisementSavedMessage);
       setErrors([content.unableUploadPhotoMessage]);
       return;
+    }
+
+    if (selectedStatus !== originalStatus) {
+      const statusResult = await updateListingStatusAction({
+        listingId: String(imageSaveResult.listing.id),
+        status: selectedStatus,
+      });
+
+      if (!statusResult.ok) {
+        setIsSubmitting(false);
+        setListing(imageSaveResult.listing);
+        setSuccessMessage('');
+        setErrors([content.listingStatusUpdateFailedMessage]);
+        return;
+      }
     }
 
     setSuccessMessage(content.editAdvertisementSavedMessage);
@@ -279,6 +301,15 @@ export default function EditListingForm({
       categories={categories}
       initialValues={getEditListingInitialValues(listing)}
       initialImages={listing.images || []}
+      statusField={{
+        value: selectedStatus,
+        onChange: (status) => {
+          setSelectedStatus(status);
+          setErrors([]);
+          setSuccessMessage('');
+        },
+        disabled: isSubmitting,
+      }}
       submitButtonLabel={content.editAdvertisementSaveButton}
       submittingButtonLabel={content.editAdvertisementSavingButton}
       isSubmitting={isSubmitting}

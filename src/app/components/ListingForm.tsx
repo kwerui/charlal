@@ -4,7 +4,7 @@ import Link from 'next/link';
 import type { ChangeEvent, FormEvent } from 'react';
 import { useEffect, useRef, useState } from 'react';
 import { content } from '@/content/tyv';
-import type { ListingImage } from '@/data/listings';
+import type { ListingImage, ListingStatus } from '@/data/listings';
 import {
   getListingFormValues,
   type ListingFormCategory,
@@ -42,6 +42,11 @@ type Props = {
   successMessage?: string;
   cancelHref?: string;
   initialImages?: ListingImage[];
+  statusField?: {
+    value: ListingStatus;
+    onChange: (status: ListingStatus) => void;
+    disabled?: boolean;
+  };
   onCancel?: () => void;
   onSubmit: (
     values: ValidatedListingFormValues,
@@ -73,6 +78,7 @@ export default function ListingForm({
   successMessage,
   cancelHref,
   initialImages = [],
+  statusField,
   onCancel,
   onSubmit,
 }: Props) {
@@ -384,6 +390,46 @@ export default function ListingForm({
           onChange={clearValidationErrors}
         />
       </label>
+
+      {statusField ? (
+        <fieldset className="listing-status-edit-field form-field-full">
+          <label className="form-field" htmlFor="listing-status">
+            <span>{content.advertisementStatusLabel}</span>
+            <select
+              id="listing-status"
+              name="status"
+              value={statusField.value}
+              onChange={(event) => {
+                statusField.onChange(event.target.value as ListingStatus);
+              }}
+              disabled={Boolean(statusField.disabled)}
+            >
+              <option value="active">{content.listingStatusActive}</option>
+              <option value="reserved">{content.listingStatusReserved}</option>
+              <option value="sold">{content.listingStatusSold}</option>
+              <option value="archived">{content.listingStatusArchived}</option>
+            </select>
+          </label>
+          <dl className="listing-status-help">
+            <div>
+              <dt>{content.listingStatusActive}</dt>
+              <dd>{content.listingStatusActiveHelp}</dd>
+            </div>
+            <div>
+              <dt>{content.listingStatusReserved}</dt>
+              <dd>{content.listingStatusReservedHelp}</dd>
+            </div>
+            <div>
+              <dt>{content.listingStatusSold}</dt>
+              <dd>{content.listingStatusSoldHelp}</dd>
+            </div>
+            <div>
+              <dt>{content.listingStatusArchived}</dt>
+              <dd>{content.listingStatusArchivedHelp}</dd>
+            </div>
+          </dl>
+        </fieldset>
+      ) : null}
 
       <div className="listing-photo-section form-field-full">
         <div className="listing-photo-heading">
