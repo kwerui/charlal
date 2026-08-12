@@ -620,7 +620,11 @@ export default function AccountDashboard({
 
               return (
                 <article key={listingId} className="my-ad-item">
-                  <ListingCard listing={listing} fromHref="/account" />
+                  <ListingCard
+                    listing={listing}
+                    fromHref="/account"
+                    showActiveStatus
+                  />
                   <div className="my-ad-actions">
                     <Link
                       href={`/account/listings/${listing.id}/edit?from=/account`}

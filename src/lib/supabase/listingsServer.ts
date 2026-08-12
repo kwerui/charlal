@@ -50,6 +50,7 @@ export async function listPublicDatabaseListings(): Promise<DatabaseListingReadR
   const { data, error } = await supabase
     .from('listings')
     .select(DATABASE_LISTING_SELECT_COLUMNS)
+    .in('status', ['active', 'reserved'])
     .order('created_at', { ascending: false });
 
   if (error || !isDatabaseListingRowArray(data)) {

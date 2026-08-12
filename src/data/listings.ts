@@ -17,6 +17,7 @@ export type Listing = {
   propertyType?: 'apartments' | 'land' | 'commercial' | 'storage';
   marketplaceType?: string;
   images?: ListingImage[];
+  status?: ListingStatus;
 };
 
 export type ListingImage = {
@@ -25,6 +26,28 @@ export type ListingImage = {
   position: number;
   storagePath?: string;
 };
+
+export type ListingStatus = 'active' | 'reserved' | 'sold' | 'archived';
+
+export const LISTING_STATUSES: ListingStatus[] = [
+  'active',
+  'reserved',
+  'sold',
+  'archived',
+];
+
+export function isListingStatus(value: unknown): value is ListingStatus {
+  return (
+    value === 'active' ||
+    value === 'reserved' ||
+    value === 'sold' ||
+    value === 'archived'
+  );
+}
+
+export function getListingStatus(listing: Listing): ListingStatus {
+  return isListingStatus(listing.status) ? listing.status : 'active';
+}
 
 export const LOCAL_LISTING_PLACEHOLDER_IMAGE =
   'https://img.magnific.com/free-photo/hands-holding-colorful-paper-bags_1301-1750.jpg?semt=ais_hybrid&w=740&q=80';

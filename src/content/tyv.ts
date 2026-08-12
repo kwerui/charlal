@@ -207,6 +207,24 @@ export const content = {
   listingDetailTransactionTypeLabel: "Transaction type / Транзакцияның хевири",
   listingDetailMarketplaceTypeLabel: "Marketplace type / Рынок хевири",
   listingDetailUpdatedAtLabel: "Last updated / Сөөлгү катап чаарткан", // TODO: add reviewed Tuvan translation.
+  listingStatusLabel: "Status", // TODO: add reviewed Tuvan translation.
+  advertisementStatusLabel: "Advertisement status", // TODO: add reviewed Tuvan translation.
+  listingStatusActive: "Active", // TODO: add reviewed Tuvan translation.
+  listingStatusReserved: "Reserved", // TODO: add reviewed Tuvan translation.
+  listingStatusSold: "Sold", // TODO: add reviewed Tuvan translation.
+  listingStatusArchived: "Archived", // TODO: add reviewed Tuvan translation.
+  listingStatusControlLabel: "Status", // TODO: add reviewed Tuvan translation.
+  listingStatusUpdatingMessage: "Updating status...", // TODO: add reviewed Tuvan translation.
+  listingStatusUpdateFailedMessage: "Unable to update advertisement status.", // TODO: add reviewed Tuvan translation.
+  listingStatusActiveHelp: "Visible normally.", // TODO: add reviewed Tuvan translation.
+  listingStatusReservedHelp: "Still visible, but marked as reserved.", // TODO: add reviewed Tuvan translation.
+  listingStatusSoldHelp: "No longer shown in marketplace results.", // TODO: add reviewed Tuvan translation.
+  listingStatusArchivedHelp: "Hidden from everyone except you.", // TODO: add reviewed Tuvan translation.
+  listingReservedDetailMessage: "This advertisement is reserved, but you can still contact the seller.", // TODO: add reviewed Tuvan translation.
+  listingSoldDetailMessage: "This advertisement has been sold.", // TODO: add reviewed Tuvan translation.
+  listingArchivedDetailMessage: "This advertisement is archived and visible only to its owner.", // TODO: add reviewed Tuvan translation.
+  listingSoldMessagingUnavailableMessage: "This advertisement has been sold, so new seller conversations are unavailable.", // TODO: add reviewed Tuvan translation.
+  listingArchivedMessagingUnavailableMessage: "This advertisement is archived, so new seller conversations are unavailable.", // TODO: add reviewed Tuvan translation.
   sellerProfileTitle: "Seller profile / Садыгжының профили", // TODO: add reviewed Tuvan translation.
   memberSinceLabel: "Member since / Чылдан эгелеп кежигүн", // TODO: add reviewed Tuvan translation.
   activeListingsTitle: "Active listings / Ажылдап турар даңзылар", // TODO: add reviewed Tuvan translation.

@@ -2,12 +2,13 @@ import Link from 'next/link';
 import BackToResultsLink from '@/app/components/BackToResultsLink';
 import ListingImageGallery from '@/app/components/ListingImageGallery';
 import ListingMutationRefreshBoundary from '@/app/components/ListingMutationRefreshBoundary';
+import ListingStatusBadge from '@/app/components/ListingStatusBadge';
 import ListingDetailOwnerActions, {
   type ListingDetailViewerState,
 } from '@/app/components/ListingDetailOwnerActions';
 import { content } from '@/content/tyv';
 import type { Listing } from '@/data/listings';
-import { formatListingPrice } from '@/data/listings';
+import { formatListingPrice, getListingStatus } from '@/data/listings';
 import { resolveListingImage } from '@/lib/listingPlaceholders';
 
 type TypeOption = {
@@ -41,6 +42,8 @@ export default function ListingDetailView({
   initialViewerState,
 }: Props) {
   const listingImage = resolveListingImage(listing);
+  const listingStatus = getListingStatus(listing);
+  const hasDatabaseStatus = listing.status !== undefined;
   const publicSellerName = sellerName || listing.sellerName;
   const backLabel =
     backHref === '/'
@@ -84,9 +87,25 @@ export default function ListingDetailView({
         />
 
         <section className="listing-detail-panel">
+          {hasDatabaseStatus ? (
+            <ListingStatusBadge status={listingStatus} showActive />
+          ) : null}
           <h1 className="listing-detail-title">{listing.title}</h1>
           <p className="listing-detail-price">{formatListingPrice(listing.price)}</p>
           <p className="listing-detail-location">{listing.location}</p>
+          {hasDatabaseStatus && listingStatus === 'reserved' ? (
+            <p className="listing-detail-status-note">
+              {content.listingReservedDetailMessage}
+            </p>
+          ) : hasDatabaseStatus && listingStatus === 'sold' ? (
+            <p className="listing-detail-status-note">
+              {content.listingSoldDetailMessage}
+            </p>
+          ) : hasDatabaseStatus && listingStatus === 'archived' ? (
+            <p className="listing-detail-status-note">
+              {content.listingArchivedDetailMessage}
+            </p>
+          ) : null}
 
           <dl className="listing-detail-meta">
             <div>

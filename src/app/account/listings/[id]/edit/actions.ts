@@ -6,7 +6,7 @@ type EditedListingRevalidationInput = {
   listingId: string;
 };
 
-export async function revalidateEditedListingRoutes({
+export async function revalidateListingMutationRoutes({
   listingId,
 }: EditedListingRevalidationInput): Promise<void> {
   const safeListingId = listingId.trim();
@@ -19,6 +19,13 @@ export async function revalidateEditedListingRoutes({
   revalidatePath('/');
   revalidatePath('/account');
   revalidatePath('/search');
+  revalidatePath('/category/[slug]', 'page');
   revalidatePath('/category/[slug]/[subcategory]', 'page');
   revalidatePath('/seller/[slug]', 'page');
+}
+
+export async function revalidateEditedListingRoutes(
+  input: EditedListingRevalidationInput
+): Promise<void> {
+  await revalidateListingMutationRoutes(input);
 }

@@ -6,6 +6,7 @@ import { content } from '@/content/tyv';
 import type { Listing } from '@/data/listings';
 import { useAuthStatus } from '@/lib/auth/client';
 import { recordEditNavigation } from '@/lib/editNavigationStorage';
+import { getListingStatus } from '@/data/listings';
 import { isListingOwnedByUser } from '@/lib/listingOwnership';
 
 export type ListingDetailViewerState =
@@ -31,6 +32,7 @@ export default function ListingDetailOwnerActions({
   const editHref = `/account/listings/${listing.id}/edit?from=${encodeURIComponent(
     currentHref
   )}`;
+  const listingStatus = getListingStatus(listing);
   const isDatabaseListing =
     typeof listing.id === 'string' && listing.id.startsWith('db-');
   const hasDatabaseSeller = isDatabaseListing && Boolean(listing.ownerId);
@@ -65,6 +67,18 @@ export default function ListingDetailOwnerActions({
     return (
       <div className="listing-detail-actions" aria-busy="true">
         <div className="listing-detail-action-skeleton" aria-hidden="true" />
+      </div>
+    );
+  }
+
+  if (listingStatus === 'sold' || listingStatus === 'archived') {
+    return (
+      <div className="listing-detail-actions">
+        <p className="listing-messaging-unavailable">
+          {listingStatus === 'sold'
+            ? content.listingSoldMessagingUnavailableMessage
+            : content.listingArchivedMessagingUnavailableMessage}
+        </p>
       </div>
     );
   }
