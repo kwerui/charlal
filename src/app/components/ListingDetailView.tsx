@@ -3,6 +3,7 @@ import BackToResultsLink from '@/app/components/BackToResultsLink';
 import ListingImageGallery from '@/app/components/ListingImageGallery';
 import ListingMutationRefreshBoundary from '@/app/components/ListingMutationRefreshBoundary';
 import ListingStatusBadge from '@/app/components/ListingStatusBadge';
+import ProfileAvatar from '@/app/components/ProfileAvatar';
 import ListingDetailOwnerActions, {
   type ListingDetailViewerState,
 } from '@/app/components/ListingDetailOwnerActions';
@@ -30,6 +31,10 @@ type Props = {
   backHref: string;
   sellerName?: string;
   sellerPublicSlug?: string | null;
+  sellerAvatarPath?: string | null;
+  sellerAvatarFocusX?: number;
+  sellerAvatarFocusY?: number;
+  sellerAvatarZoom?: number;
   initialViewerState: ListingDetailViewerState;
 };
 
@@ -39,6 +44,10 @@ export default function ListingDetailView({
   backHref,
   sellerName,
   sellerPublicSlug,
+  sellerAvatarPath,
+  sellerAvatarFocusX = 50,
+  sellerAvatarFocusY = 50,
+  sellerAvatarZoom = 100,
   initialViewerState,
 }: Props) {
   const listingImage = resolveListingImage(listing);
@@ -111,16 +120,28 @@ export default function ListingDetailView({
             <div>
               <dt>{content.listingDetailSellerLabel}</dt>
               <dd>
-                {sellerPublicSlug ? (
-                  <Link
-                    href={`/seller/${sellerPublicSlug}`}
-                    className="listing-detail-seller-link"
-                  >
-                    {publicSellerName}
-                  </Link>
-                ) : (
-                  publicSellerName
-                )}
+                <span className="listing-detail-seller-identity">
+                  {sellerPublicSlug ? (
+                    <ProfileAvatar
+                      avatarPath={sellerAvatarPath}
+                      displayName={publicSellerName}
+                      size="small"
+                      focusX={sellerAvatarFocusX}
+                      focusY={sellerAvatarFocusY}
+                      zoom={sellerAvatarZoom}
+                    />
+                  ) : null}
+                  {sellerPublicSlug ? (
+                    <Link
+                      href={`/seller/${sellerPublicSlug}`}
+                      className="listing-detail-seller-link"
+                    >
+                      {publicSellerName}
+                    </Link>
+                  ) : (
+                    publicSellerName
+                  )}
+                </span>
               </dd>
             </div>
             <div>

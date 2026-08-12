@@ -87,6 +87,10 @@ function isProfileRow(value: unknown): value is {
   public_slug: string;
   bio: string | null;
   location: string | null;
+  avatar_path: string | null;
+  avatar_focus_x: number;
+  avatar_focus_y: number;
+  avatar_zoom: number;
   created_at: string;
   updated_at: string;
 } {
@@ -100,6 +104,10 @@ function isProfileRow(value: unknown): value is {
     public_slug: unknown;
     bio: unknown;
     location: unknown;
+    avatar_path: unknown;
+    avatar_focus_x: unknown;
+    avatar_focus_y: unknown;
+    avatar_zoom: unknown;
     created_at: unknown;
     updated_at: unknown;
   }>;
@@ -110,6 +118,10 @@ function isProfileRow(value: unknown): value is {
     typeof profile.public_slug === 'string' &&
     (profile.bio === null || typeof profile.bio === 'string') &&
     (profile.location === null || typeof profile.location === 'string') &&
+    (profile.avatar_path === null || typeof profile.avatar_path === 'string') &&
+    typeof profile.avatar_focus_x === 'number' &&
+    typeof profile.avatar_focus_y === 'number' &&
+    typeof profile.avatar_zoom === 'number' &&
     typeof profile.created_at === 'string' &&
     typeof profile.updated_at === 'string'
   );
@@ -121,6 +133,10 @@ function mapProfile(profile: {
   public_slug: string;
   bio: string | null;
   location: string | null;
+  avatar_path: string | null;
+  avatar_focus_x: number;
+  avatar_focus_y: number;
+  avatar_zoom: number;
   created_at: string;
   updated_at: string;
 }): AppProfile {
@@ -130,6 +146,10 @@ function mapProfile(profile: {
     publicSlug: profile.public_slug,
     bio: profile.bio,
     location: profile.location,
+    avatarPath: profile.avatar_path,
+    avatarFocusX: profile.avatar_focus_x,
+    avatarFocusY: profile.avatar_focus_y,
+    avatarZoom: profile.avatar_zoom,
     createdAt: profile.created_at,
     updatedAt: profile.updated_at,
   };
@@ -202,7 +222,7 @@ async function loadProfile(userId: string): Promise<AppProfile | null> {
   const supabase = createClient();
   const { data, error } = await supabase
     .from('profiles')
-    .select('id, display_name, public_slug, bio, location, created_at, updated_at')
+    .select('id, display_name, public_slug, bio, location, avatar_path, avatar_focus_x, avatar_focus_y, avatar_zoom, created_at, updated_at')
     .eq('id', userId)
     .maybeSingle();
 
@@ -484,7 +504,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         location: safeLocation,
       })
       .eq('id', user.id)
-      .select('id, display_name, public_slug, bio, location, created_at, updated_at')
+      .select('id, display_name, public_slug, bio, location, avatar_path, avatar_focus_x, avatar_focus_y, avatar_zoom, created_at, updated_at')
       .single();
 
     if (error || !isProfileRow(data)) {

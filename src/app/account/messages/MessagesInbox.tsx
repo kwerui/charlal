@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import ProfileAvatar from '@/app/components/ProfileAvatar';
 import { content } from '@/content/tyv';
 import type { AppConversationSummary } from '@/lib/messagingTypes';
 import { useMessagingRealtime } from '@/lib/messagingRealtime';
@@ -41,46 +42,63 @@ export default function MessagesInbox({ initialConversations }: Props) {
           const hasUnreadMessages = conversation.unreadCount > 0;
 
           return (
-            <Link
+            <article
               key={conversation.id}
-              href={`/account/messages/${conversation.id}`}
               className={
                 hasUnreadMessages
                   ? 'conversation-summary-card conversation-summary-card--unread'
                   : 'conversation-summary-card'
               }
             >
-              <span className="conversation-summary-title">
-                {conversation.listingTitle}
-              </span>
-              <span className="conversation-summary-participant">
-                {conversation.otherParticipantDisplayName}
-              </span>
-              <span className="conversation-summary-preview">
-                {conversation.lastMessageDeleted
-                  ? content.messageDeletedLabel
-                  : conversation.lastMessagePreview}
-              </span>
-              <span className="conversation-summary-meta">
-                <time
-                  className="conversation-summary-time"
-                  dateTime={conversation.lastMessageAt}
-                >
-                  {formatMessageDate(conversation.lastMessageAt)}
-                </time>
-                {hasUnreadMessages ? (
-                  <span
-                    className="conversation-unread-count-badge"
-                    aria-label={`${conversation.unreadCount} ${content.unreadMessagesLabel}`}
-                    title={`${conversation.unreadCount} ${content.unreadMessagesLabel}`}
+              <Link
+                href={`/seller/${conversation.otherParticipantPublicSlug}`}
+                className="conversation-summary-profile-link"
+              >
+                <ProfileAvatar
+                  avatarPath={conversation.otherParticipantAvatarPath}
+                  displayName={conversation.otherParticipantDisplayName}
+                  size="small"
+                  focusX={conversation.otherParticipantAvatarFocusX}
+                  focusY={conversation.otherParticipantAvatarFocusY}
+                  zoom={conversation.otherParticipantAvatarZoom}
+                />
+                <span className="conversation-summary-participant">
+                  {conversation.otherParticipantDisplayName}
+                </span>
+              </Link>
+              <Link
+                href={`/account/messages/${conversation.id}`}
+                className="conversation-summary-conversation-link"
+              >
+                <span className="conversation-summary-title">
+                  {conversation.listingTitle}
+                </span>
+                <span className="conversation-summary-preview">
+                  {conversation.lastMessageDeleted
+                    ? content.messageDeletedLabel
+                    : conversation.lastMessagePreview}
+                </span>
+                <span className="conversation-summary-meta">
+                  <time
+                    className="conversation-summary-time"
+                    dateTime={conversation.lastMessageAt}
                   >
-                    {conversation.unreadCount > 99
-                      ? '99+'
-                      : conversation.unreadCount}
-                  </span>
-                ) : null}
-              </span>
-            </Link>
+                    {formatMessageDate(conversation.lastMessageAt)}
+                  </time>
+                  {hasUnreadMessages ? (
+                    <span
+                      className="conversation-unread-count-badge"
+                      aria-label={`${conversation.unreadCount} ${content.unreadMessagesLabel}`}
+                      title={`${conversation.unreadCount} ${content.unreadMessagesLabel}`}
+                    >
+                      {conversation.unreadCount > 99
+                        ? '99+'
+                        : conversation.unreadCount}
+                    </span>
+                  ) : null}
+                </span>
+              </Link>
+            </article>
           );
         })}
       </div>

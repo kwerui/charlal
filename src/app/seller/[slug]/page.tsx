@@ -1,6 +1,7 @@
 import { notFound } from 'next/navigation';
 import ListingCard from '@/app/components/ListingCard';
 import ListingMutationRefreshBoundary from '@/app/components/ListingMutationRefreshBoundary';
+import PublicSellerAvatarViewer from '@/app/components/PublicSellerAvatarViewer';
 import ResultsScrollRestorer from '@/app/components/ResultsScrollRestorer';
 import { content } from '@/content/tyv';
 import { getPublicSellerPageBySlug } from '@/lib/supabase/publicSellerProfilesServer';
@@ -53,8 +54,19 @@ export default async function SellerPage({ params }: SellerPageProps) {
       />
       <ResultsScrollRestorer resultsHref={sellerHref} />
       <section className="seller-profile-header-card" aria-labelledby="seller-profile-title">
-        <p className="hero-kicker">{content.sellerProfileTitle}</p>
-        <h1 id="seller-profile-title">{profile.displayName}</h1>
+        <div className="seller-profile-identity">
+          <PublicSellerAvatarViewer
+            avatarPath={profile.avatarPath}
+            displayName={profile.displayName}
+            focusX={profile.avatarFocusX}
+            focusY={profile.avatarFocusY}
+            zoom={profile.avatarZoom}
+          />
+          <div>
+            <p className="hero-kicker">{content.sellerProfileTitle}</p>
+            <h1 id="seller-profile-title">{profile.displayName}</h1>
+          </div>
+        </div>
         <dl className="seller-profile-meta">
           {profile.location ? (
             <div>

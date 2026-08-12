@@ -320,6 +320,33 @@ export const content = {
   accountProfileLoadFailedMessage: "Your account is signed in, but the profile could not be loaded. / Силерниң аккаунтуңар кирген, ынчалза-даа профильди үндүрүп шыдаваан.", // TODO: add reviewed Tuvan translation.
   unableLoadProfileMessage: "Unable to load profile / Профильди үндүрүп шыдаваан", // TODO: add reviewed Tuvan translation.
   profileUpdatedMessage: "Profile updated. / Профиль чаарттынган.", // TODO: add reviewed Tuvan translation.
+  profilePhotoLabel: "Profile photo", // TODO: add reviewed Tuvan translation.
+  chooseProfilePhotoButton: "Choose photo", // TODO: add reviewed Tuvan translation.
+  changeProfilePhotoButton: "Change photo", // TODO: add reviewed Tuvan translation.
+  saveProfilePhotoButton: "Save photo", // TODO: add reviewed Tuvan translation.
+  removeProfilePhotoButton: "Remove photo", // TODO: add reviewed Tuvan translation.
+  profilePhotoUploadingMessage: "Uploading...", // TODO: add reviewed Tuvan translation.
+  profilePhotoUpdatedMessage: "Profile photo updated.", // TODO: add reviewed Tuvan translation.
+  profilePhotoRemovedMessage: "Profile photo removed.", // TODO: add reviewed Tuvan translation.
+  profilePhotoUploadFailedMessage: "Unable to upload profile photo.", // TODO: add reviewed Tuvan translation.
+  profilePhotoRemoveFailedMessage: "Unable to remove profile photo.", // TODO: add reviewed Tuvan translation.
+  profilePhotoRequirementsMessage: "JPEG, PNG, or WebP. Maximum file size 5 MB.", // TODO: add reviewed Tuvan translation.
+  profilePhotoInvalidFormatMessage: "Invalid image format. Use JPEG, PNG, or WebP.", // TODO: add reviewed Tuvan translation.
+  profilePhotoTooLargeMessage: "Image is too large. Maximum file size is 5 MB.", // TODO: add reviewed Tuvan translation.
+  profilePhotoPreviewTitle: "Profile photo preview", // TODO: add reviewed Tuvan translation.
+  adjustProfilePhotoButton: "Adjust photo", // TODO: add reviewed Tuvan translation.
+  profilePhotoPreviewHelp: "This is how your profile photo will appear.", // TODO: add reviewed Tuvan translation.
+  profilePhotoDragZoomHelp: "Drag photo to reposition. Scroll or use the buttons to zoom.", // TODO: add reviewed Tuvan translation.
+  profilePhotoPositionControlLabel: "Adjust profile photo position", // TODO: add reviewed Tuvan translation.
+  profilePhotoZoomControlsLabel: "Profile photo zoom controls", // TODO: add reviewed Tuvan translation.
+  profilePhotoZoomOutButton: "Zoom out", // TODO: add reviewed Tuvan translation.
+  profilePhotoZoomInButton: "Zoom in", // TODO: add reviewed Tuvan translation.
+  profilePhotoResetFocusButton: "Reset to center", // TODO: add reviewed Tuvan translation.
+  saveProfilePhotoPositionButton: "Save position", // TODO: add reviewed Tuvan translation.
+  removeProfilePhotoConfirmTitle: "Remove profile photo?", // TODO: add reviewed Tuvan translation.
+  removeProfilePhotoConfirmMessage: "Your profile will use the default avatar until you add another photo.", // TODO: add reviewed Tuvan translation.
+  profilePhotoFocusSaveFailedMessage: "Unable to save photo position.", // TODO: add reviewed Tuvan translation.
+  openProfilePhotoViewerLabel: "Open profile photo", // TODO: add reviewed Tuvan translation.
   importedLocalAdvertisementsMessage: "Imported local advertisements / Импорттуг тус черниң чарлалдары", // TODO: add reviewed Tuvan translation.
   noLocalAdvertisementsRequiredMigrationMessage: "No local advertisements required migration. / Тус черниң чарлалдары көжүп чоруурун негевес.", // TODO: add reviewed Tuvan translation.
   localAdvertisementsImportFailedMessage: "Some local advertisements could not be imported. They remain in this browser and can be retried later. / Чамдык тус ​​черниң чарлалдарын киирип шыдаваан. Олар бо браузерде артып каар болгаш соонда катап шенеп болур.", // TODO: add reviewed Tuvan translation.

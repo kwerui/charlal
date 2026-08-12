@@ -6,6 +6,7 @@ import type { FormEvent, MouseEvent } from 'react';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import AccountNativeHistoryRestorer from '@/app/account/AccountNativeHistoryRestorer';
 import AccountRefreshScrollManager from '@/app/account/AccountRefreshScrollManager';
+import ProfilePhotoManager from '@/app/account/ProfilePhotoManager';
 import ListingCard from '@/app/components/ListingCard';
 import ResultsScrollRestorer from '@/app/components/ResultsScrollRestorer';
 import { content } from '@/content/tyv';
@@ -516,6 +517,15 @@ export default function AccountDashboard({
               ? `${content.importedLocalAdvertisementsMessage}: ${legacyMigrationCount}`
               : content.noLocalAdvertisementsRequiredMigrationMessage}
           </p>
+        ) : null}
+        {accountProfile ? (
+          <ProfilePhotoManager
+            profile={accountProfile}
+            displayName={renderedUser.displayName || content.publicSellerFallbackLabel}
+            onChanged={async () => {
+              router.refresh();
+            }}
+          />
         ) : null}
         <form className="public-name-form" onSubmit={handlePublicNameSubmit} noValidate>
           <label className="form-field" htmlFor="account-public-name">
