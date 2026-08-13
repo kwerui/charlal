@@ -38,7 +38,6 @@ export default async function SignInPage({ searchParams }: SignInPageProps) {
     <main className="auth-page">
       <section className="auth-card" aria-labelledby="sign-in-title">
         <div className="auth-card-copy">
-          <p className="hero-kicker">{content.signInKicker}</p>
           <h2 id="sign-in-title" className="auth-title">
             {content.signInTitle}
           </h2>

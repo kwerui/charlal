@@ -1495,6 +1495,13 @@ body {
 
 .policy-checkbox {
   align-items: flex-start;
+  gap: 10px;
+  line-height: 1.45;
+}
+
+.policy-checkbox input {
+  flex: 0 0 auto;
+  margin-top: 2px;
 }
 
 .checkbox-field input {
@@ -4209,18 +4216,19 @@ body {
   }
 
   .auth-page {
-    align-items: stretch;
-    min-height: calc(100vh - 126px);
-    padding: 0;
+      align-items: flex-start;
+  min-height: 0;
+  padding: 0;
   }
 
   .auth-card {
     width: 100%;
-    min-height: calc(100vh - 126px);
+    min-height: auto;
+    padding: 36px 30px 44px;
     border-width: 0;
     border-radius: 0;
     box-shadow: none;
-    align-content: center;
+    align-content: start;
   }
 
   .form-page {

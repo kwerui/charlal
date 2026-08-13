@@ -150,10 +150,6 @@ export default function SignUpForm({ nextPath }: Props) {
         </label>
       </div>
 
-      <Link href="/forgot-password" className="inline-link">
-        {content.forgotPasswordLink}
-      </Link>
-
       {errorMessage ? (
         <p className="form-error" role="alert">
           {errorMessage}

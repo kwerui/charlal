@@ -15,7 +15,6 @@ export default async function SignUpPage({ searchParams }: SignUpPageProps) {
     <main className="auth-page">
       <section className="auth-card" aria-labelledby="sign-up-title">
         <div className="auth-card-copy">
-          <p className="hero-kicker">{content.signUpKicker}</p>
           <h2 id="sign-up-title" className="auth-title">
             {content.signUpTitle}
           </h2>

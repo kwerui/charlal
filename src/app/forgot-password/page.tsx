@@ -7,7 +7,6 @@ export default function ForgotPasswordPage() {
     <main className="auth-page">
       <section className="auth-card" aria-labelledby="forgot-password-title">
         <div className="auth-card-copy">
-          <p className="hero-kicker">{content.forgotPasswordKicker}</p>
           <h2 id="forgot-password-title" className="auth-title">
             {content.forgotPasswordTitle}
           </h2>
