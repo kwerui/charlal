@@ -36,8 +36,11 @@ export default async function ConversationPage({
   const threadResult = await getCurrentUserConversationThread(conversationId);
 
   return (
-    <main className="account-page">
-      <section className="account-panel" aria-labelledby="messages-title">
+    <main className="account-page account-page--conversation">
+      <section
+        className="account-panel account-panel--conversation"
+        aria-labelledby="messages-title"
+      >
         <Link href="/account/messages" className="page-back-link">
           {content.backToMessages}
         </Link>

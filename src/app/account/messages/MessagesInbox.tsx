@@ -59,6 +59,13 @@ export default function MessagesInbox({ initialConversations }: Props) {
               }
             >
               <Link
+                href={`/account/messages/${conversation.id}`}
+                className="conversation-summary-card-link"
+                aria-label={`${conversation.listingTitle} — ${conversation.otherParticipantDisplayName}`}
+              >
+                <span className="sr-only">{conversation.listingTitle}</span>
+              </Link>
+              <Link
                 href={`/seller/${conversation.otherParticipantPublicSlug}`}
                 className="conversation-summary-profile-link"
               >
@@ -74,10 +81,7 @@ export default function MessagesInbox({ initialConversations }: Props) {
                   {conversation.otherParticipantDisplayName}
                 </span>
               </Link>
-              <Link
-                href={`/account/messages/${conversation.id}`}
-                className="conversation-summary-conversation-link"
-              >
+              <div className="conversation-summary-conversation-content">
                 <span className="conversation-summary-title">
                   {conversation.listingTitle}
                 </span>
@@ -103,7 +107,7 @@ export default function MessagesInbox({ initialConversations }: Props) {
                     </span>
                   ) : null}
                 </span>
-              </Link>
+              </div>
             </article>
           );
         })}

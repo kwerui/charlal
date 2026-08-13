@@ -2195,107 +2195,73 @@ export default function ConversationThread({
         onSubmit={handleSubmit}
         noValidate
       >
-        <label className="form-field" htmlFor="thread-message-body">
-          <span>{content.writeMessageLabel}</span>
-          <textarea
-            ref={textareaRef}
-            id="thread-message-body"
-            name="body"
-            value={body}
-            maxLength={MESSAGE_BODY_MAX_LENGTH}
-            rows={4}
-            aria-describedby={error ? errorId : undefined}
-            onChange={(event) => {
-              const nextBody = event.target.value;
-
-              setBody(nextBody);
-              setError('');
-
-              if (
-                pendingDeliveryRef.current &&
-                nextBody.trim() !== pendingDeliveryRef.current.body
-              ) {
-                pendingDeliveryRef.current = null;
-                setUploadedPendingAttachments(null);
-
-                if (sendStatusRef.current === 'delivery-uncertain') {
-                  updateSendStatus('idle');
-                }
+        <div className="message-composer-row">
+          <div className="message-attachment-composer">
+            <input
+              ref={attachmentInputRef}
+              id="thread-message-attachments"
+              className="sr-only"
+              type="file"
+              accept={MESSAGE_ATTACHMENT_ACCEPT}
+              multiple
+              onChange={handleAttachmentFilesChange}
+              disabled={
+                sendStatus === 'sending' ||
+                pendingAttachments.length >= MAX_MESSAGE_ATTACHMENTS
               }
-            }}
-            required={pendingAttachments.length === 0}
-          />
-        </label>
-        <div className="message-attachment-composer">
-          <input
-            ref={attachmentInputRef}
-            id="thread-message-attachments"
-            className="sr-only"
-            type="file"
-            accept={MESSAGE_ATTACHMENT_ACCEPT}
-            multiple
-            onChange={handleAttachmentFilesChange}
-            disabled={
-              sendStatus === 'sending' ||
-              pendingAttachments.length >= MAX_MESSAGE_ATTACHMENTS
-            }
-          />
-          <button
-            type="button"
-            className="secondary-button message-attachment-add-button"
-            onClick={() => attachmentInputRef.current?.click()}
-            disabled={
-              sendStatus === 'sending' ||
-              pendingAttachments.length >= MAX_MESSAGE_ATTACHMENTS
-            }
-          >
-            {content.addMessagePhotosButton}
-          </button>
-          <p className="form-help">
-            {content.messageAttachmentRequirementsMessage}
-          </p>
-          {pendingAttachments.length > 0 ? (
-            <div
-              className="message-attachment-preview-list"
-              aria-label={content.messagePhotosLabel}
+            />
+            <button
+              type="button"
+              className="secondary-button message-attachment-add-button"
+              onClick={() => attachmentInputRef.current?.click()}
+              disabled={
+                sendStatus === 'sending' ||
+                pendingAttachments.length >= MAX_MESSAGE_ATTACHMENTS
+              }
             >
-              {pendingAttachments.map((attachment, index) => (
-                <div
-                  key={attachment.id}
-                  className="message-attachment-preview"
-                >
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img
-                    src={attachment.previewUrl}
-                    alt=""
-                    className="message-attachment-preview-image"
-                  />
-                  <button
-                    type="button"
-                    className="message-attachment-remove-button"
-                    onClick={() => removePendingAttachment(attachment.id)}
-                    disabled={sendStatus === 'sending'}
-                    aria-label={`${content.removeMessagePhotoButton} ${index + 1}`}
-                  >
-                    ×
-                  </button>
-                </div>
-              ))}
-            </div>
-          ) : null}
-        </div>
-        {error ? (
-          <p id={errorId} className="form-error" role="alert">
-            {error}
-          </p>
-        ) : null}
-        <div className="message-form-actions">
-          <Link href="/account/messages" className="secondary-button">
-            {content.backToMessages}
-          </Link>
+              {content.addMessagePhotosButton}
+            </button>
+          </div>
+
+          <label
+            className="form-field message-composer-field"
+            htmlFor="thread-message-body"
+          >
+            <span className="sr-only">{content.writeMessageLabel}</span>
+            <textarea
+              ref={textareaRef}
+              id="thread-message-body"
+              name="body"
+              value={body}
+              maxLength={MESSAGE_BODY_MAX_LENGTH}
+              rows={2}
+              placeholder={content.writeMessageLabel}
+              aria-describedby={error ? errorId : undefined}
+              onChange={(event) => {
+                const nextBody = event.target.value;
+
+                setBody(nextBody);
+                setError('');
+
+                if (
+                  pendingDeliveryRef.current &&
+                  nextBody.trim() !== pendingDeliveryRef.current.body
+                ) {
+                  pendingDeliveryRef.current = null;
+                  setUploadedPendingAttachments(null);
+
+                  if (sendStatusRef.current === 'delivery-uncertain') {
+                    updateSendStatus('idle');
+                  }
+                }
+              }}
+              required={pendingAttachments.length === 0}
+            />
+          </label>
+
           <button
             type="submit"
-            className="search-button"
+            className="search-button message-send-button"
             disabled={sendStatus === 'sending'}
             aria-busy={sendStatus === 'sending'}
           >
@@ -2304,6 +2270,43 @@ export default function ConversationThread({
               : content.sendMessageButton}
           </button>
         </div>
+
+        <p className="form-help message-attachment-help">
+          {content.messageAttachmentRequirementsMessage}
+        </p>
+
+        {pendingAttachments.length > 0 ? (
+          <div
+            className="message-attachment-preview-list"
+            aria-label={content.messagePhotosLabel}
+          >
+            {pendingAttachments.map((attachment, index) => (
+              <div key={attachment.id} className="message-attachment-preview">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={attachment.previewUrl}
+                  alt=""
+                  className="message-attachment-preview-image"
+                />
+                <button
+                  type="button"
+                  className="message-attachment-remove-button"
+                  onClick={() => removePendingAttachment(attachment.id)}
+                  disabled={sendStatus === 'sending'}
+                  aria-label={`${content.removeMessagePhotoButton} ${index + 1}`}
+                >
+                  ×
+                </button>
+              </div>
+            ))}
+          </div>
+        ) : null}
+
+        {error ? (
+          <p id={errorId} className="form-error" role="alert">
+            {error}
+          </p>
+        ) : null}
       </form>
 
       {messageMenuOverlay ? (

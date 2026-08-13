@@ -67,54 +67,63 @@ export default function SiteHeader({
 
   return (
     <header className="header">
-      <Link href="/" className="site-name-link" aria-label={content.homeLinkLabel}>
-        <h1 className="site-name">{content.siteName}</h1>
-      </Link>
-      <nav className="header-actions" aria-label={content.headerActionsLabel}>
-        {signedIn ? (
-          <>
-            <Link
-              href="/account/messages"
-              className="header-button secondary-header-button header-messages-button"
-              aria-label={messagesLabel}
-            >
-              <span>{content.messagesTitle}</span>
-              {unreadConversationCount > 0 ? (
-                <span className="header-unread-badge" aria-hidden="true">
-                  {formatUnreadBadge(unreadConversationCount)}
-                </span>
-              ) : null}
+      <div className="header-inner">
+        <Link href="/" className="site-name-link" aria-label={content.homeLinkLabel}>
+          <h1 className="site-name">{content.siteName}</h1>
+        </Link>
+
+        <nav className="header-actions" aria-label={content.headerActionsLabel}>
+          {signedIn ? (
+            <>
+              <Link
+                href="/account/messages"
+                className="header-button secondary-header-button header-messages-button"
+                aria-label={messagesLabel}
+              >
+                <span>{content.messagesTitle}</span>
+                {unreadConversationCount > 0 ? (
+                  <span className="header-unread-badge" aria-hidden="true">
+                    {formatUnreadBadge(unreadConversationCount)}
+                  </span>
+                ) : null}
+              </Link>
+              <Link
+                href="/account"
+                className="header-button secondary-header-button"
+                onClick={clearNativeHistoryTraversalIntent}
+              >
+                {content.headerAccount}
+              </Link>
+              <button
+                type="button"
+                className="header-button header-sign-out-button"
+                onClick={handleSignOut}
+              >
+                {content.headerSignOut}
+              </button>
+            </>
+          ) : (
+            <Link href="/sign-in" className="header-button secondary-header-button">
+              {content.headerSignIn}
             </Link>
-            <Link
-              href="/account"
-              className="header-button secondary-header-button"
-              onClick={clearNativeHistoryTraversalIntent}
-            >
-              {content.headerAccount}
-            </Link>
-            <button type="button" className="header-button secondary-header-button" onClick={handleSignOut}>
-              {content.headerSignOut}
-            </button>
-          </>
-        ) : (
-          <Link href="/sign-in" className="header-button secondary-header-button">
-            {content.headerSignIn}
-          </Link>
-        )}
+          )}
+        </nav>
+
         <button
           type="button"
-          className="header-button primary-header-button"
+          className="header-button primary-header-button header-post-ad-button"
           onClick={handlePostAdClick}
           disabled={authStatus === 'checking'}
         >
           {content.headerPostAd}
         </button>
-      </nav>
-      {signedIn && user ? (
-        <span className="sr-only">
-          {content.signedInAsLabel} {user.email}
-        </span>
-      ) : null}
+
+        {signedIn && user ? (
+          <span className="sr-only">
+            {content.signedInAsLabel} {user.email}
+          </span>
+        ) : null}
+      </div>
     </header>
   );
 }
