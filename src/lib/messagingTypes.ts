@@ -4,6 +4,9 @@ export const CONVERSATION_SELECT_COLUMNS =
 export const MESSAGE_SELECT_COLUMNS =
   'id, conversation_id, sender_id, body, created_at, client_attempt_id, edited_at, deleted_at';
 
+export const MESSAGE_ATTACHMENT_SELECT_COLUMNS =
+  'id, message_id, storage_path, position, content_type, created_at';
+
 export const CONVERSATION_READ_SELECT_COLUMNS =
   'conversation_id, user_id, last_read_at';
 
@@ -11,6 +14,18 @@ export const CONVERSATION_USER_STATE_SELECT_COLUMNS =
   'conversation_id, user_id, hidden_at';
 
 export const MESSAGE_BODY_MAX_LENGTH = 2000;
+export const MAX_MESSAGE_ATTACHMENTS = 4;
+export const MAX_MESSAGE_ATTACHMENT_BYTES = 8 * 1024 * 1024;
+export const MESSAGE_ATTACHMENT_ACCEPT = 'image/jpeg,image/png,image/webp';
+
+export const MESSAGE_ATTACHMENT_MIME_TYPES = [
+  'image/jpeg',
+  'image/png',
+  'image/webp',
+] as const;
+
+export type MessageAttachmentMimeType =
+  (typeof MESSAGE_ATTACHMENT_MIME_TYPES)[number];
 
 export type DatabaseConversationRow = {
   id: string;
@@ -39,6 +54,7 @@ export type DatabaseConversationSummaryRow = {
   last_message_at: string;
   unread_count: number;
   last_message_deleted: boolean;
+  last_message_attachment_count: number;
 };
 
 export type DatabaseMessageRow = {
@@ -50,6 +66,15 @@ export type DatabaseMessageRow = {
   client_attempt_id: string | null;
   edited_at: string | null;
   deleted_at: string | null;
+};
+
+export type DatabaseMessageAttachmentRow = {
+  id: string;
+  message_id: string;
+  storage_path: string;
+  position: number;
+  content_type: MessageAttachmentMimeType;
+  created_at: string;
 };
 
 export type DatabaseConversationReadRow = {
@@ -100,6 +125,7 @@ export type AppConversationSummary = {
   lastMessageAt: string;
   unreadCount: number;
   lastMessageDeleted: boolean;
+  lastMessageAttachmentCount: number;
 };
 
 export type AppMessage = {
@@ -111,6 +137,16 @@ export type AppMessage = {
   clientAttemptId: string | null;
   editedAt: string | null;
   deletedAt: string | null;
+};
+
+export type AppMessageAttachment = {
+  id: string;
+  messageId: string;
+  storagePath: string;
+  position: number;
+  contentType: MessageAttachmentMimeType;
+  createdAt: string;
+  url: string;
 };
 
 export type AppConversationRead = {
@@ -171,7 +207,8 @@ export function isDatabaseConversationSummaryRow(
     typeof value.last_message_preview === 'string' &&
     typeof value.last_message_at === 'string' &&
     typeof value.unread_count === 'number' &&
-    typeof value.last_message_deleted === 'boolean'
+    typeof value.last_message_deleted === 'boolean' &&
+    typeof value.last_message_attachment_count === 'number'
   );
 }
 
@@ -196,6 +233,31 @@ export function isDatabaseMessageRow(value: unknown): value is DatabaseMessageRo
       value.client_attempt_id === null) &&
     (typeof value.edited_at === 'string' || value.edited_at === null) &&
     (typeof value.deleted_at === 'string' || value.deleted_at === null)
+  );
+}
+
+export function isMessageAttachmentMimeType(
+  value: unknown
+): value is MessageAttachmentMimeType {
+  return (
+    value === 'image/jpeg' || value === 'image/png' || value === 'image/webp'
+  );
+}
+
+export function isDatabaseMessageAttachmentRow(
+  value: unknown
+): value is DatabaseMessageAttachmentRow {
+  if (!isRecord(value)) {
+    return false;
+  }
+
+  return (
+    typeof value.id === 'string' &&
+    typeof value.message_id === 'string' &&
+    typeof value.storage_path === 'string' &&
+    typeof value.position === 'number' &&
+    isMessageAttachmentMimeType(value.content_type) &&
+    typeof value.created_at === 'string'
   );
 }
 
@@ -231,6 +293,12 @@ export function isDatabaseMessageRowArray(
   value: unknown
 ): value is DatabaseMessageRow[] {
   return Array.isArray(value) && value.every(isDatabaseMessageRow);
+}
+
+export function isDatabaseMessageAttachmentRowArray(
+  value: unknown
+): value is DatabaseMessageAttachmentRow[] {
+  return Array.isArray(value) && value.every(isDatabaseMessageAttachmentRow);
 }
 
 export function isDatabaseConversationReadRowArray(
@@ -279,6 +347,7 @@ export function databaseConversationSummaryRowToApp(
     lastMessageAt: row.last_message_at,
     unreadCount: row.unread_count,
     lastMessageDeleted: row.last_message_deleted,
+    lastMessageAttachmentCount: row.last_message_attachment_count,
   };
 }
 
@@ -292,6 +361,21 @@ export function databaseMessageRowToApp(row: DatabaseMessageRow): AppMessage {
     clientAttemptId: row.client_attempt_id,
     editedAt: row.edited_at,
     deletedAt: row.deleted_at,
+  };
+}
+
+export function databaseMessageAttachmentRowToApp(
+  row: DatabaseMessageAttachmentRow,
+  url: string
+): AppMessageAttachment {
+  return {
+    id: row.id,
+    messageId: row.message_id,
+    storagePath: row.storage_path,
+    position: row.position,
+    contentType: row.content_type,
+    createdAt: row.created_at,
+    url,
   };
 }
 

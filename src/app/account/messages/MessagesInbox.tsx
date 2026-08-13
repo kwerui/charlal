@@ -40,6 +40,14 @@ export default function MessagesInbox({ initialConversations }: Props) {
       <div className="messages-inbox-list">
         {conversations.map((conversation) => {
           const hasUnreadMessages = conversation.unreadCount > 0;
+          const previewText = conversation.lastMessageDeleted
+            ? content.messageDeletedLabel
+            : conversation.lastMessagePreview ||
+              (conversation.lastMessageAttachmentCount === 1
+                ? content.messagePhotoPreviewLabel
+                : conversation.lastMessageAttachmentCount > 1
+                  ? content.messagePhotosPreviewLabel
+                  : '');
 
           return (
             <article
@@ -74,9 +82,7 @@ export default function MessagesInbox({ initialConversations }: Props) {
                   {conversation.listingTitle}
                 </span>
                 <span className="conversation-summary-preview">
-                  {conversation.lastMessageDeleted
-                    ? content.messageDeletedLabel
-                    : conversation.lastMessagePreview}
+                  {previewText}
                 </span>
                 <span className="conversation-summary-meta">
                   <time

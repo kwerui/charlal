@@ -10,6 +10,7 @@ import {
   isDatabaseConversationReadRowArray,
   isDatabaseConversationRow,
   isDatabaseConversationSummaryRowArray,
+  isDatabaseMessageAttachmentRowArray,
   isDatabaseMessageRow,
   isDatabaseMessageRowArray,
   type AppConversationRead,
@@ -17,7 +18,13 @@ import {
   type AppConversationPublicCounterpart,
   type AppConversationSummary,
   type AppMessage,
+  type AppMessageAttachment,
 } from '@/lib/messagingTypes';
+import {
+  messageAttachmentRowToAppWithSignedUrl,
+  removeMessageAttachmentFiles,
+  type MessageAttachmentMetadataInput,
+} from '@/lib/supabase/messageAttachments';
 import { createClient } from '@/lib/supabase/server';
 
 export type MessagingFailureReason =
@@ -27,6 +34,9 @@ export type MessagingFailureReason =
   | 'self-message'
   | 'empty-message'
   | 'message-too-long'
+  | 'too-many-attachments'
+  | 'invalid-attachment'
+  | 'attachment-upload-failed'
   | 'database-unavailable';
 
 export type ConversationIdResult =
@@ -65,6 +75,7 @@ export type ConversationThreadResult =
       conversation: AppConversation;
       counterpart: AppConversationPublicCounterpart;
       messages: AppMessage[];
+      attachments: AppMessageAttachment[];
       readMarkers: AppConversationRead[];
     }
   | {
@@ -102,6 +113,18 @@ function normalizeMessageBody(body: string): string {
 type SafePostgrestError = {
   code?: string;
   message?: string;
+};
+
+type DeletedMessageWithAttachmentsRow = {
+  id: string;
+  conversation_id: string;
+  sender_id: string;
+  body: string;
+  created_at: string;
+  client_attempt_id: string | null;
+  edited_at: string | null;
+  deleted_at: string | null;
+  attachment_paths: string[];
 };
 
 type ConversationPublicCounterpartRow = {
@@ -151,6 +174,47 @@ function sanitizeDiagnosticMessage(message: string | undefined): string {
   return (message || 'Unknown messaging error')
     .replace(/[\r\n\t]+/g, ' ')
     .slice(0, 240);
+}
+
+function isDeletedMessageWithAttachmentsRow(
+  value: unknown
+): value is DeletedMessageWithAttachmentsRow {
+  if (!value || typeof value !== 'object') {
+    return false;
+  }
+
+  const row = value as Partial<
+    Record<keyof DeletedMessageWithAttachmentsRow, unknown>
+  >;
+
+  return (
+    typeof row.id === 'string' &&
+    typeof row.conversation_id === 'string' &&
+    typeof row.sender_id === 'string' &&
+    typeof row.body === 'string' &&
+    typeof row.created_at === 'string' &&
+    (typeof row.client_attempt_id === 'string' ||
+      row.client_attempt_id === null) &&
+    (typeof row.edited_at === 'string' || row.edited_at === null) &&
+    (typeof row.deleted_at === 'string' || row.deleted_at === null) &&
+    Array.isArray(row.attachment_paths) &&
+    row.attachment_paths.every((path) => typeof path === 'string')
+  );
+}
+
+function deletedMessageWithAttachmentsRowToApp(
+  row: DeletedMessageWithAttachmentsRow
+): AppMessage {
+  return {
+    id: row.id,
+    conversationId: row.conversation_id,
+    senderId: row.sender_id,
+    body: row.body,
+    createdAt: row.created_at,
+    clientAttemptId: row.client_attempt_id,
+    editedAt: row.edited_at,
+    deletedAt: row.deleted_at,
+  };
 }
 
 async function hasResolvedUserForDiagnostic(
@@ -204,6 +268,17 @@ function classifyMessagingError(message: string | undefined): MessagingFailureRe
 
   if (safeMessage.includes('message body is too long')) {
     return 'message-too-long';
+  }
+
+  if (safeMessage.includes('at most 4 attachments')) {
+    return 'too-many-attachments';
+  }
+
+  if (
+    safeMessage.includes('attachment') ||
+    safeMessage.includes('invalid image')
+  ) {
+    return 'invalid-attachment';
   }
 
   if (
@@ -430,6 +505,32 @@ export async function getCurrentUserConversationThread(
     };
   }
 
+  const { data: attachmentData, error: attachmentError } = await supabase.rpc(
+    'get_message_attachments',
+    {
+      p_conversation_id: safeConversationId,
+    }
+  );
+
+  if (
+    attachmentError ||
+    !isDatabaseMessageAttachmentRowArray(attachmentData)
+  ) {
+    return {
+      ok: false,
+      reason: classifyMessagingError(attachmentError?.message),
+    };
+  }
+
+  const attachmentResults = await Promise.all(
+    attachmentData.map((row) =>
+      messageAttachmentRowToAppWithSignedUrl(supabase, row)
+    )
+  );
+  const attachments = attachmentResults.filter(
+    (attachment): attachment is AppMessageAttachment => Boolean(attachment)
+  );
+
   const { data: readMarkerData, error: readMarkerError } = await supabase
     .from('conversation_reads')
     .select(CONVERSATION_READ_SELECT_COLUMNS)
@@ -447,6 +548,7 @@ export async function getCurrentUserConversationThread(
     conversation: databaseConversationRowToApp(conversationData),
     counterpart: conversationPublicCounterpartRowToApp(counterpartRow),
     messages: messageData.map(databaseMessageRowToApp),
+    attachments,
     readMarkers: readMarkerData.map(databaseConversationReadRowToApp),
   };
 }
@@ -537,6 +639,76 @@ export async function sendConversationMessage(
   };
 }
 
+export async function sendConversationMessageWithAttachments(input: {
+  conversationId: string;
+  body: string;
+  clientAttemptId: string;
+  attachments: MessageAttachmentMetadataInput[];
+}): Promise<SendMessageResult> {
+  await connection();
+
+  const safeConversationId = input.conversationId.trim();
+  const safeBody = normalizeMessageBody(input.body);
+  const safeClientAttemptId = input.clientAttemptId.trim();
+  const safeAttachments = input.attachments.map((attachment) => ({
+    storage_path: attachment.storagePath.trim(),
+    content_type: attachment.contentType,
+  }));
+
+  if (!safeConversationId) {
+    return { ok: false, reason: 'not-found' };
+  }
+
+  if (!safeClientAttemptId || safeAttachments.length === 0) {
+    return { ok: false, reason: 'invalid-attachment' };
+  }
+
+  if (safeAttachments.length > 4) {
+    return { ok: false, reason: 'too-many-attachments' };
+  }
+
+  if (safeBody.length > MESSAGE_BODY_MAX_LENGTH) {
+    return { ok: false, reason: 'message-too-long' };
+  }
+
+  const supabase = await createClient();
+  const { data, error } = await supabase.rpc(
+    'send_conversation_message_with_attachments',
+    {
+      p_conversation_id: safeConversationId,
+      p_body: safeBody,
+      p_client_attempt_id: safeClientAttemptId,
+      p_attachments: safeAttachments,
+    }
+  );
+
+  if (
+    error ||
+    !Array.isArray(data) ||
+    data.length !== 1 ||
+    !isDatabaseMessageRow(data[0])
+  ) {
+    await logMessagingDiagnostic({
+      operation: 'send_conversation_message_with_attachments',
+      error: error || {
+        code: 'mapping_failed',
+        message: 'Send attachment message RPC returned an unexpected row shape.',
+      },
+      userResolved: await hasResolvedUserForDiagnostic(supabase),
+    });
+
+    return {
+      ok: false,
+      reason: classifyMessagingError(error?.message),
+    };
+  }
+
+  return {
+    ok: true,
+    message: databaseMessageRowToApp(data[0]),
+  };
+}
+
 export async function editConversationMessage(
   messageId: string,
   body: string
@@ -545,14 +717,13 @@ export async function editConversationMessage(
 
   const safeMessageId = messageId.trim();
   const safeBody = normalizeMessageBody(body);
-  const validationError = validateMessageBody(safeBody);
 
   if (!safeMessageId) {
     return { ok: false, reason: 'not-found' };
   }
 
-  if (validationError) {
-    return { ok: false, reason: validationError };
+  if (safeBody.length > MESSAGE_BODY_MAX_LENGTH) {
+    return { ok: false, reason: 'message-too-long' };
   }
 
   const supabase = await createClient();
@@ -600,21 +771,25 @@ export async function deleteConversationMessage(
   }
 
   const supabase = await createClient();
-  const { data, error } = await supabase.rpc('delete_conversation_message', {
-    p_message_id: safeMessageId,
-  });
+  const { data, error } = await supabase.rpc(
+    'delete_conversation_message_with_attachments',
+    {
+      p_message_id: safeMessageId,
+    }
+  );
 
   if (
     error ||
     !Array.isArray(data) ||
     data.length !== 1 ||
-    !isDatabaseMessageRow(data[0])
+    !isDeletedMessageWithAttachmentsRow(data[0])
   ) {
     await logMessagingDiagnostic({
-      operation: 'delete_conversation_message',
+      operation: 'delete_conversation_message_with_attachments',
       error: error || {
         code: 'mapping_failed',
-        message: 'Delete message RPC returned an unexpected row shape.',
+        message:
+          'Delete message with attachments RPC returned an unexpected row shape.',
       },
       userResolved: await hasResolvedUserForDiagnostic(supabase),
     });
@@ -625,9 +800,13 @@ export async function deleteConversationMessage(
     };
   }
 
+  if (data[0].attachment_paths.length > 0) {
+    await removeMessageAttachmentFiles(supabase, data[0].attachment_paths);
+  }
+
   return {
     ok: true,
-    message: databaseMessageRowToApp(data[0]),
+    message: deletedMessageWithAttachmentsRowToApp(data[0]),
   };
 }
 

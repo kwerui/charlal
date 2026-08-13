@@ -5,7 +5,9 @@ import type {
   AppConversationRead,
   AppConversationSummary,
   AppMessage,
+  AppMessageAttachment,
 } from '@/lib/messagingTypes';
+import type { MessageAttachmentMetadataInput } from '@/lib/supabase/messageAttachments';
 import { getCurrentUserResult } from '@/lib/auth/server';
 import {
   deleteConversationMessage,
@@ -15,6 +17,7 @@ import {
   listCurrentUserConversationSummaries,
   markConversationRead,
   sendConversationMessage,
+  sendConversationMessageWithAttachments,
   startListingConversation,
   type MessagingFailureReason,
 } from '@/lib/supabase/messagingServer';
@@ -34,6 +37,7 @@ export type SendMessageActionResult =
   | {
       ok: true;
       message: AppMessage;
+      attachments?: AppMessageAttachment[];
     }
   | {
       ok: false;
@@ -66,6 +70,7 @@ export type ConversationThreadSnapshotActionResult =
   | {
       ok: true;
       messages: AppMessage[];
+      attachments: AppMessageAttachment[];
       readMarkers: AppConversationRead[];
     }
   | {
@@ -124,6 +129,7 @@ export async function sendMessageAction(input: {
   conversationId: string;
   body: string;
   clientAttemptId: string;
+  attachments?: MessageAttachmentMetadataInput[];
 }): Promise<SendMessageActionResult> {
   const authResult = await getCurrentUserResult();
 
@@ -138,7 +144,13 @@ export async function sendMessageAction(input: {
     return { ok: false, reason: 'unauthenticated' };
   }
 
-  if (!input.conversationId || !input.body || !input.clientAttemptId) {
+  const attachmentCount = input.attachments?.length || 0;
+
+  if (
+    !input.conversationId ||
+    (!input.body && attachmentCount === 0) ||
+    !input.clientAttemptId
+  ) {
     logMessagingActionDiagnostic({
       operation: 'sendMessageAction',
       stage: 'invalid_input',
@@ -148,11 +160,19 @@ export async function sendMessageAction(input: {
     });
   }
 
-  const result = await sendConversationMessage(
-    input.conversationId,
-    input.body,
-    input.clientAttemptId
-  );
+  const result =
+    attachmentCount > 0
+      ? await sendConversationMessageWithAttachments({
+          conversationId: input.conversationId,
+          body: input.body,
+          clientAttemptId: input.clientAttemptId,
+          attachments: input.attachments || [],
+        })
+      : await sendConversationMessage(
+          input.conversationId,
+          input.body,
+          input.clientAttemptId
+        );
 
   if (!result.ok) {
     logMessagingActionDiagnostic({
@@ -168,7 +188,22 @@ export async function sendMessageAction(input: {
   revalidatePath('/account/messages');
   revalidatePath(`/account/messages/${input.conversationId}`);
 
-  return result;
+  if (attachmentCount === 0) {
+    return result;
+  }
+
+  const threadResult = await getCurrentUserConversationThread(input.conversationId);
+
+  if (!threadResult.ok) {
+    return result;
+  }
+
+  return {
+    ...result,
+    attachments: threadResult.attachments.filter(
+      (attachment) => attachment.messageId === result.message.id
+    ),
+  };
 }
 
 export async function editMessageAction(input: {
@@ -346,6 +381,7 @@ export async function getConversationThreadSnapshotAction(
   return {
     ok: true,
     messages: threadResult.messages,
+    attachments: threadResult.attachments,
     readMarkers: threadResult.readMarkers,
   };
 }

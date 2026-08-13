@@ -52,6 +52,7 @@ export default async function ConversationPage({
             conversation={threadResult.conversation}
             counterpart={threadResult.counterpart}
             initialMessages={threadResult.messages}
+            initialAttachments={threadResult.attachments}
             initialReadMarkers={threadResult.readMarkers}
             currentUserId={authResult.user.id}
           />
