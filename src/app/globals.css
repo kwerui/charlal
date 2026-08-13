@@ -3189,6 +3189,12 @@ body {
   display: contents;
 }
 
+.message-read-sentinel {
+  width: 1px;
+  height: 1px;
+  justify-self: stretch;
+}
+
 .message-date-divider {
   justify-self: center;
   margin: 6px 0;
@@ -3227,6 +3233,54 @@ body {
   color: var(--text-dark);
   line-height: 1.5;
   white-space: pre-wrap;
+}
+
+.message-attachments {
+  display: grid;
+  gap: 6px;
+  width: min(100%, 360px);
+  contain: layout;
+}
+
+.message-attachments--count-1 {
+  width: min(100%, 340px);
+}
+
+.message-attachments--count-2,
+.message-attachments--count-3,
+.message-attachments--count-4 {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.message-attachment-button {
+  position: relative;
+  display: block;
+  overflow: hidden;
+  min-height: 0;
+  padding: 0;
+  border-radius: 8px;
+  border: 1px solid rgba(148,163,184,0.7);
+  background: rgba(15,23,42,0.08);
+  cursor: pointer;
+  aspect-ratio: 1 / 1;
+}
+
+.message-attachments--count-1 .message-attachment-button {
+  aspect-ratio: 4 / 3;
+}
+
+.message-attachment-image {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.message-attachment-button:hover,
+.message-attachment-button:focus-visible {
+  outline: none;
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 4px rgba(37,99,235,0.18);
 }
 
 .message-bubble time,
@@ -3615,6 +3669,182 @@ body {
   resize: vertical;
 }
 
+.message-attachment-composer {
+  display: grid;
+  gap: 10px;
+}
+
+.message-attachment-add-button {
+  width: fit-content;
+  cursor: pointer;
+}
+
+.message-attachment-add-button:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.message-attachment-preview-list {
+  display: flex;
+  max-width: 100%;
+  gap: 8px;
+  overflow-x: auto;
+  padding-bottom: 2px;
+  overscroll-behavior-x: contain;
+}
+
+.message-attachment-preview {
+  position: relative;
+  flex: 0 0 86px;
+  width: 86px;
+  height: 86px;
+  overflow: hidden;
+  border-radius: 8px;
+  border: 1px solid var(--border-color);
+  background: var(--bg-light);
+}
+
+.message-attachment-preview-image {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.message-attachment-remove-button {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  display: inline-flex;
+  width: 26px;
+  min-width: 26px;
+  height: 26px;
+  min-height: 26px;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border-radius: 999px;
+  border: 1px solid rgba(248,250,252,0.8);
+  background: rgba(15,23,42,0.82);
+  color: #fff;
+  font: inherit;
+  font-size: 18px;
+  font-weight: 800;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.message-attachment-remove-button:hover,
+.message-attachment-remove-button:focus-visible {
+  outline: none;
+  border-color: #fff;
+  background: rgba(220,38,38,0.9);
+  box-shadow: 0 0 0 4px rgba(220,38,38,0.18);
+}
+
+.message-photo-viewer-dialog {
+  width: min(1120px, 100%);
+  height: min(90vh, 860px);
+  background: rgba(2,6,23,0.96);
+}
+
+.message-photo-viewer-image-frame {
+  padding: 42px 58px 46px;
+  background: #020617;
+}
+
+.message-photo-viewer-dialog .listing-photo-viewer-close {
+  top: 14px;
+  right: 14px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  min-width: 36px;
+  height: 36px;
+  min-height: 36px;
+  padding: 0;
+  border-color: rgba(248,250,252,0.42);
+  border-radius: 999px;
+  background: rgba(15,23,42,0.54);
+  color: #f8fafc;
+  font-size: 28px;
+  font-weight: 500;
+  line-height: 1;
+}
+
+.message-photo-viewer-dialog .listing-photo-viewer-close:hover,
+.message-photo-viewer-dialog .listing-photo-viewer-close:focus-visible {
+  border-color: rgba(248,250,252,0.76);
+  background: rgba(15,23,42,0.78);
+}
+
+.message-photo-viewer-dialog .listing-photo-viewer-nav {
+  width: 40px;
+  min-width: 40px;
+  height: 40px;
+  min-height: 40px;
+  padding: 0;
+  border-color: rgba(248,250,252,0.46);
+  background: rgba(15,23,42,0.48);
+  color: #fff;
+  font-size: 30px;
+  font-weight: 500;
+  line-height: 1;
+  text-shadow: 0 2px 8px rgba(0,0,0,0.45);
+}
+
+.message-photo-viewer-dialog .listing-photo-viewer-nav--previous {
+  left: 16px;
+}
+
+.message-photo-viewer-dialog .listing-photo-viewer-nav--next {
+  right: 16px;
+}
+
+.message-photo-viewer-dialog .listing-photo-viewer-nav:hover,
+.message-photo-viewer-dialog .listing-photo-viewer-nav:focus-visible {
+  background: rgba(15,23,42,0.78);
+}
+
+.message-photo-viewer-dialog .listing-photo-viewer-position {
+  bottom: 12px;
+  padding: 8px 12px;
+  background: rgba(15,23,42,0.58);
+}
+
+.message-photo-viewer-context {
+  display: grid;
+  max-width: min(620px, calc(100% - 32px));
+  gap: 4px;
+  text-align: center;
+}
+
+.message-photo-viewer-context p {
+  margin: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.message-photo-viewer-caption {
+  display: -webkit-box;
+  color: #f8fafc;
+  font-size: 15px;
+  font-weight: 700;
+  line-height: 1.35;
+  white-space: normal;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+}
+
+.message-photo-viewer-metadata {
+  color: rgba(248,250,252,0.82);
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1.25;
+  white-space: nowrap;
+}
+
 .message-form-actions {
   display: flex;
   flex-wrap: wrap;
@@ -3793,6 +4023,22 @@ body {
 
   .listing-photo-viewer-position {
     bottom: 21px;
+  }
+
+  .message-photo-viewer-dialog .listing-photo-viewer-nav {
+    width: 44px;
+    min-width: 44px;
+    height: 44px;
+    min-height: 44px;
+    font-size: 28px;
+  }
+
+  .message-photo-viewer-dialog .listing-photo-viewer-nav--previous {
+    left: 12px;
+  }
+
+  .message-photo-viewer-dialog .listing-photo-viewer-nav--next {
+    right: 12px;
   }
 
   .conversation-thread-heading,

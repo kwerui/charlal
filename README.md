@@ -25,9 +25,10 @@ This project uses [`next/font`](https://nextjs.org/docs/app/building-your-applic
 This repository uses Supabase authentication, profiles, PostgreSQL-backed
 user-created advertisements, and private seller/buyer messaging. Built-in demo
 listings still live in source code. User-created database advertisements can
-use public Supabase Storage listing photos. Favourites, message attachments,
-seller-profile images, push/email notifications, typing indicators, and
-moderation tools are not implemented yet.
+use public Supabase Storage listing photos. Message photos use a separate
+private Supabase Storage bucket and short-lived signed URLs. Favourites,
+push/email notifications, typing indicators, and moderation tools are not
+implemented yet.
 
 1. Create a Supabase project from the Supabase dashboard.
 2. Open the project, then use the Connect dialog or Project Settings API section
@@ -105,6 +106,17 @@ Editor.
     policies: anonymous visitors can view public listing-image metadata/media,
     while only authenticated listing owners can insert/reorder/delete metadata
     and upload/delete matching Storage objects.
+31. Open `supabase/migrations/20260822_add_message_attachments.sql`.
+32. Copy the full SQL into the SQL Editor and run it after the messaging public
+    profile data migration.
+33. Confirm the `message-attachments` Storage bucket exists, is private, has an
+    8 MB file-size limit, and allows only `image/jpeg`, `image/png`, and
+    `image/webp`.
+34. Confirm `public.message_attachments` exists and RLS is enabled.
+35. In Database > Policies, inspect the `message_attachments` and
+    `storage.objects` policies: only authenticated conversation participants
+    can read attachment metadata or upload into a conversation path, and only
+    the uploading owner can delete the private Storage object.
 
 The listings migration creates the `public.listings` table, constraints, owner
 policies, indexes for owner/category/date reads, and triggers that keep seller
@@ -139,6 +151,46 @@ URLs. Anonymous visitors may view listing images, but anonymous users cannot
 upload, update, or delete Storage objects or image metadata. Owner authorization
 is still enforced through `auth.uid()` and `public.listings.owner_id`.
 
+### Message Photo Attachments
+
+Message photos are private conversation media. Do not store them in the public
+`listing-images` or `profile-avatars` buckets. The migration
+`20260822_add_message_attachments.sql` creates the private
+`message-attachments` bucket, `public.message_attachments`, participant-only
+metadata RLS, private Storage policies, attachment-aware send/edit/delete RPCs,
+and an inbox-summary update for image-only latest-message previews.
+
+Storage paths use:
+
+```text
+<conversation-id>/<client-attempt-id>/<random-file-id>.<ext>
+```
+
+The path does not contain the sender's email, user ID, or original filename.
+The database stores only metadata and Storage paths. The app generates
+short-lived signed URLs after verifying that the current user participates in
+the conversation. Signed URLs are not persisted; possession of one grants
+temporary access until it expires.
+
+Message sending supports text-only, photo-only, and text plus up to four
+photos. JPEG, PNG, and WebP are allowed, with an 8 MB limit per photo. Photos
+upload first into the private bucket under the stable `client_attempt_id`
+attempt folder, then the server RPC creates the message and metadata
+atomically. If upload fails before the RPC, already-uploaded objects are removed
+best-effort and the draft remains. If the RPC response is uncertain, the app
+keeps the same attempt ID and uploaded paths so retrying the same attempt does
+not create another message row.
+
+Realtime still uses the existing messaging subscriptions. When a message event
+arrives, the thread fetches an authorized snapshot to obtain attachment
+metadata and fresh signed URLs. Message photos are visible only to the buyer
+and seller; a signed-out visitor or unrelated user cannot read metadata, upload
+into the conversation path, or retrieve the private object through Storage RLS.
+
+Deleting a message tombstones it for both participants, removes attachment
+metadata, and best-effort deletes sender-owned Storage objects. Hiding a
+conversation for one user does not delete shared messages or attachments.
+
 When a profile display name changes, the profile synchronization trigger updates
 listing seller names and conversation buyer/seller display-name snapshots. Email
 addresses are not copied into listings, conversations, or messages.
@@ -152,8 +204,8 @@ phase, Supabase Realtime updates the active thread, header unread badge, and
 Messages inbox after database message/read-marker changes. Sender-visible read
 receipts are shown only for the sender's newest outgoing message. If the live
 connection is unavailable, refresh the thread or inbox to check for messages.
-Push/email notifications, attachments, typing indicators, and moderation tools
-are planned for later phases.
+Push/email notifications, typing indicators, and moderation tools are planned
+for later phases.
 
 ### Advertisement Storage
 

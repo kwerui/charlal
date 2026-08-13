@@ -268,6 +268,21 @@ export const content = {
   messageDeliveryUnconfirmedMessage: "Message delivery could not be confirmed. Check the conversation before retrying. / Медээниң чедирилгезин бадыткап шыдаваан. Катап шенээр мурнунда чугааны хынап алыңар.", // TODO: add reviewed Tuvan translation.
   newMessagesButton: "New messages / Чаа медээлер", // TODO: add reviewed Tuvan translation.
   jumpToNewestMessageButton: "Jump to newest message / Эң чаа медээже шилчиир", // TODO: add reviewed Tuvan translation.
+  addMessagePhotosButton: "Add photos", // TODO: add reviewed Tuvan translation.
+  removeMessagePhotoButton: "Remove photo", // TODO: add reviewed Tuvan translation.
+  messagePhotosLabel: "Message photos", // TODO: add reviewed Tuvan translation.
+  messagePhotoPreviewLabel: "Photo", // TODO: add reviewed Tuvan translation.
+  messagePhotosPreviewLabel: "Photos", // TODO: add reviewed Tuvan translation.
+  messageAttachmentRequirementsMessage: "Add up to 4 photos. JPEG, PNG, or WebP. Maximum 8 MB each.", // TODO: add reviewed Tuvan translation.
+  messageAttachmentMaximumMessage: "A message can have at most 4 photos.", // TODO: add reviewed Tuvan translation.
+  messageAttachmentTooLargeMessage: "Photo is too large. Maximum size is 8 MB.", // TODO: add reviewed Tuvan translation.
+  messageAttachmentUnsupportedTypeMessage: "Unsupported photo type. Use JPEG, PNG, or WebP.", // TODO: add reviewed Tuvan translation.
+  messageAttachmentUploadFailedMessage: "Unable to upload photo.", // TODO: add reviewed Tuvan translation.
+  messagePhotoAltTemplate: "photo {current} of {total}", // TODO: add reviewed Tuvan translation.
+  openMessagePhotoViewerLabel: "Open message photo {current} of {total}", // TODO: add reviewed Tuvan translation.
+  messagePhotoViewerTitle: "Message photo", // TODO: add reviewed Tuvan translation.
+  messagePhotoPositionTemplate: "{current} / {total}", // TODO: add reviewed Tuvan translation.
+  messagePhotoInMessagePositionTemplate: "Photo {current} of {total}", // TODO: add reviewed Tuvan translation.
   todayLabel: "Today / Бо хүн", // TODO: add reviewed Tuvan translation.
   yesterdayLabel: "Yesterday / Дүүн", // TODO: add reviewed Tuvan translation.
   monthNames: [
