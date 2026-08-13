@@ -122,19 +122,10 @@ export async function createMessageAttachmentSignedUrl(
   return data.signedUrl;
 }
 
-export async function messageAttachmentRowToAppWithSignedUrl(
-  supabase: MessageAttachmentStorageClient,
-  row: DatabaseMessageAttachmentRow
-): Promise<AppMessageAttachment | null> {
-  const url = await createMessageAttachmentSignedUrl(
-    supabase,
-    row.storage_path
-  );
-
-  if (!url) {
-    return null;
-  }
-
+function messageAttachmentRowToApp(
+  row: DatabaseMessageAttachmentRow,
+  url: string
+): AppMessageAttachment {
   return {
     id: row.id,
     messageId: row.message_id,
@@ -144,4 +135,54 @@ export async function messageAttachmentRowToAppWithSignedUrl(
     createdAt: row.created_at,
     url,
   };
+}
+
+export async function messageAttachmentRowToAppWithSignedUrl(
+  supabase: MessageAttachmentStorageClient,
+  row: DatabaseMessageAttachmentRow
+): Promise<AppMessageAttachment | null> {
+  const url = await createMessageAttachmentSignedUrl(
+    supabase,
+    row.storage_path
+  );
+
+  return url ? messageAttachmentRowToApp(row, url) : null;
+}
+
+export async function messageAttachmentRowsToAppWithSignedUrls(
+  supabase: MessageAttachmentStorageClient,
+  rows: DatabaseMessageAttachmentRow[]
+): Promise<AppMessageAttachment[]> {
+  const validRows = rows.filter((row) =>
+    isMessageAttachmentPath(row.storage_path)
+  );
+
+  if (validRows.length === 0) {
+    return [];
+  }
+
+  const { data, error } = await supabase.storage
+    .from(MESSAGE_ATTACHMENTS_BUCKET)
+    .createSignedUrls(
+      validRows.map((row) => row.storage_path),
+      MESSAGE_ATTACHMENT_SIGNED_URL_SECONDS
+    );
+
+  if (error || !data) {
+    return [];
+  }
+
+  const signedUrlsByPath = new Map<string, string>();
+
+  for (const signedUrlResult of data) {
+    if (signedUrlResult.path && signedUrlResult.signedUrl) {
+      signedUrlsByPath.set(signedUrlResult.path, signedUrlResult.signedUrl);
+    }
+  }
+
+  return validRows.flatMap((row) => {
+    const url = signedUrlsByPath.get(row.storage_path);
+
+    return url ? [messageAttachmentRowToApp(row, url)] : [];
+  });
 }

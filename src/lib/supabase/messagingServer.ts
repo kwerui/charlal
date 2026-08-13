@@ -21,7 +21,7 @@ import {
   type AppMessageAttachment,
 } from '@/lib/messagingTypes';
 import {
-  messageAttachmentRowToAppWithSignedUrl,
+  messageAttachmentRowsToAppWithSignedUrls,
   removeMessageAttachmentFiles,
   type MessageAttachmentMetadataInput,
 } from '@/lib/supabase/messageAttachments';
@@ -522,13 +522,9 @@ export async function getCurrentUserConversationThread(
     };
   }
 
-  const attachmentResults = await Promise.all(
-    attachmentData.map((row) =>
-      messageAttachmentRowToAppWithSignedUrl(supabase, row)
-    )
-  );
-  const attachments = attachmentResults.filter(
-    (attachment): attachment is AppMessageAttachment => Boolean(attachment)
+  const attachments = await messageAttachmentRowsToAppWithSignedUrls(
+    supabase,
+    attachmentData
   );
 
   const { data: readMarkerData, error: readMarkerError } = await supabase

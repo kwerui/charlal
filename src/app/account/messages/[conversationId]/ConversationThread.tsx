@@ -84,6 +84,10 @@ type PendingAttachment = {
 };
 
 type AttachmentViewerState = {
+  kind: 'sent';
+  attachmentId: string;
+} | {
+  kind: 'pending';
   attachmentId: string;
 };
 
@@ -92,6 +96,12 @@ type ConversationPhotoGalleryItem = {
   message: AppMessage;
   positionInMessage: number;
   messageAttachmentCount: number;
+};
+
+type PendingPhotoGalleryItem = {
+  attachment: PendingAttachment;
+  position: number;
+  total: number;
 };
 
 type FollowNewestTarget = {
@@ -497,11 +507,13 @@ export default function ConversationThread({
   const shouldScrollToBottomRef = useRef(true);
   const initialThreadRevealRef = useRef(false);
   const messageHistoryRef = useRef<HTMLDivElement | null>(null);
+  const messageListContentRef = useRef<HTMLDivElement | null>(null);
   const messageFormRef = useRef<HTMLFormElement | null>(null);
   const textareaRef = useRef<HTMLTextAreaElement | null>(null);
   const editContainerRef = useRef<HTMLFormElement | null>(null);
   const editTextareaRef = useRef<HTMLTextAreaElement | null>(null);
   const attachmentInputRef = useRef<HTMLInputElement | null>(null);
+  const pendingAttachmentPreviewListRef = useRef<HTMLDivElement | null>(null);
   const readSentinelRef = useRef<HTMLDivElement | null>(null);
   const attachmentViewerCloseButtonRef = useRef<HTMLButtonElement | null>(null);
   const pendingAttachmentPreviewUrlsRef = useRef<Set<string>>(new Set());
@@ -513,6 +525,7 @@ export default function ConversationThread({
   const mountedRef = useRef(false);
   const sendAttemptRef = useRef(0);
   const sendStatusRef = useRef<SendStatus>('idle');
+  const previousPendingAttachmentCountRef = useRef(0);
   const pendingDeliveryRef = useRef<PendingDelivery | null>(null);
   const outgoingAttachmentScrollRef = useRef<{
     messageId: string;
@@ -521,6 +534,7 @@ export default function ConversationThread({
     completed: boolean;
   } | null>(null);
   const followNewestTargetRef = useRef<FollowNewestTarget | null>(null);
+  const isStickyToBottomRef = useRef(true);
   const programmaticHistoryScrollRef = useRef(false);
   const programmaticHistoryScrollFrameRef = useRef<number | null>(null);
   const lastHistoryScrollTopRef = useRef(0);
@@ -598,19 +612,43 @@ export default function ConversationThread({
 
     return galleryItems;
   }, [attachmentsByMessageId, messages]);
-  const currentGalleryIndex = attachmentViewer
+  const pendingPhotoGallery = useMemo(() => {
+    const total = pendingAttachments.length;
+
+    return pendingAttachments.map<PendingPhotoGalleryItem>(
+      (attachment, index) => ({
+        attachment,
+        position: index + 1,
+        total,
+      })
+    );
+  }, [pendingAttachments]);
+  const currentGalleryIndex = attachmentViewer?.kind === 'sent'
     ? conversationPhotoGallery.findIndex(
+        (galleryItem) =>
+          galleryItem.attachment.id === attachmentViewer.attachmentId
+      )
+    : -1;
+  const currentPendingGalleryIndex = attachmentViewer?.kind === 'pending'
+    ? pendingPhotoGallery.findIndex(
         (galleryItem) =>
           galleryItem.attachment.id === attachmentViewer.attachmentId
       )
     : -1;
   const selectedGalleryItem =
     currentGalleryIndex >= 0 ? conversationPhotoGallery[currentGalleryIndex] : null;
-  const selectedViewerAttachment = selectedGalleryItem?.attachment || null;
+  const selectedPendingGalleryItem =
+    currentPendingGalleryIndex >= 0
+      ? pendingPhotoGallery[currentPendingGalleryIndex]
+      : null;
   const viewerPositionLabel = selectedGalleryItem
     ? content.messagePhotoInMessagePositionTemplate
         .replace('{current}', String(selectedGalleryItem.positionInMessage))
         .replace('{total}', String(selectedGalleryItem.messageAttachmentCount))
+    : selectedPendingGalleryItem
+      ? content.messagePhotoInMessagePositionTemplate
+          .replace('{current}', String(selectedPendingGalleryItem.position))
+          .replace('{total}', String(selectedPendingGalleryItem.total))
     : '';
   const viewerCaptionSnippet = selectedGalleryItem
     ? getCaptionSnippet(selectedGalleryItem.message.body)
@@ -622,10 +660,80 @@ export default function ConversationThread({
     viewerPositionLabel && viewerMessageTime
       ? `${viewerPositionLabel} · ${viewerMessageTime}`
       : viewerPositionLabel || viewerMessageTime;
-  const canViewPreviousPhoto = currentGalleryIndex > 0;
+  const selectedViewerPhotoUrl =
+    selectedGalleryItem?.attachment.url ||
+    selectedPendingGalleryItem?.attachment.previewUrl ||
+    '';
+  const viewerGalleryLength =
+    attachmentViewer?.kind === 'pending'
+      ? pendingPhotoGallery.length
+      : conversationPhotoGallery.length;
+  const canViewPreviousPhoto =
+    attachmentViewer?.kind === 'pending'
+      ? currentPendingGalleryIndex > 0
+      : currentGalleryIndex > 0;
   const canViewNextPhoto =
-    currentGalleryIndex >= 0 &&
-    currentGalleryIndex < conversationPhotoGallery.length - 1;
+    attachmentViewer?.kind === 'pending'
+      ? currentPendingGalleryIndex >= 0 &&
+        currentPendingGalleryIndex < pendingPhotoGallery.length - 1
+      : currentGalleryIndex >= 0 &&
+        currentGalleryIndex < conversationPhotoGallery.length - 1;
+
+  const showPreviousViewerPhoto = useCallback((): void => {
+    if (!attachmentViewer || !canViewPreviousPhoto) {
+      return;
+    }
+
+    if (attachmentViewer.kind === 'pending') {
+      setAttachmentViewer({
+        kind: 'pending',
+        attachmentId:
+          pendingPhotoGallery[currentPendingGalleryIndex - 1].attachment.id,
+      });
+      return;
+    }
+
+    setAttachmentViewer({
+      kind: 'sent',
+      attachmentId:
+        conversationPhotoGallery[currentGalleryIndex - 1].attachment.id,
+    });
+  }, [
+    attachmentViewer,
+    canViewPreviousPhoto,
+    conversationPhotoGallery,
+    currentGalleryIndex,
+    currentPendingGalleryIndex,
+    pendingPhotoGallery,
+  ]);
+
+  const showNextViewerPhoto = useCallback((): void => {
+    if (!attachmentViewer || !canViewNextPhoto) {
+      return;
+    }
+
+    if (attachmentViewer.kind === 'pending') {
+      setAttachmentViewer({
+        kind: 'pending',
+        attachmentId:
+          pendingPhotoGallery[currentPendingGalleryIndex + 1].attachment.id,
+      });
+      return;
+    }
+
+    setAttachmentViewer({
+      kind: 'sent',
+      attachmentId:
+        conversationPhotoGallery[currentGalleryIndex + 1].attachment.id,
+    });
+  }, [
+    attachmentViewer,
+    canViewNextPhoto,
+    conversationPhotoGallery,
+    currentGalleryIndex,
+    currentPendingGalleryIndex,
+    pendingPhotoGallery,
+  ]);
 
   const closeConfirmationDialog = useCallback((): void => {
     const previousDialog = confirmationDialog;
@@ -680,6 +788,27 @@ export default function ConversationThread({
   }, []);
 
   useEffect(() => {
+    const previousCount = previousPendingAttachmentCountRef.current;
+
+    previousPendingAttachmentCountRef.current = pendingAttachments.length;
+
+    if (pendingAttachments.length <= previousCount) {
+      return undefined;
+    }
+
+    const scrollFrame = window.requestAnimationFrame(() => {
+      pendingAttachmentPreviewListRef.current?.scrollIntoView({
+        behavior: 'smooth',
+        block: 'nearest',
+      });
+    });
+
+    return () => {
+      window.cancelAnimationFrame(scrollFrame);
+    };
+  }, [pendingAttachments.length]);
+
+  useEffect(() => {
     if (!attachmentViewer) {
       return undefined;
     }
@@ -692,29 +821,19 @@ export default function ConversationThread({
         return;
       }
 
-      if (conversationPhotoGallery.length <= 1) {
+      if (viewerGalleryLength <= 1) {
         return;
       }
 
       if (event.key === 'ArrowLeft') {
         event.preventDefault();
-        if (canViewPreviousPhoto) {
-          setAttachmentViewer({
-            attachmentId:
-              conversationPhotoGallery[currentGalleryIndex - 1].attachment.id,
-          });
-        }
+        showPreviousViewerPhoto();
         return;
       }
 
       if (event.key === 'ArrowRight') {
         event.preventDefault();
-        if (canViewNextPhoto) {
-          setAttachmentViewer({
-            attachmentId:
-              conversationPhotoGallery[currentGalleryIndex + 1].attachment.id,
-          });
-        }
+        showNextViewerPhoto();
       }
     }
 
@@ -725,14 +844,18 @@ export default function ConversationThread({
     };
   }, [
     attachmentViewer,
-    canViewNextPhoto,
-    canViewPreviousPhoto,
-    conversationPhotoGallery,
-    currentGalleryIndex,
+    showNextViewerPhoto,
+    showPreviousViewerPhoto,
+    viewerGalleryLength,
   ]);
 
   useEffect(() => {
-    if (attachmentViewer && currentGalleryIndex < 0) {
+    const missingSentPhoto =
+      attachmentViewer?.kind === 'sent' && currentGalleryIndex < 0;
+    const missingPendingPhoto =
+      attachmentViewer?.kind === 'pending' && currentPendingGalleryIndex < 0;
+
+    if (missingSentPhoto || missingPendingPhoto) {
       const closeFrame = window.requestAnimationFrame(() => {
         setAttachmentViewer(null);
       });
@@ -743,7 +866,7 @@ export default function ConversationThread({
     }
 
     return undefined;
-  }, [attachmentViewer, currentGalleryIndex]);
+  }, [attachmentViewer, currentGalleryIndex, currentPendingGalleryIndex]);
 
   useEffect(() => {
     const messageHistoryElement = messageHistoryRef.current;
@@ -855,6 +978,7 @@ export default function ConversationThread({
     }
 
     programmaticHistoryScrollRef.current = true;
+    isStickyToBottomRef.current = true;
     scrollHistoryToBottom(messageHistoryRef.current);
     programmaticHistoryScrollFrameRef.current = window.requestAnimationFrame(
       () => {
@@ -1153,27 +1277,76 @@ export default function ConversationThread({
     const previousScrollTop = lastHistoryScrollTopRef.current;
     const currentScrollTop = historyElement?.scrollTop || 0;
     const userMovedUp = currentScrollTop < previousScrollTop - 2;
+    const isNearBottom = isNearHistoryBottom(historyElement);
 
     lastHistoryScrollTopRef.current = currentScrollTop;
+
+    if (!programmaticHistoryScrollRef.current) {
+      isStickyToBottomRef.current = isNearBottom;
+    }
 
     if (
       followNewestTargetRef.current &&
       !programmaticHistoryScrollRef.current &&
       userMovedUp &&
-      !isNearHistoryBottom(historyElement)
+      !isNearBottom
     ) {
       finishFollowNewestTarget();
       setShowNewMessagesButton(true);
       return;
     }
 
-    if (!isNearHistoryBottom(historyElement)) {
+    if (!isNearBottom) {
       return;
     }
 
     setShowNewMessagesButton(false);
     markVisibleUnreadBoundaryRead();
   }, [finishFollowNewestTarget, markVisibleUnreadBoundaryRead]);
+
+  useEffect(() => {
+    const contentElement = messageListContentRef.current;
+
+    if (!contentElement) {
+      return undefined;
+    }
+
+    let alignmentFrame: number | null = null;
+
+    function alignIfSticky(): void {
+      if (
+        !isStickyToBottomRef.current &&
+        !shouldScrollToBottomRef.current &&
+        !followNewestTargetRef.current
+      ) {
+        return;
+      }
+
+      if (alignmentFrame !== null) {
+        window.cancelAnimationFrame(alignmentFrame);
+      }
+
+      alignmentFrame = window.requestAnimationFrame(() => {
+        scrollMessageHistoryToBottom();
+        setShowNewMessagesButton(false);
+        markVisibleUnreadBoundaryRead();
+        alignmentFrame = null;
+      });
+    }
+
+    const resizeObserver = new ResizeObserver(alignIfSticky);
+    resizeObserver.observe(contentElement);
+
+    alignIfSticky();
+
+    return () => {
+      resizeObserver.disconnect();
+
+      if (alignmentFrame !== null) {
+        window.cancelAnimationFrame(alignmentFrame);
+      }
+    };
+  }, [markVisibleUnreadBoundaryRead, scrollMessageHistoryToBottom]);
 
   useEffect(() => {
     let active = true;
@@ -1508,6 +1681,8 @@ export default function ConversationThread({
         followTarget.attachmentCount === 0
       ) {
         finishFollowNewestTarget();
+      } else if (!followTarget) {
+        shouldScrollToBottomRef.current = false;
       }
 
       if (!initialThreadRevealRef.current) {
@@ -1959,24 +2134,26 @@ export default function ConversationThread({
         tabIndex={0}
         onScroll={handleMessageHistoryScroll}
       >
-        {messages.map((message, index) => {
-          const isOwnMessage = message.senderId === currentUserId;
-          const isLatestOwnMessage = latestOwnMessage?.id === message.id;
-          const isDeleted = message.deletedAt !== null;
-          const isEditing = editingMessageId === message.id;
-          const messageAttachments = attachmentsByMessageId[message.id] || [];
-          const messageDateKey = getDateKey(message.createdAt, useLocalTime);
-          const previousMessage = index > 0 ? messages[index - 1] : null;
-          const previousDateKey = previousMessage
-            ? getDateKey(previousMessage.createdAt, useLocalTime)
-            : null;
-          const readByOtherParticipant =
-            Boolean(otherReadMarker) &&
-            Date.parse(otherReadMarker?.lastReadAt || '') >=
-              Date.parse(message.createdAt);
+        <div ref={messageListContentRef} className="message-list-content">
+          {messages.map((message, index) => {
+            const isOwnMessage = message.senderId === currentUserId;
+            const isLatestOwnMessage = latestOwnMessage?.id === message.id;
+            const isDeleted = message.deletedAt !== null;
+            const isEditing = editingMessageId === message.id;
+            const messageAttachments = attachmentsByMessageId[message.id] || [];
+            const shouldEagerLoadAttachments = index >= messages.length - 6;
+            const messageDateKey = getDateKey(message.createdAt, useLocalTime);
+            const previousMessage = index > 0 ? messages[index - 1] : null;
+            const previousDateKey = previousMessage
+              ? getDateKey(previousMessage.createdAt, useLocalTime)
+              : null;
+            const readByOtherParticipant =
+              Boolean(otherReadMarker) &&
+              Date.parse(otherReadMarker?.lastReadAt || '') >=
+                Date.parse(message.createdAt);
 
-          return (
-            <div key={message.id} className="message-list-item">
+            return (
+              <div key={message.id} className="message-list-item">
               {messageDateKey !== previousDateKey ? (
                 <div className="message-date-divider" role="separator">
                   {formatMessageDateDivider(message.createdAt, useLocalTime)}
@@ -2060,6 +2237,7 @@ export default function ConversationThread({
                                 className="message-attachment-button"
                                 onClick={() =>
                                   setAttachmentViewer({
+                                    kind: 'sent',
                                     attachmentId: attachment.id,
                                   })
                                 }
@@ -2078,7 +2256,9 @@ export default function ConversationThread({
                                   src={attachment.url}
                                   alt=""
                                   className="message-attachment-image"
-                                  loading="lazy"
+                                  loading={
+                                    shouldEagerLoadAttachments ? 'eager' : 'lazy'
+                                  }
                                   onLoad={() => {
                                     handleOutgoingAttachmentSettled(message.id);
                                     handleIncomingAttachmentSettled(message.id);
@@ -2157,9 +2337,10 @@ export default function ConversationThread({
                   aria-hidden="true"
                 />
               ) : null}
-            </div>
+              </div>
             );
-        })}
+          })}
+        </div>
       </div>
 
       {showNewMessagesButton ? (
@@ -2277,17 +2458,32 @@ export default function ConversationThread({
 
         {pendingAttachments.length > 0 ? (
           <div
+            ref={pendingAttachmentPreviewListRef}
             className="message-attachment-preview-list"
             aria-label={content.messagePhotosLabel}
           >
             {pendingAttachments.map((attachment, index) => (
               <div key={attachment.id} className="message-attachment-preview">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  src={attachment.previewUrl}
-                  alt=""
-                  className="message-attachment-preview-image"
-                />
+                <button
+                  type="button"
+                  className="message-attachment-preview-button"
+                  onClick={() =>
+                    setAttachmentViewer({
+                      kind: 'pending',
+                      attachmentId: attachment.id,
+                    })
+                  }
+                  aria-label={content.openMessagePhotoViewerLabel
+                    .replace('{current}', String(index + 1))
+                    .replace('{total}', String(pendingAttachments.length))}
+                >
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={attachment.previewUrl}
+                    alt=""
+                    className="message-attachment-preview-image"
+                  />
+                </button>
                 <button
                   type="button"
                   className="message-attachment-remove-button"
@@ -2437,7 +2633,7 @@ export default function ConversationThread({
         </div>
       ) : null}
 
-      {selectedViewerAttachment ? (
+      {selectedViewerPhotoUrl ? (
         <div
           className="listing-photo-viewer-backdrop message-photo-viewer-backdrop"
           role="presentation"
@@ -2459,20 +2655,14 @@ export default function ConversationThread({
             >
               ×
             </button>
-            {conversationPhotoGallery.length > 1 ? (
+            {viewerGalleryLength > 1 ? (
               <>
                 {canViewPreviousPhoto ? (
                   <button
                     type="button"
                     className="listing-photo-viewer-nav listing-photo-viewer-nav--previous"
                     aria-label={content.previousListingPhotoButton}
-                    onClick={() =>
-                      setAttachmentViewer({
-                        attachmentId:
-                          conversationPhotoGallery[currentGalleryIndex - 1]
-                            .attachment.id,
-                      })
-                    }
+                    onClick={showPreviousViewerPhoto}
                   >
                     ‹
                   </button>
@@ -2482,20 +2672,14 @@ export default function ConversationThread({
                     type="button"
                     className="listing-photo-viewer-nav listing-photo-viewer-nav--next"
                     aria-label={content.nextListingPhotoButton}
-                    onClick={() =>
-                      setAttachmentViewer({
-                        attachmentId:
-                          conversationPhotoGallery[currentGalleryIndex + 1]
-                            .attachment.id,
-                      })
-                    }
+                    onClick={showNextViewerPhoto}
                   >
                     ›
                   </button>
                 ) : null}
               </>
             ) : null}
-            {selectedGalleryItem ? (
+            {selectedGalleryItem || selectedPendingGalleryItem ? (
               <div
                 className="listing-photo-viewer-position message-photo-viewer-context"
                 aria-live="polite"
@@ -2516,7 +2700,7 @@ export default function ConversationThread({
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 className="listing-photo-viewer-image"
-                src={selectedViewerAttachment.url}
+                src={selectedViewerPhotoUrl}
                 alt={content.messagePhotoViewerTitle}
               />
             </div>
