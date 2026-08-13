@@ -468,18 +468,20 @@ export default function AccountDashboard({
 
   return (
     <div className="account-content" ref={accountContentRef}>
-      <section className="account-info" aria-labelledby="account-info-title">
+      <section className="account-overview" aria-labelledby="account-info-title">
         <h3 id="account-info-title">{content.accountInfoTitle}</h3>
-        <p>
-          <span>{content.accountEmailLabel}</span>
-          <strong>{renderedUser.email}</strong>
-        </p>
-        <p>
-          <span>{content.accountPublicNameLabel}</span>
-          <strong>
-            {renderedUser.displayName || content.publicSellerFallbackLabel}
-          </strong>
-        </p>
+        <div className="account-overview-meta">
+          <p className="account-overview-row">
+            <span>{content.accountEmailLabel}</span>
+            <strong>{renderedUser.email}</strong>
+          </p>
+          <p className="account-overview-row">
+            <span>{content.accountPublicNameLabel}</span>
+            <strong>
+              {renderedUser.displayName || content.publicSellerFallbackLabel}
+            </strong>
+          </p>
+        </div>
         <div className="account-quick-actions">
           {accountProfile?.publicSlug ? (
             <Link
@@ -508,16 +510,24 @@ export default function AccountDashboard({
             {content.localAdvertisementsImportFailedMessage}
           </p>
         ) : null}
-        {legacyMigrationCount !== null ? (
-          <p
-            className="account-status-message account-status-message--success"
-            role="status"
-          >
-            {legacyMigrationCount > 0
-              ? `${content.importedLocalAdvertisementsMessage}: ${legacyMigrationCount}`
-              : content.noLocalAdvertisementsRequiredMigrationMessage}
-          </p>
-        ) : null}
+     {legacyMigrationCount !== null &&
+(!legacyMigrationError || legacyMigrationCount > 0) ? (
+  <p
+    className={
+      legacyMigrationCount > 0
+        ? 'account-status-message account-status-message--success'
+        : 'account-status-message account-status-message--legacy'
+    }
+    role="status"
+  >
+    {legacyMigrationCount > 0
+      ? `${content.importedLocalAdvertisementsMessage}: ${legacyMigrationCount}`
+      : content.noLocalAdvertisementsRequiredMigrationMessage}
+  </p>
+) : null}
+      </section>
+
+      <section className="account-profile-settings">
         {accountProfile ? (
           <ProfilePhotoManager
             profile={accountProfile}
@@ -593,7 +603,7 @@ export default function AccountDashboard({
               {publicNameError}
             </p>
           ) : null}
-          <button type="submit" className="search-button">
+          <button type="submit" className="search-button account-save-profile-button">
             {content.accountSaveProfileButton}
           </button>
         </form>
@@ -603,7 +613,8 @@ export default function AccountDashboard({
         <div className="my-ads-heading">
           <h3 id="my-ads-title">{content.myAdvertisementsTitle}</h3>
           <p className="results-summary" aria-live="polite">
-            {content.myAdvertisementsCountLabel}: {ownedListings.length}
+            <span className="sr-only">{content.myAdvertisementsCountLabel}: </span>
+            {ownedListings.length}
           </p>
         </div>
 
@@ -704,53 +715,56 @@ export default function AccountDashboard({
         )}
       </section>
 
-      <section className="my-ads-section" aria-labelledby="unassigned-ads-title">
-        <div className="my-ads-heading">
-          <h3 id="unassigned-ads-title">{content.olderUnassignedAdvertisementsTitle}</h3>
-          <p className="results-summary" aria-live="polite">
-            {content.olderUnassignedAdvertisementsCountLabel}: {unassignedListings.length}
-          </p>
-        </div>
+      {claimMessage ? (
+        <p className="form-success account-legacy-claim-message" role="status">
+          {claimMessage}
+        </p>
+      ) : null}
 
-        {claimMessage ? (
-          <p className="form-success" role="status">
-            {claimMessage}
-          </p>
-        ) : null}
-
-        {listingToClaim ? (
-          <section
-            className="delete-confirmation"
-            role="dialog"
-            aria-modal="true"
-            aria-labelledby="claim-ad-title"
-          >
-            <h4 id="claim-ad-title">{content.confirmClaimAdvertisementTitle}</h4>
-            <p>
-              {content.confirmClaimAdvertisementMessage} {listingToClaim.title}
+      {unassignedListings.length > 0 ? (
+        <section className="my-ads-section" aria-labelledby="unassigned-ads-title">
+          <div className="my-ads-heading">
+            <h3 id="unassigned-ads-title">{content.olderUnassignedAdvertisementsTitle}</h3>
+            <p className="results-summary" aria-live="polite">
+              <span className="sr-only">
+                {content.olderUnassignedAdvertisementsCountLabel}:{' '}
+              </span>
+              {unassignedListings.length}
             </p>
-            <div className="delete-confirmation-actions">
-              <button
-                type="button"
-                className="secondary-button"
-                onClick={cancelClaim}
-                disabled={isClaiming}
-              >
-                {content.cancelButton}
-              </button>
-              <button
-                type="button"
-                className="search-button"
-                onClick={confirmClaim}
-                disabled={isClaiming || !claimTargetStillUnassigned}
-              >
-                {content.claimAdvertisementButton}
-              </button>
-            </div>
-          </section>
-        ) : null}
+          </div>
 
-        {unassignedListings.length > 0 ? (
+          {listingToClaim ? (
+            <section
+              className="delete-confirmation"
+              role="dialog"
+              aria-modal="true"
+              aria-labelledby="claim-ad-title"
+            >
+              <h4 id="claim-ad-title">{content.confirmClaimAdvertisementTitle}</h4>
+              <p>
+                {content.confirmClaimAdvertisementMessage} {listingToClaim.title}
+              </p>
+              <div className="delete-confirmation-actions">
+                <button
+                  type="button"
+                  className="secondary-button"
+                  onClick={cancelClaim}
+                  disabled={isClaiming}
+                >
+                  {content.cancelButton}
+                </button>
+                <button
+                  type="button"
+                  className="search-button"
+                  onClick={confirmClaim}
+                  disabled={isClaiming || !claimTargetStillUnassigned}
+                >
+                  {content.claimAdvertisementButton}
+                </button>
+              </div>
+            </section>
+          ) : null}
+
           <div className="my-ads-grid">
             {unassignedListings.map((listing) => (
               <article key={String(listing.id)} className="my-ad-item">
@@ -766,13 +780,8 @@ export default function AccountDashboard({
               </article>
             ))}
           </div>
-        ) : (
-          <div className="empty-results" role="status">
-            <h3>{content.olderUnassignedAdvertisementsTitle}</h3>
-            <p>{content.noUnassignedAdvertisementsMessage}</p>
-          </div>
-        )}
-      </section>
+        </section>
+      ) : null}
       <AccountRefreshScrollManager ready={accountReady} />
       <AccountNativeHistoryRestorer
         accountReady={accountReady}

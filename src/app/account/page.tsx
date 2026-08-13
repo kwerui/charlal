@@ -17,13 +17,15 @@ export default async function AccountPage() {
       : null;
 
   return (
-    <main className="account-page">
-      <section className="account-panel" aria-labelledby="account-title">
+    <main className="account-page account-page--dashboard">
+      <section
+        className="account-panel account-panel--dashboard"
+        aria-labelledby="account-title"
+      >
         <div className="form-page-heading">
-          <p className="hero-kicker">{content.accountKicker}</p>
-          <h2 id="account-title" className="auth-title">
+          <h1 id="account-title" className="auth-title">
             {content.accountTitle}
-          </h2>
+          </h1>
         </div>
         <AccountDashboard
           initialAuthStatus={

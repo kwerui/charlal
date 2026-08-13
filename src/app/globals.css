@@ -5138,4 +5138,373 @@ body {
   }
 }
 
+/* ===== DESIGN PASS F1: ACCOUNT + MY ADS ===== */
+.account-page--dashboard {
+  align-items: flex-start;
+  padding: 32px 20px 40px;
+}
 
+.account-panel--dashboard {
+  width: min(100%, 1040px);
+  gap: 24px;
+  padding: 28px;
+}
+
+.account-panel--dashboard > .form-page-heading {
+  gap: 0;
+}
+
+.account-panel--dashboard .auth-title {
+  font-size: clamp(28px, 3vw, 34px);
+}
+
+.account-panel--dashboard .account-content {
+  gap: 26px;
+}
+
+.account-overview {
+  display: grid;
+  gap: 14px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.account-overview h3,
+.my-ads-heading h3 {
+  margin: 0;
+  color: var(--text-dark);
+}
+
+.account-overview-meta {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px 24px;
+}
+
+.account-overview-row {
+  display: grid;
+  gap: 3px;
+  min-width: 0;
+  margin: 0;
+}
+
+.account-overview-row span {
+  color: var(--text-light);
+  font-size: 14px;
+  font-weight: 650;
+}
+
+.account-overview-row strong {
+  min-width: 0;
+  color: var(--text-dark);
+  font-size: 16px;
+  overflow-wrap: anywhere;
+}
+
+.account-overview .account-quick-actions {
+  gap: 8px;
+}
+
+.account-overview .secondary-button {
+  min-height: 40px;
+  padding: 9px 13px;
+  font-size: 14px;
+}
+
+.account-status-message--legacy {
+  width: fit-content;
+  max-width: 100%;
+  margin: 0;
+  padding: 7px 10px;
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  background: transparent;
+  color: var(--text-light);
+  font-size: 13px;
+  font-weight: 650;
+  line-height: 1.4;
+}
+
+.account-profile-settings {
+  display: grid;
+  gap: 16px;
+  padding: 18px;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-lg);
+  background: var(--bg-light);
+}
+
+.account-profile-settings .profile-photo-manager {
+  align-items: center;
+  padding: 0 0 16px;
+  border: 0;
+  border-bottom: 1px solid var(--border-color);
+  border-radius: 0;
+  background: transparent;
+}
+
+.account-profile-settings .profile-photo-controls {
+  gap: 7px;
+}
+
+.account-profile-settings .profile-photo-controls h4 {
+  font-size: 17px;
+}
+
+.account-profile-settings .profile-photo-main-actions {
+  gap: 8px;
+}
+
+.account-profile-settings .profile-photo-button {
+  min-height: 40px;
+  padding: 9px 12px;
+}
+
+.account-profile-settings .public-name-form {
+  gap: 10px;
+  margin-top: 0;
+}
+
+.account-profile-settings .form-field {
+  gap: 6px;
+}
+
+.account-profile-settings .form-field input,
+.account-profile-settings .form-field textarea {
+  background: var(--bg-white);
+}
+
+.account-profile-settings .account-help-text {
+  margin-top: -3px;
+}
+
+.account-save-profile-button {
+  justify-self: end;
+  width: auto;
+  min-width: 220px;
+}
+
+.my-ads-section {
+  gap: 14px;
+}
+
+.my-ads-heading {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: end;
+  gap: 10px 16px;
+}
+
+.my-ads-heading .results-summary {
+  width: fit-content;
+  max-width: 100%;
+  min-height: 0;
+  margin: 0;
+  padding: 6px 10px;
+  border-radius: var(--radius-pill);
+  font-size: 14px;
+  line-height: 1.3;
+  box-shadow: none;
+}
+
+.my-ads-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px;
+}
+
+.my-ad-item {
+  min-width: 0;
+  gap: 8px;
+}
+
+.my-ad-item .listing-card {
+  box-shadow: none;
+}
+
+.my-ad-item .listing-image-wrapper {
+  aspect-ratio: 16 / 9;
+}
+
+.my-ad-item .listing-info {
+  gap: 6px;
+  padding: 14px 15px 15px;
+}
+
+.my-ad-item .listing-title {
+  font-size: 18px;
+}
+
+.my-ad-item .listing-price {
+  font-size: 22px;
+}
+
+.my-ad-item .listing-location {
+  font-size: 15px;
+}
+
+.my-ad-actions {
+  gap: 8px;
+}
+
+.my-ad-actions .listing-management-button {
+  min-height: 40px;
+  padding: 9px 11px;
+  font-size: 14px;
+}
+
+.my-ad-delete-button,
+.my-ad-delete-button:link,
+.my-ad-delete-button:visited {
+  border-color: rgba(220, 38, 38, 0.34);
+  background: var(--color-danger-soft);
+  color: var(--color-danger);
+}
+
+.my-ad-delete-button:hover:not(:disabled),
+.my-ad-delete-button:focus-visible {
+  border-color: var(--color-danger);
+  background: rgba(220, 38, 38, 0.14);
+  color: var(--color-danger);
+  box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.12);
+}
+
+.account-legacy-claim-message {
+  margin: -8px 0 0;
+}
+
+@media (max-width: 768px) {
+  .account-page--dashboard {
+    padding: 18px 12px 30px;
+  }
+
+  .account-panel--dashboard {
+    width: 100%;
+    gap: 20px;
+    padding: 20px;
+  }
+
+  .account-overview-meta {
+    grid-template-columns: 1fr;
+  }
+
+  .my-ads-grid {
+    grid-template-columns: 1fr;
+    gap: 14px;
+  }
+}
+
+@media (max-width: 640px) {
+  .account-panel--dashboard {
+    padding: 18px;
+  }
+
+  .account-panel--dashboard .account-content {
+    gap: 22px;
+  }
+
+  .account-profile-settings {
+    padding: 16px;
+  }
+
+  .account-profile-settings .profile-photo-manager {
+    grid-template-columns: 64px minmax(0, 1fr);
+    align-items: start;
+    gap: 12px;
+  }
+
+  .account-profile-settings .profile-avatar--large {
+    width: 64px;
+    height: 64px;
+    font-size: 24px;
+  }
+
+  .account-profile-settings .profile-photo-main-actions {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .account-save-profile-button {
+    justify-self: stretch;
+    width: 100%;
+    min-width: 0;
+  }
+
+  .my-ads-heading {
+    grid-template-columns: 1fr;
+    align-items: start;
+  }
+
+  .my-ad-item .listing-card {
+    grid-template-columns: minmax(118px, 36%) minmax(0, 1fr);
+    grid-template-rows: 1fr;
+    min-height: 132px;
+  }
+
+  .my-ad-item .listing-image-wrapper {
+    height: 100%;
+    min-height: 132px;
+    aspect-ratio: auto;
+  }
+
+  .my-ad-item .listing-info {
+    align-content: center;
+    gap: 6px;
+    padding: 12px 13px;
+  }
+
+  .my-ad-actions .listing-management-button {
+    min-height: 42px;
+    font-size: 14px;
+    line-height: 1.25;
+  }
+}
+
+@media (max-width: 420px) {
+  .account-page--dashboard {
+    padding-right: 10px;
+    padding-left: 10px;
+  }
+
+  .account-panel--dashboard {
+    padding: 16px;
+  }
+
+  .account-overview .account-quick-actions {
+    display: grid;
+    grid-template-columns: 1fr;
+  }
+
+  .account-overview .secondary-button {
+    width: 100%;
+  }
+
+  .account-profile-settings {
+    margin-right: -2px;
+    margin-left: -2px;
+    padding: 14px;
+  }
+
+  .account-profile-settings .profile-photo-main-actions {
+    grid-template-columns: 1fr;
+  }
+
+  .my-ad-item .listing-card {
+    grid-template-columns: minmax(108px, 36%) minmax(0, 1fr);
+    min-height: 124px;
+  }
+
+  .my-ad-item .listing-image-wrapper {
+    min-height: 124px;
+  }
+
+  .my-ad-item .listing-title {
+    font-size: 17px;
+  }
+
+  .my-ad-item .listing-price {
+    font-size: 21px;
+  }
+
+  .my-ad-item .listing-location {
+    font-size: 15px;
+  }
+}
