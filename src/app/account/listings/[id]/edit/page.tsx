@@ -49,13 +49,15 @@ export default async function EditListingPage({
       : null;
 
   return (
-    <main className="form-page">
-      <section className="form-panel" aria-labelledby="edit-listing-title">
+    <main className="form-page form-page--listing-editor">
+      <section
+        className="form-panel form-panel--listing-editor"
+        aria-labelledby="edit-listing-title"
+      >
         <div className="form-page-heading">
-          <p className="hero-kicker">{content.accountKicker}</p>
-          <h2 id="edit-listing-title" className="auth-title">
+          <h1 id="edit-listing-title" className="auth-title">
             {content.editAdvertisementTitle}
-          </h2>
+          </h1>
         </div>
         <EditListingForm
           id={id}

@@ -3,13 +3,15 @@ import PostAdForm from './PostAdForm';
 
 export default function PostAdPage() {
   return (
-    <main className="form-page">
-      <section className="form-panel" aria-labelledby="post-ad-title">
+    <main className="form-page form-page--listing-editor">
+      <section
+        className="form-panel form-panel--listing-editor"
+        aria-labelledby="post-ad-title"
+      >
         <div className="form-page-heading">
-          <p className="hero-kicker">{content.postAdKicker}</p>
-          <h2 id="post-ad-title" className="auth-title">
+          <h1 id="post-ad-title" className="auth-title">
             {content.postAdTitle}
-          </h2>
+          </h1>
         </div>
         <PostAdForm categories={content.categories} />
       </section>

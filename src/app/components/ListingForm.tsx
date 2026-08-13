@@ -248,148 +248,152 @@ export default function ListingForm({
   }
 
   return (
-    <form className="post-ad-form" onSubmit={handleSubmit} noValidate>
-      <label className="form-field" htmlFor="listing-title">
-        <span>{content.listingTitleLabel}</span>
-        <input
-          id="listing-title"
-          name="title"
-          type="text"
-          required
-          defaultValue={initialValues?.title || ''}
-          onChange={clearValidationErrors}
-        />
-      </label>
-
-      <label className="form-field" htmlFor="listing-category">
-        <span>{content.listingCategoryLabel}</span>
-        <select
-          id="listing-category"
-          name="category"
-          required
-          value={selectedCategorySlug}
-          onChange={(event) => handleCategoryChange(event.target.value)}
-        >
-          <option value="" disabled>
-            {content.listingCategoryPlaceholder}
-          </option>
-          {categories.map((category) => (
-            <option key={category.slug} value={category.slug}>
-              {category.name}
-            </option>
-          ))}
-        </select>
-      </label>
-
-      {hasSubcategories ? (
-        <label className="form-field" htmlFor="listing-subcategory">
-          <span>{content.listingSubcategoryLabel}</span>
-          <select
-            id="listing-subcategory"
-            name="subcategory"
+    <form className="post-ad-form listing-editor-form" onSubmit={handleSubmit} noValidate>
+      <div className="listing-form-section listing-form-section--details">
+        <label className="form-field" htmlFor="listing-title">
+          <span>{content.listingTitleLabel}</span>
+          <input
+            id="listing-title"
+            name="title"
+            type="text"
             required
-            value={selectedSubcategorySlug}
-            onChange={(event) => handleSubcategoryChange(event.target.value)}
+            defaultValue={initialValues?.title || ''}
+            onChange={clearValidationErrors}
+          />
+        </label>
+
+        <label className="form-field" htmlFor="listing-category">
+          <span>{content.listingCategoryLabel}</span>
+          <select
+            id="listing-category"
+            name="category"
+            required
+            value={selectedCategorySlug}
+            onChange={(event) => handleCategoryChange(event.target.value)}
           >
             <option value="" disabled>
-              {content.listingSubcategoryPlaceholder}
+              {content.listingCategoryPlaceholder}
             </option>
-            {selectedCategory?.subcategories.map((subcategory) => (
-              <option key={subcategory.slug} value={subcategory.slug}>
-                {subcategory.name}
+            {categories.map((category) => (
+              <option key={category.slug} value={category.slug}>
+                {category.name}
               </option>
             ))}
           </select>
         </label>
-      ) : null}
 
-      {hasTypes ? (
-        <label className="form-field" htmlFor="listing-type">
-          <span>{content.listingTypeLabel}</span>
-          <select
-            id="listing-type"
-            name="type"
-            required
-            value={selectedTypeSlug}
-            onChange={(event) => {
-              setSelectedTypeSlug(event.target.value);
-              clearValidationErrors();
-            }}
-          >
-            <option value="" disabled>
-              {content.listingTypePlaceholder}
-            </option>
-            {selectedCategory?.types?.map((typeItem) => (
-              <option key={typeItem.slug} value={typeItem.slug}>
-                {typeItem.name}
+        {hasSubcategories ? (
+          <label className="form-field" htmlFor="listing-subcategory">
+            <span>{content.listingSubcategoryLabel}</span>
+            <select
+              id="listing-subcategory"
+              name="subcategory"
+              required
+              value={selectedSubcategorySlug}
+              onChange={(event) => handleSubcategoryChange(event.target.value)}
+            >
+              <option value="" disabled>
+                {content.listingSubcategoryPlaceholder}
               </option>
-            ))}
-          </select>
-        </label>
-      ) : null}
+              {selectedCategory?.subcategories.map((subcategory) => (
+                <option key={subcategory.slug} value={subcategory.slug}>
+                  {subcategory.name}
+                </option>
+              ))}
+            </select>
+          </label>
+        ) : null}
 
-      {hasBuyTypes ? (
-        <label className="form-field" htmlFor="listing-buy-type">
-          <span>{content.listingBuyTypeLabel}</span>
-          <select
-            id="listing-buy-type"
-            name="buyType"
-            required
-            value={selectedBuyTypeSlug}
-            onChange={(event) => {
-              setSelectedBuyTypeSlug(event.target.value);
-              clearValidationErrors();
-            }}
-          >
-            <option value="" disabled>
-              {content.listingBuyTypePlaceholder}
-            </option>
-            {marketplaceBuyTypes.map((buyType) => (
-              <option key={buyType.slug} value={buyType.slug}>
-                {buyType.name}
+        {hasTypes ? (
+          <label className="form-field" htmlFor="listing-type">
+            <span>{content.listingTypeLabel}</span>
+            <select
+              id="listing-type"
+              name="type"
+              required
+              value={selectedTypeSlug}
+              onChange={(event) => {
+                setSelectedTypeSlug(event.target.value);
+                clearValidationErrors();
+              }}
+            >
+              <option value="" disabled>
+                {content.listingTypePlaceholder}
               </option>
-            ))}
-          </select>
+              {selectedCategory?.types?.map((typeItem) => (
+                <option key={typeItem.slug} value={typeItem.slug}>
+                  {typeItem.name}
+                </option>
+              ))}
+            </select>
+          </label>
+        ) : null}
+
+        {hasBuyTypes ? (
+          <label className="form-field" htmlFor="listing-buy-type">
+            <span>{content.listingBuyTypeLabel}</span>
+            <select
+              id="listing-buy-type"
+              name="buyType"
+              required
+              value={selectedBuyTypeSlug}
+              onChange={(event) => {
+                setSelectedBuyTypeSlug(event.target.value);
+                clearValidationErrors();
+              }}
+            >
+              <option value="" disabled>
+                {content.listingBuyTypePlaceholder}
+              </option>
+              {marketplaceBuyTypes.map((buyType) => (
+                <option key={buyType.slug} value={buyType.slug}>
+                  {buyType.name}
+                </option>
+              ))}
+            </select>
+          </label>
+        ) : null}
+
+        <label className="form-field form-field-full" htmlFor="listing-description">
+          <span>{content.listingDescriptionLabel}</span>
+          <textarea
+            id="listing-description"
+            name="description"
+            rows={5}
+            required
+            defaultValue={initialValues?.description || ''}
+            onChange={clearValidationErrors}
+          />
         </label>
-      ) : null}
+      </div>
 
-      <label className="form-field form-field-full" htmlFor="listing-description">
-        <span>{content.listingDescriptionLabel}</span>
-        <textarea
-          id="listing-description"
-          name="description"
-          rows={5}
-          required
-          defaultValue={initialValues?.description || ''}
-          onChange={clearValidationErrors}
-        />
-      </label>
+      <div className="listing-form-section listing-form-section--commerce">
+        <label className="form-field" htmlFor="listing-price">
+          <span>{content.listingPriceLabel}</span>
+          <input
+            id="listing-price"
+            name="price"
+            type="number"
+            min="0"
+            inputMode="decimal"
+            required
+            defaultValue={initialValues ? String(initialValues.price) : ''}
+            onChange={clearValidationErrors}
+          />
+        </label>
 
-      <label className="form-field" htmlFor="listing-price">
-        <span>{content.listingPriceLabel}</span>
-        <input
-          id="listing-price"
-          name="price"
-          type="number"
-          min="0"
-          inputMode="decimal"
-          required
-          defaultValue={initialValues ? String(initialValues.price) : ''}
-          onChange={clearValidationErrors}
-        />
-      </label>
-
-      <label className="form-field" htmlFor="listing-location">
-        <span>{content.listingLocationLabel}</span>
-        <input
-          id="listing-location"
-          name="location"
-          type="text"
-          required
-          defaultValue={initialValues?.location || ''}
-          onChange={clearValidationErrors}
-        />
-      </label>
+        <label className="form-field" htmlFor="listing-location">
+          <span>{content.listingLocationLabel}</span>
+          <input
+            id="listing-location"
+            name="location"
+            type="text"
+            required
+            defaultValue={initialValues?.location || ''}
+            onChange={clearValidationErrors}
+          />
+        </label>
+      </div>
 
       {statusField ? (
         <fieldset className="listing-status-edit-field form-field-full">

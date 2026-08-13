@@ -5508,3 +5508,285 @@ body {
     font-size: 15px;
   }
 }
+
+/* ===== DESIGN PASS F2: POST + EDIT AD FORMS ===== */
+.form-page--listing-editor {
+  align-items: flex-start;
+  padding-top: 32px;
+  padding-bottom: 40px;
+}
+
+.form-panel--listing-editor {
+  width: min(100%, 840px);
+  gap: 18px;
+  padding: 28px;
+}
+
+.form-panel--listing-editor > .form-page-heading {
+  gap: 0;
+}
+
+.form-panel--listing-editor .auth-title {
+  font-size: clamp(28px, 3vw, 32px);
+}
+
+.listing-editor-form {
+  gap: 16px;
+}
+
+.listing-form-section {
+  grid-column: 1 / -1;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px 16px;
+  min-width: 0;
+}
+
+.listing-form-section--commerce {
+  padding-top: 16px;
+  border-top: 1px solid var(--border-color);
+}
+
+.listing-editor-form .form-field {
+  gap: 6px;
+}
+
+.listing-editor-form .form-field input,
+.listing-editor-form .form-field select,
+.listing-editor-form .form-field textarea {
+  min-height: 48px;
+}
+
+.listing-editor-form .form-field textarea {
+  min-height: 132px;
+}
+
+/* Status stays informative, but behaves like compact reference content instead
+   of a second full-size form card. */
+.listing-editor-form .listing-status-edit-field {
+  gap: 10px;
+  padding: 16px 0 0;
+  border: 0;
+  border-top: 1px solid var(--border-color);
+  border-radius: 0;
+  background: transparent;
+}
+
+.listing-editor-form .listing-status-help {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 6px 18px;
+}
+
+.listing-editor-form .listing-status-help div {
+  grid-template-columns: minmax(76px, max-content) minmax(0, 1fr);
+  gap: 4px 9px;
+  align-items: baseline;
+}
+
+.listing-editor-form .listing-status-help dt,
+.listing-editor-form .listing-status-help dd {
+  font-size: 12px;
+  line-height: 1.35;
+}
+
+/* Keep all photo tasks together as one lightweight manager. */
+.listing-editor-form .listing-photo-section {
+  gap: 10px;
+  padding-top: 16px;
+  border-top: 1px solid var(--border-color);
+}
+
+.listing-editor-form .listing-photo-heading {
+  gap: 2px;
+}
+
+.listing-editor-form .listing-photo-heading .filter-label {
+  font-size: 17px;
+  font-weight: 800;
+}
+
+.listing-editor-form .listing-photo-picker {
+  min-height: 42px;
+  padding: 9px 14px;
+}
+
+.listing-editor-form .listing-photo-empty {
+  margin: 0;
+  padding: 9px 11px;
+  border-style: dashed;
+  background: transparent;
+  color: var(--text-light);
+  font-size: 13px;
+  font-weight: 650;
+  line-height: 1.4;
+}
+
+.listing-editor-form .listing-photo-requirements {
+  margin-top: -1px;
+}
+
+.listing-editor-form .listing-photo-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.listing-editor-form .listing-photo-item {
+  grid-template-columns: minmax(130px, 42%) minmax(0, 1fr);
+  align-items: start;
+  gap: 10px;
+  padding: 9px;
+}
+
+.listing-editor-form .listing-photo-preview {
+  width: 100%;
+  align-self: stretch;
+}
+
+.listing-editor-form .listing-photo-controls {
+  align-content: start;
+  gap: 7px;
+  min-width: 0;
+}
+
+.listing-editor-form .listing-photo-position {
+  font-size: 12px;
+}
+
+.listing-editor-form .listing-photo-control-row {
+  gap: 6px;
+}
+
+.listing-editor-form .listing-photo-control,
+.listing-editor-form .listing-photo-remove {
+  min-height: 34px;
+  padding: 7px 8px;
+  font-size: 12px;
+}
+
+.listing-editor-form .listing-photo-remove {
+  border-color: color-mix(in srgb, var(--color-danger) 42%, var(--border-color));
+  background: transparent;
+  color: var(--color-danger);
+}
+
+.listing-editor-form .listing-form-actions {
+  padding-top: 2px;
+}
+
+.listing-editor-form .listing-form-actions:has(> :only-child) {
+  grid-template-columns: minmax(220px, 320px);
+  justify-content: end;
+}
+
+.listing-editor-form .listing-form-action {
+  min-height: 46px;
+  padding: 10px 16px;
+}
+
+@media (max-width: 768px) {
+  .form-page--listing-editor {
+    padding: 18px 12px 28px;
+  }
+
+  .form-panel--listing-editor {
+    width: 100%;
+    gap: 18px;
+    padding: 22px 18px;
+  }
+
+  .form-panel--listing-editor .auth-title {
+    font-size: clamp(28px, 8vw, 32px);
+  }
+
+  .listing-editor-form,
+  .listing-form-section {
+    grid-template-columns: 1fr;
+  }
+
+  .listing-editor-form {
+    gap: 14px;
+  }
+
+  .listing-form-section {
+    gap: 13px;
+  }
+
+  .listing-form-section--commerce,
+  .listing-editor-form .listing-status-edit-field,
+  .listing-editor-form .listing-photo-section {
+    padding-top: 14px;
+  }
+
+  .listing-editor-form .form-field input,
+  .listing-editor-form .form-field select,
+  .listing-editor-form .form-field textarea {
+    min-height: 46px;
+  }
+
+  .listing-editor-form .form-field textarea {
+    min-height: 124px;
+  }
+
+  .listing-editor-form .listing-status-help {
+    grid-template-columns: 1fr;
+    gap: 5px;
+  }
+
+  .listing-editor-form .listing-status-help div {
+    grid-template-columns: minmax(74px, max-content) minmax(0, 1fr);
+    gap: 4px 8px;
+  }
+
+  .listing-editor-form .listing-status-help dt,
+  .listing-editor-form .listing-status-help dd {
+    font-size: 13px;
+  }
+
+  .listing-editor-form .listing-photo-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .listing-editor-form .listing-photo-item {
+    grid-template-columns: minmax(118px, 42%) minmax(0, 1fr);
+    gap: 9px;
+  }
+
+  .listing-editor-form .listing-photo-control-row {
+    grid-template-columns: 1fr;
+    gap: 5px;
+  }
+
+  .listing-editor-form .listing-photo-control,
+  .listing-editor-form .listing-photo-remove {
+    min-height: 34px;
+    font-size: 12px;
+  }
+
+  .listing-editor-form .listing-form-actions,
+  .listing-editor-form .listing-form-actions:has(> :only-child) {
+    grid-template-columns: 1fr;
+    justify-content: stretch;
+    gap: 10px;
+  }
+
+  .listing-editor-form .listing-form-action {
+    width: 100%;
+    min-height: 46px;
+  }
+}
+
+@media (max-width: 420px) {
+  .form-page--listing-editor {
+    padding-right: 10px;
+    padding-left: 10px;
+  }
+
+  .form-panel--listing-editor {
+    padding: 20px 16px;
+  }
+
+  .listing-editor-form .listing-photo-item {
+    grid-template-columns: minmax(108px, 40%) minmax(0, 1fr);
+    padding: 8px;
+  }
+}
