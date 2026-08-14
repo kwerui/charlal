@@ -8,7 +8,11 @@ import {
 } from '@/lib/auth/server';
 import type { ListingDetailViewerState } from '@/app/components/ListingDetailOwnerActions';
 import { getListingFallbackResultsHref } from '@/lib/listingRoutes';
-import { getSafeResultsHref } from '@/lib/resultReturnHref';
+import {
+  buildHrefWithSearchParams,
+  getSafeResultsHref,
+} from '@/lib/resultReturnHref';
+import { getCurrentUserFavoriteState } from '@/lib/supabase/listingFavorites';
 import {
   getPublicDatabaseListingById,
   getPublicSellerProfileForListingId,
@@ -40,6 +44,8 @@ export default async function ListingPage({ params, searchParams }: ListingPageP
   const query = await searchParams;
   const builtInListing = listings.find((item) => String(item.id) === id);
   const safeFromHref = getSafeResultsHref(query.from);
+  const favoriteReturnHref = buildHrefWithSearchParams(`/listing/${id}`, query);
+  const favoriteState = await getCurrentUserFavoriteState();
 
   if (builtInListing) {
     const backHref =
@@ -52,6 +58,9 @@ export default async function ListingPage({ params, searchParams }: ListingPageP
           categories={content.categories}
           backHref={backHref}
           initialViewerState="signed-out"
+          savedListingKeys={favoriteState.savedKeys}
+          currentViewerId={favoriteState.userId}
+          favoriteReturnHref={favoriteReturnHref}
         />
       </div>
     );
@@ -113,6 +122,9 @@ export default async function ListingPage({ params, searchParams }: ListingPageP
         sellerAvatarZoom={sellerPublicProfile?.avatarZoom ?? 100}
         sellerName={sellerPublicProfile?.displayName || undefined}
         initialViewerState={initialViewerState}
+        savedListingKeys={favoriteState.savedKeys}
+        currentViewerId={favoriteState.userId}
+        favoriteReturnHref={favoriteReturnHref}
       />
     </div>
   );

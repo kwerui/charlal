@@ -45,6 +45,7 @@ type Props = {
   initialUser: AppUser | null;
   initialProfile: AppProfile | null;
   initialOwnedListings: Listing[];
+  initialSavedListingKeys: string[];
   initialListingsLoaded: boolean;
   initialListingsError: boolean;
 };
@@ -58,6 +59,7 @@ export default function AccountDashboard({
   initialUser,
   initialProfile,
   initialOwnedListings,
+  initialSavedListingKeys,
   initialListingsLoaded,
   initialListingsError,
 }: Props) {
@@ -501,6 +503,10 @@ export default function AccountDashboard({
               </span>
             ) : null}
           </Link>
+          <Link href="/account/favorites" className="secondary-button">
+            <span aria-hidden="true">♥</span>
+            <span>{content.savedAdvertisementsTitle}</span>
+          </Link>
         </div>
         {legacyMigrationError ? (
           <p
@@ -645,6 +651,8 @@ export default function AccountDashboard({
                     listing={listing}
                     fromHref="/account"
                     showActiveStatus
+                    savedListingKeys={initialSavedListingKeys}
+                    currentViewerId={accountUser?.id || null}
                   />
                   <div className="my-ad-actions">
                     <Link
@@ -768,7 +776,11 @@ export default function AccountDashboard({
           <div className="my-ads-grid">
             {unassignedListings.map((listing) => (
               <article key={String(listing.id)} className="my-ad-item">
-                <ListingCard listing={listing} fromHref="/account" />
+                <ListingCard
+                  listing={listing}
+                  fromHref="/account"
+                  currentViewerId={accountUser?.id || null}
+                />
                 <button
                   type="button"
                   className="search-button my-ad-claim-button"

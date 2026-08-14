@@ -4,6 +4,7 @@ import ListingMutationRefreshBoundary from '@/app/components/ListingMutationRefr
 import PublicSellerAvatarViewer from '@/app/components/PublicSellerAvatarViewer';
 import ResultsScrollRestorer from '@/app/components/ResultsScrollRestorer';
 import { content } from '@/content/tyv';
+import { getCurrentUserFavoriteState } from '@/lib/supabase/listingFavorites';
 import { getPublicSellerPageBySlug } from '@/lib/supabase/publicSellerProfilesServer';
 
 type SellerPageProps = {
@@ -46,6 +47,7 @@ export default async function SellerPage({ params }: SellerPageProps) {
 
   const { profile, listings } = sellerResult;
   const sellerHref = `/seller/${profile.publicSlug}`;
+  const favoriteState = await getCurrentUserFavoriteState();
 
   return (
     <main className="seller-profile-page">
@@ -98,6 +100,8 @@ export default async function SellerPage({ params }: SellerPageProps) {
                 key={listing.id}
                 listing={listing}
                 fromHref={sellerHref}
+                savedListingKeys={favoriteState.savedKeys}
+                currentViewerId={favoriteState.userId}
               />
             ))}
           </div>

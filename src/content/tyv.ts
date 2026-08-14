@@ -192,6 +192,12 @@ export const content = {
   housingClearPropertyType: "Clear property type / Шынар хевирин арыглаар",
   housingClearAllFilters: "Clear all filters / Шупту фильтрлерни арыглап кааптыңар",
   openListingLabel: "Open listing / Ажык даңзы",
+  saveAdvertisementButton: "Save advertisement", // TODO: add reviewed Tuvan translation.
+  saveAdvertisementShortButton: "Save", // TODO: add reviewed Tuvan translation.
+  savedAdvertisementButton: "Saved", // TODO: add reviewed Tuvan translation.
+  removeSavedAdvertisementButton: "Remove from saved", // TODO: add reviewed Tuvan translation.
+  signInToSaveAdvertisementMessage: "Sign in to save advertisements.", // TODO: add reviewed Tuvan translation.
+  unableUpdateSavedAdvertisementMessage: "Unable to update saved advertisement.", // TODO: add reviewed Tuvan translation.
   resultsCountLabel: "Matching listings / Таарыштырган даңзылар",
   emptyResultsTitle: "No listings found / Данзылдар тывылбаан",
   emptyResultsMessage: "Try changing or clearing the filters. / Фильтрлерни өскертип азы арыглап көрүңер",
@@ -366,6 +372,12 @@ export const content = {
   noLocalAdvertisementsRequiredMigrationMessage: "No local advertisements required migration. / Тус черниң чарлалдары көжүп чоруурун негевес.", // TODO: add reviewed Tuvan translation.
   localAdvertisementsImportFailedMessage: "Some local advertisements could not be imported. They remain in this browser and can be retried later. / Чамдык тус ​​черниң чарлалдарын киирип шыдаваан. Олар бо браузерде артып каар болгаш соонда катап шенеп болур.", // TODO: add reviewed Tuvan translation.
   publicSellerFallbackLabel: "Seller / Садыгжы", // TODO: add reviewed Tuvan translation.
+  savedAdvertisementsTitle: "Saved advertisements", // TODO: add reviewed Tuvan translation.
+  savedAdvertisementsCountLabel: "Saved advertisements", // TODO: add reviewed Tuvan translation.
+  noSavedAdvertisementsTitle: "No saved advertisements", // TODO: add reviewed Tuvan translation.
+  noSavedAdvertisementsMessage: "Advertisements you save will appear here.", // TODO: add reviewed Tuvan translation.
+  unableLoadSavedAdvertisementsTitle: "Unable to load saved advertisements", // TODO: add reviewed Tuvan translation.
+  unableLoadSavedAdvertisementsMessage: "Try again in a moment.", // TODO: add reviewed Tuvan translation.
   myAdvertisementsTitle: "My advertisements / Мээң чарлалдарым", // TODO: add reviewed Tuvan translation.
   myAdvertisementsCountLabel: "My advertisements / Мээң чарлалдарым", // TODO: add reviewed Tuvan translation.
   noAdvertisementsPostedTitle: "No advertisements posted / Чарлал чок", // TODO: add reviewed Tuvan translation.

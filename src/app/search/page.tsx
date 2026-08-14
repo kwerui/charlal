@@ -3,6 +3,7 @@ import SearchForm from '@/app/components/SearchForm';
 import { content } from '@/content/tyv';
 import { listings } from '@/data/listings';
 import { buildHrefWithSearchParams } from '@/lib/resultReturnHref';
+import { getCurrentUserFavoriteState } from '@/lib/supabase/listingFavorites';
 import { listPublicDatabaseListings } from '@/lib/supabase/listingsServer';
 
 type SearchPageProps = {
@@ -23,6 +24,7 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
   const databaseError = databaseListingsResult.ok
     ? ''
     : content.databaseListingsLoadFailedMessage;
+  const favoriteState = await getCurrentUserFavoriteState();
 
   return (
     <div className="app-container">
@@ -40,6 +42,8 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
           builtInListings={listings}
           databaseListings={databaseListings}
           databaseError={databaseError}
+          savedListingKeys={favoriteState.savedKeys}
+          currentViewerId={favoriteState.userId}
           criteria={{ searchQuery }}
           resultsHref={resultsHref}
           emptyHeadingLevel="h2"

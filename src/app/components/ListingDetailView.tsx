@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import BackToResultsLink from '@/app/components/BackToResultsLink';
+import FavoriteListingButton from '@/app/components/FavoriteListingButton';
 import ListingImageGallery from '@/app/components/ListingImageGallery';
 import ListingMutationRefreshBoundary from '@/app/components/ListingMutationRefreshBoundary';
 import ListingStatusBadge from '@/app/components/ListingStatusBadge';
@@ -10,6 +11,10 @@ import ListingDetailOwnerActions, {
 import { content } from '@/content/tyv';
 import type { Listing } from '@/data/listings';
 import { formatListingPrice, getListingStatus } from '@/data/listings';
+import {
+  getListingFavoriteKey,
+  getListingFavoriteReference,
+} from '@/lib/listingFavoriteKeys';
 import { resolveListingImage } from '@/lib/listingPlaceholders';
 
 type TypeOption = {
@@ -36,6 +41,9 @@ type Props = {
   sellerAvatarFocusY?: number;
   sellerAvatarZoom?: number;
   initialViewerState: ListingDetailViewerState;
+  savedListingKeys?: string[];
+  currentViewerId?: string | null;
+  favoriteReturnHref?: string;
 };
 
 export default function ListingDetailView({
@@ -49,6 +57,9 @@ export default function ListingDetailView({
   sellerAvatarFocusY = 50,
   sellerAvatarZoom = 100,
   initialViewerState,
+  savedListingKeys = [],
+  currentViewerId = null,
+  favoriteReturnHref,
 }: Props) {
   const listingImage = resolveListingImage(listing);
   const listingStatus = getListingStatus(listing);
@@ -80,6 +91,14 @@ export default function ListingDetailView({
       : listing.transactionType === 'rent'
       ? content.housingRentOption
       : undefined;
+  const favoriteReference = getListingFavoriteReference(listing);
+  const isSaved = favoriteReference
+    ? savedListingKeys.includes(getListingFavoriteKey(favoriteReference))
+    : false;
+  const isOwnDatabaseListing =
+    favoriteReference?.source === 'database' &&
+    Boolean(listing.ownerId) &&
+    listing.ownerId === currentViewerId;
 
   return (
     <article className="listing-detail-page">
@@ -191,6 +210,15 @@ export default function ListingDetailView({
             listing={listing}
             initialViewerState={initialViewerState}
           />
+          {favoriteReference && !isOwnDatabaseListing ? (
+            <FavoriteListingButton
+              reference={favoriteReference}
+              initiallySaved={isSaved}
+              initiallySavedForUserId={currentViewerId}
+              variant="detail"
+              returnHref={favoriteReturnHref}
+            />
+          ) : null}
         </section>
       </div>
     </article>

@@ -20,6 +20,8 @@ type Props = {
   showEmptyState?: boolean;
   emptyHeadingLevel?: 'h2' | 'h3';
   requireSearchQuery?: boolean;
+  savedListingKeys?: string[];
+  currentViewerId?: string | null;
 };
 
 export default function ListingResults({
@@ -33,6 +35,8 @@ export default function ListingResults({
   showEmptyState = true,
   emptyHeadingLevel = 'h3',
   requireSearchQuery = false,
+  savedListingKeys = [],
+  currentViewerId = null,
 }: Props) {
   const matchingListings = useMemo(() => {
     if (requireSearchQuery && !criteria.searchQuery?.trim()) {
@@ -74,6 +78,8 @@ export default function ListingResults({
               key={String(listing.id)}
               listing={listing}
               fromHref={resultsHref}
+              savedListingKeys={savedListingKeys}
+              currentViewerId={currentViewerId}
             />
           ))}
         </div>

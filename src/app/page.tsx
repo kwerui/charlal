@@ -3,6 +3,7 @@ import ListingResults from '@/app/components/ListingResults';
 import SearchForm from '@/app/components/SearchForm';
 import { content } from '@/content/tyv';
 import { listings } from '@/data/listings';
+import { getCurrentUserFavoriteState } from '@/lib/supabase/listingFavorites';
 import { listPublicDatabaseListings } from '@/lib/supabase/listingsServer';
 
 /**
@@ -17,6 +18,7 @@ export default async function Home(): Promise<React.ReactNode> {
   const databaseError = databaseListingsResult.ok
     ? ''
     : content.databaseListingsLoadFailedMessage;
+  const favoriteState = await getCurrentUserFavoriteState();
 
   return (
     <div className="app-container">
@@ -45,6 +47,8 @@ export default async function Home(): Promise<React.ReactNode> {
           builtInListings={listings}
           databaseListings={databaseListings}
           databaseError={databaseError}
+          savedListingKeys={favoriteState.savedKeys}
+          currentViewerId={favoriteState.userId}
           resultsHref="/"
           limit={6}
           showResultsSummary={false}

@@ -4,7 +4,8 @@ import Link from 'next/link';
 import type { FormEvent } from 'react';
 import { useState } from 'react';
 import { content } from '@/content/tyv';
-import { signInWithEmailPassword } from '@/lib/auth/client';
+import { signInWithEmailPassword, useAuthStatus } from '@/lib/auth/client';
+import { getSafeNextPath } from '@/lib/auth/safeNextPath';
 
 type Props = {
   nextPath: string;
@@ -50,6 +51,7 @@ export default function SignInForm({
   initialMessage = '',
   initialMessageTone = 'success',
 }: Props) {
+  const { refreshAuth } = useAuthStatus();
   const [formMessage, setFormMessage] = useState(initialMessage);
   const [messageTone, setMessageTone] = useState<'success' | 'error'>(
     initialMessageTone
@@ -85,7 +87,11 @@ export default function SignInForm({
       return;
     }
 
-    window.location.replace(getAuthenticatedRedirectPath(nextPath));
+    await refreshAuth();
+
+    window.location.replace(
+      getAuthenticatedRedirectPath(getSafeNextPath(nextPath, '/account'))
+    );
   }
 
   return (

@@ -2016,6 +2016,13 @@ body {
   gap: 10px;
 }
 
+.account-quick-actions .secondary-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
 .public-name-form {
   gap: 12px;
   margin-top: 4px;
@@ -2309,10 +2316,17 @@ body {
   align-items: stretch;
 }
 
+.listing-card-shell {
+  position: relative;
+  min-width: 0;
+  height: 100%;
+}
+
 .listing-card {
   display: grid;
   grid-template-rows: auto 1fr;
   min-width: 0;
+  height: 100%;
   overflow: hidden;
   border: 1px solid var(--border-color);
   border-radius: 14px;
@@ -2337,6 +2351,142 @@ body {
   outline: none;
   border-color: var(--primary-color);
   box-shadow: var(--focus-ring), var(--shadow-lg);
+}
+
+.favorite-control--card {
+  position: absolute;
+  right: 12px;
+  bottom: 12px;
+  z-index: 2;
+  display: grid;
+  justify-items: end;
+  gap: 6px;
+  max-width: calc(100% - 24px);
+}
+
+.favorite-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-width: 42px;
+  min-height: 42px;
+  max-width: 100%;
+  padding: 8px 12px;
+  border: 1px solid rgba(15,23,42,0.16);
+  border-radius: var(--radius-pill);
+  background: rgba(255,255,255,0.94);
+  color: var(--text-dark);
+  font: inherit;
+  font-size: 14px;
+  font-weight: 800;
+  line-height: 1.2;
+  cursor: pointer;
+  box-shadow: var(--shadow-sm);
+}
+
+.favorite-control--card .favorite-button {
+  width: auto;
+  min-width: 96px;
+  height: 44px;
+  padding: 0 14px;
+  border-color: rgba(15,23,42,0.2);
+  background: rgba(255,255,255,0.96);
+  color: #334155;
+  font-size: 14px;
+  line-height: 1.2;
+  box-shadow: 0 10px 24px rgba(15,23,42,0.18);
+}
+
+.favorite-control--card .favorite-button-icon {
+  font-size: 20px;
+}
+
+.favorite-button--saved {
+  border-color: rgba(220,38,38,0.32);
+  background: #fff1f2;
+  color: #be123c;
+}
+
+.favorite-control--card .favorite-button--saved {
+  border-color: rgba(225,29,72,0.45);
+  background: #fff1f2;
+  color: #e11d48;
+}
+
+.favorite-button:hover:not(:disabled),
+.favorite-button:focus-visible {
+  outline: none;
+  border-color: var(--primary-color);
+  box-shadow: var(--focus-ring), var(--shadow-sm);
+}
+
+.favorite-button:disabled {
+  cursor: wait;
+  opacity: 0.78;
+}
+
+.favorite-button-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+}
+
+.favorite-control--detail {
+  display: grid;
+  justify-items: start;
+  gap: 6px;
+}
+
+.favorite-control--detail .favorite-button {
+  min-width: 128px;
+  background: var(--bg-white);
+  color: var(--text-dark);
+  border-color: var(--border-strong);
+}
+
+.favorite-control--detail .favorite-button--saved {
+  background: #fff1f2;
+  color: #be123c;
+  border-color: rgba(190,18,60,0.38);
+}
+
+.saved-advertisements-count {
+  display: inline-flex;
+  align-items: center;
+  width: fit-content;
+  min-height: 34px;
+  margin: 0 0 16px;
+  padding: 6px 10px;
+  border-radius: var(--radius-pill);
+  font-size: 14px;
+  line-height: 1.25;
+}
+
+@media (prefers-color-scheme: dark) {
+  .favorite-control--card .favorite-button {
+    border-color: rgba(248,250,252,0.24);
+    background: rgba(15,23,42,0.88);
+    color: #f8fafc;
+    box-shadow: 0 12px 28px rgba(0,0,0,0.34);
+  }
+
+  .favorite-control--card .favorite-button--saved,
+  .favorite-control--detail .favorite-button--saved {
+    border-color: rgba(251,113,133,0.52);
+    background: rgba(136,19,55,0.9);
+    color: #ffe4e6;
+  }
+}
+
+.favorite-error {
+  max-width: 260px;
+  margin: 0;
+  color: var(--color-danger);
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1.35;
 }
 
 .listing-status-badge {
@@ -2551,6 +2701,10 @@ body {
   gap: 8px;
   min-width: 0;
   padding: 17px 18px 18px;
+}
+
+.listing-card-shell--has-favorite .listing-info {
+  padding-bottom: 72px;
 }
 
 .listing-title {
@@ -5960,5 +6114,25 @@ body {
     grid-column: 2;
     grid-row: 2;
     justify-self: stretch;
+  }
+}
+
+@media (max-width: 640px) {
+  .listing-card-shell--has-favorite .listing-info,
+  .listings-section .listing-card-shell--has-favorite .listing-info {
+    align-content: start;
+    padding-bottom: 70px;
+  }
+
+  .favorite-control--card {
+    right: 10px;
+    bottom: 10px;
+    max-width: calc(100% - 20px);
+  }
+
+  .favorite-control--card .favorite-button {
+    min-width: 88px;
+    height: 42px;
+    padding: 0 12px;
   }
 }

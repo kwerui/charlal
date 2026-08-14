@@ -4,6 +4,7 @@ import ListingResults from '@/app/components/ListingResults';
 import { content } from '@/content/tyv';
 import { listings } from '@/data/listings';
 import { buildHrefWithSearchParams } from '@/lib/resultReturnHref';
+import { getCurrentUserFavoriteState } from '@/lib/supabase/listingFavorites';
 import { listPublicDatabaseListings } from '@/lib/supabase/listingsServer';
 import HousingFilterControls from './HousingFilterControls';
 import MarketplaceBuyTypeDropdown from './MarketplaceBuyTypeDropdown';
@@ -164,6 +165,7 @@ export default async function SubcategoryPage({ params, searchParams }: Subcateg
   const databaseError = databaseListingsResult.ok
     ? ''
     : content.databaseListingsLoadFailedMessage;
+  const favoriteState = await getCurrentUserFavoriteState();
 
   return (
     <div className="app-container">
@@ -219,6 +221,8 @@ export default async function SubcategoryPage({ params, searchParams }: Subcateg
             builtInListings={listings}
             databaseListings={databaseListings}
             databaseError={databaseError}
+            savedListingKeys={favoriteState.savedKeys}
+            currentViewerId={favoriteState.userId}
             criteria={{
               categorySlug: category.slug,
               subcategorySlug: subcategory,

@@ -1,6 +1,8 @@
 import { redirect } from 'next/navigation';
 import { content } from '@/content/tyv';
 import { getCurrentUserResult } from '@/lib/auth/server';
+import { getListingFavoriteKey } from '@/lib/listingFavoriteKeys';
+import { getCurrentUserFavoriteReferences } from '@/lib/supabase/listingFavorites';
 import { listOwnedDatabaseListingsForOwner } from '@/lib/supabase/listingsServer';
 import AccountDashboard from './AccountDashboard';
 
@@ -15,6 +17,10 @@ export default async function AccountPage() {
     authResult.status === 'authenticated'
       ? await listOwnedDatabaseListingsForOwner(authResult.user.id)
       : null;
+  const savedListingKeys =
+    authResult.status === 'authenticated'
+      ? (await getCurrentUserFavoriteReferences()).map(getListingFavoriteKey)
+      : [];
 
   return (
     <main className="account-page account-page--dashboard">
@@ -40,6 +46,7 @@ export default async function AccountPage() {
           initialOwnedListings={
             ownedListingsResult?.ok ? ownedListingsResult.listings : []
           }
+          initialSavedListingKeys={savedListingKeys}
           initialListingsLoaded={Boolean(ownedListingsResult)}
           initialListingsError={Boolean(
             ownedListingsResult && !ownedListingsResult.ok
