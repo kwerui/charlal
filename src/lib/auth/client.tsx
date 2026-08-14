@@ -11,8 +11,6 @@ import {
   type ReactNode,
 } from 'react';
 import { createClient } from '@/lib/supabase/client';
-import { migrateLegacyDemoListingsForUser } from '@/lib/auth/legacyDemoMigration';
-import type { LocalListingImportResult } from '@/lib/auth/legacyDemoMigration';
 import {
   PROFILE_BIO_MAX_LENGTH,
   PROFILE_LOCATION_MAX_LENGTH,
@@ -22,7 +20,6 @@ import {
   type AppProfile,
   type AppUser,
   type AuthStatus,
-  type LegacyMigrationStatus,
   type ProfileStatus,
 } from '@/lib/auth/types';
 
@@ -57,9 +54,6 @@ type ProfileUpdateValues = {
 type AuthContextValue = {
   status: AuthStatus;
   profileStatus: ProfileStatus;
-  legacyMigrationStatus: LegacyMigrationStatus;
-  legacyMigrationCount: number | null;
-  legacyMigrationError: boolean;
   user: AppUser | null;
   profile: AppProfile | null;
   refreshAuth: () => Promise<void>;
@@ -72,9 +66,6 @@ const AuthContext = createContext<AuthContextValue | undefined>(undefined);
 type ResolvedAuthState = {
   status: AuthStatus;
   profileStatus: ProfileStatus;
-  legacyMigrationStatus: LegacyMigrationStatus;
-  legacyMigrationCount: number | null;
-  legacyMigrationError: boolean;
   user: AppUser | null;
   profile: AppProfile | null;
 };
@@ -271,10 +262,6 @@ async function resolveCurrentAuthState(): Promise<{
   };
 }
 
-async function runLegacyMigration(user: AppUser): Promise<LocalListingImportResult> {
-  return migrateLegacyDemoListingsForUser(user);
-}
-
 export async function signInWithEmailPassword(
   email: string,
   password: string
@@ -352,16 +339,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [profileStatus, setProfileStatus] = useState<ProfileStatus>(
     cachedAuthState?.profileStatus || 'idle'
   );
-  const [legacyMigrationStatus, setLegacyMigrationStatus] =
-    useState<LegacyMigrationStatus>(
-      cachedAuthState?.legacyMigrationStatus || 'idle'
-    );
-  const [legacyMigrationCount, setLegacyMigrationCount] = useState<number | null>(
-    cachedAuthState?.legacyMigrationCount ?? null
-  );
-  const [legacyMigrationError, setLegacyMigrationError] = useState(
-    cachedAuthState?.legacyMigrationError || false
-  );
   const [user, setUser] = useState<AppUser | null>(cachedAuthState?.user || null);
   const [profile, setProfile] = useState<AppProfile | null>(
     cachedAuthState?.profile || null
@@ -371,9 +348,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (!cachedAuthState) {
       setStatus('checking');
       setProfileStatus('loading');
-      setLegacyMigrationStatus('idle');
-      setLegacyMigrationCount(null);
-      setLegacyMigrationError(false);
     }
 
     const nextState = await resolveCurrentAuthState();
@@ -382,45 +356,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setProfileStatus(nextState.profileStatus);
     setUser(nextState.user);
     setProfile(nextState.profile);
-
-    if (nextState.status !== 'authenticated' || !nextState.user) {
-      setLegacyMigrationStatus('complete');
-      setLegacyMigrationCount(null);
-      setLegacyMigrationError(false);
-      cachedAuthState = {
-        ...nextState,
-        legacyMigrationStatus: 'complete',
-        legacyMigrationCount: null,
-        legacyMigrationError: false,
-      };
-      return;
-    }
-
-    setLegacyMigrationStatus('running');
-
-    try {
-      const migrationResult = await runLegacyMigration(nextState.user);
-
-      setLegacyMigrationCount(migrationResult.importedCount);
-      setLegacyMigrationError(!migrationResult.ok);
-      cachedAuthState = {
-        ...nextState,
-        legacyMigrationStatus: 'complete',
-        legacyMigrationCount: migrationResult.importedCount,
-        legacyMigrationError: !migrationResult.ok,
-      };
-    } catch {
-      setLegacyMigrationCount(0);
-      setLegacyMigrationError(true);
-      cachedAuthState = {
-        ...nextState,
-        legacyMigrationStatus: 'complete',
-        legacyMigrationCount: 0,
-        legacyMigrationError: true,
-      };
-    } finally {
-      setLegacyMigrationStatus('complete');
-    }
+    cachedAuthState = nextState;
   }, []);
 
   useEffect(() => {
@@ -454,17 +390,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     await supabase.auth.signOut();
     setStatus('unauthenticated');
     setProfileStatus('idle');
-    setLegacyMigrationStatus('complete');
-    setLegacyMigrationCount(null);
-    setLegacyMigrationError(false);
     setUser(null);
     setProfile(null);
     cachedAuthState = {
       status: 'unauthenticated',
       profileStatus: 'idle',
-      legacyMigrationStatus: 'complete',
-      legacyMigrationCount: null,
-      legacyMigrationError: false,
       user: null,
       profile: null,
     };
@@ -533,9 +463,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const value: AuthContextValue = {
     status,
     profileStatus,
-    legacyMigrationStatus,
-    legacyMigrationCount,
-    legacyMigrationError,
     user,
     profile,
     refreshAuth,

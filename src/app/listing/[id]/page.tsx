@@ -17,7 +17,6 @@ import {
   getPublicDatabaseListingById,
   getPublicSellerProfileForListingId,
 } from '@/lib/supabase/listingsServer';
-import LocalListingDetail from './LocalListingDetail';
 
 type ListingPageProps = {
   params: Promise<{ id: string }>;
@@ -82,16 +81,6 @@ export default async function ListingPage({ params, searchParams }: ListingPageP
   }
 
   if (!databaseListingResult.listing) {
-    if (id.startsWith('local-')) {
-      return (
-        <LocalListingDetail
-          id={id}
-          safeFromHref={safeFromHref}
-          categories={content.categories}
-        />
-      );
-    }
-
     notFound();
   }
 

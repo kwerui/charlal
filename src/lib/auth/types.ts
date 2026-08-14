@@ -25,7 +25,6 @@ export type AppProfile = {
 
 export type AuthStatus = 'checking' | 'authenticated' | 'unauthenticated';
 export type ProfileStatus = 'idle' | 'loading' | 'loaded' | 'error';
-export type LegacyMigrationStatus = 'idle' | 'running' | 'complete';
 
 export function sanitizeProfileDisplayName(displayName: string): string {
   return displayName.trim().slice(0, PROFILE_DISPLAY_NAME_MAX_LENGTH);

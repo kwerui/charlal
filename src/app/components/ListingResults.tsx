@@ -6,7 +6,6 @@ import ListingMutationRefreshBoundary from '@/app/components/ListingMutationRefr
 import ResultsScrollRestorer from '@/app/components/ResultsScrollRestorer';
 import { content } from '@/content/tyv';
 import type { Listing } from '@/data/listings';
-import { combineListings } from '@/lib/localListings';
 import { filterListings, type ListingFilterCriteria } from '@/lib/listingFilters';
 
 type Props = {
@@ -23,6 +22,18 @@ type Props = {
   savedListingKeys?: string[];
   currentViewerId?: string | null;
 };
+
+function combineListings(
+  builtInListings: Listing[],
+  databaseListings: Listing[]
+): Listing[] {
+  const builtInIds = new Set(builtInListings.map((listing) => String(listing.id)));
+  const safeDatabaseListings = databaseListings.filter(
+    (listing) => !builtInIds.has(String(listing.id))
+  );
+
+  return [...safeDatabaseListings, ...builtInListings];
+}
 
 export default function ListingResults({
   builtInListings,

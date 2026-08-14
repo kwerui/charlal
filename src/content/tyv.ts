@@ -368,9 +368,6 @@ export const content = {
   removeProfilePhotoConfirmMessage: "Your profile will use the default avatar until you add another photo.", // TODO: add reviewed Tuvan translation.
   profilePhotoFocusSaveFailedMessage: "Unable to save photo position.", // TODO: add reviewed Tuvan translation.
   openProfilePhotoViewerLabel: "Open profile photo", // TODO: add reviewed Tuvan translation.
-  importedLocalAdvertisementsMessage: "Imported local advertisements / Импорттуг тус черниң чарлалдары", // TODO: add reviewed Tuvan translation.
-  noLocalAdvertisementsRequiredMigrationMessage: "No local advertisements required migration. / Тус черниң чарлалдары көжүп чоруурун негевес.", // TODO: add reviewed Tuvan translation.
-  localAdvertisementsImportFailedMessage: "Some local advertisements could not be imported. They remain in this browser and can be retried later. / Чамдык тус ​​черниң чарлалдарын киирип шыдаваан. Олар бо браузерде артып каар болгаш соонда катап шенеп болур.", // TODO: add reviewed Tuvan translation.
   publicSellerFallbackLabel: "Seller / Садыгжы", // TODO: add reviewed Tuvan translation.
   savedAdvertisementsTitle: "Saved advertisements", // TODO: add reviewed Tuvan translation.
   savedAdvertisementsCountLabel: "Saved advertisements", // TODO: add reviewed Tuvan translation.
@@ -382,14 +379,6 @@ export const content = {
   myAdvertisementsCountLabel: "My advertisements / Мээң чарлалдарым", // TODO: add reviewed Tuvan translation.
   noAdvertisementsPostedTitle: "No advertisements posted / Чарлал чок", // TODO: add reviewed Tuvan translation.
   noAdvertisementsPostedMessage: "Advertisements you create while signed in will appear here. / Кирип тургаш кылган чарлалдарыңар мында көстүп кээр.", // TODO: add reviewed Tuvan translation.
-  olderUnassignedAdvertisementsTitle: "Older unassigned advertisements / Эрги аңгылаттынмаан чарлалдар", // TODO: add reviewed Tuvan translation.
-  olderUnassignedAdvertisementsCountLabel: "Older unassigned advertisements / Эрги аңгылаттынмаан чарлалдар", // TODO: add reviewed Tuvan translation.
-  noUnassignedAdvertisementsMessage: "Older demo advertisements without an owner will appear here.", // TODO: add reviewed Tuvan translation.
-  claimAdvertisementButton: "Claim advertisement / Негелде чарлал", // TODO: add reviewed Tuvan translation.
-  confirmClaimAdvertisementTitle: "Confirm claim / Негелдени бадыткаар", // TODO: add reviewed Tuvan translation.
-  confirmClaimAdvertisementMessage: "Claim this older advertisement? / Бо эрги чарлалды негеп алыр силер бе?", // TODO: add reviewed Tuvan translation.
-  advertisementClaimedMessage: "Advertisement claimed. / Чарлал айыткан.", // TODO: add reviewed Tuvan translation.
-  advertisementClaimFailedMessage: "This advertisement could not be claimed. / Бо чарлалды негеп шыдаваан.", // TODO: add reviewed Tuvan translation.
   deleteAdvertisementButton: "Delete advertisement / Чарлалды өжүрүп кааптыңар", // TODO: add reviewed Tuvan translation.
   confirmDeleteAdvertisementTitle: "Confirm deletion / Өжүргенин бадыткаар", // TODO: add reviewed Tuvan translation.
   confirmDeleteAdvertisementMessage: "Delete this advertisement? / Бо чарлалды өжүрүп кааптыңар бе?", // TODO: add reviewed Tuvan translation.
@@ -503,11 +492,6 @@ export const content = {
   postAdErrorHousingTypeRequired: "Choose a housing transaction and property type. / Бажың-балгат дугайында садыглажыышкынның хевирин болгаш өнчү-хөреңгиниң хевирин шилип алыңар. ", // TODO: add reviewed Tuvan translation.
   postAdErrorMarketplaceTypeRequired: "Choose a marketplace type. / Рынок хевирин шилип алыңар.", // TODO: add reviewed Tuvan translation.
   postAdErrorSaveFailed: "The advertisement could not be saved. / Чарлалды камгалап шыдаваан.", // TODO: add reviewed Tuvan translation.
-  localListingSellerName: "Demo user", // TODO: add reviewed Tuvan translation.
-  loadingListingMessage: "Loading listing... / Даңзыны үндүрүп турар...", // TODO: add reviewed Tuvan translation.
-  localListingNotFoundTitle: "Listing not found / Даңзы тывылбаан", // TODO: add reviewed Tuvan translation.
-  localListingNotFoundMessage: "This local demo listing may have been deleted or browser storage may have been cleared.", // TODO: add reviewed Tuvan translation.
-
   // Categories (each category stores its name, slug, image, and subcategories)
   categories: [
     {

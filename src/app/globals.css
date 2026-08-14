@@ -2069,10 +2069,6 @@ body {
   width: 100%;
 }
 
-.my-ad-claim-button {
-  width: 100%;
-}
-
 .edit-listing-state-link {
   margin-top: 16px;
 }
@@ -5403,20 +5399,6 @@ body {
   font-size: 14px;
 }
 
-.account-status-message--legacy {
-  width: fit-content;
-  max-width: 100%;
-  margin: 0;
-  padding: 7px 10px;
-  border: 1px solid var(--border-color);
-  border-radius: 8px;
-  background: transparent;
-  color: var(--text-light);
-  font-size: 13px;
-  font-weight: 650;
-  line-height: 1.4;
-}
-
 .account-profile-settings {
   display: grid;
   gap: 16px;
@@ -5558,10 +5540,6 @@ body {
   background: rgba(220, 38, 38, 0.14);
   color: var(--color-danger);
   box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.12);
-}
-
-.account-legacy-claim-message {
-  margin: -8px 0 0;
 }
 
 @media (max-width: 768px) {

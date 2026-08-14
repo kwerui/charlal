@@ -214,22 +214,6 @@ database assigns ownership from the authenticated Supabase user via `auth.uid()`
 and derives the public seller display name from `public.profiles`; the browser
 form never submits an owner ID or seller email.
 
-The app still reads old browser-local advertisements from
-`tuva-marketplace:user-listings:v1` only for migration and recovery:
-
-- After sign-in, eligible local advertisements owned by the current Supabase UUID
-  or by the exact matching legacy demo user ID are imported once into
-  `public.listings`.
-- A local advertisement is removed from browser storage only after its database
-  insert succeeds.
-- Older unassigned local advertisements remain visible in Account until the
-  signed-in user explicitly claims one; claiming inserts it into PostgreSQL and
-  then removes only that local copy.
-- Failed imports remain in browser storage and can be retried later.
-
-The import completion marker is browser-local and idempotent:
-`charlal:supabase-listing-imports:v1`.
-
 Listing photos are uploaded only after the advertisement row exists. The app
 supports zero to eight JPEG, PNG, or WebP photos per database listing, with the
 first image used as the cover in cards and the full ordered gallery shown on

@@ -9,7 +9,6 @@ import {
   isDatabaseListingRowArray,
   listingFormValuesToDatabaseInsert,
   listingFormValuesToDatabaseUpdate,
-  listingToDatabaseInsert,
 } from '@/lib/listingDatabaseTypes';
 import type { ValidatedListingFormValues } from '@/lib/listingFormValidation';
 import { createClient } from '@/lib/supabase/client';
@@ -95,32 +94,6 @@ export async function createDatabaseListingFromFormValues(
   const { data, error } = await supabase
     .from('listings')
     .insert(listingFormValuesToDatabaseInsert(values))
-    .select(DATABASE_LISTING_SELECT_COLUMNS)
-    .single();
-
-  if (error || !isDatabaseListingRow(data)) {
-    return { ok: false, reason: 'database-unavailable' };
-  }
-
-  return {
-    ok: true,
-    listing: await attachImagesToListing(databaseRowToListing(data)),
-  };
-}
-
-export async function createDatabaseListingFromExistingListing(
-  listing: Listing
-): Promise<DatabaseListingMutationResult> {
-  const insertValues = listingToDatabaseInsert(listing);
-
-  if (!insertValues) {
-    return { ok: false, reason: 'database-unavailable' };
-  }
-
-  const supabase = createClient();
-  const { data, error } = await supabase
-    .from('listings')
-    .insert(insertValues)
     .select(DATABASE_LISTING_SELECT_COLUMNS)
     .single();
 

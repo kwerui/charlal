@@ -13,11 +13,6 @@ import { content } from '@/content/tyv';
 import type { Listing } from '@/data/listings';
 import { useMessagingRealtime } from '@/lib/messagingRealtime';
 import {
-  getUnassignedLocalListings,
-  removeLocalListingsById,
-  subscribeToLocalListings,
-} from '@/lib/localListings';
-import {
   getUserOwnerId,
   isListingOwnedByUser,
 } from '@/lib/listingOwnership';
@@ -34,7 +29,6 @@ import {
 } from '@/lib/auth/types';
 import { useAuthStatus } from '@/lib/auth/client';
 import {
-  createDatabaseListingFromExistingListing,
   deleteDatabaseListingOwnedBy,
   listOwnedDatabaseListings,
 } from '@/lib/supabase/listingsClient';
@@ -68,9 +62,6 @@ export default function AccountDashboard({
   const {
     status: authStatus,
     profileStatus,
-    legacyMigrationStatus,
-    legacyMigrationCount,
-    legacyMigrationError,
     user: currentUser,
     profile: currentProfile,
     updateProfile,
@@ -87,7 +78,6 @@ export default function AccountDashboard({
   const initialListingRefreshSettledRef = useRef(false);
   const [ownedListings, setOwnedListings] =
     useState<Listing[]>(initialOwnedListings);
-  const [unassignedListings, setUnassignedListings] = useState<Listing[]>([]);
   const [listingSectionsLoaded, setListingSectionsLoaded] =
     useState(initialListingsLoaded);
   const [listingSectionsError, setListingSectionsError] = useState(
@@ -103,15 +93,12 @@ export default function AccountDashboard({
   const [publicNameMessage, setPublicNameMessage] = useState('');
   const [publicNameError, setPublicNameError] = useState('');
   const [listingToDelete, setListingToDelete] = useState<Listing | null>(null);
-  const [listingToClaim, setListingToClaim] = useState<Listing | null>(null);
   const [deleteMessage, setDeleteMessage] = useState('');
   const [deleteErrorListingId, setDeleteErrorListingId] = useState<string | null>(
     null
   );
   const [deleteErrorMessage, setDeleteErrorMessage] = useState('');
-  const [claimMessage, setClaimMessage] = useState('');
   const [isDeleting, setIsDeleting] = useState(false);
-  const [isClaiming, setIsClaiming] = useState(false);
   const deleteConfirmationRefs = useRef<Record<string, HTMLElement | null>>({});
 
   useEffect(() => {
@@ -135,8 +122,6 @@ export default function AccountDashboard({
   const refreshListingSections = useCallback(async (
     options: RefreshListingSectionsOptions = {}
   ) => {
-    setUnassignedListings(getUnassignedLocalListings());
-
     if (authStatus === 'unauthenticated') {
       setOwnedListings([]);
       setListingSectionsLoaded(false);
@@ -149,17 +134,10 @@ export default function AccountDashboard({
       return;
     }
 
-    if (legacyMigrationStatus !== 'complete') {
-      setListingSectionsLoaded(initialListingsLoaded);
-      return;
-    }
-
     if (
       !options.force &&
       hasUsableInitialListings &&
-      !initialListingRefreshSettledRef.current &&
-      legacyMigrationCount === 0 &&
-      !legacyMigrationError
+      !initialListingRefreshSettledRef.current
     ) {
       initialListingRefreshSettledRef.current = true;
       setListingSectionsLoaded(true);
@@ -183,9 +161,6 @@ export default function AccountDashboard({
     authStatus,
     hasUsableInitialListings,
     initialListingsLoaded,
-    legacyMigrationCount,
-    legacyMigrationError,
-    legacyMigrationStatus,
     ownerId,
   ]);
 
@@ -195,11 +170,9 @@ export default function AccountDashboard({
     }
 
     const frameId = window.requestAnimationFrame(refreshIfActive);
-    const unsubscribe = subscribeToLocalListings(refreshIfActive);
 
     return () => {
       window.cancelAnimationFrame(frameId);
-      unsubscribe();
     };
   }, [refreshListingSections]);
 
@@ -260,14 +233,6 @@ export default function AccountDashboard({
         ownedListings.some((listing) => listing.id === listingToDelete.id)
     );
   }, [accountUser, listingToDelete, ownedListings]);
-
-  const claimTargetStillUnassigned = useMemo(() => {
-    return Boolean(
-      listingToClaim &&
-        !listingToClaim.ownerId &&
-        unassignedListings.some((listing) => listing.id === listingToClaim.id)
-    );
-  }, [listingToClaim, unassignedListings]);
 
   async function handlePublicNameSubmit(event: FormEvent<HTMLFormElement>): Promise<void> {
     event.preventDefault();
@@ -367,17 +332,6 @@ export default function AccountDashboard({
     setDeleteErrorMessage(content.advertisementDeleteFailedMessage);
   }
 
-  function startClaim(listing: Listing): void {
-    setClaimMessage('');
-    setListingToClaim(listing);
-  }
-
-  function cancelClaim(): void {
-    if (!isClaiming) {
-      setListingToClaim(null);
-    }
-  }
-
   function saveAccountScrollForEdit(
     event: MouseEvent<HTMLAnchorElement>
   ): void {
@@ -389,35 +343,9 @@ export default function AccountDashboard({
     );
   }
 
-  async function confirmClaim(): Promise<void> {
-    if (!listingToClaim || !ownerId || !currentUser || isClaiming) {
-      return;
-    }
-
-    setIsClaiming(true);
-    const claimResult = await createDatabaseListingFromExistingListing({
-      ...listingToClaim,
-      ownerId,
-      sellerName: currentUser.displayName,
-    });
-    setIsClaiming(false);
-
-    if (claimResult.ok) {
-      removeLocalListingsById([listingToClaim.id]);
-      await refreshListingSections({ force: true });
-      setListingToClaim(null);
-      setClaimMessage(content.advertisementClaimedMessage);
-      return;
-    }
-
-    setClaimMessage(content.advertisementClaimFailedMessage);
-    setListingToClaim(null);
-  }
-
   const accountReady =
     authStatus === 'authenticated' &&
     profileStatus === 'loaded' &&
-    legacyMigrationStatus === 'complete' &&
     Boolean(currentUser) &&
     Boolean(ownerId) &&
     listingSectionsLoaded;
@@ -508,29 +436,6 @@ export default function AccountDashboard({
             <span>{content.savedAdvertisementsTitle}</span>
           </Link>
         </div>
-        {legacyMigrationError ? (
-          <p
-            className="account-status-message account-status-message--error"
-            role="alert"
-          >
-            {content.localAdvertisementsImportFailedMessage}
-          </p>
-        ) : null}
-     {legacyMigrationCount !== null &&
-(!legacyMigrationError || legacyMigrationCount > 0) ? (
-  <p
-    className={
-      legacyMigrationCount > 0
-        ? 'account-status-message account-status-message--success'
-        : 'account-status-message account-status-message--legacy'
-    }
-    role="status"
-  >
-    {legacyMigrationCount > 0
-      ? `${content.importedLocalAdvertisementsMessage}: ${legacyMigrationCount}`
-      : content.noLocalAdvertisementsRequiredMigrationMessage}
-  </p>
-) : null}
       </section>
 
       <section className="account-profile-settings">
@@ -723,77 +628,6 @@ export default function AccountDashboard({
         )}
       </section>
 
-      {claimMessage ? (
-        <p className="form-success account-legacy-claim-message" role="status">
-          {claimMessage}
-        </p>
-      ) : null}
-
-      {unassignedListings.length > 0 ? (
-        <section className="my-ads-section" aria-labelledby="unassigned-ads-title">
-          <div className="my-ads-heading">
-            <h3 id="unassigned-ads-title">{content.olderUnassignedAdvertisementsTitle}</h3>
-            <p className="results-summary" aria-live="polite">
-              <span className="sr-only">
-                {content.olderUnassignedAdvertisementsCountLabel}:{' '}
-              </span>
-              {unassignedListings.length}
-            </p>
-          </div>
-
-          {listingToClaim ? (
-            <section
-              className="delete-confirmation"
-              role="dialog"
-              aria-modal="true"
-              aria-labelledby="claim-ad-title"
-            >
-              <h4 id="claim-ad-title">{content.confirmClaimAdvertisementTitle}</h4>
-              <p>
-                {content.confirmClaimAdvertisementMessage} {listingToClaim.title}
-              </p>
-              <div className="delete-confirmation-actions">
-                <button
-                  type="button"
-                  className="secondary-button"
-                  onClick={cancelClaim}
-                  disabled={isClaiming}
-                >
-                  {content.cancelButton}
-                </button>
-                <button
-                  type="button"
-                  className="search-button"
-                  onClick={confirmClaim}
-                  disabled={isClaiming || !claimTargetStillUnassigned}
-                >
-                  {content.claimAdvertisementButton}
-                </button>
-              </div>
-            </section>
-          ) : null}
-
-          <div className="my-ads-grid">
-            {unassignedListings.map((listing) => (
-              <article key={String(listing.id)} className="my-ad-item">
-                <ListingCard
-                  listing={listing}
-                  fromHref="/account"
-                  currentViewerId={accountUser?.id || null}
-                />
-                <button
-                  type="button"
-                  className="search-button my-ad-claim-button"
-                  onClick={() => startClaim(listing)}
-                  disabled={isClaiming}
-                >
-                  {content.claimAdvertisementButton}
-                </button>
-              </article>
-            ))}
-          </div>
-        </section>
-      ) : null}
       <AccountRefreshScrollManager ready={accountReady} />
       <AccountNativeHistoryRestorer
         accountReady={accountReady}

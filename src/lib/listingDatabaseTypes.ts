@@ -209,39 +209,6 @@ export function publicDatabaseRowsToListings(
   return rows.map(publicDatabaseRowToListing);
 }
 
-function toTimestampFromDateLabel(dateLabel: string): string | undefined {
-  if (!/^\d{4}-\d{2}-\d{2}$/.test(dateLabel)) {
-    return undefined;
-  }
-
-  return `${dateLabel}T00:00:00.000Z`;
-}
-
-export function listingToDatabaseInsert(
-  listing: Listing
-): DatabaseListingInsert | null {
-  if (typeof listing.id !== 'string' || !listing.id.trim()) {
-    return null;
-  }
-
-  return {
-    id: listing.id.trim(),
-    title: listing.title.trim(),
-    description: listing.description.trim(),
-    price: listing.price,
-    location: listing.location.trim(),
-    category: listing.categorySlug.trim(),
-    subcategory: listing.subcategorySlug.trim(),
-    transaction_type: listing.transactionType || null,
-    property_type: listing.propertyType || null,
-    marketplace_type: listing.marketplaceType || null,
-    created_at: toTimestampFromDateLabel(listing.datePosted),
-    updated_at: listing.updatedAt
-      ? toTimestampFromDateLabel(listing.updatedAt)
-      : toTimestampFromDateLabel(listing.datePosted),
-  };
-}
-
 export function listingFormValuesToDatabaseInsert(
   values: ValidatedListingFormValues
 ): DatabaseListingInsert {
