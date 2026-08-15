@@ -339,7 +339,7 @@ export const content = {
   messageDeletedLabel: "Message deleted / Медээни өжүрүп каан", // TODO: add reviewed Tuvan translation.
   messageActionsLabel: "Message actions / Медээ ажыл-чорудулгазы", // TODO: add reviewed Tuvan translation.
   editMessageButton: "Edit message / Медээни эде көөр", // TODO: add reviewed Tuvan translation.
-  saveMessageButton: "Save message / Медээни кадагала", // TODO: add reviewed Tuvan translation.
+  saveMessageButton: "Save changes / Өскерлиишкиннерни кадагала", // TODO: add reviewed Tuvan translation.
   deleteMessageButton: "Delete message / Медээни өжүрүп кааптыңар", // TODO: add reviewed Tuvan translation.
   deleteMessageConfirmTitle: "Delete this message? / Бо медээни өжүрүп кааптыңар бе?", // TODO: add reviewed Tuvan translation.
   deleteMessageConfirmMessage: "This removes the text for both people in this conversation. / Бо чугаада ийи кижиниң бижиин үндүрер.", // TODO: add reviewed Tuvan translation.
