@@ -76,7 +76,11 @@ export default function ListingCard({
       initiallySaved={isSaved}
       initiallySavedForUserId={currentViewerId}
       returnHref={fromHref}
-      onRemoved={() => onFavoriteRemoved?.(String(listing.id))}
+      onRemoved={
+        onFavoriteRemoved
+          ? () => onFavoriteRemoved(String(listing.id))
+          : undefined
+      }
     />
   ) : null;
 

@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import type { ChangeEvent, FormEvent } from 'react';
+import type { ChangeEvent, FormEvent, ReactNode } from 'react';
 import { useEffect, useRef, useState } from 'react';
 import { content } from '@/content/tyv';
 import type { ListingImage, ListingStatus } from '@/data/listings';
@@ -46,6 +46,7 @@ type Props = {
     value: ListingStatus;
     onChange: (status: ListingStatus) => void;
     disabled?: boolean;
+    soldBuyerControl?: ReactNode;
   };
   onCancel?: () => void;
   onSubmit: (
@@ -432,6 +433,7 @@ export default function ListingForm({
               <dd>{content.listingStatusArchivedHelp}</dd>
             </div>
           </dl>
+          {statusField.soldBuyerControl}
         </fieldset>
       ) : null}
 

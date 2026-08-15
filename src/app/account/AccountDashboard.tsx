@@ -6,6 +6,7 @@ import type { FormEvent, MouseEvent } from 'react';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import AccountNativeHistoryRestorer from '@/app/account/AccountNativeHistoryRestorer';
 import AccountRefreshScrollManager from '@/app/account/AccountRefreshScrollManager';
+import AccountReviewsSummary from '@/app/account/AccountReviewsSummary';
 import ProfilePhotoManager from '@/app/account/ProfilePhotoManager';
 import ListingCard from '@/app/components/ListingCard';
 import ResultsScrollRestorer from '@/app/components/ResultsScrollRestorer';
@@ -33,6 +34,7 @@ import {
   listOwnedDatabaseListings,
 } from '@/lib/supabase/listingsClient';
 import { saveResultsScrollPosition } from '@/lib/resultsScrollStorage';
+import type { ReviewableTransaction } from '@/lib/supabase/reviews';
 
 type Props = {
   initialAuthStatus: 'signed-in' | 'unresolved';
@@ -40,6 +42,7 @@ type Props = {
   initialProfile: AppProfile | null;
   initialOwnedListings: Listing[];
   initialSavedListingKeys: string[];
+  initialReviewableTransactions: ReviewableTransaction[];
   initialListingsLoaded: boolean;
   initialListingsError: boolean;
 };
@@ -54,6 +57,7 @@ export default function AccountDashboard({
   initialProfile,
   initialOwnedListings,
   initialSavedListingKeys,
+  initialReviewableTransactions,
   initialListingsLoaded,
   initialListingsError,
 }: Props) {
@@ -519,6 +523,8 @@ export default function AccountDashboard({
           </button>
         </form>
       </section>
+
+      <AccountReviewsSummary initialTransactions={initialReviewableTransactions} />
 
       <section className="my-ads-section" aria-labelledby="my-ads-title">
         <div className="my-ads-heading">

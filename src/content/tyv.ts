@@ -231,10 +231,40 @@ export const content = {
   listingArchivedDetailMessage: "This advertisement is archived and visible only to its owner.", // TODO: add reviewed Tuvan translation.
   listingSoldMessagingUnavailableMessage: "This advertisement has been sold, so new seller conversations are unavailable.", // TODO: add reviewed Tuvan translation.
   listingArchivedMessagingUnavailableMessage: "This advertisement is archived, so new seller conversations are unavailable.", // TODO: add reviewed Tuvan translation.
+  soldBuyerLabel: "Who bought this item?", // TODO: add reviewed Tuvan translation.
+  selectSoldBuyerPlaceholder: "Select buyer...", // TODO: add reviewed Tuvan translation.
+  soldOutsideCharlalOption: "Sold outside Charlal / no Charlal buyer", // TODO: add reviewed Tuvan translation.
+  soldBuyerHelp: "Choose a buyer only if this Charlal account bought the item. This enables an optional seller review.", // TODO: add reviewed Tuvan translation.
+  soldBuyerRequiredMessage: "Choose the Charlal buyer or mark this as sold outside Charlal.", // TODO: add reviewed Tuvan translation.
+  soldBuyerNoCandidatesHelp: "No Charlal buyers messaged about this exact advertisement. You can still mark it sold outside Charlal.", // TODO: add reviewed Tuvan translation.
+  soldBuyerLoadingMessage: "Loading buyer options...", // TODO: add reviewed Tuvan translation.
+  recordedBuyerLabel: "Recorded buyer:", // TODO: add reviewed Tuvan translation.
+  recordedBuyerFallback: "Recorded Charlal buyer", // TODO: add reviewed Tuvan translation.
+  recordedBuyerHelp: "This completed Charlal sale is already recorded. The buyer cannot be replaced here.", // TODO: add reviewed Tuvan translation.
   sellerProfileTitle: "Seller profile / Садыгжының профили", // TODO: add reviewed Tuvan translation.
   memberSinceLabel: "Member since / Чылдан эгелеп кежигүн", // TODO: add reviewed Tuvan translation.
   activeListingsTitle: "Active listings / Ажылдап турар даңзылар", // TODO: add reviewed Tuvan translation.
   noActiveSellerListingsMessage: "No active listings from this seller. / Бо садыгжыдан ажылдап турар дыңнадыглар чок.", // TODO: add reviewed Tuvan translation.
+  sellerReviewsTitle: "Reviews / Үнелелдер", // TODO: add reviewed Tuvan translation.
+  seeAllReviewsLabel: "See all reviews", // TODO: add reviewed Tuvan translation.
+  noReviewsYetLabel: "No reviews yet", // TODO: add reviewed Tuvan translation.
+  reviewSingularLabel: "review", // TODO: add reviewed Tuvan translation.
+  reviewsPluralLabel: "reviews", // TODO: add reviewed Tuvan translation.
+  verifiedPurchaseLabel: "Verified purchase", // TODO: add reviewed Tuvan translation. Charlal verified the seller recorded this Charlal buyer; this is not payment verification.
+  sellerResponseLabel: "Seller response", // TODO: add reviewed Tuvan translation.
+  addSellerResponseButton: "Add response", // TODO: add reviewed Tuvan translation.
+  editSellerResponseButton: "Edit response", // TODO: add reviewed Tuvan translation.
+  saveSellerResponseChangesButton: "Save changes", // TODO: add reviewed Tuvan translation.
+  deleteSellerResponseButton: "Delete response", // TODO: add reviewed Tuvan translation.
+  sellerResponseSavingButton: "Saving...", // TODO: add reviewed Tuvan translation.
+  sellerResponseSavedMessage: "Seller response saved.", // TODO: add reviewed Tuvan translation.
+  sellerResponseDeletedMessage: "Seller response deleted.", // TODO: add reviewed Tuvan translation.
+  sellerResponseSaveFailedMessage: "Unable to save seller response.", // TODO: add reviewed Tuvan translation.
+  sellerResponseDeleteFailedMessage: "Unable to delete seller response.", // TODO: add reviewed Tuvan translation.
+  deleteSellerResponseConfirmMessage: "Delete this seller response?", // TODO: add reviewed Tuvan translation.
+  editedReviewLabel: "Edited", // TODO: add reviewed Tuvan translation.
+  openReviewPhotoLabel: "Open review photo", // TODO: add reviewed Tuvan translation.
+  backToSellerProfileLabel: "Back to seller profile", // TODO: add reviewed Tuvan translation.
   bioLabel: "Bio / Мен дугайымда", // TODO: add reviewed Tuvan translation.
   profileLocationLabel: "Location / Турар чер", // TODO: add reviewed Tuvan translation.
   viewPublicProfileLabel: "View public profile / Хөй-ниити профилин көрүңер", // TODO: add reviewed Tuvan translation.
@@ -377,6 +407,37 @@ export const content = {
   unableLoadSavedAdvertisementsMessage: "Try again in a moment.", // TODO: add reviewed Tuvan translation.
   myAdvertisementsTitle: "My advertisements / Мээң чарлалдарым", // TODO: add reviewed Tuvan translation.
   myAdvertisementsCountLabel: "My advertisements / Мээң чарлалдарым", // TODO: add reviewed Tuvan translation.
+  reviewsAccountSummaryTitle: "Reviews", // TODO: add reviewed Tuvan translation.
+  reviewsAccountSummaryTemplate: "{toReview} to review · {written} written", // TODO: add reviewed Tuvan translation.
+  viewReviewsButton: "View reviews", // TODO: add reviewed Tuvan translation.
+  purchasesToReviewTitle: "Purchases to review", // TODO: add reviewed Tuvan translation.
+  noPurchasesToReviewMessage: "Purchases that still need a review will appear here.", // TODO: add reviewed Tuvan translation.
+  myReviewsTitle: "My reviews", // TODO: add reviewed Tuvan translation.
+  noMyReviewsMessage: "Reviews you have written will appear here.", // TODO: add reviewed Tuvan translation.
+  purchasedFromLabel: "Purchased from", // TODO: add reviewed Tuvan translation.
+  leaveReviewButton: "Leave review", // TODO: add reviewed Tuvan translation.
+  editReviewButton: "Edit review", // TODO: add reviewed Tuvan translation.
+  saveReviewChangesButton: "Save changes", // TODO: add reviewed Tuvan translation.
+  deleteReviewButton: "Delete review", // TODO: add reviewed Tuvan translation.
+  submitReviewButton: "Submit review", // TODO: add reviewed Tuvan translation.
+  reviewSavingButton: "Saving review...", // TODO: add reviewed Tuvan translation.
+  reviewSavedMessage: "Review saved.", // TODO: add reviewed Tuvan translation.
+  reviewDeletedMessage: "Review deleted.", // TODO: add reviewed Tuvan translation.
+  reviewSaveFailedMessage: "Unable to save review.", // TODO: add reviewed Tuvan translation.
+  reviewDeleteFailedMessage: "Unable to delete review.", // TODO: add reviewed Tuvan translation.
+  deleteReviewConfirmTitle: "Delete review?", // TODO: add reviewed Tuvan translation.
+  deleteReviewConfirmMessage: "Your rating, text and photos will be removed. You can review this purchase again later.", // TODO: add reviewed Tuvan translation.
+  reviewRatingLabel: "Rating", // TODO: add reviewed Tuvan translation.
+  reviewRatingRequiredMessage: "Choose a 1 to 5 star rating.", // TODO: add reviewed Tuvan translation.
+  starsLabel: "stars", // TODO: add reviewed Tuvan translation.
+  reviewTextLabel: "Review text (optional)", // TODO: add reviewed Tuvan translation.
+  addReviewPhotosButton: "Add review photos", // TODO: add reviewed Tuvan translation.
+  reviewPhotoRequirementsMessage: "Add up to 3 photos. JPEG, PNG, or WebP. Maximum 5 MB each.", // TODO: add reviewed Tuvan translation.
+  reviewPhotoMaximumMessage: "A review can have at most 3 photos.", // TODO: add reviewed Tuvan translation.
+  reviewPhotoTooLargeMessage: "Photo is too large. Maximum size is 5 MB.", // TODO: add reviewed Tuvan translation.
+  reviewPhotoUnsupportedTypeMessage: "Unsupported photo type. Use JPEG, PNG, or WebP.", // TODO: add reviewed Tuvan translation.
+  reviewPhotoUploadFailedMessage: "Unable to upload review photo.", // TODO: add reviewed Tuvan translation.
+  reviewPhotoPreviewLabel: "Review photo", // TODO: add reviewed Tuvan translation.
   noAdvertisementsPostedTitle: "No advertisements posted / Чарлал чок", // TODO: add reviewed Tuvan translation.
   noAdvertisementsPostedMessage: "Advertisements you create while signed in will appear here. / Кирип тургаш кылган чарлалдарыңар мында көстүп кээр.", // TODO: add reviewed Tuvan translation.
   deleteAdvertisementButton: "Delete advertisement / Чарлалды өжүрүп кааптыңар", // TODO: add reviewed Tuvan translation.

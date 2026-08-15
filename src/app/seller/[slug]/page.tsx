@@ -1,9 +1,12 @@
 import { notFound } from 'next/navigation';
+import Link from 'next/link';
 import ListingCard from '@/app/components/ListingCard';
 import ListingMutationRefreshBoundary from '@/app/components/ListingMutationRefreshBoundary';
 import PublicSellerAvatarViewer from '@/app/components/PublicSellerAvatarViewer';
+import PublicSellerReviews from '@/app/seller/[slug]/PublicSellerReviews';
 import ResultsScrollRestorer from '@/app/components/ResultsScrollRestorer';
 import { content } from '@/content/tyv';
+import { getCurrentUserResult } from '@/lib/auth/server';
 import { getCurrentUserFavoriteState } from '@/lib/supabase/listingFavorites';
 import { getPublicSellerPageBySlug } from '@/lib/supabase/publicSellerProfilesServer';
 
@@ -22,6 +25,16 @@ function formatMemberSince(value: string): string {
     month: 'long',
     year: 'numeric',
   }).format(date);
+}
+
+function formatSellerRating(averageRating: number | null, reviewCount: number): string {
+  if (!averageRating || reviewCount === 0) {
+    return content.noReviewsYetLabel;
+  }
+
+  return `${averageRating.toFixed(1)} · ${reviewCount} ${
+    reviewCount === 1 ? content.reviewSingularLabel : content.reviewsPluralLabel
+  }`;
 }
 
 export default async function SellerPage({ params }: SellerPageProps) {
@@ -45,9 +58,15 @@ export default async function SellerPage({ params }: SellerPageProps) {
     notFound();
   }
 
-  const { profile, listings } = sellerResult;
+  const { profile, listings, reviewSummary, recentReviews } = sellerResult;
   const sellerHref = `/seller/${profile.publicSlug}`;
-  const favoriteState = await getCurrentUserFavoriteState();
+  const [favoriteState, authResult] = await Promise.all([
+    getCurrentUserFavoriteState(),
+    getCurrentUserResult(),
+  ]);
+  const canRespond =
+    authResult.status === 'authenticated' &&
+    authResult.profile.publicSlug === profile.publicSlug;
 
   return (
     <main className="seller-profile-page">
@@ -67,6 +86,13 @@ export default async function SellerPage({ params }: SellerPageProps) {
           <div>
             <p className="hero-kicker">{content.sellerProfileTitle}</p>
             <h1 id="seller-profile-title">{profile.displayName}</h1>
+            <p className="seller-reputation-summary">
+              <span aria-hidden="true">★</span>{' '}
+              {formatSellerRating(
+                reviewSummary.averageRating,
+                reviewSummary.reviewCount
+              )}
+            </p>
           </div>
         </div>
         <dl className="seller-profile-meta">
@@ -87,6 +113,25 @@ export default async function SellerPage({ params }: SellerPageProps) {
             <p>{profile.bio}</p>
           </section>
         ) : null}
+      </section>
+
+      <section className="seller-reviews-section" aria-labelledby="seller-reviews-title">
+        <div className="seller-section-heading">
+          <h2 id="seller-reviews-title">{content.sellerReviewsTitle}</h2>
+          {reviewSummary.reviewCount > recentReviews.length ? (
+            <Link
+              href={`/seller/${profile.publicSlug}/reviews`}
+              className="secondary-button"
+            >
+              {content.seeAllReviewsLabel}
+            </Link>
+          ) : null}
+        </div>
+        <PublicSellerReviews
+          sellerSlug={profile.publicSlug}
+          reviews={recentReviews}
+          canRespond={canRespond}
+        />
       </section>
 
       <section className="seller-listings-section" aria-labelledby="seller-active-listings-title">

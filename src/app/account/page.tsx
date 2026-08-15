@@ -4,6 +4,8 @@ import { getCurrentUserResult } from '@/lib/auth/server';
 import { getListingFavoriteKey } from '@/lib/listingFavoriteKeys';
 import { getCurrentUserFavoriteReferences } from '@/lib/supabase/listingFavorites';
 import { listOwnedDatabaseListingsForOwner } from '@/lib/supabase/listingsServer';
+import { createClient } from '@/lib/supabase/server';
+import { listMyReviewableTransactions } from '@/lib/supabase/reviews';
 import AccountDashboard from './AccountDashboard';
 
 export default async function AccountPage() {
@@ -20,6 +22,10 @@ export default async function AccountPage() {
   const savedListingKeys =
     authResult.status === 'authenticated'
       ? (await getCurrentUserFavoriteReferences()).map(getListingFavoriteKey)
+      : [];
+  const reviewableTransactions =
+    authResult.status === 'authenticated'
+      ? await listMyReviewableTransactions(await createClient())
       : [];
 
   return (
@@ -47,6 +53,7 @@ export default async function AccountPage() {
             ownedListingsResult?.ok ? ownedListingsResult.listings : []
           }
           initialSavedListingKeys={savedListingKeys}
+          initialReviewableTransactions={reviewableTransactions}
           initialListingsLoaded={Boolean(ownedListingsResult)}
           initialListingsError={Boolean(
             ownedListingsResult && !ownedListingsResult.ok

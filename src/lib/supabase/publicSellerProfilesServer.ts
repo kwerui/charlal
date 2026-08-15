@@ -7,6 +7,12 @@ import {
 } from '@/lib/listingDatabaseTypes';
 import { createClient } from '@/lib/supabase/server';
 import {
+  getSellerReviewSummary,
+  listPublicSellerReviews,
+  type PublicSellerReview,
+  type SellerReviewSummary,
+} from '@/lib/supabase/reviews';
+import {
   attachImageRowsToListings,
   listListingImageRowsForListingIds,
 } from '@/lib/supabase/listingImages';
@@ -40,6 +46,8 @@ type PublicSellerPageResult =
       ok: true;
       profile: PublicSellerProfile | null;
       listings: Listing[];
+      reviewSummary: SellerReviewSummary;
+      recentReviews: PublicSellerReview[];
     }
   | {
       ok: false;
@@ -96,6 +104,11 @@ export async function getPublicSellerPageBySlug(
       ok: true,
       profile: null,
       listings: [],
+      reviewSummary: {
+        averageRating: null,
+        reviewCount: 0,
+      },
+      recentReviews: [],
     };
   }
 
@@ -124,6 +137,11 @@ export async function getPublicSellerPageBySlug(
       ok: true,
       profile: null,
       listings: [],
+      reviewSummary: {
+        averageRating: null,
+        reviewCount: 0,
+      },
+      recentReviews: [],
     };
   }
 
@@ -140,9 +158,16 @@ export async function getPublicSellerPageBySlug(
     listings.map((listing) => String(listing.id))
   );
 
+  const [reviewSummary, recentReviews] = await Promise.all([
+    getSellerReviewSummary(supabase, safeSlug),
+    listPublicSellerReviews(supabase, safeSlug, 3),
+  ]);
+
   return {
     ok: true,
     profile: mapPublicSellerProfileRow(profileRow),
     listings: attachImageRowsToListings(listings, imageRows),
+    reviewSummary,
+    recentReviews,
   };
 }

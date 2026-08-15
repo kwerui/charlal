@@ -2561,7 +2561,8 @@ body {
 }
 
 .seller-profile-header-card,
-.seller-listings-section {
+.seller-listings-section,
+.seller-reviews-section {
   display: grid;
   gap: 14px;
   min-width: 0;
@@ -2574,6 +2575,8 @@ body {
 
 .seller-profile-header-card h1,
 .seller-listings-section h2,
+.seller-reviews-section h1,
+.seller-reviews-section h2,
 .seller-profile-bio h2 {
   margin: 0;
   color: var(--text-dark);
@@ -2637,6 +2640,175 @@ body {
   overflow-wrap: anywhere;
 }
 
+.seller-reputation-summary {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  margin: 8px 0 0;
+  color: var(--text-light);
+  font-weight: 800;
+  line-height: 1.4;
+}
+
+.seller-reputation-summary span {
+  color: #d97706;
+}
+
+.seller-section-heading {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  min-width: 0;
+}
+
+.seller-review-list {
+  display: grid;
+  gap: 12px;
+  min-width: 0;
+}
+
+.seller-review-card {
+  display: grid;
+  gap: 10px;
+  min-width: 0;
+  padding: 14px;
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  background: color-mix(in srgb, var(--bg-white) 94%, var(--bg-light));
+}
+
+.seller-review-header {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  min-width: 0;
+}
+
+.seller-review-header > div {
+  min-width: 0;
+}
+
+.seller-review-header h3,
+.seller-review-stars,
+.seller-review-meta,
+.seller-review-body,
+.seller-review-date,
+.seller-response h4,
+.seller-response p {
+  margin: 0;
+}
+
+.seller-review-header h3 {
+  color: var(--text-dark);
+  font-size: 16px;
+  line-height: 1.35;
+  overflow-wrap: anywhere;
+}
+
+.seller-review-stars {
+  color: #d97706;
+  font-size: 18px;
+  line-height: 1;
+  letter-spacing: 0;
+}
+
+.seller-review-meta,
+.seller-review-date,
+.seller-response time {
+  color: var(--text-light);
+  font-size: 13px;
+  font-weight: 650;
+  line-height: 1.45;
+  overflow-wrap: anywhere;
+}
+
+.seller-review-body {
+  color: var(--text-dark);
+  line-height: 1.6;
+  overflow-wrap: anywhere;
+}
+
+.seller-review-photos,
+.review-photo-preview-list {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 96px));
+  gap: 8px;
+  min-width: 0;
+}
+
+.seller-review-photos .review-photo-thumb-button,
+.review-photo-preview-list li {
+  position: relative;
+  display: block;
+  aspect-ratio: 1;
+  min-width: 0;
+  overflow: hidden;
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  background: var(--bg-light);
+}
+
+.seller-review-photos .review-photo-thumb-button {
+  cursor: zoom-in;
+  padding: 0;
+}
+
+.seller-review-photos .review-photo-thumb-button:hover,
+.seller-review-photos .review-photo-thumb-button:focus-visible {
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.14);
+  outline: 0;
+}
+
+.seller-review-photos img,
+.review-photo-preview-list img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.seller-response {
+  display: grid;
+  gap: 6px;
+  padding: 12px;
+  border-left: 3px solid var(--primary-color);
+  border-radius: 8px;
+  background: var(--bg-light);
+}
+
+.seller-response h4 {
+  color: var(--text-dark);
+  font-size: 14px;
+}
+
+.seller-response p {
+  color: var(--text-dark);
+  line-height: 1.55;
+  overflow-wrap: anywhere;
+}
+
+.seller-response-editor {
+  display: grid;
+  gap: 8px;
+  padding-top: 2px;
+}
+
+.seller-response-editor form {
+  display: grid;
+  gap: 8px;
+}
+
+.seller-response-editor .search-button,
+.seller-response-editor .listing-management-button,
+.seller-response-editor .secondary-button {
+  justify-self: start;
+  min-height: 38px;
+  padding: 8px 14px;
+  font-size: 14px;
+}
+
 .seller-listings-section {
   display: grid;
   gap: 16px;
@@ -2644,7 +2816,8 @@ body {
 
 .seller-listings-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(min(100%, 240px), 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 280px), 320px));
+  justify-content: start;
   gap: 18px;
   min-width: 0;
 }
@@ -5327,22 +5500,26 @@ body {
 }
 
 /* ===== DESIGN PASS F1: ACCOUNT + MY ADS ===== */
-.account-page--dashboard {
+.account-page--dashboard,
+.account-page--reviews {
   align-items: flex-start;
   padding: 32px 20px 40px;
 }
 
-.account-panel--dashboard {
+.account-panel--dashboard,
+.account-panel--reviews {
   width: min(100%, 1040px);
   gap: 24px;
   padding: 28px;
 }
 
-.account-panel--dashboard > .form-page-heading {
+.account-panel--dashboard > .form-page-heading,
+.account-panel--reviews > .form-page-heading {
   gap: 0;
 }
 
-.account-panel--dashboard .auth-title {
+.account-panel--dashboard .auth-title,
+.account-panel--reviews .auth-title {
   font-size: clamp(28px, 3vw, 34px);
 }
 
@@ -5458,6 +5635,269 @@ body {
   min-width: 220px;
 }
 
+.account-reviews-summary {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 12px 18px;
+  min-width: 0;
+  padding: 18px;
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  background: var(--bg-white);
+}
+
+.account-reviews-summary h3,
+.account-reviews-summary p {
+  margin: 0;
+}
+
+.account-reviews-summary h3 {
+  color: var(--text-dark);
+  font-size: 20px;
+  line-height: 1.3;
+}
+
+.account-reviews-summary p {
+  color: var(--text-light);
+  font-size: 15px;
+  font-weight: 700;
+  line-height: 1.45;
+}
+
+.account-reviews-summary .secondary-button {
+  justify-self: end;
+  min-height: 42px;
+  padding: 9px 14px;
+}
+
+.purchases-review-section {
+  display: grid;
+  gap: 14px;
+  min-width: 0;
+  padding: 18px;
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  background: var(--bg-white);
+}
+
+.purchases-review-section > h3 {
+  margin: 0;
+  color: var(--text-dark);
+  font-size: 20px;
+  line-height: 1.3;
+}
+
+.purchases-review-list {
+  display: grid;
+  gap: 12px;
+  min-width: 0;
+}
+
+.purchase-review-item {
+  display: grid;
+  gap: 10px;
+  min-width: 0;
+  padding: 14px;
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  background: var(--bg-light);
+}
+
+.purchase-review-summary {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  min-width: 0;
+}
+
+.purchase-review-summary > div {
+  min-width: 0;
+}
+
+.purchase-review-summary h4,
+.purchase-review-summary p,
+.purchase-review-kicker {
+  margin: 0;
+}
+
+.purchase-review-summary h4 {
+  color: var(--text-dark);
+  font-size: 17px;
+  line-height: 1.35;
+  overflow-wrap: anywhere;
+}
+
+.purchase-review-summary p {
+  color: var(--text-light);
+  font-size: 14px;
+  font-weight: 650;
+  line-height: 1.45;
+  overflow-wrap: anywhere;
+}
+
+.purchase-review-summary a {
+  color: var(--primary-color);
+  font-weight: 800;
+}
+
+.purchase-review-kicker {
+  color: var(--text-light);
+  font-size: 12px;
+  font-weight: 850;
+  line-height: 1.35;
+  text-transform: uppercase;
+}
+
+.purchase-review-toggle {
+  flex: 0 0 auto;
+  min-height: 38px;
+  padding: 8px 12px;
+  font-size: 14px;
+}
+
+.review-form {
+  display: grid;
+  gap: 12px;
+  min-width: 0;
+}
+
+.review-star-field {
+  display: grid;
+  gap: 8px;
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.review-star-field legend {
+  color: var(--text-dark);
+  font-weight: 800;
+}
+
+.review-star-options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.review-star-options label {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 42px;
+  height: 42px;
+  cursor: pointer;
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  background: var(--bg-white);
+}
+
+.review-star-options input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+}
+
+.review-star-options span[aria-hidden="true"] {
+  color: #d97706;
+  font-size: 24px;
+  line-height: 1;
+}
+
+.review-star-options label:has(input:focus-visible) {
+  outline: 3px solid rgba(37, 99, 235, 0.28);
+  outline-offset: 2px;
+}
+
+.review-photo-editor {
+  display: grid;
+  gap: 8px;
+}
+
+.review-photo-editor small {
+  color: var(--text-light);
+  font-weight: 650;
+  line-height: 1.4;
+}
+
+.review-photo-preview-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.review-photo-preview-list button {
+  position: absolute;
+  right: 4px;
+  bottom: 4px;
+  min-height: 30px;
+  padding: 5px 8px;
+  border: 0;
+  border-radius: 6px;
+  background: rgba(127, 29, 29, 0.88);
+  color: #fff;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.review-form-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.review-form-actions .search-button,
+.review-form-actions .listing-management-button {
+  min-height: 40px;
+  padding: 8px 14px;
+  font-size: 14px;
+}
+
+.review-summary-card .review-form-actions {
+  align-items: center;
+}
+
+.my-reviews-section {
+  background: var(--bg-white);
+}
+
+.review-summary-card {
+  background: var(--bg-white);
+}
+
+.review-summary-card .seller-review-header h4 {
+  margin: 0;
+  color: var(--text-dark);
+  font-size: 17px;
+  line-height: 1.35;
+  overflow-wrap: anywhere;
+}
+
+.review-summary-card .seller-review-stars {
+  font-size: 17px;
+}
+
+.my-review-photos {
+  grid-template-columns: repeat(3, minmax(0, 84px));
+}
+
+.review-photo-upload-button {
+  justify-self: start;
+  cursor: pointer;
+}
+
+.review-confirmation-listing {
+  margin: 0;
+  color: var(--text-dark);
+  font-weight: 800;
+  overflow-wrap: anywhere;
+}
+
 .my-ads-section {
   gap: 14px;
 }
@@ -5543,11 +5983,13 @@ body {
 }
 
 @media (max-width: 768px) {
-  .account-page--dashboard {
+  .account-page--dashboard,
+  .account-page--reviews {
     padding: 18px 12px 30px;
   }
 
-  .account-panel--dashboard {
+  .account-panel--dashboard,
+  .account-panel--reviews {
     width: 100%;
     gap: 20px;
     padding: 20px;
@@ -5564,7 +6006,8 @@ body {
 }
 
 @media (max-width: 640px) {
-  .account-panel--dashboard {
+  .account-panel--dashboard,
+  .account-panel--reviews {
     padding: 18px;
   }
 
@@ -5574,6 +6017,16 @@ body {
 
   .account-profile-settings {
     padding: 16px;
+  }
+
+  .account-reviews-summary {
+    grid-template-columns: 1fr;
+    align-items: start;
+    padding: 16px;
+  }
+
+  .account-reviews-summary .secondary-button {
+    justify-self: start;
   }
 
   .account-profile-settings .profile-photo-manager {
@@ -5629,12 +6082,14 @@ body {
 }
 
 @media (max-width: 420px) {
-  .account-page--dashboard {
+  .account-page--dashboard,
+  .account-page--reviews {
     padding-right: 10px;
     padding-left: 10px;
   }
 
-  .account-panel--dashboard {
+  .account-panel--dashboard,
+  .account-panel--reviews {
     padding: 16px;
   }
 
@@ -5651,6 +6106,18 @@ body {
     margin-right: -2px;
     margin-left: -2px;
     padding: 14px;
+  }
+
+  .purchase-review-summary,
+  .review-form .review-form-actions {
+    display: grid;
+    grid-template-columns: 1fr;
+  }
+
+  .purchase-review-toggle,
+  .review-form .review-form-actions .search-button,
+  .review-form .review-form-actions .listing-management-button {
+    width: 100%;
   }
 
   .account-profile-settings .profile-photo-main-actions {
@@ -5757,6 +6224,45 @@ body {
 .listing-editor-form .listing-status-help dd {
   font-size: 12px;
   line-height: 1.35;
+}
+
+.listing-editor-form .sold-buyer-control {
+  display: grid;
+  gap: 6px;
+  padding-top: 4px;
+}
+
+.listing-editor-form .sold-buyer-control .form-help {
+  margin: 0;
+  color: var(--text-light);
+  font-size: 13px;
+  font-weight: 650;
+  line-height: 1.45;
+}
+
+.listing-editor-form .sold-buyer-recorded {
+  display: grid;
+  gap: 3px;
+  min-width: 0;
+  padding: 10px 12px;
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  background: var(--bg-light);
+}
+
+.listing-editor-form .sold-buyer-recorded span {
+  color: var(--text-light);
+  font-size: 12px;
+  font-weight: 850;
+  line-height: 1.35;
+  text-transform: uppercase;
+}
+
+.listing-editor-form .sold-buyer-recorded strong {
+  color: var(--text-dark);
+  font-size: 15px;
+  line-height: 1.35;
+  overflow-wrap: anywhere;
 }
 
 /* Keep all photo tasks together as one lightweight manager. */
@@ -5912,6 +6418,20 @@ body {
     font-size: 13px;
   }
 
+  .seller-section-heading {
+    align-items: flex-start;
+  }
+
+  .seller-listings-grid {
+    grid-template-columns: 1fr;
+    justify-content: stretch;
+  }
+
+  .seller-review-photos,
+  .review-photo-preview-list {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
   .listing-editor-form .listing-photo-grid {
     grid-template-columns: 1fr;
   }
@@ -5988,14 +6508,19 @@ body {
 .info-page-panel,
 .listing-detail-panel,
 .seller-profile-header-card,
-.seller-listings-section {
+.seller-listings-section,
+.seller-reviews-section,
+.purchases-review-section,
+.purchase-review-item,
+.seller-review-card {
   min-width: 0;
 }
 
 .auth-title,
 .page-title,
 .info-page-panel h1,
-.seller-profile-header-card h1 {
+.seller-profile-header-card h1,
+.seller-reviews-section h1 {
   overflow-wrap: anywhere;
 }
 
@@ -6048,7 +6573,8 @@ body {
   .form-page-heading,
   .form-field,
   .listing-photo-section,
-  .listing-status-edit-field {
+  .listing-status-edit-field,
+  .seller-response {
     min-width: 0;
   }
 }
