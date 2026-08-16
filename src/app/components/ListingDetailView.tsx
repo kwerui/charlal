@@ -3,6 +3,7 @@ import BackToResultsLink from '@/app/components/BackToResultsLink';
 import FavoriteListingButton from '@/app/components/FavoriteListingButton';
 import ListingImageGallery from '@/app/components/ListingImageGallery';
 import ListingMutationRefreshBoundary from '@/app/components/ListingMutationRefreshBoundary';
+import ListingReportButton from '@/app/components/ListingReportButton';
 import ListingStatusBadge from '@/app/components/ListingStatusBadge';
 import ProfileAvatar from '@/app/components/ProfileAvatar';
 import ListingDetailOwnerActions, {
@@ -99,6 +100,10 @@ export default function ListingDetailView({
     favoriteReference?.source === 'database' &&
     Boolean(listing.ownerId) &&
     listing.ownerId === currentViewerId;
+  const reportListingId =
+    favoriteReference?.source === 'database' && listing.ownerId
+      ? favoriteReference.listingId
+      : null;
 
   return (
     <article className="listing-detail-page">
@@ -216,6 +221,13 @@ export default function ListingDetailView({
               initiallySaved={isSaved}
               initiallySavedForUserId={currentViewerId}
               variant="detail"
+              returnHref={favoriteReturnHref}
+            />
+          ) : null}
+          {reportListingId && !isOwnDatabaseListing && listing.ownerId ? (
+            <ListingReportButton
+              listingId={reportListingId}
+              ownerId={listing.ownerId}
               returnHref={favoriteReturnHref}
             />
           ) : null}

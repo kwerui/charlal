@@ -17,14 +17,14 @@ export const content = {
   signedInAsLabel: "Signed in as / Кылдыр кирген",
 
   // Footer and public pages
-  siteFooterLabel: "Site footer", // TODO: add reviewed Tuvan translation.
-  siteFooterNavLabel: "Footer links", // TODO: add reviewed Tuvan translation.
-  footerAboutLink: "About", // TODO: add reviewed Tuvan translation.
-  footerTermsLink: "Terms", // TODO: add reviewed Tuvan translation.
-  footerPrivacyLink: "Privacy", // TODO: add reviewed Tuvan translation.
-  footerContactLink: "Contact", // TODO: add reviewed Tuvan translation.
-  legalPageKicker: "Information", // TODO: add reviewed Tuvan translation.
-  privacyPageTitle: "Privacy Policy", // TODO: legal review and reviewed Tuvan translation required.
+  siteFooterLabel: "Site footer / Сайтының адаанда", // TODO: add reviewed Tuvan translation.
+  siteFooterNavLabel: "Footer links / Адаанда ссылкалар", // TODO: add reviewed Tuvan translation.
+  footerAboutLink: "About / Сайт дугайында", // TODO: add reviewed Tuvan translation.
+  footerTermsLink: "Terms / Дугуржулгалар", // TODO: add reviewed Tuvan translation.
+  footerPrivacyLink: "Privacy / Чыжыл", // TODO: add reviewed Tuvan translation.
+  footerContactLink: "Contact / Харылзаа", // TODO: add reviewed Tuvan translation.
+  legalPageKicker: "Information / Медегдел", // TODO: add reviewed Tuvan translation.
+  privacyPageTitle: "Privacy Policy / Чажыт чоруктуң политиказы", // TODO: legal review and reviewed Tuvan translation required.
   privacyPageIntro: "This page is a placeholder structure for Charlal's future reviewed privacy and personal data policy. It is not final legal text.", // TODO: legal review and reviewed Tuvan translation required.
   privacyPolicySections: [
     {
@@ -88,7 +88,7 @@ export const content = {
       body: "TODO: Add reviewed official contact details for privacy questions.",
     },
   ], // TODO: legal review and reviewed Tuvan translations required.
-  termsPageTitle: "Terms of Use", // TODO: legal review and reviewed Tuvan translation required.
+  termsPageTitle: "Terms of Use / Ажыглаарының чуруму", // TODO: legal review and reviewed Tuvan translation required.
   termsPageIntro: "This page is a placeholder structure for Charlal's future reviewed user agreement. It is not final legal text.", // TODO: legal review and reviewed Tuvan translation required.
   termsSections: [
     {
@@ -140,8 +140,8 @@ export const content = {
       body: "TODO: Add reviewed official contact details for terms questions.",
     },
   ], // TODO: legal review and reviewed Tuvan translations required.
-  aboutPageKicker: "About Charlal", // TODO: add reviewed Tuvan translation.
-  aboutPageTitle: "About Charlal", // TODO: add reviewed Tuvan translation.
+  aboutPageKicker: "About Charlal / Чарлал дугайында", // TODO: add reviewed Tuvan translation.
+  aboutPageTitle: "About Charlal / Чарлал дугайында", // TODO: add reviewed Tuvan translation.
   aboutPageBody: [
     "Charlal is a simple regional marketplace for people to post and discover advertisements in Tuva.",
     "The goal is to keep buying, selling, and local discovery straightforward for people with different levels of technical confidence.",
@@ -198,6 +198,31 @@ export const content = {
   removeSavedAdvertisementButton: "Remove from saved", // TODO: add reviewed Tuvan translation.
   signInToSaveAdvertisementMessage: "Sign in to save advertisements.", // TODO: add reviewed Tuvan translation.
   unableUpdateSavedAdvertisementMessage: "Unable to update saved advertisement.", // TODO: add reviewed Tuvan translation.
+  reportAdvertisementButton: "Report ad", // TODO: add reviewed Tuvan translation.
+  reportAdvertisementTitle: "Report ad", // TODO: add reviewed Tuvan translation.
+  reportAdvertisementQuestion: "Why are you reporting this ad?", // TODO: add reviewed Tuvan translation.
+  reportAdvertisementDetailsLabel: "Tell us more (optional)", // TODO: add reviewed Tuvan translation.
+  reportAdvertisementDetailsHelp: "Maximum 1000 characters.", // TODO: add reviewed Tuvan translation.
+  reportAdvertisementSendButton: "Send report", // TODO: add reviewed Tuvan translation.
+  reportAdvertisementSendingButton: "Sending report...", // TODO: add reviewed Tuvan translation.
+  reportAdvertisementSuccessTitle: "Report sent", // TODO: add reviewed Tuvan translation.
+  reportAdvertisementSuccessMessage: "Report sent. Thank you.", // TODO: add reviewed Tuvan translation.
+  reportAdvertisementAlreadyReportedTitle: "Already reported", // TODO: add reviewed Tuvan translation.
+  reportAdvertisementAlreadyReportedMessage: "You already reported this ad.", // TODO: add reviewed Tuvan translation.
+  reportAdvertisementAlreadyReportedButton: "Already reported", // TODO: add reviewed Tuvan translation.
+  reportAdvertisementReasonRequiredMessage: "Choose a reason for the report.", // TODO: add reviewed Tuvan translation.
+  reportAdvertisementDetailsTooLongMessage: "The details are too long. Use 1000 characters or fewer.", // TODO: add reviewed Tuvan translation.
+  reportAdvertisementOwnListingMessage: "You cannot report your own ad.", // TODO: add reviewed Tuvan translation.
+  reportAdvertisementUnavailableMessage: "This ad cannot be reported.", // TODO: add reviewed Tuvan translation.
+  reportAdvertisementFailedMessage: "Unable to send report.", // TODO: add reviewed Tuvan translation.
+  signInToReportAdvertisementMessage: "Sign in to report advertisements.", // TODO: add reviewed Tuvan translation.
+  listingReportReasonLabels: {
+    scam: "Scam / fraud",
+    prohibited_item: "Prohibited item",
+    misleading: "Misleading information",
+    duplicate_spam: "Duplicate / spam",
+    other: "Other",
+  }, // TODO: add reviewed Tuvan translations.
   resultsCountLabel: "Matching listings / Таарыштырган даңзылар",
   emptyResultsTitle: "No listings found / Данзылдар тывылбаан",
   emptyResultsMessage: "Try changing or clearing the filters. / Фильтрлерни өскертип азы арыглап көрүңер",
