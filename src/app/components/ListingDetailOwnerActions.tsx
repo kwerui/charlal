@@ -35,7 +35,7 @@ export default function ListingDetailOwnerActions({
   const listingStatus = getListingStatus(listing);
   const isDatabaseListing =
     typeof listing.id === 'string' && listing.id.startsWith('db-');
-  const hasDatabaseSeller = isDatabaseListing && Boolean(listing.ownerId);
+  const hasDatabaseSeller = isDatabaseListing;
   const viewerState: ListingDetailViewerState = !hasDatabaseSeller
     ? 'signed-out'
     : authStatus === 'authenticated'

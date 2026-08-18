@@ -98,10 +98,10 @@ export default function ListingDetailView({
     : false;
   const isOwnDatabaseListing =
     favoriteReference?.source === 'database' &&
-    Boolean(listing.ownerId) &&
-    listing.ownerId === currentViewerId;
+    (listing.isOwnedByViewer ||
+      Boolean(listing.ownerId && listing.ownerId === currentViewerId));
   const reportListingId =
-    favoriteReference?.source === 'database' && listing.ownerId
+    favoriteReference?.source === 'database'
       ? favoriteReference.listingId
       : null;
 
@@ -224,10 +224,9 @@ export default function ListingDetailView({
               returnHref={favoriteReturnHref}
             />
           ) : null}
-          {reportListingId && !isOwnDatabaseListing && listing.ownerId ? (
+          {reportListingId && !isOwnDatabaseListing ? (
             <ListingReportButton
               listingId={reportListingId}
-              ownerId={listing.ownerId}
               returnHref={favoriteReturnHref}
             />
           ) : null}

@@ -12,7 +12,11 @@ export function getUserOwnerId(user: AppUser | null): string | undefined {
 }
 
 export function isListingOwnedByOwnerId(listing: Listing, ownerId: string): boolean {
-  return listing.ownerId === ownerId;
+  if (listing.ownerId) {
+    return listing.ownerId === ownerId;
+  }
+
+  return listing.isOwnedByViewer === true;
 }
 
 export function isListingOwnedByUser(listing: Listing, user: AppUser | null): boolean {

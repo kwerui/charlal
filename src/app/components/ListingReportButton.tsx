@@ -15,7 +15,6 @@ import { getSafeNextPath } from '@/lib/auth/safeNextPath';
 
 type Props = {
   listingId: string;
-  ownerId: string;
   returnHref?: string;
 };
 
@@ -56,7 +55,6 @@ function getReportErrorMessage(reason: string): string {
 
 export default function ListingReportButton({
   listingId,
-  ownerId,
   returnHref,
 }: Props) {
   const router = useRouter();
@@ -75,7 +73,6 @@ export default function ListingReportButton({
   const [reportStatus, setReportStatus] = useState<ReportFeedbackStatus>('idle');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const activeUserId = status === 'authenticated' && user ? user.id : null;
-  const isOwnListing = Boolean(activeUserId && activeUserId === ownerId);
   const signInReturnHref = getSafeNextPath(
     returnHref || getSafeCurrentHref(pathname, searchParams),
     '/'
@@ -114,10 +111,6 @@ export default function ListingReportButton({
       window.removeEventListener('keydown', handleKeyDown);
     };
   }, [closeDialog, isOpen, isSubmitting]);
-
-  if (isOwnListing) {
-    return null;
-  }
 
   function openDialog(): void {
     setError('');

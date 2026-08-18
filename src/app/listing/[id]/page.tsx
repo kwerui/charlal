@@ -24,15 +24,11 @@ type ListingPageProps = {
 };
 
 function getListingDetailViewerState(
-  listingOwnerId: string | undefined,
+  isOwnedByViewer: boolean,
   viewer: CurrentViewerIdResult
 ): ListingDetailViewerState {
-  if (!listingOwnerId) {
-    return 'signed-out';
-  }
-
   if (viewer.status === 'signed-in') {
-    return viewer.userId === listingOwnerId ? 'owner' : 'signed-in-non-owner';
+    return isOwnedByViewer ? 'owner' : 'signed-in-non-owner';
   }
 
   return viewer.status;
@@ -90,7 +86,7 @@ export default async function ListingPage({ params, searchParams }: ListingPageP
     getPublicSellerProfileForListingId(String(listing.id)),
   ]);
   const initialViewerState = getListingDetailViewerState(
-    listing.ownerId,
+    listing.isOwnedByViewer === true,
     viewer
   );
   const backHref = safeFromHref || getListingFallbackResultsHref(listing);

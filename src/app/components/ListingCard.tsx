@@ -38,8 +38,8 @@ export default function ListingCard({
     : false;
   const isOwnDatabaseListing =
     favoriteReference?.source === 'database' &&
-    Boolean(listing.ownerId) &&
-    listing.ownerId === currentViewerId;
+    (listing.isOwnedByViewer ||
+      Boolean(listing.ownerId && listing.ownerId === currentViewerId));
   const listingHref = fromHref
     ? {
         pathname: listingPath,

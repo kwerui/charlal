@@ -154,6 +154,25 @@ export function databaseRowToListing(row: DatabaseListingRow): Listing {
   return listing;
 }
 
+export function publicDatabaseRowToOwnedListing(
+  row: PublicDatabaseListingRow,
+  ownerId: string
+): Listing {
+  const listing = publicDatabaseRowToListing(row);
+
+  listing.ownerId = ownerId;
+  listing.isOwnedByViewer = true;
+
+  return listing;
+}
+
+export function markListingOwnedByViewer(listing: Listing): Listing {
+  return {
+    ...listing,
+    isOwnedByViewer: true,
+  };
+}
+
 export function publicDatabaseRowToListing(row: PublicDatabaseListingRow): Listing {
   const listingData = {
     categorySlug: row.category,

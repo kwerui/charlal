@@ -1,11 +1,16 @@
 import { connection } from 'next/server';
 import type { Listing } from '@/data/listings';
 import {
-  DATABASE_LISTING_SELECT_COLUMNS,
+  PUBLIC_DATABASE_LISTING_SELECT_COLUMNS,
   databaseRowToListing,
   databaseRowsToListings,
   isDatabaseListingRow,
   isDatabaseListingRowArray,
+  isPublicDatabaseListingRow,
+  isPublicDatabaseListingRowArray,
+  markListingOwnedByViewer,
+  publicDatabaseRowToListing,
+  publicDatabaseRowsToListings,
 } from '@/lib/listingDatabaseTypes';
 import {
   attachImageRowsToListings,
@@ -71,6 +76,10 @@ type ListingPublicSellerProfileRow = {
   avatar_zoom: number;
 };
 
+type OwnedListingIdRow = {
+  listing_id: string;
+};
+
 function isListingPublicSellerProfileRow(
   value: unknown
 ): value is ListingPublicSellerProfileRow {
@@ -90,21 +99,69 @@ function isListingPublicSellerProfileRow(
   );
 }
 
+function isOwnedListingIdRow(value: unknown): value is OwnedListingIdRow {
+  if (!value || typeof value !== 'object') {
+    return false;
+  }
+
+  const row = value as Partial<Record<keyof OwnedListingIdRow, unknown>>;
+
+  return typeof row.listing_id === 'string';
+}
+
+function isOwnedListingIdRowArray(value: unknown): value is OwnedListingIdRow[] {
+  return Array.isArray(value) && value.every(isOwnedListingIdRow);
+}
+
+async function attachViewerOwnership(
+  listings: Listing[],
+  supabase: Awaited<ReturnType<typeof createClient>>
+): Promise<Listing[]> {
+  if (listings.length === 0) {
+    return listings;
+  }
+
+  const { data: claimsData } = await supabase.auth.getClaims();
+  const viewerId = claimsData?.claims?.sub;
+
+  if (!viewerId) {
+    return listings;
+  }
+
+  const listingIds = listings.map((listing) => String(listing.id));
+  const { data, error } = await supabase.rpc('list_current_user_owned_listing_ids', {
+    p_listing_ids: listingIds,
+  });
+
+  if (error || !isOwnedListingIdRowArray(data)) {
+    return listings;
+  }
+
+  const ownedIds = new Set(data.map((row) => row.listing_id));
+
+  return listings.map((listing) =>
+    ownedIds.has(String(listing.id)) ? markListingOwnedByViewer(listing) : listing
+  );
+}
+
 export async function listPublicDatabaseListings(): Promise<DatabaseListingReadResult> {
   await connection();
 
   const supabase = await createClient();
   const { data, error } = await supabase
     .from('listings')
-    .select(DATABASE_LISTING_SELECT_COLUMNS)
+    .select(PUBLIC_DATABASE_LISTING_SELECT_COLUMNS)
     .in('status', ['active', 'reserved'])
     .order('created_at', { ascending: false });
 
-  if (error || !isDatabaseListingRowArray(data)) {
+  if (error || !isPublicDatabaseListingRowArray(data)) {
     return { ok: false, reason: 'database-unavailable' };
   }
 
-  const listings = databaseRowsToListings(data);
+  const listings = await attachViewerOwnership(
+    publicDatabaseRowsToListings(data),
+    supabase
+  );
   const imageRows = await listListingImageRowsForListingIds(
     supabase,
     listings.map((listing) => String(listing.id))
@@ -128,17 +185,15 @@ export async function listOwnedDatabaseListingsForOwner(
   }
 
   const supabase = await createClient();
-  const { data, error } = await supabase
-    .from('listings')
-    .select(DATABASE_LISTING_SELECT_COLUMNS)
-    .eq('owner_id', safeOwnerId)
-    .order('created_at', { ascending: false });
+  const { data, error } = await supabase.rpc('list_my_listings');
 
   if (error || !isDatabaseListingRowArray(data)) {
     return { ok: false, reason: 'database-unavailable' };
   }
 
-  const listings = databaseRowsToListings(data);
+  const listings = databaseRowsToListings(
+    data.filter((row) => row.owner_id === safeOwnerId)
+  ).map(markListingOwnedByViewer);
   const imageRows = await listListingImageRowsForListingIds(
     supabase,
     listings.map((listing) => String(listing.id))
@@ -164,7 +219,7 @@ export async function getPublicDatabaseListingById(
   const supabase = await createClient();
   const { data, error } = await supabase
     .from('listings')
-    .select(DATABASE_LISTING_SELECT_COLUMNS)
+    .select(PUBLIC_DATABASE_LISTING_SELECT_COLUMNS)
     .eq('id', safeId)
     .maybeSingle();
 
@@ -176,11 +231,57 @@ export async function getPublicDatabaseListingById(
     return { ok: true, listing: null };
   }
 
-  if (!isDatabaseListingRow(data)) {
+  if (!isPublicDatabaseListingRow(data)) {
     return { ok: false, reason: 'database-unavailable' };
   }
 
-  const listing = databaseRowToListing(data);
+  const [listing] = await attachViewerOwnership(
+    [publicDatabaseRowToListing(data)],
+    supabase
+  );
+  const imageRows = await listListingImageRowsForListingIds(supabase, [
+    String(listing.id),
+  ]);
+
+  return {
+    ok: true,
+    listing: attachImageRowsToListings([listing], imageRows)[0] || listing,
+  };
+}
+
+export async function getOwnedDatabaseListingById(
+  id: string,
+  ownerId: string
+): Promise<DatabaseListingDetailResult> {
+  await connection();
+
+  const safeId = id.trim();
+  const safeOwnerId = ownerId.trim();
+
+  if (!safeId || !safeOwnerId || /^\d+$/.test(safeId)) {
+    return { ok: true, listing: null };
+  }
+
+  const supabase = await createClient();
+  const { data, error } = await supabase.rpc('get_my_listing', {
+    p_listing_id: safeId,
+  });
+  const rows = Array.isArray(data) ? data : [];
+  const row = rows[0];
+
+  if (error) {
+    return { ok: false, reason: 'database-unavailable' };
+  }
+
+  if (!row) {
+    return { ok: true, listing: null };
+  }
+
+  if (!isDatabaseListingRow(row) || row.owner_id !== safeOwnerId) {
+    return { ok: false, reason: 'database-unavailable' };
+  }
+
+  const listing = markListingOwnedByViewer(databaseRowToListing(row));
   const imageRows = await listListingImageRowsForListingIds(supabase, [
     String(listing.id),
   ]);

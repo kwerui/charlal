@@ -93,7 +93,7 @@ export default async function ContactSellerPage({
     );
   }
 
-  if (!listing.ownerId || listing.ownerId === authResult.user.id) {
+  if (listing.isOwnedByViewer) {
     return (
       <main className="form-page">
         <section className="form-panel" aria-labelledby="contact-seller-title">

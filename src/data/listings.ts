@@ -13,6 +13,7 @@ export type Listing = {
   datePosted: string;
   updatedAt?: string;
   ownerId?: string;
+  isOwnedByViewer?: boolean;
   transactionType?: 'sale' | 'rent';
   propertyType?: 'apartments' | 'land' | 'commercial' | 'storage';
   marketplaceType?: string;

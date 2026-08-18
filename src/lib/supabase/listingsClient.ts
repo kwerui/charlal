@@ -2,13 +2,17 @@
 
 import type { Listing } from '@/data/listings';
 import {
-  DATABASE_LISTING_SELECT_COLUMNS,
+  PUBLIC_DATABASE_LISTING_SELECT_COLUMNS,
   databaseRowToListing,
   databaseRowsToListings,
   isDatabaseListingRow,
   isDatabaseListingRowArray,
+  isPublicDatabaseListingRow,
   listingFormValuesToDatabaseInsert,
   listingFormValuesToDatabaseUpdate,
+  markListingOwnedByViewer,
+  publicDatabaseRowToListing,
+  publicDatabaseRowToOwnedListing,
 } from '@/lib/listingDatabaseTypes';
 import type { ValidatedListingFormValues } from '@/lib/listingFormValidation';
 import { createClient } from '@/lib/supabase/client';
@@ -87,6 +91,25 @@ async function attachImagesToListings(
   return attachImageRowsToListings(listings, imageRows);
 }
 
+function isOwnedByCurrentUserResponse(value: unknown): value is boolean {
+  return typeof value === 'boolean';
+}
+
+async function isListingOwnedByCurrentUser(
+  listingId: string
+): Promise<boolean | null> {
+  const supabase = createClient();
+  const { data, error } = await supabase.rpc('current_user_owns_listing', {
+    p_listing_id: listingId,
+  });
+
+  if (error || !isOwnedByCurrentUserResponse(data)) {
+    return null;
+  }
+
+  return data;
+}
+
 export async function createDatabaseListingFromFormValues(
   values: ValidatedListingFormValues
 ): Promise<DatabaseListingMutationResult> {
@@ -94,16 +117,18 @@ export async function createDatabaseListingFromFormValues(
   const { data, error } = await supabase
     .from('listings')
     .insert(listingFormValuesToDatabaseInsert(values))
-    .select(DATABASE_LISTING_SELECT_COLUMNS)
+    .select(PUBLIC_DATABASE_LISTING_SELECT_COLUMNS)
     .single();
 
-  if (error || !isDatabaseListingRow(data)) {
+  if (error || !isPublicDatabaseListingRow(data)) {
     return { ok: false, reason: 'database-unavailable' };
   }
 
   return {
     ok: true,
-    listing: await attachImagesToListing(databaseRowToListing(data)),
+    listing: await attachImagesToListing(
+      markListingOwnedByViewer(publicDatabaseRowToListing(data))
+    ),
   };
 }
 
@@ -117,19 +142,19 @@ export async function listOwnedDatabaseListings(
   }
 
   const supabase = createClient();
-  const { data, error } = await supabase
-    .from('listings')
-    .select(DATABASE_LISTING_SELECT_COLUMNS)
-    .eq('owner_id', safeOwnerId)
-    .order('created_at', { ascending: false });
+  const { data, error } = await supabase.rpc('list_my_listings');
 
   if (error || !isDatabaseListingRowArray(data)) {
     return { ok: false, reason: 'database-unavailable' };
   }
 
+  const ownedRows = data.filter((row) => row.owner_id === safeOwnerId);
+
   return {
     ok: true,
-    listings: await attachImagesToListings(databaseRowsToListings(data)),
+    listings: await attachImagesToListings(
+      databaseRowsToListings(ownedRows).map(markListingOwnedByViewer)
+    ),
   };
 }
 
@@ -145,12 +170,11 @@ export async function findOwnedDatabaseListingById(
   }
 
   const supabase = createClient();
-  const { data, error } = await supabase
-    .from('listings')
-    .select(DATABASE_LISTING_SELECT_COLUMNS)
-    .eq('id', safeListingId)
-    .eq('owner_id', safeOwnerId)
-    .maybeSingle();
+  const { data, error } = await supabase.rpc('get_my_listing', {
+    p_listing_id: safeListingId,
+  });
+  const rows = Array.isArray(data) ? data : [];
+  const row = rows[0];
 
   if (error) {
     return {
@@ -159,17 +183,19 @@ export async function findOwnedDatabaseListingById(
     };
   }
 
-  if (!data) {
+  if (!row) {
     return { ok: false, reason: 'not-owned' };
   }
 
-  if (!isDatabaseListingRow(data)) {
+  if (!isDatabaseListingRow(row) || row.owner_id !== safeOwnerId) {
     return { ok: false, reason: 'database-unavailable' };
   }
 
   return {
     ok: true,
-    listing: await attachImagesToListing(databaseRowToListing(data)),
+    listing: await attachImagesToListing(
+      markListingOwnedByViewer(databaseRowToListing(row))
+    ),
   };
 }
 
@@ -190,8 +216,7 @@ export async function updateDatabaseListingOwnedBy(
     .from('listings')
     .update(listingFormValuesToDatabaseUpdate(values))
     .eq('id', safeListingId)
-    .eq('owner_id', safeOwnerId)
-    .select(DATABASE_LISTING_SELECT_COLUMNS)
+    .select(PUBLIC_DATABASE_LISTING_SELECT_COLUMNS)
     .maybeSingle();
 
   if (error) {
@@ -205,13 +230,15 @@ export async function updateDatabaseListingOwnedBy(
     return { ok: false, reason: 'not-owned' };
   }
 
-  if (!isDatabaseListingRow(data)) {
+  if (!isPublicDatabaseListingRow(data)) {
     return { ok: false, reason: 'database-unavailable' };
   }
 
   return {
     ok: true,
-    listing: await attachImagesToListing(databaseRowToListing(data)),
+    listing: await attachImagesToListing(
+      publicDatabaseRowToOwnedListing(data, safeOwnerId)
+    ),
   };
 }
 
@@ -241,28 +268,14 @@ export async function saveDatabaseListingImagesOwnedBy(
   }
 
   const supabase = createClient();
-  const { data: listingData, error: listingError } = await supabase
-    .from('listings')
-    .select(DATABASE_LISTING_SELECT_COLUMNS)
-    .eq('id', safeListingId)
-    .eq('owner_id', safeOwnerId)
-    .maybeSingle();
+  const isOwned = await isListingOwnedByCurrentUser(safeListingId);
 
-  if (listingError) {
-    return {
-      ok: false,
-      reason: isMissingOrDeniedResponse(listingError.code)
-        ? 'not-owned'
-        : 'database-unavailable',
-    };
-  }
-
-  if (!listingData) {
-    return { ok: false, reason: 'not-owned' };
-  }
-
-  if (!isDatabaseListingRow(listingData)) {
+  if (isOwned === null) {
     return { ok: false, reason: 'database-unavailable' };
+  }
+
+  if (!isOwned) {
+    return { ok: false, reason: 'not-owned' };
   }
 
   const { data: existingRows, error: existingRowsError } = await supabase
@@ -332,9 +345,18 @@ export async function saveDatabaseListingImagesOwnedBy(
     return { ok: false, reason: 'database-unavailable' };
   }
 
+  const refreshedListing = await findOwnedDatabaseListingById(
+    safeListingId,
+    safeOwnerId
+  );
+
+  if (!refreshedListing.ok) {
+    return refreshedListing;
+  }
+
   return {
     ok: true,
-    listing: await attachImagesToListing(databaseRowToListing(listingData)),
+    listing: refreshedListing.listing,
   };
 }
 
@@ -350,6 +372,16 @@ export async function deleteDatabaseListingOwnedBy(
   }
 
   const supabase = createClient();
+  const isOwned = await isListingOwnedByCurrentUser(safeListingId);
+
+  if (isOwned === null) {
+    return { ok: false, reason: 'database-unavailable' };
+  }
+
+  if (!isOwned) {
+    return { ok: false, reason: 'not-owned' };
+  }
+
   const { data: imageRowsData, error: imageRowsError } = await supabase
     .from('listing_images')
     .select(LISTING_IMAGE_SELECT_COLUMNS)
@@ -376,7 +408,6 @@ export async function deleteDatabaseListingOwnedBy(
     .from('listings')
     .delete()
     .eq('id', safeListingId)
-    .eq('owner_id', safeOwnerId)
     .select('id')
     .maybeSingle();
 

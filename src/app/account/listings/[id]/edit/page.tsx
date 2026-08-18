@@ -3,7 +3,7 @@ import { content } from '@/content/tyv';
 import { listings } from '@/data/listings';
 import { getCurrentViewerId } from '@/lib/auth/server';
 import { getSafeEditReturnHref } from '@/lib/resultReturnHref';
-import { getPublicDatabaseListingById } from '@/lib/supabase/listingsServer';
+import { getOwnedDatabaseListingById } from '@/lib/supabase/listingsServer';
 import EditListingForm from './EditListingForm';
 
 type EditListingPageProps = {
@@ -30,7 +30,7 @@ export default async function EditListingPage({
   const builtInListing = listings.find((listing) => String(listing.id) === id);
   const databaseListingResult = builtInListing
     ? { ok: true as const, listing: null }
-    : await getPublicDatabaseListingById(id);
+    : await getOwnedDatabaseListingById(id, viewer.status === 'signed-in' ? viewer.userId : '');
   const initialEditState =
     viewer.status === 'unresolved'
       ? 'checking'
@@ -40,9 +40,7 @@ export default async function EditListingPage({
       ? builtInListing
         ? 'not-owned'
         : 'not-found'
-      : databaseListingResult.listing.ownerId === viewer.userId
-      ? 'ready'
-      : 'not-owned';
+      : 'ready';
   const initialListing =
     initialEditState === 'ready' && databaseListingResult.ok
       ? databaseListingResult.listing

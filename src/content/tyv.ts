@@ -21,7 +21,7 @@ export const content = {
   siteFooterNavLabel: "Footer links / Адаанда ссылкалар", // TODO: add reviewed Tuvan translation.
   footerAboutLink: "About / Сайт дугайында", // TODO: add reviewed Tuvan translation.
   footerTermsLink: "Terms / Дугуржулгалар", // TODO: add reviewed Tuvan translation.
-  footerPrivacyLink: "Privacy / Чыжыл", // TODO: add reviewed Tuvan translation.
+  footerPrivacyLink: "Privacy / Чажыл", // TODO: add reviewed Tuvan translation.
   footerContactLink: "Contact / Харылзаа", // TODO: add reviewed Tuvan translation.
   legalPageKicker: "Information / Медегдел", // TODO: add reviewed Tuvan translation.
   privacyPageTitle: "Privacy Policy / Чажыт чоруктуң политиказы", // TODO: legal review and reviewed Tuvan translation required.

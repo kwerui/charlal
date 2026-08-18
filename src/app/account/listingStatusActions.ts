@@ -3,9 +3,9 @@
 import type { ListingStatus } from '@/data/listings';
 import { isListingStatus } from '@/data/listings';
 import {
-  DATABASE_LISTING_SELECT_COLUMNS,
-  databaseRowToListing,
-  isDatabaseListingRow,
+  PUBLIC_DATABASE_LISTING_SELECT_COLUMNS,
+  isPublicDatabaseListingRow,
+  publicDatabaseRowToOwnedListing,
 } from '@/lib/listingDatabaseTypes';
 import { getCurrentUserResult } from '@/lib/auth/server';
 import { createClient } from '@/lib/supabase/server';
@@ -64,16 +64,15 @@ export async function updateListingStatusAction(input: {
 
     const { data, error } = await supabase
       .from('listings')
-      .select(DATABASE_LISTING_SELECT_COLUMNS)
+      .select(PUBLIC_DATABASE_LISTING_SELECT_COLUMNS)
       .eq('id', safeListingId)
-      .eq('owner_id', authResult.user.id)
       .maybeSingle();
 
-    if (error || !data || !isDatabaseListingRow(data)) {
+    if (error || !data || !isPublicDatabaseListingRow(data)) {
       return { ok: false, reason: 'database-unavailable' };
     }
 
-    const listing = databaseRowToListing(data);
+    const listing = publicDatabaseRowToOwnedListing(data, authResult.user.id);
 
     await revalidateListingMutationRoutes({ listingId: safeListingId });
 
@@ -90,8 +89,7 @@ export async function updateListingStatusAction(input: {
     .from('listings')
     .update({ status: input.status })
     .eq('id', safeListingId)
-    .eq('owner_id', authResult.user.id)
-    .select(DATABASE_LISTING_SELECT_COLUMNS)
+    .select(PUBLIC_DATABASE_LISTING_SELECT_COLUMNS)
     .maybeSingle();
 
   if (error) {
@@ -102,11 +100,11 @@ export async function updateListingStatusAction(input: {
     return { ok: false, reason: 'not-owned' };
   }
 
-  if (!isDatabaseListingRow(data)) {
+  if (!isPublicDatabaseListingRow(data)) {
     return { ok: false, reason: 'database-unavailable' };
   }
 
-  const listing = databaseRowToListing(data);
+  const listing = publicDatabaseRowToOwnedListing(data, authResult.user.id);
 
   await revalidateListingMutationRoutes({ listingId: safeListingId });
 

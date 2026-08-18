@@ -54,11 +54,6 @@ export type CurrentUserFavoriteState = {
   savedKeys: string[];
 };
 
-type FavoriteDatabaseListingEligibilityRow = {
-  id: string;
-  owner_id: string;
-};
-
 function isListingFavoriteRow(value: unknown): value is ListingFavoriteRow {
   if (!value || typeof value !== 'object') {
     return false;
@@ -94,20 +89,6 @@ function isValidReference(reference: ListingFavoriteReference): boolean {
   );
 }
 
-function isFavoriteDatabaseListingEligibilityRow(
-  value: unknown
-): value is FavoriteDatabaseListingEligibilityRow {
-  if (!value || typeof value !== 'object') {
-    return false;
-  }
-
-  const row = value as Partial<
-    Record<keyof FavoriteDatabaseListingEligibilityRow, unknown>
-  >;
-
-  return typeof row.id === 'string' && typeof row.owner_id === 'string';
-}
-
 async function canSaveListingReference(
   reference: ListingFavoriteReference,
   userId: string
@@ -119,18 +100,15 @@ async function canSaveListingReference(
   }
 
   const supabase = await createClient();
-  const { data, error } = await supabase
-    .from('listings')
-    .select('id, owner_id')
-    .eq('id', reference.listingId)
-    .in('status', ['active', 'reserved'])
-    .maybeSingle();
+  const { data, error } = await supabase.rpc('can_current_user_save_listing', {
+    p_listing_id: reference.listingId,
+  });
 
-  if (error || !isFavoriteDatabaseListingEligibilityRow(data)) {
+  if (error || typeof data !== 'boolean') {
     return false;
   }
 
-  return data.owner_id !== userId;
+  return data === true && Boolean(userId.trim());
 }
 
 export async function getCurrentUserFavoriteReferences(): Promise<
@@ -315,7 +293,7 @@ export async function listCurrentUserSavedListings(): Promise<SavedListingsResul
       listing &&
       !(
         favorite.source === 'database' &&
-        listing.ownerId === viewer.userId
+        listing.isOwnedByViewer === true
       )
     );
   });
