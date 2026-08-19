@@ -14,6 +14,7 @@ export type Listing = {
   updatedAt?: string;
   ownerId?: string;
   isOwnedByViewer?: boolean;
+  viewerOwnershipUnavailable?: boolean;
   transactionType?: 'sale' | 'rent';
   propertyType?: 'apartments' | 'land' | 'commercial' | 'storage';
   marketplaceType?: string;

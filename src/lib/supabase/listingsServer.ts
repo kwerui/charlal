@@ -118,6 +118,13 @@ function isOwnedListingIdRowArray(value: unknown): value is OwnedListingIdRow[] 
   return Array.isArray(value) && value.every(isOwnedListingIdRow);
 }
 
+function markViewerOwnershipUnavailable(listings: Listing[]): Listing[] {
+  return listings.map((listing) => ({
+    ...listing,
+    viewerOwnershipUnavailable: true,
+  }));
+}
+
 async function attachViewerOwnership(
   listings: Listing[],
   supabase: Awaited<ReturnType<typeof createClient>>
@@ -139,7 +146,7 @@ async function attachViewerOwnership(
   });
 
   if (error || !isOwnedListingIdRowArray(data)) {
-    return listings;
+    return markViewerOwnershipUnavailable(listings);
   }
 
   const ownedIds = new Set(data.map((row) => row.listing_id));

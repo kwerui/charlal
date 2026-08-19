@@ -7,6 +7,7 @@ import { content } from '@/content/tyv';
 import type { Listing } from '@/data/listings';
 import { formatListingPrice, getListingStatus } from '@/data/listings';
 import {
+  canOfferListingFavoriteControl,
   getListingFavoriteKey,
   getListingFavoriteReference,
 } from '@/lib/listingFavoriteKeys';
@@ -36,10 +37,12 @@ export default function ListingCard({
   const isSaved = favoriteReference
     ? savedListingKeys.includes(getListingFavoriteKey(favoriteReference))
     : false;
-  const isOwnDatabaseListing =
-    favoriteReference?.source === 'database' &&
-    (listing.isOwnedByViewer ||
-      Boolean(listing.ownerId && listing.ownerId === currentViewerId));
+  const canOfferFavoriteControl = canOfferListingFavoriteControl({
+    listing,
+    reference: favoriteReference,
+    isSaved,
+    currentViewerId,
+  });
   const listingHref = fromHref
     ? {
         pathname: listingPath,
@@ -70,7 +73,7 @@ export default function ListingCard({
     </>
   );
 
-  const favoriteControl = favoriteReference && !isOwnDatabaseListing ? (
+  const favoriteControl = canOfferFavoriteControl && favoriteReference ? (
     <FavoriteListingButton
       reference={favoriteReference}
       initiallySaved={isSaved}

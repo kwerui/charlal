@@ -13,8 +13,10 @@ import { content } from '@/content/tyv';
 import type { Listing } from '@/data/listings';
 import { formatListingPrice, getListingStatus } from '@/data/listings';
 import {
+  canOfferListingFavoriteControl,
   getListingFavoriteKey,
   getListingFavoriteReference,
+  isKnownOwnDatabaseFavoriteListing,
 } from '@/lib/listingFavoriteKeys';
 import { resolveListingImage } from '@/lib/listingPlaceholders';
 
@@ -96,10 +98,17 @@ export default function ListingDetailView({
   const isSaved = favoriteReference
     ? savedListingKeys.includes(getListingFavoriteKey(favoriteReference))
     : false;
-  const isOwnDatabaseListing =
-    favoriteReference?.source === 'database' &&
-    (listing.isOwnedByViewer ||
-      Boolean(listing.ownerId && listing.ownerId === currentViewerId));
+  const isOwnDatabaseListing = isKnownOwnDatabaseFavoriteListing(
+    listing,
+    favoriteReference,
+    currentViewerId
+  );
+  const canOfferFavoriteControl = canOfferListingFavoriteControl({
+    listing,
+    reference: favoriteReference,
+    isSaved,
+    currentViewerId,
+  });
   const reportListingId =
     favoriteReference?.source === 'database'
       ? favoriteReference.listingId
@@ -215,7 +224,7 @@ export default function ListingDetailView({
             listing={listing}
             initialViewerState={initialViewerState}
           />
-          {favoriteReference && !isOwnDatabaseListing ? (
+          {canOfferFavoriteControl && favoriteReference ? (
             <FavoriteListingButton
               reference={favoriteReference}
               initiallySaved={isSaved}

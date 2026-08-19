@@ -9,6 +9,7 @@ import {
 import { content } from '@/content/tyv';
 import {
   getListingFavoriteKey,
+  type ListingFavoriteMutationFailureReason,
   type ListingFavoriteReference,
 } from '@/lib/listingFavoriteKeys';
 import { useAuthStatus } from '@/lib/auth/client';
@@ -122,6 +123,43 @@ function takeMatchingPendingFavoriteIntent(
   }
 }
 
+function getFavoriteMutationFailureMessage(
+  reason: ListingFavoriteMutationFailureReason
+): string {
+  if (reason === 'auth-required') {
+    return content.signInToSaveAdvertisementMessage;
+  }
+
+  if (reason === 'invalid-listing') {
+    return content.advertisementCannotBeSavedMessage;
+  }
+
+  if (
+    reason === 'database-unavailable' ||
+    reason === 'schema-unavailable'
+  ) {
+    return content.savedAdvertisementsTemporarilyUnavailableMessage;
+  }
+
+  return content.unableUpdateSavedAdvertisementMessage;
+}
+
+function logFavoriteClientFailure(
+  action: 'save' | 'toggle',
+  reason: ListingFavoriteMutationFailureReason,
+  reference: ListingFavoriteReference
+): void {
+  if (process.env.NODE_ENV !== 'production') {
+    console.error(`Favorite ${action} failed.`, {
+      reason,
+      reference: {
+        source: reference.source,
+        listingId: reference.listingId,
+      },
+    });
+  }
+}
+
 export default function FavoriteListingButton({
   reference,
   initiallySaved,
@@ -185,11 +223,8 @@ export default function FavoriteListingButton({
         const result = await saveFavoriteAction(pendingReference);
 
         if (!result.ok) {
-          setError(
-            result.reason === 'auth-required'
-              ? content.signInToSaveAdvertisementMessage
-              : content.unableUpdateSavedAdvertisementMessage
-          );
+          logFavoriteClientFailure('save', result.reason, pendingReference);
+          setError(getFavoriteMutationFailureMessage(result.reason));
           return;
         }
 
@@ -231,11 +266,8 @@ export default function FavoriteListingButton({
           : await saveFavoriteAction(reference);
 
         if (!result.ok) {
-          setError(
-            result.reason === 'auth-required'
-              ? content.signInToSaveAdvertisementMessage
-              : content.unableUpdateSavedAdvertisementMessage
-          );
+          logFavoriteClientFailure('toggle', result.reason, reference);
+          setError(getFavoriteMutationFailureMessage(result.reason));
 
           if (result.reason === 'auth-required') {
             router.push(`/sign-in?next=${encodeURIComponent(signInReturnHref)}`);
@@ -266,8 +298,12 @@ export default function FavoriteListingButton({
     <div
       className={
         variant === 'detail'
-          ? 'favorite-control favorite-control--detail'
-          : 'favorite-control favorite-control--card'
+          ? `favorite-control favorite-control--detail${
+              displayedError ? ' favorite-control--has-error' : ''
+            }`
+          : `favorite-control favorite-control--card${
+              displayedError ? ' favorite-control--has-error' : ''
+            }`
       }
     >
       <button

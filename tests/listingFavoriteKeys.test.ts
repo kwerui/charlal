@@ -2,7 +2,11 @@ import assert from 'node:assert/strict';
 import test from 'node:test';
 import {
   buildSavedListingsPayload,
+  canOfferListingFavoriteControl,
   getDatabaseListingIdsFromFavorites,
+  getListingFavoriteReference,
+  getRpcFavoriteSaveValidationResult,
+  isKnownOwnDatabaseFavoriteListing,
   type ListingFavoriteRecord,
 } from '../src/lib/listingFavoriteKeys.js';
 import type { Listing } from '../src/data/listings.js';
@@ -29,6 +33,18 @@ function createListing(
 
 test('returns no database listing ids for empty favorites', () => {
   assert.deepEqual(getDatabaseListingIdsFromFavorites([]), []);
+});
+
+test('classifies database and builtin favorite references from listing ids', () => {
+  assert.deepEqual(getListingFavoriteReference(createListing('db-abc')), {
+    source: 'database',
+    listingId: 'db-abc',
+  });
+  assert.deepEqual(getListingFavoriteReference(createListing(42)), {
+    source: 'builtin',
+    listingId: '42',
+  });
+  assert.equal(getListingFavoriteReference(createListing('local-draft')), null);
 });
 
 test('extracts unique database listing ids from favorites in saved order', () => {
@@ -115,4 +131,95 @@ test('builds saved listings in favorite order and omits inaccessible listings', 
     result.favorites.map((favorite) => favorite.listingId),
     ['db-visible-2', '7', 'db-visible-1']
   );
+});
+
+test('does not offer a favorite save control for known own database listings', () => {
+  const listing = createListing('db-owned', {
+    isOwnedByViewer: true,
+  });
+  const reference = getListingFavoriteReference(listing);
+
+  assert.equal(
+    isKnownOwnDatabaseFavoriteListing(listing, reference, 'viewer-1'),
+    true
+  );
+  assert.equal(
+    canOfferListingFavoriteControl({
+      listing,
+      reference,
+      isSaved: false,
+      currentViewerId: 'viewer-1',
+    }),
+    false
+  );
+});
+
+test('hides new database saves when viewer ownership is unavailable', () => {
+  const listing = createListing('db-unknown-owner', {
+    viewerOwnershipUnavailable: true,
+  });
+  const reference = getListingFavoriteReference(listing);
+
+  assert.equal(
+    canOfferListingFavoriteControl({
+      listing,
+      reference,
+      isSaved: false,
+      currentViewerId: 'viewer-1',
+    }),
+    false
+  );
+  assert.equal(
+    canOfferListingFavoriteControl({
+      listing,
+      reference,
+      isSaved: true,
+      currentViewerId: 'viewer-1',
+    }),
+    true
+  );
+});
+
+test('allows builtin and known non-owned database favorite controls', () => {
+  const builtinListing = createListing(9);
+  const databaseListing = createListing('db-visible');
+
+  assert.equal(
+    canOfferListingFavoriteControl({
+      listing: builtinListing,
+      reference: getListingFavoriteReference(builtinListing),
+      isSaved: false,
+      currentViewerId: 'viewer-1',
+    }),
+    true
+  );
+  assert.equal(
+    canOfferListingFavoriteControl({
+      listing: databaseListing,
+      reference: getListingFavoriteReference(databaseListing),
+      isSaved: false,
+      currentViewerId: 'viewer-1',
+    }),
+    true
+  );
+});
+
+test('maps favorite save-validation RPC outcomes to distinct reasons', () => {
+  assert.deepEqual(getRpcFavoriteSaveValidationResult(true), { ok: true });
+  assert.deepEqual(getRpcFavoriteSaveValidationResult(false), {
+    ok: false,
+    reason: 'invalid-listing',
+  });
+  assert.deepEqual(getRpcFavoriteSaveValidationResult(null, 'PGRST202'), {
+    ok: false,
+    reason: 'schema-unavailable',
+  });
+  assert.deepEqual(getRpcFavoriteSaveValidationResult(null, '42883'), {
+    ok: false,
+    reason: 'schema-unavailable',
+  });
+  assert.deepEqual(getRpcFavoriteSaveValidationResult(null, '42501'), {
+    ok: false,
+    reason: 'database-unavailable',
+  });
 });

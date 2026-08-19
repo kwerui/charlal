@@ -29,3 +29,15 @@ test('saved listings use the bounded database listing lookup', () => {
   assert.equal(favoritesSource.includes('listPublicDatabaseListings()'), false);
   assert.equal(favoritesSource.includes("rpc('list_my_listings'"), false);
 });
+
+test('favorite save validation does not bypass missing RPCs with owner_id reads', () => {
+  const favoritesSource = readFileSync(
+    'src/lib/supabase/listingFavorites.ts',
+    'utf8'
+  );
+  const favoriteKeysSource = readFileSync('src/lib/listingFavoriteKeys.ts', 'utf8');
+
+  assert.equal(favoritesSource.includes(".select('id, owner_id, status')"), false);
+  assert.equal(favoritesSource.includes('getRpcFavoriteSaveValidationResult'), true);
+  assert.equal(favoriteKeysSource.includes('schema-unavailable'), true);
+});

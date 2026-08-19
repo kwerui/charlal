@@ -8,10 +8,28 @@ import {
   type ListingFavoriteMutationResult,
 } from '@/lib/supabase/listingFavorites';
 
+function logFavoriteActionFailure(
+  action: 'save' | 'remove',
+  reference: ListingFavoriteReference,
+  result: ListingFavoriteMutationResult
+): void {
+  if (process.env.NODE_ENV !== 'production' && !result.ok) {
+    console.error(`Favorite ${action} action failed.`, {
+      reason: result.reason,
+      reference: {
+        source: reference.source,
+        listingId: reference.listingId,
+      },
+    });
+  }
+}
+
 export async function saveFavoriteAction(
   reference: ListingFavoriteReference
 ): Promise<ListingFavoriteMutationResult> {
   const result = await saveListingFavorite(reference);
+
+  logFavoriteActionFailure('save', reference, result);
 
   if (result.ok) {
     revalidatePath('/');
@@ -27,6 +45,8 @@ export async function removeFavoriteAction(
   reference: ListingFavoriteReference
 ): Promise<ListingFavoriteMutationResult> {
   const result = await removeListingFavorite(reference);
+
+  logFavoriteActionFailure('remove', reference, result);
 
   if (result.ok) {
     revalidatePath('/');

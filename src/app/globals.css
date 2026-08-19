@@ -2477,12 +2477,40 @@ body {
 }
 
 .favorite-error {
-  max-width: 260px;
   margin: 0;
-  color: var(--color-danger);
+  max-width: min(280px, calc(100vw - 32px));
+  padding: 9px 11px;
+  border: 1px solid rgba(185,28,28,0.34);
+  border-radius: 8px;
+  background: #7f1d1d;
+  color: #fff7ed;
   font-size: 13px;
   font-weight: 700;
   line-height: 1.35;
+  box-shadow: 0 12px 26px rgba(127,29,29,0.2);
+}
+
+.favorite-control--card .favorite-error {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  justify-self: end;
+  width: max-content;
+  text-align: right;
+}
+
+.favorite-control--detail .favorite-error {
+  justify-self: start;
+  text-align: left;
+}
+
+@media (prefers-color-scheme: dark) {
+  .favorite-error {
+    border-color: rgba(254,202,202,0.36);
+    background: #991b1b;
+    color: #fff7ed;
+    box-shadow: 0 14px 30px rgba(0,0,0,0.32);
+  }
 }
 
 .listing-status-badge {

@@ -6,6 +6,9 @@ import {
   buildSavedListingsPayload,
   getDatabaseListingIdsFromFavorites,
   getListingFavoriteKey,
+  getRpcFavoriteSaveValidationResult,
+  type FavoriteSaveValidationResult,
+  type ListingFavoriteMutationFailureReason,
   type ListingFavoriteRecord,
   type ListingFavoriteReference,
   type ListingFavoriteSource,
@@ -19,19 +22,13 @@ type ListingFavoriteRow = {
   created_at: string;
 };
 
-type SaveableListingRow = {
-  id: string;
-  owner_id: string;
-  status: string;
-};
-
 export type ListingFavoriteMutationResult =
   | {
       ok: true;
     }
   | {
       ok: false;
-      reason: 'auth-required' | 'invalid-listing' | 'database-unavailable';
+      reason: ListingFavoriteMutationFailureReason;
     };
 
 export type SavedListingsResult =
@@ -97,85 +94,88 @@ function isValidReference(reference: ListingFavoriteReference): boolean {
   );
 }
 
-function isSaveableListingRow(value: unknown): value is SaveableListingRow {
-  if (!value || typeof value !== 'object') {
-    return false;
+type SupabaseErrorDiagnostic = {
+  code?: string;
+  message?: string;
+  details?: string;
+  hint?: string;
+};
+
+function getSupabaseErrorDiagnostic(error: unknown): SupabaseErrorDiagnostic {
+  if (!error || typeof error !== 'object') {
+    return {};
   }
 
-  const row = value as Partial<Record<keyof SaveableListingRow, unknown>>;
+  const source = error as Partial<Record<keyof SupabaseErrorDiagnostic, unknown>>;
+  const diagnostic: SupabaseErrorDiagnostic = {};
 
-  return (
-    typeof row.id === 'string' &&
-    typeof row.owner_id === 'string' &&
-    typeof row.status === 'string'
-  );
+  if (typeof source.code === 'string') {
+    diagnostic.code = source.code;
+  }
+
+  if (typeof source.message === 'string') {
+    diagnostic.message = source.message;
+  }
+
+  if (typeof source.details === 'string') {
+    diagnostic.details = source.details;
+  }
+
+  if (typeof source.hint === 'string') {
+    diagnostic.hint = source.hint;
+  }
+
+  return diagnostic;
 }
 
-function isMissingRpcError(error: { code?: string } | null): boolean {
-  return error?.code === 'PGRST202' || error?.code === '42883';
-}
-
-function logFavoriteMutationError(
+function logFavoriteMutationDiagnostic(
   context: string,
-  error: unknown
+  error: unknown,
+  reason: ListingFavoriteMutationFailureReason
 ): void {
   if (process.env.NODE_ENV !== 'production') {
-    console.error(`Favorite mutation failed during ${context}.`, error);
+    console.error(`Favorite mutation failed during ${context}.`, {
+      reason,
+      supabase: getSupabaseErrorDiagnostic(error),
+    });
   }
 }
 
 async function canSaveListingReference(
   reference: ListingFavoriteReference,
   userId: string
-): Promise<boolean> {
+): Promise<FavoriteSaveValidationResult> {
   const safeUserId = userId.trim();
   const safeListingId = reference.listingId.trim();
 
   if (!safeUserId || !safeListingId) {
-    return false;
+    return { ok: false, reason: 'invalid-listing' };
   }
 
   if (reference.source === 'builtin') {
-    return builtInListings.some(
-      (listing) => String(listing.id) === safeListingId
-    );
+    return builtInListings.some((listing) => String(listing.id) === safeListingId)
+      ? { ok: true }
+      : { ok: false, reason: 'invalid-listing' };
   }
 
   const supabase = await createClient();
   const { data, error } = await supabase.rpc('can_current_user_save_listing', {
     p_listing_id: safeListingId,
   });
+  const validation = getRpcFavoriteSaveValidationResult(
+    data,
+    getSupabaseErrorDiagnostic(error).code
+  );
 
-  if (!error && typeof data === 'boolean') {
-    return data === true;
+  if (!validation.ok && validation.reason !== 'invalid-listing') {
+    logFavoriteMutationDiagnostic(
+      'listing save validation',
+      error,
+      validation.reason
+    );
   }
 
-  if (error || typeof data !== 'boolean') {
-    if (!isMissingRpcError(error)) {
-      logFavoriteMutationError('listing save validation', error);
-      return false;
-    }
-
-    const { data: listingData, error: listingError } = await supabase
-      .from('listings')
-      .select('id, owner_id, status')
-      .eq('id', safeListingId)
-      .in('status', ['active', 'reserved'])
-      .maybeSingle();
-
-    if (listingError) {
-      logFavoriteMutationError('fallback listing save validation', listingError);
-      return false;
-    }
-
-    if (!isSaveableListingRow(listingData)) {
-      return false;
-    }
-
-    return listingData.owner_id !== safeUserId;
-  }
-
-  return false;
+  return validation;
 }
 
 function normalizeFavoriteReference(
@@ -205,7 +205,11 @@ async function upsertFavoriteReference(
   );
 
   if (error) {
-    logFavoriteMutationError('favorite upsert', error);
+    logFavoriteMutationDiagnostic(
+      'favorite upsert',
+      error,
+      'database-unavailable'
+    );
     return { ok: false, reason: 'database-unavailable' };
   }
 
@@ -225,7 +229,11 @@ async function deleteFavoriteReference(
     .eq('listing_id', reference.listingId);
 
   if (error) {
-    logFavoriteMutationError('favorite delete', error);
+    logFavoriteMutationDiagnostic(
+      'favorite delete',
+      error,
+      'database-unavailable'
+    );
     return { ok: false, reason: 'database-unavailable' };
   }
 
@@ -242,8 +250,10 @@ export async function saveListingFavoriteForSignedInUser(
     return { ok: false, reason: 'invalid-listing' };
   }
 
-  if (!(await canSaveListingReference(safeReference, userId))) {
-    return { ok: false, reason: 'invalid-listing' };
+  const validation = await canSaveListingReference(safeReference, userId);
+
+  if (!validation.ok) {
+    return { ok: false, reason: validation.reason };
   }
 
   return upsertFavoriteReference(userId.trim(), safeReference);

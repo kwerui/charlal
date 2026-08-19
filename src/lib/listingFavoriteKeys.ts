@@ -11,6 +11,21 @@ export type ListingFavoriteRecord = ListingFavoriteReference & {
   createdAt: string;
 };
 
+export type ListingFavoriteMutationFailureReason =
+  | 'auth-required'
+  | 'invalid-listing'
+  | 'schema-unavailable'
+  | 'database-unavailable';
+
+export type FavoriteSaveValidationResult =
+  | {
+      ok: true;
+    }
+  | {
+      ok: false;
+      reason: Exclude<ListingFavoriteMutationFailureReason, 'auth-required'>;
+    };
+
 export function getListingFavoriteReference(
   listing: Listing
 ): ListingFavoriteReference | null {
@@ -54,6 +69,70 @@ export function getDatabaseListingIdsFromFavorites(
   }
 
   return listingIds;
+}
+
+export function isMissingFavoriteValidationRpcErrorCode(
+  code: string | undefined
+): boolean {
+  return code === 'PGRST202' || code === '42883';
+}
+
+export function getRpcFavoriteSaveValidationResult(
+  data: unknown,
+  errorCode?: string
+): FavoriteSaveValidationResult {
+  if (isMissingFavoriteValidationRpcErrorCode(errorCode)) {
+    return { ok: false, reason: 'schema-unavailable' };
+  }
+
+  if (errorCode || typeof data !== 'boolean') {
+    return { ok: false, reason: 'database-unavailable' };
+  }
+
+  return data ? { ok: true } : { ok: false, reason: 'invalid-listing' };
+}
+
+export function isKnownOwnDatabaseFavoriteListing(
+  listing: Listing,
+  reference: ListingFavoriteReference | null,
+  currentViewerId: string | null
+): boolean {
+  return Boolean(
+    reference?.source === 'database' &&
+      (listing.isOwnedByViewer ||
+        (currentViewerId && listing.ownerId === currentViewerId))
+  );
+}
+
+export function canOfferListingFavoriteControl({
+  listing,
+  reference,
+  isSaved,
+  currentViewerId,
+}: {
+  listing: Listing;
+  reference: ListingFavoriteReference | null;
+  isSaved: boolean;
+  currentViewerId: string | null;
+}): boolean {
+  if (!reference) {
+    return false;
+  }
+
+  if (isKnownOwnDatabaseFavoriteListing(listing, reference, currentViewerId)) {
+    return false;
+  }
+
+  if (
+    reference.source === 'database' &&
+    currentViewerId &&
+    listing.viewerOwnershipUnavailable &&
+    !isSaved
+  ) {
+    return false;
+  }
+
+  return true;
 }
 
 export type SavedListingsPayload = {

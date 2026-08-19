@@ -197,6 +197,8 @@ export const content = {
   savedAdvertisementButton: "Saved", // TODO: add reviewed Tuvan translation.
   removeSavedAdvertisementButton: "Remove from saved", // TODO: add reviewed Tuvan translation.
   signInToSaveAdvertisementMessage: "Sign in to save advertisements.", // TODO: add reviewed Tuvan translation.
+  advertisementCannotBeSavedMessage: "This advertisement cannot be saved.", // TODO: add reviewed Tuvan translation.
+  savedAdvertisementsTemporarilyUnavailableMessage: "Saved advertisements are temporarily unavailable. Try again later.", // TODO: add reviewed Tuvan translation.
   unableUpdateSavedAdvertisementMessage: "Unable to update saved advertisement.", // TODO: add reviewed Tuvan translation.
   reportAdvertisementButton: "Report ad", // TODO: add reviewed Tuvan translation.
   reportAdvertisementTitle: "Report ad", // TODO: add reviewed Tuvan translation.
