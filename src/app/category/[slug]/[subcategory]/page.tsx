@@ -158,14 +158,26 @@ export default async function SubcategoryPage({ params, searchParams }: Subcateg
     minPrice: selectedMinPrice,
     maxPrice: selectedMaxPrice,
   };
-  const databaseListingsResult = await listPublicDatabaseListings();
+  const [databaseListingsResult, favoriteState] = await Promise.all([
+    listPublicDatabaseListings({
+      categorySlug: category.slug,
+      subcategorySlug: subcategory,
+      isAllPage,
+      housingTransaction,
+      housingPropertyType: selectedHousingPropertyType,
+      marketplaceType: selectedMarketplaceType,
+      minPrice: selectedMinPrice,
+      maxPrice: selectedMaxPrice,
+      searchQuery: selectedSearchQuery,
+    }),
+    getCurrentUserFavoriteState(),
+  ]);
   const databaseListings = databaseListingsResult.ok
     ? databaseListingsResult.listings
     : [];
   const databaseError = databaseListingsResult.ok
     ? ''
     : content.databaseListingsLoadFailedMessage;
-  const favoriteState = await getCurrentUserFavoriteState();
 
   return (
     <div className="app-container">

@@ -11,14 +11,16 @@ import { listPublicDatabaseListings } from '@/lib/supabase/listingsServer';
  */
 
 export default async function Home(): Promise<React.ReactNode> {
-  const databaseListingsResult = await listPublicDatabaseListings();
+  const [databaseListingsResult, favoriteState] = await Promise.all([
+    listPublicDatabaseListings({ limit: 6 }),
+    getCurrentUserFavoriteState(),
+  ]);
   const databaseListings = databaseListingsResult.ok
     ? databaseListingsResult.listings
     : [];
   const databaseError = databaseListingsResult.ok
     ? ''
     : content.databaseListingsLoadFailedMessage;
-  const favoriteState = await getCurrentUserFavoriteState();
 
   return (
     <div className="app-container">

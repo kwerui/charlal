@@ -1,0 +1,18 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "incremental": false,
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
+    "noEmit": false,
+    "outDir": ".tmp-tests",
+    "target": "ES2022"
+  },
+  "include": [
+    "next.config.ts",
+    "src/lib/messageThreadClientBehavior.ts",
+    "src/lib/messagingRealtimeClientBehavior.ts",
+    "src/lib/publicListingQuery.ts",
+    "tests/**/*.test.ts"
+  ]
+}

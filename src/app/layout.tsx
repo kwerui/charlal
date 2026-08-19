@@ -4,9 +4,7 @@ import NativeHistoryIntentMarker from './components/NativeHistoryIntentMarker';
 import SiteHeader from './components/SiteHeader';
 import SiteFooter from './components/SiteFooter';
 import { AuthProvider } from '@/lib/auth/client';
-import { getCurrentUserResult } from '@/lib/auth/server';
 import { MessagingRealtimeProvider } from '@/lib/messagingRealtime';
-import { countCurrentUserUnreadConversations } from '@/lib/supabase/messagingServer';
 import "./globals.css";
 
 const geistSans = Geist({
@@ -24,28 +22,18 @@ export const metadata: Metadata = {
   description: "",
 };
 
-export default async function RootLayout({
+export default function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const authResult = await getCurrentUserResult();
-  const unreadCountResult =
-    authResult.status === 'authenticated'
-      ? await countCurrentUserUnreadConversations()
-      : null;
-  const initialUnreadConversationCount =
-    unreadCountResult?.ok ? unreadCountResult.count : 0;
-
   return (
     <html lang="en" className={`${geistSans.variable} ${geistMono.variable}`}>
       <body>
         <AuthProvider>
-          <MessagingRealtimeProvider
-            initialUnreadConversationCount={initialUnreadConversationCount}
-          >
+          <MessagingRealtimeProvider>
             <NativeHistoryIntentMarker />
-            <SiteHeader initialAuthStatus={authResult.status} />
+            <SiteHeader />
             {children}
             <SiteFooter />
           </MessagingRealtimeProvider>

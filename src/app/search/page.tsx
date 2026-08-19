@@ -2,6 +2,7 @@ import ListingResults from '@/app/components/ListingResults';
 import SearchForm from '@/app/components/SearchForm';
 import { content } from '@/content/tyv';
 import { listings } from '@/data/listings';
+import { hasPublicListingSearchQuery } from '@/lib/publicListingQuery';
 import { buildHrefWithSearchParams } from '@/lib/resultReturnHref';
 import { getCurrentUserFavoriteState } from '@/lib/supabase/listingFavorites';
 import { listPublicDatabaseListings } from '@/lib/supabase/listingsServer';
@@ -17,14 +18,22 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
     ? rawSearchQuery[0] || ''
     : rawSearchQuery || '';
   const resultsHref = buildHrefWithSearchParams('/search', query);
-  const databaseListingsResult = await listPublicDatabaseListings();
+  const hasSearchQuery = hasPublicListingSearchQuery({ searchQuery });
+  const [databaseListingsResult, favoriteState] = hasSearchQuery
+    ? await Promise.all([
+        listPublicDatabaseListings({ searchQuery }),
+        getCurrentUserFavoriteState(),
+      ])
+    : [
+        { ok: true as const, listings: [] },
+        { userId: null, favorites: [], savedKeys: [] },
+      ];
   const databaseListings = databaseListingsResult.ok
     ? databaseListingsResult.listings
     : [];
   const databaseError = databaseListingsResult.ok
     ? ''
     : content.databaseListingsLoadFailedMessage;
-  const favoriteState = await getCurrentUserFavoriteState();
 
   return (
     <div className="app-container">

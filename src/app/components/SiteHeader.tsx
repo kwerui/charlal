@@ -8,7 +8,7 @@ import { useMessagingRealtime } from '@/lib/messagingRealtime';
 import { clearNativeHistoryTraversalIntent } from '@/lib/nativeHistoryIntentStorage';
 
 type Props = {
-  initialAuthStatus:
+  initialAuthStatus?:
     | 'authenticated'
     | 'signed-out'
     | 'profile-error'
@@ -30,6 +30,7 @@ export default function SiteHeader({
   const signedIn =
     authStatus === 'authenticated' ||
     (authStatus === 'checking' && initialAuthStatus === 'authenticated');
+  const checkingAuth = authStatus === 'checking' && !signedIn;
   const unreadConversationCount = signedIn
     ? liveUnreadConversationCount
     : 0;
@@ -65,8 +66,7 @@ export default function SiteHeader({
     }
   }
 
-    const [postAdEnglish, postAdTuvan] = content.headerPostAd.split(' / ');
-
+  const [postAdEnglish, postAdTuvan] = content.headerPostAd.split(' / ');
 
   return (
     <header className="header">
@@ -76,7 +76,7 @@ export default function SiteHeader({
         </Link>
 
         <nav className="header-actions" aria-label={content.headerActionsLabel}>
-          {signedIn ? (
+          {checkingAuth ? null : signedIn ? (
             <>
               <Link
                 href="/account/messages"

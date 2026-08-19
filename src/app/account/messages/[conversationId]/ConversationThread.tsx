@@ -1,23 +1,47 @@
 'use client';
 
 import type {
+  RealtimeChannel,
   RealtimePostgresInsertPayload,
   RealtimePostgresUpdatePayload,
 } from '@supabase/realtime-js';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import type { ChangeEvent, CSSProperties, FormEvent } from 'react';
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import {
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
 import ProfileAvatar from '@/app/components/ProfileAvatar';
 import {
   deleteMessageAction,
   editMessageAction,
+  getConversationMessageSnapshotAction,
   getConversationThreadSnapshotAction,
   hideConversationAction,
   markConversationReadAction,
   sendMessageAction,
 } from '@/app/account/messages/actions';
 import { content } from '@/content/tyv';
+import { useAuthStatus } from '@/lib/auth/client';
+import {
+  canStartThreadRealtime,
+  countRealtimeChannelsForTopicPrefix,
+  getRealtimeChannelName,
+  getMessageSnapshotHydrationRetryDelayMs,
+  getThreadRealtimePostgresChangeSpecs,
+  getScrollBottomDistance,
+  getThreadRealtimeRetryDelayMs,
+  isNearMessageThreadBottom,
+  shouldHydrateRealtimeMessageSnapshot,
+  shouldAutoScrollForThreadMessage,
+  shouldRetryMessageSnapshotHydration,
+  toSupabaseRealtimeTopic,
+} from '@/lib/messageThreadClientBehavior';
 import { useMessagingRealtime } from '@/lib/messagingRealtime';
 import {
   MESSAGE_BODY_MAX_LENGTH,
@@ -37,6 +61,10 @@ import {
   type DatabaseMessageRow,
 } from '@/lib/messagingTypes';
 import { createClient } from '@/lib/supabase/client';
+import {
+  getRealtimeDiagnostics,
+  subscribeWithRealtimeDiagnostics,
+} from '@/lib/supabase/realtimeDiagnostics';
 import {
   cleanupUploadedMessageAttachments,
   prepareMessageAttachmentMetadata,
@@ -111,6 +139,12 @@ type FollowNewestTarget = {
   snapshotResolved: boolean;
 };
 
+type InitialBottomPinState = {
+  conversationId: string;
+  pendingAttachmentIds: Set<string>;
+  settlingFrame: number | null;
+};
+
 type MessageMenuOverlay = {
   messageId: string;
   top: number;
@@ -125,6 +159,8 @@ type ConfirmationDialogState =
   | {
       kind: 'conversation';
     };
+
+type ThreadRealtimeDiagnosticSupabase = ReturnType<typeof createClient>;
 
 const SEND_CONFIRMATION_TIMEOUT_MS = 12000;
 const MESSAGE_MENU_WIDTH = 152;
@@ -300,15 +336,14 @@ function mergeReadMarker(
 }
 
 function isNearHistoryBottom(historyElement: HTMLDivElement | null): boolean {
-  if (!historyElement) {
-    return true;
-  }
-
-  return (
-    historyElement.scrollHeight -
-      historyElement.clientHeight -
-      historyElement.scrollTop <=
-    96
+  return isNearMessageThreadBottom(
+    historyElement
+      ? {
+          scrollHeight: historyElement.scrollHeight,
+          clientHeight: historyElement.clientHeight,
+          scrollTop: historyElement.scrollTop,
+        }
+      : null
   );
 }
 
@@ -318,6 +353,29 @@ function scrollHistoryToBottom(historyElement: HTMLDivElement | null): void {
   }
 
   historyElement.scrollTop = historyElement.scrollHeight;
+}
+
+function getHistoryScrollDiagnosticMetrics(
+  historyElement: HTMLDivElement | null
+): Record<string, unknown> {
+  if (!historyElement) {
+    return {
+      hasHistoryElement: false,
+    };
+  }
+
+  const metrics = {
+    scrollHeight: historyElement.scrollHeight,
+    clientHeight: historyElement.clientHeight,
+    scrollTop: historyElement.scrollTop,
+  };
+
+  return {
+    hasHistoryElement: true,
+    ...metrics,
+    distanceFromBottom: getScrollBottomDistance(metrics),
+    isNearBottom: isNearMessageThreadBottom(metrics),
+  };
 }
 
 function isElementVisibleInHistory(
@@ -382,6 +440,75 @@ function getConnectionStatusMessage(status: VisibleConnectionStatus): string {
   }
 
   return '';
+}
+
+function logThreadRealtimeDiagnostic(
+  conversationId: string,
+  message: string,
+  details: Record<string, unknown> = {}
+): void {
+  if (process.env.NODE_ENV !== 'development') {
+    return;
+  }
+
+  console.warn('[messaging-thread-realtime]', {
+    conversationId,
+    message,
+    ...details,
+  });
+}
+
+function logThreadScrollDiagnostic(
+  conversationId: string,
+  message: string,
+  details: Record<string, unknown> = {}
+): void {
+  if (process.env.NODE_ENV !== 'development') {
+    return;
+  }
+
+  console.debug('[messaging-thread-scroll]', {
+    conversationId,
+    message,
+    ...details,
+  });
+}
+
+function serializeThreadRealtimeError(error: Error | undefined): Record<string, unknown> {
+  if (!error) {
+    return {
+      hasError: false,
+    };
+  }
+
+  const cause =
+    'cause' in error && error.cause && typeof error.cause === 'object'
+      ? error.cause
+      : null;
+
+  return {
+    hasError: true,
+    errorName: error.name,
+    errorMessage: error.message,
+    errorCause: cause,
+  };
+}
+
+function getThreadRealtimeDiagnostics(
+  supabase: ThreadRealtimeDiagnosticSupabase,
+  channelName: string,
+  channelBaseName: string = channelName
+): Record<string, unknown> {
+  const logicalTopicPrefix = toSupabaseRealtimeTopic(`${channelBaseName}:`);
+  const channels = supabase.getChannels();
+
+  return {
+    ...getRealtimeDiagnostics(supabase, channelName, channelBaseName),
+    sameLogicalThreadChannelCount: countRealtimeChannelsForTopicPrefix(
+      channels,
+      logicalTopicPrefix
+    ),
+  };
 }
 
 function getCaptionSnippet(body: string): string {
@@ -461,6 +588,7 @@ export default function ConversationThread({
 }: Props) {
   const router = useRouter();
   const supabase = useMemo(() => createClient(), []);
+  const { status: authStatus, user: authUser } = useAuthStatus();
   const { refreshMessagingState } = useMessagingRealtime();
   const [messages, setMessages] = useState(() =>
     [...initialMessages].sort(compareMessagesByCreatedAt)
@@ -533,16 +661,28 @@ export default function ConversationThread({
     settledCount: number;
     completed: boolean;
   } | null>(null);
+  const hydratingMessageIdsRef = useRef<Set<string>>(new Set());
+  const hydrateAgainMessageIdsRef = useRef<Set<string>>(new Set());
+  const hydrationRetryTimeoutsRef = useRef<Map<string, number>>(new Map());
   const followNewestTargetRef = useRef<FollowNewestTarget | null>(null);
   const isStickyToBottomRef = useRef(true);
+  const initialBottomPinRef = useRef<InitialBottomPinState | null>(null);
   const programmaticHistoryScrollRef = useRef(false);
   const programmaticHistoryScrollFrameRef = useRef<number | null>(null);
   const lastHistoryScrollTopRef = useRef(0);
   const threadStatusRef = useRef<ThreadRealtimeStatus>('idle');
   const threadStatusVersionRef = useRef(0);
   const activeThreadChannelGenerationRef = useRef(0);
+  const threadRealtimeRetryTimeoutRef = useRef<number | null>(null);
+  const threadRealtimeRetryAttemptRef = useRef(0);
   const [threadReconnectGeneration, setThreadReconnectGeneration] =
     useState(0);
+  const canSubscribeToThreadRealtime = canStartThreadRealtime({
+    authStatus,
+    authUserId: authUser?.id,
+    currentUserId,
+    isBrowserOnline,
+  });
   const otherParticipantName = counterpart.displayName;
   const otherParticipantId =
     conversation.buyerId === currentUserId
@@ -679,6 +819,34 @@ export default function ConversationThread({
       : currentGalleryIndex >= 0 &&
         currentGalleryIndex < conversationPhotoGallery.length - 1;
 
+  const clearThreadRealtimeRetry = useCallback((): void => {
+    if (threadRealtimeRetryTimeoutRef.current === null) {
+      return;
+    }
+
+    window.clearTimeout(threadRealtimeRetryTimeoutRef.current);
+    threadRealtimeRetryTimeoutRef.current = null;
+  }, []);
+
+  const clearMessageHydrationRetry = useCallback((messageId: string): void => {
+    const retryTimeout = hydrationRetryTimeoutsRef.current.get(messageId);
+
+    if (retryTimeout === undefined) {
+      return;
+    }
+
+    window.clearTimeout(retryTimeout);
+    hydrationRetryTimeoutsRef.current.delete(messageId);
+  }, []);
+
+  const clearMessageHydrationRetries = useCallback((): void => {
+    for (const retryTimeout of hydrationRetryTimeoutsRef.current.values()) {
+      window.clearTimeout(retryTimeout);
+    }
+
+    hydrationRetryTimeoutsRef.current.clear();
+  }, []);
+
   const showPreviousViewerPhoto = useCallback((): void => {
     if (!attachmentViewer || !canViewPreviousPhoto) {
       return;
@@ -755,25 +923,69 @@ export default function ConversationThread({
   }, [confirmationDialog]);
 
   useEffect(() => {
+    const hydratingMessageIds = hydratingMessageIdsRef.current;
+    const hydrateAgainMessageIds = hydrateAgainMessageIdsRef.current;
+    const initialAttachmentIds = new Set(
+      initialAttachments.map((attachment) => attachment.id)
+    );
+
     initialThreadRevealRef.current = false;
+    shouldScrollToBottomRef.current = true;
+    isStickyToBottomRef.current = true;
+    initialBottomPinRef.current = {
+      conversationId: conversation.id,
+      pendingAttachmentIds: initialAttachmentIds,
+      settlingFrame: null,
+    };
+    lastHistoryScrollTopRef.current = 0;
+    followNewestTargetRef.current = null;
+    outgoingAttachmentScrollRef.current = null;
+    hydratingMessageIds.clear();
+    hydrateAgainMessageIds.clear();
+    clearMessageHydrationRetries();
+    threadRealtimeRetryAttemptRef.current = 0;
+    clearThreadRealtimeRetry();
     mountedRef.current = true;
     const localTimeFrame = window.requestAnimationFrame(() => {
       setUseLocalTime(true);
     });
+    logThreadScrollDiagnostic(conversation.id, 'Initialized initial bottom pin.', {
+      initialMessageCount: initialMessages.length,
+      initialAttachmentCount: initialAttachments.length,
+      pendingInitialAttachmentCount: initialAttachmentIds.size,
+      ...getHistoryScrollDiagnosticMetrics(messageHistoryRef.current),
+    });
 
     return () => {
       window.cancelAnimationFrame(localTimeFrame);
+      const initialBottomPin = initialBottomPinRef.current;
+
+      if (initialBottomPin && initialBottomPin.settlingFrame !== null) {
+        window.cancelAnimationFrame(initialBottomPin.settlingFrame);
+      }
+
+      initialBottomPinRef.current = null;
       mountedRef.current = false;
       sendAttemptRef.current += 1;
       pendingDeliveryRef.current = null;
       outgoingAttachmentScrollRef.current = null;
       followNewestTargetRef.current = null;
+      hydratingMessageIds.clear();
+      hydrateAgainMessageIds.clear();
+      clearMessageHydrationRetries();
+      clearThreadRealtimeRetry();
       if (programmaticHistoryScrollFrameRef.current !== null) {
         window.cancelAnimationFrame(programmaticHistoryScrollFrameRef.current);
         programmaticHistoryScrollFrameRef.current = null;
       }
     };
-  }, [conversation.id]);
+  }, [
+    clearMessageHydrationRetries,
+    clearThreadRealtimeRetry,
+    conversation.id,
+    initialAttachments,
+    initialMessages.length,
+  ]);
 
   useEffect(() => {
     const previewUrls = pendingAttachmentPreviewUrlsRef.current;
@@ -1178,6 +1390,138 @@ export default function ConversationThread({
     updateSendStatus,
   ]);
 
+  const hydrateRealtimeMessageSnapshot = useCallback(
+    async (
+      messageId: string,
+      reason: string,
+      hydrationRetryAttemptIndex = 0
+    ): Promise<void> => {
+      clearMessageHydrationRetry(messageId);
+
+      if (hydratingMessageIdsRef.current.has(messageId)) {
+        hydrateAgainMessageIdsRef.current.add(messageId);
+        return;
+      }
+
+      hydratingMessageIdsRef.current.add(messageId);
+
+      try {
+        let shouldHydrateAgain = true;
+
+        while (shouldHydrateAgain) {
+          hydrateAgainMessageIdsRef.current.delete(messageId);
+
+          const result = await getConversationMessageSnapshotAction(
+            conversation.id,
+            messageId
+          );
+
+          if (!mountedRef.current) {
+            return;
+          }
+
+          if (!result.ok) {
+            logThreadRealtimeDiagnostic(
+              conversation.id,
+              'Message snapshot hydration failed.',
+              {
+                messageId,
+                reason,
+                failureReason: result.reason,
+              }
+            );
+            return;
+          }
+
+          setMessages((currentMessages) =>
+            upsertMessage(currentMessages, result.message)
+          );
+          setAttachmentsByMessageId((currentAttachments) => ({
+            ...currentAttachments,
+            [result.message.id]: result.attachments,
+          }));
+
+          if (
+            shouldRetryMessageSnapshotHydration({
+              reason,
+              attachmentCount: result.attachments.length,
+              retryAttemptIndex: hydrationRetryAttemptIndex,
+            })
+          ) {
+            const retryDelayMs = getMessageSnapshotHydrationRetryDelayMs(
+              hydrationRetryAttemptIndex
+            );
+
+            if (retryDelayMs !== null) {
+              const retryTimeout = window.setTimeout(() => {
+                hydrationRetryTimeoutsRef.current.delete(messageId);
+
+                if (!mountedRef.current) {
+                  return;
+                }
+
+                void hydrateRealtimeMessageSnapshot(
+                  messageId,
+                  reason,
+                  hydrationRetryAttemptIndex + 1
+                );
+              }, retryDelayMs);
+
+              hydrationRetryTimeoutsRef.current.set(messageId, retryTimeout);
+              logThreadRealtimeDiagnostic(
+                conversation.id,
+                'Scheduled bounded message snapshot hydration retry.',
+                {
+                  messageId,
+                  reason,
+                  hydrationRetryAttemptIndex,
+                  retryDelayMs,
+                }
+              );
+            }
+          }
+
+          const followTarget = followNewestTargetRef.current;
+
+          if (followTarget?.messageId === result.message.id) {
+            followTarget.snapshotResolved = true;
+            followTarget.attachmentCount = result.attachments.length;
+            followTarget.settledAttachmentCount = 0;
+            shouldScrollToBottomRef.current = true;
+          }
+
+          const pendingDelivery = pendingDeliveryRef.current;
+
+          if (
+            pendingDelivery &&
+            isDeliveryMatch(result.message, pendingDelivery, currentUserId)
+          ) {
+            pendingDeliveryRef.current = null;
+            updateSendStatus('idle');
+            setError('');
+            setBody((currentBody) =>
+              currentBody.trim() === pendingDelivery.body ? '' : currentBody
+            );
+            clearPendingAttachments();
+            shouldScrollToBottomRef.current = true;
+          }
+
+          shouldHydrateAgain = hydrateAgainMessageIdsRef.current.has(messageId);
+        }
+      } finally {
+        hydratingMessageIdsRef.current.delete(messageId);
+        hydrateAgainMessageIdsRef.current.delete(messageId);
+      }
+    },
+    [
+      clearPendingAttachments,
+      clearMessageHydrationRetry,
+      conversation.id,
+      currentUserId,
+      updateSendStatus,
+    ]
+  );
+
   const markThreadRead = useCallback(async (readBoundaryMessageId: string): Promise<void> => {
     if (
       markReadInFlightRef.current ||
@@ -1236,6 +1580,82 @@ export default function ConversationThread({
     shouldScrollToBottomRef.current = false;
   }, []);
 
+  const finishInitialBottomPin = useCallback((reason: string): void => {
+    const initialBottomPin = initialBottomPinRef.current;
+
+    if (!initialBottomPin) {
+      return;
+    }
+
+    if (initialBottomPin.settlingFrame !== null) {
+      window.cancelAnimationFrame(initialBottomPin.settlingFrame);
+    }
+
+    initialBottomPinRef.current = null;
+    logThreadScrollDiagnostic(conversation.id, 'Finished initial bottom pin.', {
+      reason,
+      ...getHistoryScrollDiagnosticMetrics(messageHistoryRef.current),
+    });
+  }, [conversation.id]);
+
+  const scheduleInitialBottomPinSettled = useCallback((reason: string): void => {
+    const initialBottomPin = initialBottomPinRef.current;
+
+    if (!initialBottomPin) {
+      return;
+    }
+
+    if (initialBottomPin.settlingFrame !== null) {
+      window.cancelAnimationFrame(initialBottomPin.settlingFrame);
+    }
+
+    initialBottomPin.settlingFrame = window.requestAnimationFrame(() => {
+      const currentPin = initialBottomPinRef.current;
+
+      if (!currentPin) {
+        return;
+      }
+
+      currentPin.settlingFrame = window.requestAnimationFrame(() => {
+        scrollMessageHistoryToBottom();
+        finishInitialBottomPin(reason);
+      });
+    });
+  }, [finishInitialBottomPin, scrollMessageHistoryToBottom]);
+
+  const handleInitialAttachmentSettled = useCallback(
+    (attachmentId: string): void => {
+      const initialBottomPin = initialBottomPinRef.current;
+
+      if (
+        !initialBottomPin ||
+        initialBottomPin.conversationId !== conversation.id ||
+        !initialBottomPin.pendingAttachmentIds.has(attachmentId)
+      ) {
+        return;
+      }
+
+      initialBottomPin.pendingAttachmentIds.delete(attachmentId);
+      shouldScrollToBottomRef.current = true;
+      scrollMessageHistoryToBottom();
+      logThreadScrollDiagnostic(
+        conversation.id,
+        'Initial attachment image settled.',
+        {
+          attachmentId,
+          remainingInitialAttachmentCount:
+            initialBottomPin.pendingAttachmentIds.size,
+          ...getHistoryScrollDiagnosticMetrics(messageHistoryRef.current),
+        }
+      );
+
+      if (initialBottomPin.pendingAttachmentIds.size === 0) {
+        scheduleInitialBottomPinSettled('initial-attachments-settled');
+      }
+    },
+    [conversation.id, scheduleInitialBottomPinSettled, scrollMessageHistoryToBottom]
+  );
+
   const alignFollowNewestTarget = useCallback((): void => {
     if (!followNewestTargetRef.current) {
       return;
@@ -1286,6 +1706,15 @@ export default function ConversationThread({
     }
 
     if (
+      initialBottomPinRef.current &&
+      !programmaticHistoryScrollRef.current &&
+      userMovedUp &&
+      !isNearBottom
+    ) {
+      finishInitialBottomPin('manual-scroll-up');
+    }
+
+    if (
       followNewestTargetRef.current &&
       !programmaticHistoryScrollRef.current &&
       userMovedUp &&
@@ -1302,12 +1731,17 @@ export default function ConversationThread({
 
     setShowNewMessagesButton(false);
     markVisibleUnreadBoundaryRead();
-  }, [finishFollowNewestTarget, markVisibleUnreadBoundaryRead]);
+  }, [
+    finishFollowNewestTarget,
+    finishInitialBottomPin,
+    markVisibleUnreadBoundaryRead,
+  ]);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     const contentElement = messageListContentRef.current;
+    const historyElement = messageHistoryRef.current;
 
-    if (!contentElement) {
+    if (!contentElement || !historyElement) {
       return undefined;
     }
 
@@ -1317,6 +1751,7 @@ export default function ConversationThread({
       if (
         !isStickyToBottomRef.current &&
         !shouldScrollToBottomRef.current &&
+        !initialBottomPinRef.current &&
         !followNewestTargetRef.current
       ) {
         return;
@@ -1327,6 +1762,13 @@ export default function ConversationThread({
       }
 
       alignmentFrame = window.requestAnimationFrame(() => {
+        logThreadScrollDiagnostic(conversation.id, 'Resize/layout bottom alignment.', {
+          hasInitialBottomPin: Boolean(initialBottomPinRef.current),
+          shouldScrollToBottom: shouldScrollToBottomRef.current,
+          isStickyToBottom: isStickyToBottomRef.current,
+          hasFollowNewestTarget: Boolean(followNewestTargetRef.current),
+          ...getHistoryScrollDiagnosticMetrics(historyElement),
+        });
         scrollMessageHistoryToBottom();
         setShowNewMessagesButton(false);
         markVisibleUnreadBoundaryRead();
@@ -1336,6 +1778,7 @@ export default function ConversationThread({
 
     const resizeObserver = new ResizeObserver(alignIfSticky);
     resizeObserver.observe(contentElement);
+    resizeObserver.observe(historyElement);
 
     alignIfSticky();
 
@@ -1346,7 +1789,11 @@ export default function ConversationThread({
         window.cancelAnimationFrame(alignmentFrame);
       }
     };
-  }, [markVisibleUnreadBoundaryRead, scrollMessageHistoryToBottom]);
+  }, [
+    conversation.id,
+    markVisibleUnreadBoundaryRead,
+    scrollMessageHistoryToBottom,
+  ]);
 
   useEffect(() => {
     let active = true;
@@ -1453,9 +1900,132 @@ export default function ConversationThread({
   }, [markVisibleUnreadBoundaryRead]);
 
   useEffect(() => {
+    clearThreadRealtimeRetry();
+    const channelBaseName = `messaging-thread:${conversation.id}`;
+
+    if (!canSubscribeToThreadRealtime) {
+      let active = true;
+
+      hasSubscribedRef.current = false;
+      activeThreadChannelGenerationRef.current += 1;
+
+      queueMicrotask(() => {
+        if (!active) {
+          return;
+        }
+
+        if (authStatus === 'checking') {
+          setThreadStatus('idle');
+        } else if (!isBrowserOnline) {
+          setThreadStatus('reconnecting');
+        } else {
+          setThreadStatus('unavailable');
+          logThreadRealtimeDiagnostic(
+            conversation.id,
+            'Thread realtime not started because client auth is unavailable or belongs to a different user.',
+            {
+              authStatus,
+              hasAuthUser: Boolean(authUser?.id),
+              authProviderUserId: authUser?.id || null,
+              currentUserId,
+              ...getThreadRealtimeDiagnostics(
+                supabase,
+                channelBaseName,
+                channelBaseName
+              ),
+            }
+          );
+        }
+      });
+
+      return () => {
+        active = false;
+      };
+    }
+
     let active = true;
     const channelGeneration = activeThreadChannelGenerationRef.current + 1;
     activeThreadChannelGenerationRef.current = channelGeneration;
+    const channelName = getRealtimeChannelName(
+      channelBaseName,
+      channelGeneration
+    );
+    let channel: RealtimeChannel | null = null;
+
+    function scheduleThreadRealtimeRetry(reason: string): void {
+      const retryDelayMs = getThreadRealtimeRetryDelayMs(
+        threadRealtimeRetryAttemptRef.current
+      );
+
+      threadRealtimeRetryAttemptRef.current += 1;
+      clearThreadRealtimeRetry();
+      logThreadRealtimeDiagnostic(conversation.id, 'Scheduling retry.', {
+        reason,
+        retryDelayMs,
+        retryAttempt: threadRealtimeRetryAttemptRef.current,
+        generation: channelGeneration,
+        ...getThreadRealtimeDiagnostics(supabase, channelName, channelBaseName),
+      });
+
+      threadRealtimeRetryTimeoutRef.current = window.setTimeout(() => {
+        threadRealtimeRetryTimeoutRef.current = null;
+
+        if (
+          !active ||
+          activeThreadChannelGenerationRef.current !== channelGeneration
+        ) {
+          return;
+        }
+
+        setThreadStatus('reconnecting');
+        setThreadReconnectGeneration((generation) => generation + 1);
+      }, retryDelayMs);
+    }
+
+    async function removeLegacyThreadChannels(): Promise<void> {
+      const topic = toSupabaseRealtimeTopic(channelBaseName);
+      const existingChannels = supabase
+        .getChannels()
+        .filter((existingChannel) => existingChannel.topic === topic);
+
+      if (existingChannels.length === 0) {
+        return;
+      }
+
+      logThreadRealtimeDiagnostic(
+        conversation.id,
+        'Removing legacy stable-topic channel before subscribe.',
+        {
+          generation: channelGeneration,
+          existingChannelCount: existingChannels.length,
+          ...getThreadRealtimeDiagnostics(
+            supabase,
+            channelName,
+            channelBaseName
+          ),
+        }
+      );
+
+      const removeResults = await Promise.all(
+        existingChannels.map((existingChannel) =>
+          supabase.removeChannel(existingChannel)
+        )
+      );
+
+      logThreadRealtimeDiagnostic(
+        conversation.id,
+        'Removed legacy stable-topic channel before subscribe.',
+        {
+          generation: channelGeneration,
+          removeResults,
+          ...getThreadRealtimeDiagnostics(
+            supabase,
+            channelName,
+            channelBaseName
+          ),
+        }
+      );
+    }
 
     function handleIncomingMessage(
       payload: RealtimePostgresInsertPayload<DatabaseMessageRow>
@@ -1469,9 +2039,11 @@ export default function ConversationThread({
       }
 
       const nextMessage = databaseMessageRowToApp(payload.new);
-      const shouldAutoScroll =
-        nextMessage.senderId === currentUserId ||
-        isNearHistoryBottom(messageHistoryRef.current);
+      const shouldAutoScroll = shouldAutoScrollForThreadMessage({
+        senderId: nextMessage.senderId,
+        currentUserId,
+        wasNearBottom: isNearHistoryBottom(messageHistoryRef.current),
+      });
 
       threadStatusVersionRef.current += 1;
       setThreadStatus('subscribed');
@@ -1490,7 +2062,18 @@ export default function ConversationThread({
       setMessages((currentMessages) =>
         mergeMessage(currentMessages, nextMessage)
       );
-      void reconcileThread();
+      if (
+        shouldHydrateRealtimeMessageSnapshot({
+          eventTable: 'messages',
+          rawEventIncludesAttachments: false,
+        })
+      ) {
+        void hydrateRealtimeMessageSnapshot(
+          nextMessage.id,
+          'message-insert'
+        );
+      }
+      void refreshMessagingState();
 
       if (nextMessage.senderId !== currentUserId) {
         return;
@@ -1529,6 +2112,17 @@ export default function ConversationThread({
       setMessages((currentMessages) =>
         upsertMessage(currentMessages, nextMessage)
       );
+      if (
+        shouldHydrateRealtimeMessageSnapshot({
+          eventTable: 'messages',
+          rawEventIncludesAttachments: false,
+        })
+      ) {
+        void hydrateRealtimeMessageSnapshot(
+          nextMessage.id,
+          'message-update'
+        );
+      }
       void refreshMessagingState();
     }
 
@@ -1555,49 +2149,311 @@ export default function ConversationThread({
       );
     }
 
-    const channel = supabase
-      .channel(`messaging-thread:${conversation.id}`)
-      .on<DatabaseMessageRow>(
-        'postgres_changes',
-        {
-          event: 'INSERT',
-          schema: 'public',
-          table: 'messages',
-          filter: `conversation_id=eq.${conversation.id}`,
-        },
-        handleIncomingMessage
-      )
-      .on<DatabaseMessageRow>(
-        'postgres_changes',
-        {
-          event: 'UPDATE',
-          schema: 'public',
-          table: 'messages',
-          filter: `conversation_id=eq.${conversation.id}`,
-        },
-        handleMessageUpdate
-      )
-      .on<DatabaseConversationReadRow>(
-        'postgres_changes',
-        {
-          event: 'INSERT',
-          schema: 'public',
-          table: 'conversation_reads',
-          filter: `conversation_id=eq.${conversation.id}`,
-        },
-        handleReadMarkerChange
-      )
-      .on<DatabaseConversationReadRow>(
-        'postgres_changes',
-        {
-          event: 'UPDATE',
-          schema: 'public',
-          table: 'conversation_reads',
-          filter: `conversation_id=eq.${conversation.id}`,
-        },
-        handleReadMarkerChange
-      )
-      .subscribe((nextStatus) => {
+    async function startThreadRealtimeSubscription(): Promise<void> {
+      logThreadRealtimeDiagnostic(conversation.id, 'Starting subscription.', {
+        generation: channelGeneration,
+        retryAttempt: threadRealtimeRetryAttemptRef.current,
+        authStatus,
+        authProviderUserId: authUser?.id || null,
+        currentUserId,
+        ...getThreadRealtimeDiagnostics(supabase, channelName, channelBaseName),
+      });
+
+      try {
+        await removeLegacyThreadChannels();
+
+        if (
+          !active ||
+          activeThreadChannelGenerationRef.current !== channelGeneration
+        ) {
+          logThreadRealtimeDiagnostic(
+            conversation.id,
+            'Subscription start became stale before auth.',
+            {
+              generation: channelGeneration,
+              latestGeneration: activeThreadChannelGenerationRef.current,
+              ...getThreadRealtimeDiagnostics(
+                supabase,
+                channelName,
+                channelBaseName
+              ),
+            }
+          );
+          return;
+        }
+
+        const { data: sessionData, error: sessionError } =
+          await supabase.auth.getSession();
+        const sessionUserId = sessionData.session?.user?.id || null;
+        const hasSessionAccessToken = Boolean(sessionData.session?.access_token);
+
+        logThreadRealtimeDiagnostic(
+          conversation.id,
+          'Resolved client session before realtime join.',
+          {
+            generation: channelGeneration,
+            authStatus,
+            authProviderUserId: authUser?.id || null,
+            currentClientUserId: sessionUserId,
+            currentUserId,
+            hasSessionAccessToken,
+            sessionError: sessionError?.message || null,
+            ...getThreadRealtimeDiagnostics(
+              supabase,
+              channelName,
+              channelBaseName
+            ),
+          }
+        );
+
+        if (
+          sessionError ||
+          !sessionData.session?.access_token ||
+          sessionUserId !== currentUserId
+        ) {
+          setThreadStatus('unavailable');
+          scheduleThreadRealtimeRetry('client-session-unavailable');
+          return;
+        }
+
+        await supabase.realtime.setAuth(sessionData.session.access_token);
+
+        if (
+          !active ||
+          activeThreadChannelGenerationRef.current !== channelGeneration
+        ) {
+          logThreadRealtimeDiagnostic(
+            conversation.id,
+            'Subscription start became stale after realtime auth.',
+            {
+              generation: channelGeneration,
+              latestGeneration: activeThreadChannelGenerationRef.current,
+              ...getThreadRealtimeDiagnostics(
+                supabase,
+                channelName,
+                channelBaseName
+              ),
+            }
+          );
+          return;
+        }
+
+        logThreadRealtimeDiagnostic(
+          conversation.id,
+          'Applied realtime auth before channel join.',
+          {
+            generation: channelGeneration,
+            ...getThreadRealtimeDiagnostics(
+              supabase,
+              channelName,
+              channelBaseName
+            ),
+          }
+        );
+
+        const threadRealtimeSpecs =
+          getThreadRealtimePostgresChangeSpecs(conversation.id);
+        const conversationRealtimeFilter =
+          threadRealtimeSpecs[0]?.filter ||
+          `conversation_id=eq.${conversation.id}`;
+
+        logThreadRealtimeDiagnostic(
+          conversation.id,
+          'Creating channel with scoped postgres change bindings.',
+          {
+            generation: channelGeneration,
+            bindingCount: threadRealtimeSpecs.length,
+            bindings: threadRealtimeSpecs.map((spec) => ({
+              event: spec.event,
+              schema: spec.schema,
+              table: spec.table,
+              filter: spec.filter,
+            })),
+            ...getThreadRealtimeDiagnostics(
+              supabase,
+              channelName,
+              channelBaseName
+            ),
+          }
+        );
+
+        channel = supabase
+          .channel(channelName)
+          .on<DatabaseMessageRow>(
+            'postgres_changes',
+            {
+              event: 'INSERT',
+              schema: 'public',
+              table: 'messages',
+              filter: conversationRealtimeFilter,
+            },
+            handleIncomingMessage
+          )
+          .on<DatabaseMessageRow>(
+            'postgres_changes',
+            {
+              event: 'UPDATE',
+              schema: 'public',
+              table: 'messages',
+              filter: conversationRealtimeFilter,
+            },
+            handleMessageUpdate
+          )
+          .on<DatabaseConversationReadRow>(
+            'postgres_changes',
+            {
+              event: 'INSERT',
+              schema: 'public',
+              table: 'conversation_reads',
+              filter: conversationRealtimeFilter,
+            },
+            handleReadMarkerChange
+          )
+          .on<DatabaseConversationReadRow>(
+            'postgres_changes',
+            {
+              event: 'UPDATE',
+              schema: 'public',
+              table: 'conversation_reads',
+              filter: conversationRealtimeFilter,
+            },
+            handleReadMarkerChange
+          );
+
+        subscribeWithRealtimeDiagnostics(
+          supabase,
+          channel,
+          {
+            eventPrefix: 'messaging-thread',
+            channelName,
+            logicalChannelBaseName: channelBaseName,
+            details: {
+              owner: 'messaging-thread',
+              conversationId: conversation.id,
+              generation: channelGeneration,
+              authStatus,
+              authProviderUserId: authUser?.id || null,
+              currentUserId,
+            },
+          },
+          (nextStatus, error) => {
+          if (
+            !active ||
+            activeThreadChannelGenerationRef.current !== channelGeneration
+          ) {
+            logThreadRealtimeDiagnostic(
+              conversation.id,
+              'Ignored stale subscription callback.',
+              {
+                generation: channelGeneration,
+                latestGeneration: activeThreadChannelGenerationRef.current,
+                status: nextStatus,
+                ...serializeThreadRealtimeError(error),
+                ...getThreadRealtimeDiagnostics(
+                  supabase,
+                  channelName,
+                  channelBaseName
+                ),
+              }
+            );
+            return;
+          }
+
+          logThreadRealtimeDiagnostic(
+            conversation.id,
+            'Subscription callback status.',
+            {
+              generation: channelGeneration,
+              status: nextStatus,
+              authStatus,
+              authProviderUserId: authUser?.id || null,
+              currentUserId,
+              ...serializeThreadRealtimeError(error),
+              ...getThreadRealtimeDiagnostics(
+                supabase,
+                channelName,
+                channelBaseName
+              ),
+            }
+          );
+
+          if (nextStatus === 'SUBSCRIBED') {
+            threadStatusVersionRef.current += 1;
+            hasSubscribedRef.current = true;
+            threadRealtimeRetryAttemptRef.current = 0;
+            clearThreadRealtimeRetry();
+            setThreadStatus('subscribed');
+            logThreadRealtimeDiagnostic(conversation.id, 'Subscribed.');
+            return;
+          }
+
+          if (nextStatus === 'CHANNEL_ERROR' || nextStatus === 'TIMED_OUT') {
+            const statusVersion = threadStatusVersionRef.current + 1;
+            threadStatusVersionRef.current = statusVersion;
+            logThreadRealtimeDiagnostic(
+              conversation.id,
+              'Subscription reported a failure status.',
+              {
+                status: nextStatus,
+                hadSubscribed: hasSubscribedRef.current,
+                authStatus,
+                ...serializeThreadRealtimeError(error),
+                ...getThreadRealtimeDiagnostics(
+                  supabase,
+                  channelName,
+                  channelBaseName
+                ),
+              }
+            );
+
+            queueMicrotask(() => {
+              if (
+                active &&
+                activeThreadChannelGenerationRef.current ===
+                  channelGeneration &&
+                threadStatusVersionRef.current === statusVersion
+              ) {
+                setThreadStatus('unavailable');
+                scheduleThreadRealtimeRetry(nextStatus);
+              }
+            });
+            return;
+          }
+
+          if (nextStatus === 'CLOSED') {
+            const statusVersion = threadStatusVersionRef.current + 1;
+            threadStatusVersionRef.current = statusVersion;
+            logThreadRealtimeDiagnostic(
+              conversation.id,
+              'Subscription closed.',
+              {
+                hadSubscribed: hasSubscribedRef.current,
+                authStatus,
+                ...serializeThreadRealtimeError(error),
+                ...getThreadRealtimeDiagnostics(
+                  supabase,
+                  channelName,
+                  channelBaseName
+                ),
+              }
+            );
+
+            queueMicrotask(() => {
+              if (
+                active &&
+                activeThreadChannelGenerationRef.current ===
+                  channelGeneration &&
+                threadStatusVersionRef.current === statusVersion
+              ) {
+                setThreadStatus(
+                  hasSubscribedRef.current ? 'reconnecting' : 'unavailable'
+                );
+                scheduleThreadRealtimeRetry(nextStatus);
+              }
+            });
+          }
+        });
+      } catch (error) {
         if (
           !active ||
           activeThreadChannelGenerationRef.current !== channelGeneration
@@ -1605,44 +2461,28 @@ export default function ConversationThread({
           return;
         }
 
-        if (nextStatus === 'SUBSCRIBED') {
-          threadStatusVersionRef.current += 1;
-          hasSubscribedRef.current = true;
-          setThreadStatus('subscribed');
-          return;
-        }
+        setThreadStatus('unavailable');
+        logThreadRealtimeDiagnostic(
+          conversation.id,
+          'Subscription start failed.',
+          {
+            generation: channelGeneration,
+            error:
+              error instanceof Error
+                ? serializeThreadRealtimeError(error)
+                : { errorMessage: String(error) },
+            ...getThreadRealtimeDiagnostics(
+              supabase,
+              channelName,
+              channelBaseName
+            ),
+          }
+        );
+        scheduleThreadRealtimeRetry('subscription-start-failed');
+      }
+    }
 
-        if (nextStatus === 'CHANNEL_ERROR' || nextStatus === 'TIMED_OUT') {
-          const statusVersion = threadStatusVersionRef.current + 1;
-          threadStatusVersionRef.current = statusVersion;
-
-          queueMicrotask(() => {
-            if (
-              active &&
-              activeThreadChannelGenerationRef.current === channelGeneration &&
-              threadStatusVersionRef.current === statusVersion
-            ) {
-              setThreadStatus('unavailable');
-            }
-          });
-          return;
-        }
-
-        if (nextStatus === 'CLOSED' && hasSubscribedRef.current) {
-          const statusVersion = threadStatusVersionRef.current + 1;
-          threadStatusVersionRef.current = statusVersion;
-
-          queueMicrotask(() => {
-            if (
-              active &&
-              activeThreadChannelGenerationRef.current === channelGeneration &&
-              threadStatusVersionRef.current === statusVersion
-            ) {
-              setThreadStatus('reconnecting');
-            }
-          });
-        }
-      });
+    void startThreadRealtimeSubscription();
 
     return () => {
       active = false;
@@ -1650,11 +2490,56 @@ export default function ConversationThread({
         activeThreadChannelGenerationRef.current += 1;
       }
       hasSubscribedRef.current = false;
-      void supabase.removeChannel(channel);
+      clearThreadRealtimeRetry();
+      if (channel) {
+        const channelToRemove = channel;
+
+        void supabase
+          .removeChannel(channelToRemove)
+          .then((removeResult) => {
+            logThreadRealtimeDiagnostic(
+              conversation.id,
+              'Removed active channel during cleanup.',
+              {
+                generation: channelGeneration,
+                removeResult,
+                ...getThreadRealtimeDiagnostics(
+                  supabase,
+                  channelName,
+                  channelBaseName
+                ),
+              }
+            );
+          })
+          .catch((error: unknown) => {
+            logThreadRealtimeDiagnostic(
+              conversation.id,
+              'Failed to remove active channel during cleanup.',
+              {
+                generation: channelGeneration,
+                error:
+                  error instanceof Error
+                    ? serializeThreadRealtimeError(error)
+                    : { errorMessage: String(error) },
+                ...getThreadRealtimeDiagnostics(
+                  supabase,
+                  channelName,
+                  channelBaseName
+                ),
+              }
+            );
+          });
+      }
     };
   }, [
+    authStatus,
+    authUser?.id,
+    canSubscribeToThreadRealtime,
+    clearThreadRealtimeRetry,
     conversation.id,
     currentUserId,
+    hydrateRealtimeMessageSnapshot,
+    isBrowserOnline,
     markThreadRead,
     reconcileThread,
     refreshMessagingState,
@@ -1663,15 +2548,27 @@ export default function ConversationThread({
     updateSendStatus,
   ]);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (!shouldScrollToBottomRef.current) {
       return;
     }
 
-    const animationFrame = window.requestAnimationFrame(() => {
+    let cancelled = false;
+
+    function alignThreadBottom(): void {
+      logThreadScrollDiagnostic(conversation.id, 'Aligning thread bottom.', {
+        hasInitialBottomPin: Boolean(initialBottomPinRef.current),
+        shouldScrollToBottom: shouldScrollToBottomRef.current,
+        hasFollowNewestTarget: Boolean(followNewestTargetRef.current),
+        before: getHistoryScrollDiagnosticMetrics(messageHistoryRef.current),
+      });
       scrollMessageHistoryToBottom();
       setShowNewMessagesButton(false);
       markVisibleUnreadBoundaryRead();
+      logThreadScrollDiagnostic(conversation.id, 'Aligned thread bottom.', {
+        hasInitialBottomPin: Boolean(initialBottomPinRef.current),
+        after: getHistoryScrollDiagnosticMetrics(messageHistoryRef.current),
+      });
 
       const followTarget = followNewestTargetRef.current;
 
@@ -1684,7 +2581,16 @@ export default function ConversationThread({
       } else if (!followTarget) {
         shouldScrollToBottomRef.current = false;
       }
+    }
 
+    alignThreadBottom();
+
+    const animationFrame = window.requestAnimationFrame(() => {
+      if (cancelled) {
+        return;
+      }
+
+      alignThreadBottom();
       if (!initialThreadRevealRef.current) {
         initialThreadRevealRef.current = true;
 
@@ -1695,9 +2601,16 @@ export default function ConversationThread({
           });
         });
       }
+
+      const initialBottomPin = initialBottomPinRef.current;
+
+      if (initialBottomPin?.pendingAttachmentIds.size === 0) {
+        scheduleInitialBottomPinSettled('initial-layout-settled');
+      }
     });
 
     return () => {
+      cancelled = true;
       window.cancelAnimationFrame(animationFrame);
     };
   }, [
@@ -1705,6 +2618,7 @@ export default function ConversationThread({
     conversation.id,
     finishFollowNewestTarget,
     markVisibleUnreadBoundaryRead,
+    scheduleInitialBottomPinSettled,
     messages.length,
     scrollMessageHistoryToBottom,
   ]);
@@ -2260,10 +3174,12 @@ export default function ConversationThread({
                                     shouldEagerLoadAttachments ? 'eager' : 'lazy'
                                   }
                                   onLoad={() => {
+                                    handleInitialAttachmentSettled(attachment.id);
                                     handleOutgoingAttachmentSettled(message.id);
                                     handleIncomingAttachmentSettled(message.id);
                                   }}
                                   onError={() => {
+                                    handleInitialAttachmentSettled(attachment.id);
                                     handleOutgoingAttachmentSettled(message.id);
                                     handleIncomingAttachmentSettled(message.id);
                                   }}

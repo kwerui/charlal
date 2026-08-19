@@ -11,6 +11,12 @@ type CategoryPageProps = {
   params: Promise<{ slug: string }>;
 };
 
+export function generateStaticParams(): { slug: string }[] {
+  return content.categories.map((category) => ({
+    slug: category.slug,
+  }));
+}
+
 export default async function CategoryPage({ params }: CategoryPageProps) {
   const { slug } = await params;
   const category = content.categories.find((item) => item.slug === slug);

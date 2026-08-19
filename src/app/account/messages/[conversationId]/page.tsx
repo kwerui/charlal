@@ -52,6 +52,7 @@ export default async function ConversationPage({
           </div>
         ) : (
           <ConversationThread
+            key={threadResult.conversation.id}
             conversation={threadResult.conversation}
             counterpart={threadResult.counterpart}
             initialMessages={threadResult.messages}

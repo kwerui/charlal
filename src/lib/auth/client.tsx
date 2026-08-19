@@ -7,10 +7,15 @@ import {
   useContext,
   useEffect,
   useMemo,
+  useRef,
   useState,
   type ReactNode,
 } from 'react';
 import { createClient } from '@/lib/supabase/client';
+import {
+  getRealtimeDiagnostics,
+  logRealtimeDiagnostic,
+} from '@/lib/supabase/realtimeDiagnostics';
 import {
   PROFILE_BIO_MAX_LENGTH,
   PROFILE_LOCATION_MAX_LENGTH,
@@ -343,6 +348,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [profile, setProfile] = useState<AppProfile | null>(
     cachedAuthState?.profile || null
   );
+  const statusRef = useRef(status);
+  const userIdRef = useRef(user?.id || null);
 
   const refreshAuth = useCallback(async () => {
     if (!cachedAuthState) {
@@ -360,7 +367,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   useEffect(() => {
+    statusRef.current = status;
+    userIdRef.current = user?.id || null;
+  }, [status, user?.id]);
+
+  useEffect(() => {
     let active = true;
+
+    logRealtimeDiagnostic('auth-provider-effect-start', {
+      owner: 'auth-provider',
+      authStatus: statusRef.current,
+      authUserId: userIdRef.current,
+      ...getRealtimeDiagnostics(supabase),
+    });
 
     async function refreshIfActive(): Promise<void> {
       if (!active) {
@@ -374,7 +393,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange(() => {
+    } = supabase.auth.onAuthStateChange((event, session) => {
+      logRealtimeDiagnostic('auth-provider-auth-state-change', {
+        owner: 'auth-provider',
+        event,
+        sessionUserId: session?.user?.id || null,
+        hasSessionAccessToken: Boolean(session?.access_token),
+        ...getRealtimeDiagnostics(supabase),
+      });
       window.setTimeout(() => {
         void refreshIfActive();
       }, 0);
@@ -382,6 +408,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     return () => {
       active = false;
+      logRealtimeDiagnostic('auth-provider-effect-cleanup', {
+        owner: 'auth-provider',
+        ...getRealtimeDiagnostics(supabase),
+      });
       subscription.unsubscribe();
     };
   }, [refreshAuth, supabase]);

@@ -38,20 +38,58 @@ function getSupabaseStorageRemotePatterns(): SupabaseStorageRemotePattern[] {
 }
 
 const supabaseStorageRemotePatterns = getSupabaseStorageRemotePatterns();
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL?.trim();
-const supabaseOrigin = (() => {
+type SupabaseCspOrigins = {
+  supabaseOrigin: string;
+  supabaseRealtimeOrigin: string;
+};
+
+export function getSupabaseCspOrigins(
+  supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL?.trim()
+): SupabaseCspOrigins {
   if (!supabaseUrl) {
-    return '';
+    return {
+      supabaseOrigin: '',
+      supabaseRealtimeOrigin: '',
+    };
   }
 
   try {
     const parsedUrl = new URL(supabaseUrl);
 
-    return parsedUrl.protocol === 'https:' ? parsedUrl.origin : '';
+    if (parsedUrl.protocol !== 'https:' && parsedUrl.protocol !== 'http:') {
+      return {
+        supabaseOrigin: '',
+        supabaseRealtimeOrigin: '',
+      };
+    }
+
+    const realtimeUrl = new URL(supabaseUrl);
+    realtimeUrl.protocol = parsedUrl.protocol === 'https:' ? 'wss:' : 'ws:';
+
+    return {
+      supabaseOrigin: parsedUrl.origin,
+      supabaseRealtimeOrigin: realtimeUrl.origin,
+    };
   } catch {
-    return '';
+    return {
+      supabaseOrigin: '',
+      supabaseRealtimeOrigin: '',
+    };
   }
-})();
+}
+
+export function getContentSecurityPolicyConnectSources(
+  supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL?.trim()
+): string[] {
+  const { supabaseOrigin, supabaseRealtimeOrigin } =
+    getSupabaseCspOrigins(supabaseUrl);
+
+  return Array.from(
+    new Set(["'self'", supabaseOrigin, supabaseRealtimeOrigin].filter(Boolean))
+  );
+}
+
+const { supabaseOrigin } = getSupabaseCspOrigins();
 
 const imageSources = [
   "'self'",
@@ -64,7 +102,7 @@ const imageSources = [
   supabaseOrigin,
 ].filter(Boolean);
 
-const connectSources = ["'self'", supabaseOrigin].filter(Boolean);
+const connectSources = getContentSecurityPolicyConnectSources();
 const scriptSources = [
   "'self'",
   "'unsafe-inline'",

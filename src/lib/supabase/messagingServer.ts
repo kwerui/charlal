@@ -2,7 +2,9 @@ import { connection } from 'next/server';
 import {
   CONVERSATION_SELECT_COLUMNS,
   CONVERSATION_READ_SELECT_COLUMNS,
+  MESSAGE_ATTACHMENT_SELECT_COLUMNS,
   MESSAGE_BODY_MAX_LENGTH,
+  MESSAGE_SELECT_COLUMNS,
   databaseConversationReadRowToApp,
   databaseConversationRowToApp,
   databaseConversationSummaryRowToApp,
@@ -77,6 +79,17 @@ export type ConversationThreadResult =
       messages: AppMessage[];
       attachments: AppMessageAttachment[];
       readMarkers: AppConversationRead[];
+    }
+  | {
+      ok: false;
+      reason: MessagingFailureReason;
+    };
+
+export type ConversationMessageSnapshotResult =
+  | {
+      ok: true;
+      message: AppMessage;
+      attachments: AppMessageAttachment[];
     }
   | {
       ok: false;
@@ -546,6 +559,72 @@ export async function getCurrentUserConversationThread(
     messages: messageData.map(databaseMessageRowToApp),
     attachments,
     readMarkers: readMarkerData.map(databaseConversationReadRowToApp),
+  };
+}
+
+export async function getCurrentUserConversationMessageSnapshot({
+  conversationId,
+  messageId,
+}: {
+  conversationId: string;
+  messageId: string;
+}): Promise<ConversationMessageSnapshotResult> {
+  await connection();
+
+  const safeConversationId = conversationId.trim();
+  const safeMessageId = messageId.trim();
+
+  if (!safeConversationId || !safeMessageId) {
+    return { ok: false, reason: 'not-found' };
+  }
+
+  const supabase = await createClient();
+  const { data: messageData, error: messageError } = await supabase
+    .from('messages')
+    .select(MESSAGE_SELECT_COLUMNS)
+    .eq('conversation_id', safeConversationId)
+    .eq('id', safeMessageId)
+    .maybeSingle();
+
+  if (messageError) {
+    return {
+      ok: false,
+      reason: classifyMessagingError(messageError.message),
+    };
+  }
+
+  if (!messageData) {
+    return { ok: false, reason: 'not-found' };
+  }
+
+  if (!isDatabaseMessageRow(messageData)) {
+    return { ok: false, reason: 'database-unavailable' };
+  }
+
+  const { data: attachmentData, error: attachmentError } = await supabase
+    .from('message_attachments')
+    .select(MESSAGE_ATTACHMENT_SELECT_COLUMNS)
+    .eq('message_id', safeMessageId);
+
+  if (
+    attachmentError ||
+    !isDatabaseMessageAttachmentRowArray(attachmentData)
+  ) {
+    return {
+      ok: false,
+      reason: classifyMessagingError(attachmentError?.message),
+    };
+  }
+
+  const attachments = await messageAttachmentRowsToAppWithSignedUrls(
+    supabase,
+    attachmentData
+  );
+
+  return {
+    ok: true,
+    message: databaseMessageRowToApp(messageData),
+    attachments,
   };
 }
 

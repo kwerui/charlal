@@ -13,13 +13,18 @@ import {
 import { getMessagingSnapshotAction } from '@/app/account/messages/actions';
 import type { AppConversationSummary } from '@/lib/messagingTypes';
 import { useAuthStatus } from '@/lib/auth/client';
+import {
+  getMessagingRealtimeStatusAfterSnapshotRefresh,
+  getMessagingRealtimeStatusAfterSubscriptionStatus,
+  type MessagingRealtimeStatus,
+} from '@/lib/messagingRealtimeClientBehavior';
+import { getRealtimeChannelName } from '@/lib/messageThreadClientBehavior';
 import { createClient } from '@/lib/supabase/client';
-
-type MessagingRealtimeStatus =
-  | 'idle'
-  | 'subscribed'
-  | 'reconnecting'
-  | 'unavailable';
+import {
+  getRealtimeDiagnostics,
+  logRealtimeDiagnostic,
+  subscribeWithRealtimeDiagnostics,
+} from '@/lib/supabase/realtimeDiagnostics';
 
 type MessagingRealtimeContextValue = {
   unreadConversationCount: number;
@@ -32,7 +37,7 @@ const MessagingRealtimeContext =
   createContext<MessagingRealtimeContextValue | undefined>(undefined);
 
 type Props = {
-  initialUnreadConversationCount: number;
+  initialUnreadConversationCount?: number;
   children: ReactNode;
 };
 
@@ -47,8 +52,30 @@ type ChannelStatusState = {
   status: MessagingRealtimeStatus;
 };
 
+function serializeMessagingRealtimeError(
+  error: Error | undefined
+): Record<string, unknown> {
+  if (!error) {
+    return {
+      hasError: false,
+    };
+  }
+
+  const cause =
+    'cause' in error && error.cause && typeof error.cause === 'object'
+      ? error.cause
+      : null;
+
+  return {
+    hasError: true,
+    errorName: error.name,
+    errorMessage: error.message,
+    errorCause: cause,
+  };
+}
+
 export function MessagingRealtimeProvider({
-  initialUnreadConversationCount,
+  initialUnreadConversationCount = 0,
   children,
 }: Props) {
   const supabase = useMemo(() => createClient(), []);
@@ -102,10 +129,15 @@ export function MessagingRealtimeProvider({
               unreadConversationCount: nextSnapshot.unreadConversationCount,
               conversations: nextSnapshot.conversations,
             });
-            setChannelStatus({
+            setChannelStatus((currentStatus) => ({
               userId: targetUserId,
-              status: 'subscribed',
-            });
+              status:
+                currentStatus.userId === targetUserId
+                  ? getMessagingRealtimeStatusAfterSnapshotRefresh(
+                      currentStatus.status
+                    )
+                  : 'idle',
+            }));
           }
 
           shouldRefreshAgain = refreshAgainRef.current;
@@ -132,12 +164,23 @@ export function MessagingRealtimeProvider({
     if (!userId) {
       hasSubscribedRef.current = false;
       activeChannelGenerationRef.current += 1;
+      logRealtimeDiagnostic('messaging-global-skipped', {
+        owner: 'messaging-global',
+        authStatus,
+        userId: null,
+        ...getRealtimeDiagnostics(supabase),
+      });
       return undefined;
     }
 
     let active = true;
     const channelGeneration = activeChannelGenerationRef.current + 1;
     activeChannelGenerationRef.current = channelGeneration;
+    const channelBaseName = `messaging-global:${userId}`;
+    const channelName = getRealtimeChannelName(
+      channelBaseName,
+      channelGeneration
+    );
 
     queueMicrotask(() => {
       if (active) {
@@ -150,72 +193,235 @@ export function MessagingRealtimeProvider({
         active &&
         activeChannelGenerationRef.current === channelGeneration
       ) {
-        channelStatusVersionRef.current += 1;
-        setChannelStatus({
-          userId,
-          status: 'subscribed',
-        });
         void refreshMessagingStateForUser(userId);
       }
     };
+    let channel: ReturnType<typeof supabase.channel> | null = null;
 
-    const channel = supabase
-      .channel(`messaging-global:${userId}`)
-      .on(
-        'postgres_changes',
-        {
-          event: 'INSERT',
-          schema: 'public',
-          table: 'messages',
-        },
-        requestSnapshotRefresh
-      )
-      .on(
-        'postgres_changes',
-        {
-          event: 'UPDATE',
-          schema: 'public',
-          table: 'messages',
-        },
-        requestSnapshotRefresh
-      )
-      .on(
-        'postgres_changes',
-        {
-          event: 'INSERT',
-          schema: 'public',
-          table: 'conversation_reads',
-        },
-        requestSnapshotRefresh
-      )
-      .on(
-        'postgres_changes',
-        {
-          event: 'UPDATE',
-          schema: 'public',
-          table: 'conversation_reads',
-        },
-        requestSnapshotRefresh
-      )
-      .on(
-        'postgres_changes',
-        {
-          event: 'INSERT',
-          schema: 'public',
-          table: 'conversation_user_state',
-        },
-        requestSnapshotRefresh
-      )
-      .on(
-        'postgres_changes',
-        {
-          event: 'UPDATE',
-          schema: 'public',
-          table: 'conversation_user_state',
-        },
-        requestSnapshotRefresh
-      )
-      .subscribe((nextStatus) => {
+    logRealtimeDiagnostic('messaging-global-effect-start', {
+      owner: 'messaging-global',
+      authStatus,
+      userId,
+      generation: channelGeneration,
+      channelName,
+      ...getRealtimeDiagnostics(supabase, channelName, channelBaseName),
+    });
+
+    void supabase.auth
+      .getSession()
+      .then(async ({ data, error }) => {
+        if (
+          !active ||
+          activeChannelGenerationRef.current !== channelGeneration
+        ) {
+          return false;
+        }
+
+        const sessionUserId = data.session?.user?.id || null;
+        const hasSessionAccessToken = Boolean(data.session?.access_token);
+
+        logRealtimeDiagnostic('messaging-global-session-resolved', {
+          owner: 'messaging-global',
+          authStatus,
+          userId,
+          generation: channelGeneration,
+          sessionUserId,
+          hasSessionAccessToken,
+          sessionError: error?.message || null,
+          ...getRealtimeDiagnostics(supabase, channelName, channelBaseName),
+        });
+
+        if (
+          error ||
+          !data.session?.access_token ||
+          sessionUserId !== userId
+        ) {
+          setChannelStatus({
+            userId,
+            status: 'unavailable',
+          });
+          logRealtimeDiagnostic('messaging-global-session-unavailable', {
+            owner: 'messaging-global',
+            authStatus,
+            userId,
+            generation: channelGeneration,
+            sessionUserId,
+            hasSessionAccessToken,
+            sessionError: error?.message || null,
+            ...getRealtimeDiagnostics(supabase, channelName, channelBaseName),
+          });
+          return false;
+        }
+
+        await supabase.realtime.setAuth(data.session.access_token);
+        return true;
+      })
+      .then((canJoin) => {
+        if (
+          !canJoin ||
+          !active ||
+          activeChannelGenerationRef.current !== channelGeneration
+        ) {
+          return;
+        }
+
+        setChannelStatus({
+          userId,
+          status: 'reconnecting',
+        });
+
+        channel = supabase
+          .channel(channelName)
+          .on(
+            'postgres_changes',
+            {
+              event: '*',
+              schema: 'public',
+              table: 'messages',
+            },
+            requestSnapshotRefresh
+          )
+          .on(
+            'postgres_changes',
+            {
+              event: '*',
+              schema: 'public',
+              table: 'conversation_reads',
+              filter: `user_id=eq.${userId}`,
+            },
+            requestSnapshotRefresh
+          )
+          .on(
+            'postgres_changes',
+            {
+              event: '*',
+              schema: 'public',
+              table: 'conversation_user_state',
+              filter: `user_id=eq.${userId}`,
+            },
+            requestSnapshotRefresh
+          );
+
+        subscribeWithRealtimeDiagnostics(
+          supabase,
+          channel,
+          {
+            eventPrefix: 'messaging-global',
+            channelName,
+            logicalChannelBaseName: channelBaseName,
+            details: {
+              owner: 'messaging-global',
+              authStatus,
+              userId,
+              generation: channelGeneration,
+            },
+          },
+          (nextStatus, error) => {
+          if (
+            !active ||
+            activeChannelGenerationRef.current !== channelGeneration
+          ) {
+            logRealtimeDiagnostic('messaging-global-stale-status', {
+              owner: 'messaging-global',
+              authStatus,
+              userId,
+              generation: channelGeneration,
+              latestGeneration: activeChannelGenerationRef.current,
+              status: nextStatus,
+              ...serializeMessagingRealtimeError(error),
+              ...getRealtimeDiagnostics(supabase, channelName, channelBaseName),
+            });
+            return;
+          }
+
+          logRealtimeDiagnostic('messaging-global-status', {
+            owner: 'messaging-global',
+            authStatus,
+            userId,
+            generation: channelGeneration,
+            status: nextStatus,
+            ...serializeMessagingRealtimeError(error),
+            ...getRealtimeDiagnostics(supabase, channelName, channelBaseName),
+          });
+
+          if (nextStatus === 'SUBSCRIBED') {
+            channelStatusVersionRef.current += 1;
+            hasSubscribedRef.current = true;
+            setChannelStatus({
+              userId,
+              status: getMessagingRealtimeStatusAfterSubscriptionStatus({
+                nextStatus,
+                hadSubscribed: false,
+              }),
+            });
+            return;
+          }
+
+          if (nextStatus === 'CHANNEL_ERROR' || nextStatus === 'TIMED_OUT') {
+            const statusVersion = channelStatusVersionRef.current + 1;
+            channelStatusVersionRef.current = statusVersion;
+            logRealtimeDiagnostic('messaging-global-failed-status', {
+              owner: 'messaging-global',
+              authStatus,
+              userId,
+              generation: channelGeneration,
+              status: nextStatus,
+              hadSubscribed: hasSubscribedRef.current,
+              ...serializeMessagingRealtimeError(error),
+              ...getRealtimeDiagnostics(supabase, channelName, channelBaseName),
+            });
+
+            queueMicrotask(() => {
+              if (
+                active &&
+                activeChannelGenerationRef.current === channelGeneration &&
+                channelStatusVersionRef.current === statusVersion
+              ) {
+                setChannelStatus({
+                  userId,
+                  status: getMessagingRealtimeStatusAfterSubscriptionStatus({
+                    nextStatus,
+                    hadSubscribed: hasSubscribedRef.current,
+                  }),
+                });
+              }
+            });
+            return;
+          }
+
+          if (nextStatus === 'CLOSED') {
+            const statusVersion = channelStatusVersionRef.current + 1;
+            channelStatusVersionRef.current = statusVersion;
+            logRealtimeDiagnostic('messaging-global-closed-status', {
+              owner: 'messaging-global',
+              authStatus,
+              userId,
+              generation: channelGeneration,
+              status: nextStatus,
+              hadSubscribed: hasSubscribedRef.current,
+              ...serializeMessagingRealtimeError(error),
+              ...getRealtimeDiagnostics(supabase, channelName, channelBaseName),
+            });
+
+            queueMicrotask(() => {
+              if (
+                active &&
+                activeChannelGenerationRef.current === channelGeneration &&
+                channelStatusVersionRef.current === statusVersion
+              ) {
+                setChannelStatus({
+                  userId,
+                  status: getMessagingRealtimeStatusAfterSubscriptionStatus({
+                    nextStatus,
+                    hadSubscribed: hasSubscribedRef.current,
+                  }),
+                });
+              }
+            });
+          }
+        });
+      })
+      .catch((error: unknown) => {
         if (
           !active ||
           activeChannelGenerationRef.current !== channelGeneration
@@ -223,52 +429,21 @@ export function MessagingRealtimeProvider({
           return;
         }
 
-        if (nextStatus === 'SUBSCRIBED') {
-          channelStatusVersionRef.current += 1;
-          hasSubscribedRef.current = true;
-          setChannelStatus({
-            userId,
-            status: 'subscribed',
-          });
-          return;
-        }
-
-        if (nextStatus === 'CHANNEL_ERROR' || nextStatus === 'TIMED_OUT') {
-          const statusVersion = channelStatusVersionRef.current + 1;
-          channelStatusVersionRef.current = statusVersion;
-
-          queueMicrotask(() => {
-            if (
-              active &&
-              activeChannelGenerationRef.current === channelGeneration &&
-              channelStatusVersionRef.current === statusVersion
-            ) {
-              setChannelStatus({
-                userId,
-                status: 'unavailable',
-              });
-            }
-          });
-          return;
-        }
-
-        if (nextStatus === 'CLOSED') {
-          const statusVersion = channelStatusVersionRef.current + 1;
-          channelStatusVersionRef.current = statusVersion;
-
-          queueMicrotask(() => {
-            if (
-              active &&
-              activeChannelGenerationRef.current === channelGeneration &&
-              channelStatusVersionRef.current === statusVersion
-            ) {
-              setChannelStatus({
-                userId,
-                status: 'reconnecting',
-              });
-            }
-          });
-        }
+        setChannelStatus({
+          userId,
+          status: 'unavailable',
+        });
+        logRealtimeDiagnostic('messaging-global-start-failed', {
+          owner: 'messaging-global',
+          authStatus,
+          userId,
+          generation: channelGeneration,
+          error:
+            error instanceof Error
+              ? serializeMessagingRealtimeError(error)
+              : { errorMessage: String(error) },
+          ...getRealtimeDiagnostics(supabase, channelName, channelBaseName),
+        });
       });
 
     return () => {
@@ -277,9 +452,55 @@ export function MessagingRealtimeProvider({
         activeChannelGenerationRef.current += 1;
       }
       hasSubscribedRef.current = false;
-      void supabase.removeChannel(channel);
+      logRealtimeDiagnostic('messaging-global-cleanup-start', {
+        owner: 'messaging-global',
+        authStatus,
+        userId,
+        generation: channelGeneration,
+        hadChannel: Boolean(channel),
+        channelName,
+        ...getRealtimeDiagnostics(supabase, channelName, channelBaseName),
+      });
+
+      if (channel) {
+        const channelToRemove = channel;
+
+        void supabase
+          .removeChannel(channelToRemove)
+          .then((removeResult) => {
+            logRealtimeDiagnostic('messaging-global-cleanup-removed', {
+              owner: 'messaging-global',
+              authStatus,
+              userId,
+              generation: channelGeneration,
+              removeResult,
+              channelName,
+              ...getRealtimeDiagnostics(supabase, channelName, channelBaseName),
+            });
+          })
+          .catch((error: unknown) => {
+            logRealtimeDiagnostic('messaging-global-cleanup-remove-failed', {
+              owner: 'messaging-global',
+              authStatus,
+              userId,
+              generation: channelGeneration,
+              channelName,
+              error:
+                error instanceof Error
+                  ? serializeMessagingRealtimeError(error)
+                  : { errorMessage: String(error) },
+              ...getRealtimeDiagnostics(supabase, channelName, channelBaseName),
+            });
+          });
+      }
     };
-  }, [channelReconnectGeneration, refreshMessagingStateForUser, supabase, userId]);
+  }, [
+    authStatus,
+    channelReconnectGeneration,
+    refreshMessagingStateForUser,
+    supabase,
+    userId,
+  ]);
 
   useEffect(() => {
     if (!userId) {

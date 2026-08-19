@@ -16,6 +16,11 @@ import {
   attachImageRowsToListings,
   listListingImageRowsForListingIds,
 } from '@/lib/supabase/listingImages';
+import {
+  normalizePublicListingQueryOptions,
+  toPublicListingIlikePattern,
+  type PublicListingQueryOptions,
+} from '@/lib/publicListingQuery';
 import { createClient } from '@/lib/supabase/server';
 
 export type DatabaseListingReadResult =
@@ -144,15 +149,73 @@ async function attachViewerOwnership(
   );
 }
 
-export async function listPublicDatabaseListings(): Promise<DatabaseListingReadResult> {
+export async function listPublicDatabaseListings(
+  options: PublicListingQueryOptions = {}
+): Promise<DatabaseListingReadResult> {
   await connection();
 
+  const normalizedOptions = normalizePublicListingQueryOptions(options);
   const supabase = await createClient();
-  const { data, error } = await supabase
+  let query = supabase
     .from('listings')
     .select(PUBLIC_DATABASE_LISTING_SELECT_COLUMNS)
-    .in('status', ['active', 'reserved'])
-    .order('created_at', { ascending: false });
+    .in('status', ['active', 'reserved']);
+
+  if (normalizedOptions.categorySlug) {
+    query = query.eq('category', normalizedOptions.categorySlug);
+  }
+
+  if (normalizedOptions.categorySlug === 'housing') {
+    if (normalizedOptions.housingTransaction !== 'all') {
+      query = query.eq('transaction_type', normalizedOptions.housingTransaction);
+    }
+
+    if (normalizedOptions.housingPropertyType !== 'all') {
+      query = query.eq('property_type', normalizedOptions.housingPropertyType);
+    }
+  } else if (normalizedOptions.subcategorySlug) {
+    query = query.eq('subcategory', normalizedOptions.subcategorySlug);
+  }
+
+  if (normalizedOptions.marketplaceType) {
+    query = query.eq('marketplace_type', normalizedOptions.marketplaceType);
+  }
+
+  if (normalizedOptions.minPrice !== undefined) {
+    query = query.gte('price', normalizedOptions.minPrice);
+  }
+
+  if (normalizedOptions.maxPrice !== undefined) {
+    query = query.lte('price', normalizedOptions.maxPrice);
+  }
+
+  if (normalizedOptions.searchQuery) {
+    const pattern = toPublicListingIlikePattern(normalizedOptions.searchQuery);
+
+    query = query.or(
+      [
+        `title.ilike.${pattern}`,
+        `description.ilike.${pattern}`,
+        `location.ilike.${pattern}`,
+        `seller_display_name.ilike.${pattern}`,
+      ].join(',')
+    );
+  }
+
+  query = query.order('created_at', { ascending: false });
+
+  if (normalizedOptions.limit !== undefined) {
+    if (normalizedOptions.offset !== undefined) {
+      query = query.range(
+        normalizedOptions.offset,
+        normalizedOptions.offset + normalizedOptions.limit - 1
+      );
+    } else {
+      query = query.limit(normalizedOptions.limit);
+    }
+  }
+
+  const { data, error } = await query;
 
   if (error || !isPublicDatabaseListingRowArray(data)) {
     return { ok: false, reason: 'database-unavailable' };

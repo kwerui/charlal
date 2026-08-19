@@ -13,6 +13,7 @@ import {
   deleteConversationMessage,
   editConversationMessage,
   getCurrentUserConversationThread,
+  getCurrentUserConversationMessageSnapshot,
   hideConversationForCurrentUser,
   listCurrentUserConversationSummaries,
   markConversationRead,
@@ -72,6 +73,17 @@ export type ConversationThreadSnapshotActionResult =
       messages: AppMessage[];
       attachments: AppMessageAttachment[];
       readMarkers: AppConversationRead[];
+    }
+  | {
+      ok: false;
+      reason: MessagingFailureReason;
+    };
+
+export type ConversationMessageSnapshotActionResult =
+  | {
+      ok: true;
+      message: AppMessage;
+      attachments: AppMessageAttachment[];
     }
   | {
       ok: false;
@@ -384,4 +396,26 @@ export async function getConversationThreadSnapshotAction(
     attachments: threadResult.attachments,
     readMarkers: threadResult.readMarkers,
   };
+}
+
+export async function getConversationMessageSnapshotAction(
+  conversationId: string,
+  messageId: string
+): Promise<ConversationMessageSnapshotActionResult> {
+  const authResult = await getCurrentUserResult();
+
+  if (authResult.status !== 'authenticated') {
+    return { ok: false, reason: 'unauthenticated' };
+  }
+
+  const messageResult = await getCurrentUserConversationMessageSnapshot({
+    conversationId,
+    messageId,
+  });
+
+  if (!messageResult.ok) {
+    return messageResult;
+  }
+
+  return messageResult;
 }
