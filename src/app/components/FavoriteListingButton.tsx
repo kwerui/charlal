@@ -1,7 +1,7 @@
 'use client';
 
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
-import { useEffect, useMemo, useState, useTransition } from 'react';
+import { useEffect, useMemo, useRef, useState, useTransition } from 'react';
 import {
   removeFavoriteAction,
   saveFavoriteAction,
@@ -139,6 +139,7 @@ export default function FavoriteListingButton({
   );
   const [error, setError] = useState('');
   const [isPending, startTransition] = useTransition();
+  const mutationInFlightRef = useRef(false);
   const favoriteKey = useMemo(() => getListingFavoriteKey(reference), [
     reference,
   ]);
@@ -159,7 +160,15 @@ export default function FavoriteListingButton({
   );
 
   useEffect(() => {
-    if (!activeUserId || isSaved || isPending) {
+    if (mutationInFlightRef.current) {
+      return;
+    }
+
+    setSavedForUserId(initiallySaved ? initiallySavedForUserId : null);
+  }, [favoriteKey, initiallySaved, initiallySavedForUserId]);
+
+  useEffect(() => {
+    if (!activeUserId || isSaved || isPending || mutationInFlightRef.current) {
       return;
     }
 
@@ -170,23 +179,38 @@ export default function FavoriteListingButton({
     }
 
     startTransition(async () => {
-      const result = await saveFavoriteAction(pendingReference);
+      mutationInFlightRef.current = true;
 
-      if (!result.ok) {
-        setError(
-          result.reason === 'auth-required'
-            ? content.signInToSaveAdvertisementMessage
-            : content.unableUpdateSavedAdvertisementMessage
-        );
-        return;
+      try {
+        const result = await saveFavoriteAction(pendingReference);
+
+        if (!result.ok) {
+          setError(
+            result.reason === 'auth-required'
+              ? content.signInToSaveAdvertisementMessage
+              : content.unableUpdateSavedAdvertisementMessage
+          );
+          return;
+        }
+
+        setSavedForUserId(activeUserId);
+      } catch (error) {
+        if (process.env.NODE_ENV !== 'production') {
+          console.error('Favorite save failed.', error);
+        }
+
+        setError(content.unableUpdateSavedAdvertisementMessage);
+      } finally {
+        mutationInFlightRef.current = false;
       }
-
-      setSavedForUserId(activeUserId);
-      router.refresh();
     });
-  }, [activeUserId, favoriteKey, isPending, isSaved, router]);
+  }, [activeUserId, favoriteKey, isPending, isSaved]);
 
   function handleToggle(): void {
+    if (mutationInFlightRef.current) {
+      return;
+    }
+
     setError('');
 
     if (status !== 'authenticated' || !activeUserId) {
@@ -199,32 +223,42 @@ export default function FavoriteListingButton({
     }
 
     startTransition(async () => {
-      const result = isSaved
-        ? await removeFavoriteAction(reference)
-        : await saveFavoriteAction(reference);
+      mutationInFlightRef.current = true;
 
-      if (!result.ok) {
-        setError(
-          result.reason === 'auth-required'
-            ? content.signInToSaveAdvertisementMessage
-            : content.unableUpdateSavedAdvertisementMessage
-        );
+      try {
+        const result = isSaved
+          ? await removeFavoriteAction(reference)
+          : await saveFavoriteAction(reference);
 
-        if (result.reason === 'auth-required') {
-          router.push(`/sign-in?next=${encodeURIComponent(signInReturnHref)}`);
+        if (!result.ok) {
+          setError(
+            result.reason === 'auth-required'
+              ? content.signInToSaveAdvertisementMessage
+              : content.unableUpdateSavedAdvertisementMessage
+          );
+
+          if (result.reason === 'auth-required') {
+            router.push(`/sign-in?next=${encodeURIComponent(signInReturnHref)}`);
+          }
+
+          return;
         }
 
-        return;
-      }
+        if (isSaved) {
+          setSavedForUserId(null);
+          onRemoved?.();
+        } else {
+          setSavedForUserId(activeUserId);
+        }
+      } catch (error) {
+        if (process.env.NODE_ENV !== 'production') {
+          console.error('Favorite toggle failed.', error);
+        }
 
-      if (isSaved) {
-        setSavedForUserId(null);
-        onRemoved?.();
-      } else {
-        setSavedForUserId(activeUserId);
+        setError(content.unableUpdateSavedAdvertisementMessage);
+      } finally {
+        mutationInFlightRef.current = false;
       }
-
-      router.refresh();
     });
   }
 

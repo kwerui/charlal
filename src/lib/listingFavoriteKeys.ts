@@ -55,3 +55,59 @@ export function getDatabaseListingIdsFromFavorites(
 
   return listingIds;
 }
+
+export type SavedListingsPayload = {
+  ok: true;
+  listings: Listing[];
+  favorites: ListingFavoriteRecord[];
+  savedKeys: string[];
+};
+
+export function buildSavedListingsPayload(
+  favorites: ListingFavoriteRecord[],
+  databaseListings: Listing[],
+  fallbackListings: Listing[]
+): SavedListingsPayload {
+  const listingByKey = new Map<string, Listing>();
+
+  for (const listing of databaseListings) {
+    listingByKey.set(
+      getListingFavoriteKey({
+        source: 'database',
+        listingId: String(listing.id),
+      }),
+      listing
+    );
+  }
+
+  for (const listing of fallbackListings) {
+    listingByKey.set(
+      getListingFavoriteKey({
+        source: 'builtin',
+        listingId: String(listing.id),
+      }),
+      listing
+    );
+  }
+
+  const visibleFavorites = favorites.filter((favorite) => {
+    const listing = listingByKey.get(getListingFavoriteKey(favorite));
+
+    return (
+      listing &&
+      !(
+        favorite.source === 'database' &&
+        listing.isOwnedByViewer === true
+      )
+    );
+  });
+
+  return {
+    ok: true,
+    favorites: visibleFavorites,
+    savedKeys: visibleFavorites.map(getListingFavoriteKey),
+    listings: visibleFavorites
+      .map((favorite) => listingByKey.get(getListingFavoriteKey(favorite)))
+      .filter((listing): listing is Listing => Boolean(listing)),
+  };
+}
