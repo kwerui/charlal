@@ -294,12 +294,8 @@ begin
   end if;
 
   new.sender_id := verified_sender_id;
-  new.body := btrim(new.body);
+  new.body := btrim(coalesce(new.body, ''));
   new.created_at := coalesce(new.created_at, now());
-
-  if length(new.body) = 0 then
-    raise exception 'Message body cannot be empty';
-  end if;
 
   if char_length(new.body) > 2000 then
     raise exception 'Message body is too long';
