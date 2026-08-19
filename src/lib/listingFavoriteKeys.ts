@@ -31,3 +31,27 @@ export function getListingFavoriteKey(
 ): string {
   return `${reference.source}:${reference.listingId}`;
 }
+
+export function getDatabaseListingIdsFromFavorites(
+  favorites: ListingFavoriteReference[]
+): string[] {
+  const listingIds: string[] = [];
+  const seenListingIds = new Set<string>();
+
+  for (const favorite of favorites) {
+    const listingId = favorite.listingId.trim();
+
+    if (
+      favorite.source !== 'database' ||
+      !listingId ||
+      seenListingIds.has(listingId)
+    ) {
+      continue;
+    }
+
+    listingIds.push(listingId);
+    seenListingIds.add(listingId);
+  }
+
+  return listingIds;
+}

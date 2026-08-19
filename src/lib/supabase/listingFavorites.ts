@@ -3,13 +3,14 @@ import { listings as builtInListings } from '@/data/listings';
 import type { Listing } from '@/data/listings';
 import { getCurrentViewerId } from '@/lib/auth/server';
 import {
+  getDatabaseListingIdsFromFavorites,
   getListingFavoriteKey,
   type ListingFavoriteRecord,
   type ListingFavoriteReference,
   type ListingFavoriteSource,
 } from '@/lib/listingFavoriteKeys';
 import { createClient } from '@/lib/supabase/server';
-import { listPublicDatabaseListings } from '@/lib/supabase/listingsServer';
+import { listPublicDatabaseListingsByIds } from '@/lib/supabase/listingsServer';
 
 type ListingFavoriteRow = {
   listing_source: ListingFavoriteSource;
@@ -257,13 +258,22 @@ export async function listCurrentUserSavedListings(): Promise<SavedListingsResul
   const favoritesResult = await listFavoriteReferencesForSignedInUser(
     viewer.userId
   );
-  const databaseListingsResult = await listPublicDatabaseListings();
 
-  if (!favoritesResult.ok || !databaseListingsResult.ok) {
+  if (!favoritesResult.ok) {
     return { ok: false, reason: 'database-unavailable' };
   }
 
   const favorites = favoritesResult.favorites;
+  const databaseListingIds = getDatabaseListingIdsFromFavorites(favorites);
+  const databaseListingsResult =
+    databaseListingIds.length > 0
+      ? await listPublicDatabaseListingsByIds(databaseListingIds)
+      : { ok: true as const, listings: [] };
+
+  if (!databaseListingsResult.ok) {
+    return { ok: false, reason: 'database-unavailable' };
+  }
+
   const listingByKey = new Map<string, Listing>();
 
   for (const listing of databaseListingsResult.listings) {

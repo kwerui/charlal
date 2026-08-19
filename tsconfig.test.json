@@ -12,6 +12,7 @@
     "next.config.ts",
     "src/lib/messageThreadClientBehavior.ts",
     "src/lib/messagingRealtimeClientBehavior.ts",
+    "src/lib/listingFavoriteKeys.ts",
     "src/lib/publicListingQuery.ts",
     "tests/**/*.test.ts"
   ]

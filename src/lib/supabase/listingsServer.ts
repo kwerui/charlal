@@ -236,6 +236,52 @@ export async function listPublicDatabaseListings(
   };
 }
 
+export async function listPublicDatabaseListingsByIds(
+  ids: string[]
+): Promise<DatabaseListingReadResult> {
+  await connection();
+
+  const safeIds = Array.from(
+    new Set(
+      ids
+        .map((id) => id.trim())
+        .filter((id) => id.length > 0 && !/^\d+$/.test(id))
+    )
+  );
+
+  if (safeIds.length === 0) {
+    return {
+      ok: true,
+      listings: [],
+    };
+  }
+
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from('listings')
+    .select(PUBLIC_DATABASE_LISTING_SELECT_COLUMNS)
+    .in('status', ['active', 'reserved'])
+    .in('id', safeIds);
+
+  if (error || !isPublicDatabaseListingRowArray(data)) {
+    return { ok: false, reason: 'database-unavailable' };
+  }
+
+  const listings = await attachViewerOwnership(
+    publicDatabaseRowsToListings(data),
+    supabase
+  );
+  const imageRows = await listListingImageRowsForListingIds(
+    supabase,
+    listings.map((listing) => String(listing.id))
+  );
+
+  return {
+    ok: true,
+    listings: attachImageRowsToListings(listings, imageRows),
+  };
+}
+
 export async function listOwnedDatabaseListingsForOwner(
   ownerId: string
 ): Promise<DatabaseListingReadResult> {
