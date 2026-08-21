@@ -9,6 +9,8 @@ const STORAGE_RECURSION_FIX_MIGRATION =
   'supabase/migrations/20260827_fix_storage_upload_policy_recursion.sql';
 const MESSAGE_ATTACHMENT_STORAGE_FIX_MIGRATION =
   'supabase/migrations/20260830_fix_message_attachment_storage_upload_policy.sql';
+const LISTING_FAVORITES_INTEGRITY_FIX_MIGRATION =
+  'supabase/migrations/20260831_enforce_listing_favorites_integrity.sql';
 
 function readMigration(path: string): string {
   return readFileSync(path, 'utf8');
@@ -321,4 +323,65 @@ test('message attachment storage uploads require ownership and rate limiting wit
   assert.equal(insertPolicy.includes('from public.conversations c'), true);
   assert.equal(insertPolicy.includes('c.buyer_id = (select auth.uid())'), true);
   assert.equal(insertPolicy.includes('c.seller_id = (select auth.uid())'), true);
+});
+
+test('listing favorites integrity is enforced at the database write boundary', () => {
+  const migrationNames = readdirSync(MIGRATIONS_DIR)
+    .filter((name) => name.endsWith('.sql'))
+    .sort();
+  const fix = readMigration(LISTING_FAVORITES_INTEGRITY_FIX_MIGRATION);
+  const triggerFunction = getFunctionDefinition(
+    fix,
+    'prepare_listing_favorite_write'
+  );
+
+  assert.ok(
+    migrationNames.indexOf('20260823_add_listing_favorites.sql') <
+      migrationNames.indexOf(
+        '20260831_enforce_listing_favorites_integrity.sql'
+      )
+  );
+  assert.equal(fix.includes('begin;'), true);
+  assert.equal(triggerFunction.includes('security definer'), true);
+  assert.equal(triggerFunction.includes("set search_path = ''"), true);
+  assert.equal(triggerFunction.includes('viewer_id := auth.uid();'), true);
+  assert.equal(
+    triggerFunction.includes('new.user_id is distinct from viewer_id'),
+    true
+  );
+  assert.equal(
+    triggerFunction.includes("new.listing_source = 'database'"),
+    true
+  );
+  assert.equal(triggerFunction.includes('from public.listings l'), true);
+  assert.equal(triggerFunction.includes("l.status in ('active', 'reserved')"), true);
+  assert.equal(triggerFunction.includes('l.owner_id <> viewer_id'), true);
+  assert.equal(
+    triggerFunction.includes("raise exception 'Listing cannot be saved'"),
+    true
+  );
+  assert.equal(
+    triggerFunction.includes("new.listing_source = 'builtin'"),
+    true
+  );
+  assert.equal(
+    triggerFunction.includes("allowed_builtin_listing_ids constant text[]"),
+    true
+  );
+  assert.equal(
+    triggerFunction.includes('new.listing_id <> all(allowed_builtin_listing_ids)'),
+    true
+  );
+  assert.equal(
+    fix.includes(
+      'create trigger listing_favorites_prepare_write\nbefore insert or update on public.listing_favorites'
+    ),
+    true
+  );
+  assert.equal(
+    fix.includes('grant select, insert, delete on public.listing_favorites to authenticated;'),
+    true
+  );
+  assert.equal(fix.includes('grant update on public.listing_favorites'), false);
+  assert.equal(fix.includes('disable row level security'), false);
 });
