@@ -487,7 +487,7 @@ export const content = {
   // Authentication
   signInKicker: "Account / Аккаунт", // TODO: add reviewed Tuvan translation.
   signInTitle: "Sign In / Кирер",
-  signInRegisterPrompt: "New here? / Мында чаа бе?",
+  signInRegisterPrompt: "Мында бир дугаар бе?",
   signInRegisterLink: "Register / Бүрүткээр",
   signUpKicker: "Account / Аккаунт", // TODO: add reviewed Tuvan translation.
   signUpTitle: "Sign Up / Бижидип алыңар",
@@ -496,12 +496,12 @@ export const content = {
   usernameLabel: "Username / Ажыглакчы ады",
   displayNameLabel: "Display name / Көргүзер ат", // TODO: add reviewed Tuvan translation.
   displayNameInvalidMessage: "Enter a public display name that is not an email address. / Электроннуг почта адрези эвес, хөй-ниитиге көргүзер атты киирер.", // TODO: add reviewed Tuvan translation.
-  passwordConfirmationLabel: "Confirm password / Парольду бадыткаар", // TODO: add reviewed Tuvan translation.
+  passwordConfirmationLabel: "Confirm password / Пароль бадыткаар", // TODO: add reviewed Tuvan translation.
   policyAgreementPrefix: "By creating an account, I agree to the", // TODO: legal review and reviewed Tuvan translation required.
   policyAgreementMiddle: "and acknowledge the", // TODO: legal review and reviewed Tuvan translation required.
   policyAgreementSuffix: ".", // TODO: legal review and reviewed Tuvan translation required.
   signUpButton: "Sign Up / Бижидип алыңар",
-  signUpErrorRequired: "Enter display name, email, password, and password confirmation to continue. / Улаштыр ажылдаар дизе, көргүзер адын, электроннуг почтазын, парольду болгаш парольдуң бадыткалын киирер.", // TODO: add reviewed Tuvan translation.
+  signUpErrorRequired: "Enter display name, email, password, and password confirmation to continue. / Улаштыр ажылдаар дизе, көргүзер адын, электроннуг почтазын, пароль болгаш пароль бадыткалын киирер.", // TODO: add reviewed Tuvan translation.
   signUpErrorPolicy: "Agree to the policy to continue. / Улаштыр политикага чөпшээрежир.",
   signUpPasswordTooShortMessage: "Password must be at least 8 characters. / Пароль 8 демдектен эвээш эвес болур ужурлуг.", // TODO: add reviewed Tuvan translation.
   signUpPasswordMismatchMessage: "Passwords do not match. / Парольдар дүүшпес.", // TODO: add reviewed Tuvan translation.
@@ -516,16 +516,16 @@ export const content = {
   signInRateLimitMessage: "Please wait before trying again. / Катап шенээр мурнунда манап көрүңерем.", // TODO: add reviewed Tuvan translation.
   authNetworkFailureMessage: "Network request failed. Check your connection and try again. / Сеткил дилээ үрелген. Холбааңарны хынап алгаш, катап шенеп көрүңер.", // TODO: add reviewed Tuvan translation.
   forgotPasswordKicker: "Demo account",
-  forgotPasswordTitle: "Forgot Password / Парольду уттупкан",
+  forgotPasswordTitle: "Forgot Password / Пароль уттупкан",
   forgotPasswordSubmitButton: "Send reset instructions / Эгидер дугайында айтыышкыннарны чорудуптуңар",
   forgotPasswordSuccessMessage: "Demo reset message shown. No email has been sent.",
   forgotPasswordDemoWarning: "Demo only: this does not send an email yet.",
   backToSignInLink: "Back to sign in / Кирер дээш дедир",
-  emailLabel: "Email/Электроннуг чагаа",
-  passwordLabel: "Password / Парольду",
-  forgotPasswordLink: "Forgot password? / Парольду уттупкан бе?",
+  emailLabel: "Электроннуг почта",
+  passwordLabel: "Password / Пароль",
+  forgotPasswordLink: "Forgot password? / Пароль уттупкан бе?",
   signInButton: "Sign In / Кирер",
-  signInErrorRequired: "Enter both email and password to continue. / Улаштыр уламчылаар дизе, электроннуг почтаны болгаш парольду киирер.",
+  signInErrorRequired: "Enter both email and password to continue. / Улаштыр уламчылаар дизе, электроннуг почтаны болгаш пароль киирер.",
   demoAuthWarning: "Demo authentication has been replaced by Supabase Auth.", // TODO: add reviewed Tuvan translation.
 
   // Post ad
