@@ -95,11 +95,13 @@ export default function ListingImageGallery({
         onClick={() => setViewerOpen(true)}
         aria-label={`${content.openListingPhotoViewerLabel}: ${fullAlt}`}
       >
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
+        <Image
           className="listing-detail-image"
           src={selectedImage.url}
           alt={fullAlt}
+          fill
+          fetchPriority="high"
+          sizes="(max-width: 768px) calc(100vw - 24px), 600px"
         />
       </button>
       {totalImages > 1 ? (
