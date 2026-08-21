@@ -7,6 +7,8 @@ const HARDENING_MIGRATION =
   'supabase/migrations/20260826_security_hardening.sql';
 const STORAGE_RECURSION_FIX_MIGRATION =
   'supabase/migrations/20260827_fix_storage_upload_policy_recursion.sql';
+const MESSAGE_ATTACHMENT_STORAGE_FIX_MIGRATION =
+  'supabase/migrations/20260830_fix_message_attachment_storage_upload_policy.sql';
 
 function readMigration(path: string): string {
   return readFileSync(path, 'utf8');
@@ -227,4 +229,96 @@ test('storage upload rate limits are not recursive storage object policies', () 
     assert.equal(definition.includes(policy.ownershipCheck), true);
     assert.equal(helper.includes(policy.limit), true);
   }
+});
+
+test('message attachment storage uploads require ownership and rate limiting without recursive policies', () => {
+  const migrationNames = readdirSync(MIGRATIONS_DIR)
+    .filter((name) => name.endsWith('.sql'))
+    .sort();
+  const fix = readMigration(MESSAGE_ATTACHMENT_STORAGE_FIX_MIGRATION);
+  const helper = getSchemaFunctionDefinition(
+    fix,
+    'private',
+    'current_user_message_attachment_uploads_below_limit'
+  );
+  const insertPolicy = getPolicyDefinition(
+    fix,
+    'message_attachments_storage_insert_participant'
+  );
+
+  assert.ok(
+    migrationNames.indexOf('20260822_add_message_attachments.sql') <
+      migrationNames.indexOf(
+        '20260830_fix_message_attachment_storage_upload_policy.sql'
+      )
+  );
+  assert.equal(fix.includes('create schema if not exists private;'), true);
+  assert.equal(fix.includes('grant usage on schema private to authenticated;'), true);
+  assert.equal(helper.includes('security definer'), true);
+  assert.equal(helper.includes("set search_path = ''"), true);
+  assert.equal(helper.includes("from storage.objects so"), true);
+  assert.equal(helper.includes("so.bucket_id = 'message-attachments'"), true);
+  assert.equal(helper.includes('so.owner_id = viewer_id::text'), true);
+  assert.equal(
+    helper.includes("so.created_at > now() - interval '1 day'"),
+    true
+  );
+  assert.equal(helper.includes('select count(*) < 100'), true);
+  assert.equal(
+    fix.includes(
+      'alter function private.current_user_message_attachment_uploads_below_limit()'
+    ),
+    true
+  );
+  assert.equal(fix.includes('owner to postgres;'), true);
+  assert.equal(
+    fix.includes(
+      'grant execute\non function private.current_user_message_attachment_uploads_below_limit()\nto authenticated;'
+    ),
+    true
+  );
+  assert.equal(
+    fix.includes(
+      'grant execute\non function private.current_user_message_attachment_uploads_below_limit()\nto anon;'
+    ),
+    false
+  );
+  assert.equal(
+    fix.includes(
+      'grant execute\non function private.current_user_message_attachment_uploads_below_limit()\nto public;'
+    ),
+    false
+  );
+  assert.equal(
+    fix.includes(
+      'drop policy if exists "message_attachments_storage_select_participant"'
+    ),
+    false
+  );
+  assert.equal(
+    fix.includes('drop policy if exists "message_attachments_storage_delete_owner"'),
+    false
+  );
+  assert.equal(fix.includes('listing_images_storage'), false);
+  assert.equal(fix.includes('profile_avatars_storage'), false);
+  assert.equal(fix.includes('review_media_storage'), false);
+
+  assert.equal(insertPolicy.includes('on storage.objects'), true);
+  assert.equal(insertPolicy.includes('for insert'), true);
+  assert.equal(insertPolicy.includes('from storage.objects'), false);
+  assert.equal(insertPolicy.includes("bucket_id = 'message-attachments'"), true);
+  assert.equal(
+    insertPolicy.includes('owner_id = (select auth.uid())::text'),
+    true
+  );
+  assert.equal(insertPolicy.includes('lower(\n    storage.extension(name)'), true);
+  assert.equal(
+    insertPolicy.includes(
+      'private.current_user_message_attachment_uploads_below_limit()'
+    ),
+    true
+  );
+  assert.equal(insertPolicy.includes('from public.conversations c'), true);
+  assert.equal(insertPolicy.includes('c.buyer_id = (select auth.uid())'), true);
+  assert.equal(insertPolicy.includes('c.seller_id = (select auth.uid())'), true);
 });
