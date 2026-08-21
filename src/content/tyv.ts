@@ -19,9 +19,9 @@ export const content = {
   // Footer and public pages
   siteFooterLabel: "Site footer / Сайтының адаанда", // TODO: add reviewed Tuvan translation.
   siteFooterNavLabel: "Footer links / Адаанда ссылкалар", // TODO: add reviewed Tuvan translation.
-  footerAboutLink: "About / Сайт дугайында", // TODO: add reviewed Tuvan translation.
-  footerTermsLink: "Terms / Дугуржулгалар", // TODO: add reviewed Tuvan translation.
-  footerPrivacyLink: "Чажыт", // TODO: add reviewed Tuvan translation.
+  footerAboutLink: " Сайт дугайында", 
+  footerTermsLink: "Дүрүмнер", 
+  footerPrivacyLink: "Чажыт", 
   footerContactLink: "Contact / Харылзаа", // TODO: add reviewed Tuvan translation.
   legalPageKicker: "Information / Медегдел", // TODO: add reviewed Tuvan translation.
   privacyPageTitle: "Privacy Policy / Чажыт чоруктуң политиказы", // TODO: legal review and reviewed Tuvan translation required.
@@ -88,7 +88,7 @@ export const content = {
       body: "TODO: Add reviewed official contact details for privacy questions.",
     },
   ], // TODO: legal review and reviewed Tuvan translations required.
-  termsPageTitle: "Terms of Use / Ажыглаарының чуруму", // TODO: legal review and reviewed Tuvan translation required.
+  termsPageTitle: "Ажыглаарының чуруму", 
   termsPageIntro: "This page is a placeholder structure for Charlal's future reviewed user agreement. It is not final legal text.", // TODO: legal review and reviewed Tuvan translation required.
   termsSections: [
     {
@@ -140,12 +140,17 @@ export const content = {
       body: "TODO: Add reviewed official contact details for terms questions.",
     },
   ], // TODO: legal review and reviewed Tuvan translations required.
-  aboutPageKicker: "About Charlal / Чарлал дугайында", // TODO: add reviewed Tuvan translation.
-  aboutPageTitle: "About Charlal / Чарлал дугайында", // TODO: add reviewed Tuvan translation.
+  aboutPageKicker: "Charlal дугайында", // TODO: add reviewed Tuvan translation.
+  aboutPageTitle: "Charlal дугайында", // TODO: add reviewed Tuvan translation.
   aboutPageBody: [
-    "Charlal is a simple regional marketplace for people to post and discover advertisements in Tuva.",
-    "The goal is to keep buying, selling, and local discovery straightforward for people with different levels of technical confidence.",
-  ], // TODO: add reviewed Tuvan translations.
+  "**Charlal** дээрге *Чарлал* деп сөстен үнген латин үжүктерлиг бижик. **Charlal** болза шупту кижилерге ажыглаарда эптиг болгаш билдингир, Тывага хамаарышкан янзы-бүрү чарлалдарлыг тыва дыл кырында интернет-сайт-дыр (бөдүүнү-биле сайт).",
+
+  "Орус дылче сайт ажыглакчы бүрүзү боду өскертип ап болур. **Charlal**’дың соруглазы дээрге бараан дилеп турар азы бажың арендада дужаап турар дээн ышкаш чарлалдарны дүргени-биле дилээринге азы үндүр салырынга кижилерге база бир арганы бээри.",
+
+  "**Charlal**’ды ажыглаарының бертинде баштай Дүрүмнер болгаш оларны сагыырының чуруму-биле таныжып алыр ужурлуг. Ажыглакчы бүрүзү Дүрүмнерни сагыыр ужурлуг. Чарлалды үндүр салырда баштай бүрүткедип алыр. Бир дугаар бүрүткеткен соонда шупту Дүрүмнерни номчаан, олар-биле чөпшээрешкен, дүрүмнер сагыырынга хүлээлгени берген-деп санаттынып турар.",
+
+  "**Charlal**’дың ажылы дугайнда айтырыгларны техниктиг дуза бөлүүнче салыр. Оон-даа хөй ажыктыг информацияны **Charlal**’дың кол арнында адаакы кезектен тып ап болур.",
+],
   contactPageKicker: "Contact", // TODO: add reviewed Tuvan translation.
   contactPageTitle: "Contact Charlal", // TODO: add reviewed Tuvan translation.
   contactPageIntro: "This page is a placeholder for official Charlal contact details. A database-backed contact form is not included yet.", // TODO: add reviewed contact details and Tuvan translation.
