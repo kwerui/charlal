@@ -10,6 +10,7 @@
   },
   "include": [
     "next.config.ts",
+    "src/lib/auth/callbackOrigin.ts",
     "src/lib/messageThreadClientBehavior.ts",
     "src/lib/messagingRealtimeClientBehavior.ts",
     "src/lib/listingFavoriteKeys.ts",
