@@ -531,7 +531,6 @@ export const content = {
   forgotPasswordLink: "Пароль уттупкан бе?",
   signInButton: "Кирер",
   signInErrorRequired: "Enter both email and password to continue. / Улаштыр уламчылаар дизе, электроннуг почтаны болгаш пароль киирер.",
-  demoAuthWarning: "Demo authentication has been replaced by Supabase Auth.", // TODO: add reviewed Tuvan translation.
 
   // Post ad
   postAdKicker: "Marketplace / Рынок",
