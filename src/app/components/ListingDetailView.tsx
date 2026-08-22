@@ -140,9 +140,6 @@ export default function ListingDetailView({
               <Link href={propertyTypeHref}>{propertyType.name}</Link>
             </li>
           ) : null}
-          <li>
-            <span aria-current="page">{listing.title}</span>
-          </li>
         </ol>
       </nav>
 
