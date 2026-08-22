@@ -7,13 +7,14 @@
 
 export const content = {
   // Header
+  categorySectionTitle: "Категориялар",
   siteName: "Charlal.org",
   homeLinkLabel: "Кол арынче",
   headerActionsLabel: "Account actions / Аккаунттуң ажыл-чорудулгазы",
-  headerSignIn: "Sign In / Кирер",
+  headerSignIn: " Кирер",
   headerSignOut: "Sign Out / Үнер",
-  headerAccount: "Account / Аккаунт", // TODO: add reviewed Tuvan translation.
-  headerPostAd: "Post Ad / Чарлалдан үндүрер",
+  headerAccount: "Аккаунт", // TODO: add reviewed Tuvan translation.
+  headerPostAd: " Чарлалдан үндүрер",
   signedInAsLabel: "Signed in as / Кылдыр кирген",
 
   // Footer and public pages
@@ -22,7 +23,7 @@ export const content = {
   footerAboutLink: " Сайт дугайында", 
   footerTermsLink: "Дүрүмнер", 
   footerPrivacyLink: "Чажыт", 
-  footerContactLink: "Contact / Харылзаа", // TODO: add reviewed Tuvan translation.
+  footerContactLink: " Харылзаа", 
   legalPageKicker: "Information / Медегдел", // TODO: add reviewed Tuvan translation.
   privacyPageTitle: "Privacy Policy / Чажыт чоруктуң политиказы", // TODO: legal review and reviewed Tuvan translation required.
   privacyPageIntro: "This page is a placeholder structure for Charlal's future reviewed privacy and personal data policy. It is not final legal text.", // TODO: legal review and reviewed Tuvan translation required.
@@ -84,7 +85,7 @@ export const content = {
       body: "TODO: Add reviewed legal text explaining how policy updates will be communicated.",
     },
     {
-      title: "Contact",
+      title: "Харылзаа",
       body: "TODO: Add reviewed official contact details for privacy questions.",
     },
   ], // TODO: legal review and reviewed Tuvan translations required.
@@ -136,7 +137,7 @@ export const content = {
       body: "TODO: Add reviewed legal text explaining how terms updates will be handled.",
     },
     {
-      title: "Contact",
+      title: "Харылзаа",
       body: "TODO: Add reviewed official contact details for terms questions.",
     },
   ], // TODO: legal review and reviewed Tuvan translations required.
@@ -151,7 +152,7 @@ export const content = {
 
   "**Charlal**’дың ажылы дугайнда айтырыгларны техниктиг дуза бөлүүнче салыр. Оон-даа хөй ажыктыг информацияны **Charlal**’дың кол арнында адаакы кезектен тып ап болур.",
 ],
-  contactPageKicker: "Contact", // TODO: add reviewed Tuvan translation.
+  contactPageKicker: "Харылзаа", 
   contactPageTitle: "Contact Charlal", // TODO: add reviewed Tuvan translation.
   contactPageIntro: "This page is a placeholder for official Charlal contact details. A database-backed contact form is not included yet.", // TODO: add reviewed contact details and Tuvan translation.
   contactDetailsTitle: "Contact details", // TODO: add reviewed Tuvan translation.
@@ -164,7 +165,6 @@ export const content = {
   searchResultsTitle: "Search results / Дилээшкинниң түңнелдери", // TODO: add reviewed Tuvan translation.
   
   // Category navigation
-  categorySectionTitle: "Категорияларже",
   categoryPageTitle: "Категориялар", // TODO: review translation
   subcategoriesTitle: "Дайындар / Subcategories title", // TODO: review translation
   servicesSearchPlaceholder: "Электрик дээн ышкаш кылдыр парлаптыңар",
@@ -490,11 +490,11 @@ export const content = {
   editAdvertisementNotOwnedMessage: "You do not own this advertisement. / Бо чарлалдың ээзи эвес силер.", // TODO: add reviewed Tuvan translation.
 
   // Authentication
-  signInKicker: "Account / Аккаунт", // TODO: add reviewed Tuvan translation.
-  signInTitle: "Sign In / Кирер",
+  signInKicker: " Аккаунт", 
+  signInTitle: "Кирер",
   signInRegisterPrompt: "Мында бир дугаар бе?",
-  signInRegisterLink: "Register / Бүрүткээр",
-  signUpKicker: "Account / Аккаунт", // TODO: add reviewed Tuvan translation.
+  signInRegisterLink: " Бүрүткээр",
+  signUpKicker: " Аккаунт", 
   signUpTitle: "Sign Up / Бижидип алыңар",
   signUpSignInPrompt: "Already have an account? / Аккаунтуңар бар бе?",
   signUpSignInLink: "Sign in here / Мында кирип алыңар",
@@ -521,21 +521,21 @@ export const content = {
   signInRateLimitMessage: "Please wait before trying again. / Катап шенээр мурнунда манап көрүңерем.", // TODO: add reviewed Tuvan translation.
   authNetworkFailureMessage: "Network request failed. Check your connection and try again. / Сеткил дилээ үрелген. Холбааңарны хынап алгаш, катап шенеп көрүңер.", // TODO: add reviewed Tuvan translation.
   forgotPasswordKicker: "Demo account",
-  forgotPasswordTitle: "Forgot Password / Пароль уттупкан",
+  forgotPasswordTitle: "Пароль уттупкан",
   forgotPasswordSubmitButton: "Send reset instructions / Эгидер дугайында айтыышкыннарны чорудуптуңар",
   forgotPasswordSuccessMessage: "Demo reset message shown. No email has been sent.",
   forgotPasswordDemoWarning: "Demo only: this does not send an email yet.",
   backToSignInLink: "Back to sign in / Кирер дээш дедир",
   emailLabel: "Электроннуг почта",
-  passwordLabel: "Password / Пароль",
-  forgotPasswordLink: "Forgot password? / Пароль уттупкан бе?",
-  signInButton: "Sign In / Кирер",
+  passwordLabel: " Пароль",
+  forgotPasswordLink: "Пароль уттупкан бе?",
+  signInButton: "Кирер",
   signInErrorRequired: "Enter both email and password to continue. / Улаштыр уламчылаар дизе, электроннуг почтаны болгаш пароль киирер.",
   demoAuthWarning: "Demo authentication has been replaced by Supabase Auth.", // TODO: add reviewed Tuvan translation.
 
   // Post ad
   postAdKicker: "Marketplace / Рынок",
-  postAdTitle: "Post Ad / Чарлалдан үндүрер",
+  postAdTitle: "Чарлалдан үндүрер",
   checkingAuthMessage: "Checking sign-in...", // TODO: add reviewed Tuvan translation.
   listingTitleLabel: "Listing title / Даңзы ады",
   listingCategoryLabel: "Category / Категория",

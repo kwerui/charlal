@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
+import CharlalLogo from '@/app/components/CharlalLogo';
 import { content } from '@/content/tyv';
 import { useAuthStatus } from '@/lib/auth/client';
 import { useMessagingRealtime } from '@/lib/messagingRealtime';
@@ -17,6 +18,20 @@ type Props = {
 
 function formatUnreadBadge(count: number): string {
   return count > 99 ? '99+' : String(count);
+}
+
+function UserIcon() {
+  return (
+    <svg
+      className="header-button-icon"
+      viewBox="0 0 24 24"
+      aria-hidden="true"
+      focusable="false"
+    >
+      <path d="M20 21a8 8 0 0 0-16 0" />
+      <circle cx="12" cy="7" r="4" />
+    </svg>
+  );
 }
 
 export default function SiteHeader({
@@ -72,7 +87,7 @@ export default function SiteHeader({
     <header className="header">
       <div className="header-inner">
         <Link href="/" className="site-name-link" aria-label={content.homeLinkLabel}>
-          <h1 className="site-name">{content.siteName}</h1>
+          <CharlalLogo />
         </Link>
 
         <nav className="header-actions" aria-label={content.headerActionsLabel}>
@@ -107,6 +122,7 @@ export default function SiteHeader({
             </>
           ) : (
             <Link href="/sign-in" className="header-button secondary-header-button">
+              <UserIcon />
               {content.headerSignIn}
             </Link>
           )}

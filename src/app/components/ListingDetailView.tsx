@@ -12,6 +12,7 @@ import ListingDetailOwnerActions, {
 import { content } from '@/content/tyv';
 import type { Listing } from '@/data/listings';
 import { formatListingPrice, getListingStatus } from '@/data/listings';
+import { getListingFallbackResultsHref } from '@/lib/listingRoutes';
 import {
   canOfferListingFavoriteControl,
   getListingFavoriteKey,
@@ -85,15 +86,14 @@ export default function ListingDetailView({
   const propertyType = category?.types?.find(
     (item) => item.slug === listing.propertyType
   );
-  const marketplaceType = category?.buyTypes?.find(
-    (item) => item.slug === listing.marketplaceType
-  );
-  const transactionType =
-    listing.transactionType === 'sale'
-      ? content.housingSaleOption
-      : listing.transactionType === 'rent'
-      ? content.housingRentOption
-      : undefined;
+  const categoryHref = category ? `/category/${category.slug}` : '';
+  const subcategoryHref =
+    category && subcategory
+      ? `/category/${category.slug}/${subcategory.slug}`
+      : '';
+  const propertyTypeHref = propertyType
+    ? getListingFallbackResultsHref(listing)
+    : '';
   const favoriteReference = getListingFavoriteReference(listing);
   const isSaved = favoriteReference
     ? savedListingKeys.includes(getListingFavoriteKey(favoriteReference))
@@ -120,6 +120,31 @@ export default function ListingDetailView({
       <BackToResultsLink href={backHref} className="page-back-link">
         {backLabel}
       </BackToResultsLink>
+      <nav className="listing-detail-breadcrumbs" aria-label="Breadcrumb">
+        <ol>
+          <li>
+            <Link href="/">Home</Link>
+          </li>
+          {category ? (
+            <li>
+              <Link href={categoryHref}>{category.name}</Link>
+            </li>
+          ) : null}
+          {category && subcategory ? (
+            <li>
+              <Link href={subcategoryHref}>{subcategory.name}</Link>
+            </li>
+          ) : null}
+          {propertyType ? (
+            <li>
+              <Link href={propertyTypeHref}>{propertyType.name}</Link>
+            </li>
+          ) : null}
+          <li>
+            <span aria-current="page">{listing.title}</span>
+          </li>
+        </ol>
+      </nav>
 
       <div className="listing-detail-layout">
         <ListingImageGallery
@@ -149,68 +174,44 @@ export default function ListingDetailView({
             </p>
           ) : null}
 
+          <section
+            className="listing-detail-seller-card"
+            aria-labelledby="listing-detail-seller-title"
+          >
+            <ProfileAvatar
+              avatarPath={sellerAvatarPath}
+              displayName={publicSellerName}
+              size="small"
+              focusX={sellerAvatarFocusX}
+              focusY={sellerAvatarFocusY}
+              zoom={sellerAvatarZoom}
+            />
+            <div>
+              <h2 id="listing-detail-seller-title" className="sr-only">
+                {content.listingDetailSellerLabel}
+              </h2>
+              {sellerPublicSlug ? (
+                <Link
+                  href={`/seller/${sellerPublicSlug}`}
+                  className="listing-detail-seller-link"
+                >
+                  {publicSellerName}
+                </Link>
+              ) : (
+                <p>{publicSellerName}</p>
+              )}
+            </div>
+          </section>
+
           <dl className="listing-detail-meta">
             <div>
-              <dt>{content.listingDetailSellerLabel}</dt>
-              <dd>
-                <span className="listing-detail-seller-identity">
-                  {sellerPublicSlug ? (
-                    <ProfileAvatar
-                      avatarPath={sellerAvatarPath}
-                      displayName={publicSellerName}
-                      size="small"
-                      focusX={sellerAvatarFocusX}
-                      focusY={sellerAvatarFocusY}
-                      zoom={sellerAvatarZoom}
-                    />
-                  ) : null}
-                  {sellerPublicSlug ? (
-                    <Link
-                      href={`/seller/${sellerPublicSlug}`}
-                      className="listing-detail-seller-link"
-                    >
-                      {publicSellerName}
-                    </Link>
-                  ) : (
-                    publicSellerName
-                  )}
-                </span>
-              </dd>
-            </div>
-            <div>
-              <dt>{content.listingDetailDatePostedLabel}</dt>
+              <dt>Posted</dt>
               <dd>{listing.datePosted}</dd>
             </div>
             {listing.updatedAt ? (
               <div>
-                <dt>{content.listingDetailUpdatedAtLabel}</dt>
+                <dt>Updated</dt>
                 <dd>{listing.updatedAt}</dd>
-              </div>
-            ) : null}
-            <div>
-              <dt>{content.listingDetailCategoryLabel}</dt>
-              <dd>{category?.name || listing.categorySlug}</dd>
-            </div>
-            <div>
-              <dt>{content.listingDetailSubcategoryLabel}</dt>
-              <dd>{subcategory?.name || listing.subcategorySlug}</dd>
-            </div>
-            {transactionType ? (
-              <div>
-                <dt>{content.listingDetailTransactionTypeLabel}</dt>
-                <dd>{transactionType}</dd>
-              </div>
-            ) : null}
-            {propertyType ? (
-              <div>
-                <dt>{content.listingDetailPropertyTypeLabel}</dt>
-                <dd>{propertyType.name}</dd>
-              </div>
-            ) : null}
-            {marketplaceType ? (
-              <div>
-                <dt>{content.listingDetailMarketplaceTypeLabel}</dt>
-                <dd>{marketplaceType.name}</dd>
               </div>
             ) : null}
           </dl>

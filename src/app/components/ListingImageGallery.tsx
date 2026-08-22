@@ -11,6 +11,23 @@ type Props = {
   listingTitle: string;
 };
 
+function ArrowIcon({ direction }: { direction: 'left' | 'right' }) {
+  return (
+    <svg
+      className="listing-photo-viewer-nav-icon"
+      viewBox="0 0 24 24"
+      aria-hidden="true"
+      focusable="false"
+    >
+      {direction === 'left' ? (
+        <path d="m15 18-6-6 6-6" />
+      ) : (
+        <path d="m9 6 6 6-6 6" />
+      )}
+    </svg>
+  );
+}
+
 export default function ListingImageGallery({
   images,
   fallbackImage,
@@ -159,17 +176,19 @@ export default function ListingImageGallery({
               <>
                 <button
                   type="button"
-                  className="listing-photo-viewer-nav listing-photo-viewer-nav--previous"
+                  className="listing-photo-viewer-nav listing-photo-viewer-nav--icon listing-photo-viewer-nav--previous"
                   onClick={showPreviousPhoto}
+                  aria-label={content.previousListingPhotoButton}
                 >
-                  {content.previousListingPhotoButton}
+                  <ArrowIcon direction="left" />
                 </button>
                 <button
                   type="button"
-                  className="listing-photo-viewer-nav listing-photo-viewer-nav--next"
+                  className="listing-photo-viewer-nav listing-photo-viewer-nav--icon listing-photo-viewer-nav--next"
                   onClick={showNextPhoto}
+                  aria-label={content.nextListingPhotoButton}
                 >
-                  {content.nextListingPhotoButton}
+                  <ArrowIcon direction="right" />
                 </button>
                 <p className="listing-photo-viewer-position" aria-live="polite">
                   {positionLabel}

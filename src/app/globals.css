@@ -244,7 +244,7 @@ body {
 .header {
   position: relative;
   z-index: 20;
-  padding: 12px 20px;
+  padding: 16px 20px 14px;
   border-bottom: 1px solid var(--border-color);
   background: var(--bg-white);
   box-shadow: var(--shadow-sm);
@@ -267,15 +267,46 @@ body {
   text-decoration: none;
 }
 
-.site-name {
-  display: block;
-  margin: 0;
+.charlal-logo {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
   color: var(--primary-color);
-  font-size: clamp(22px, 2.3vw, 28px);
-  font-weight: 750;
+  font-size: 27px;
+  font-weight: 800;
   line-height: 1;
-  letter-spacing: -0.025em;
+  letter-spacing: 0;
   white-space: nowrap;
+}
+
+.charlal-logo-mark {
+  display: inline-grid;
+  width: 36px;
+  height: 36px;
+  place-items: center;
+  flex: 0 0 auto;
+  border-radius: var(--radius-pill);
+  background: color-mix(in srgb, var(--primary-color) 14%, transparent);
+  color: var(--primary-color);
+}
+
+.charlal-logo-mark svg {
+  display: block;
+  width: 26px;
+  height: 26px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2.3;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.charlal-logo-mark svg circle {
+  fill: color-mix(in srgb, var(--primary-color) 14%, transparent);
+}
+
+.charlal-logo-wordmark {
+  display: inline-block;
 }
 
 .header-actions {
@@ -292,6 +323,7 @@ body {
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  gap: 7px;
   min-width: 0;
   min-height: 38px;
   padding: 8px 12px;
@@ -312,6 +344,17 @@ body {
     border-color 0.16s ease,
     box-shadow 0.16s ease,
     color 0.16s ease;
+}
+
+.header-button-icon {
+  width: 18px;
+  height: 18px;
+  flex: 0 0 auto;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
 }
 
 .primary-header-button {
@@ -3000,6 +3043,68 @@ body {
   padding: 32px 20px 40px;
 }
 
+.listing-detail-breadcrumbs {
+  margin: 4px 0 18px;
+  color: var(--text-light);
+  font-size: 14px;
+  font-weight: 650;
+  line-height: 1.45;
+}
+
+.listing-detail-breadcrumbs ol {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.listing-detail-breadcrumbs li {
+  display: inline-flex;
+  align-items: center;
+  min-width: 0;
+  max-width: 100%;
+}
+
+.listing-detail-breadcrumbs li:not(:last-child)::after {
+  content: "/";
+  margin-left: 6px;
+  color: color-mix(in srgb, var(--text-light) 68%, transparent);
+}
+
+.listing-detail-breadcrumbs a,
+.listing-detail-breadcrumbs [aria-current="page"] {
+  min-width: 0;
+  max-width: min(100%, 44ch);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.listing-detail-breadcrumbs a {
+  color: var(--primary-color);
+  text-decoration: none;
+}
+
+.listing-detail-breadcrumbs [aria-current="page"] {
+  color: var(--text-light);
+  font-weight: 600;
+}
+
+.listing-detail-breadcrumbs a:hover,
+.listing-detail-breadcrumbs a:focus-visible {
+  color: var(--primary-color);
+  text-decoration: underline;
+}
+
+.listing-detail-breadcrumbs a:focus-visible {
+  outline: none;
+  border-radius: 4px;
+  box-shadow: 0 0 0 4px rgba(37,99,235,0.16);
+}
+
 .listing-detail-layout {
   display: grid;
   grid-template-columns: minmax(0, 1.1fr) minmax(320px, 0.9fr);
@@ -3140,6 +3245,17 @@ body {
   transform: translateY(-50%);
 }
 
+.listing-photo-viewer-nav--icon {
+  display: inline-grid;
+  width: 44px;
+  height: 44px;
+  min-width: 44px;
+  min-height: 44px;
+  place-items: center;
+  padding: 0;
+  background: rgba(15, 23, 42, 0.72);
+}
+
 .listing-photo-viewer-nav--previous {
   left: 12px;
 }
@@ -3154,6 +3270,22 @@ body {
   border-color: #93c5fd;
   background: rgba(30, 41, 59, 0.96);
   box-shadow: 0 0 0 4px rgba(147, 197, 253, 0.24);
+}
+
+.listing-photo-viewer-nav--icon:hover,
+.listing-photo-viewer-nav--icon:focus-visible {
+  background: rgba(15, 23, 42, 0.9);
+}
+
+.listing-photo-viewer-nav-icon {
+  display: block;
+  width: 26px;
+  height: 26px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2.6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
 }
 
 .listing-photo-viewer-position {
@@ -3253,6 +3385,36 @@ body {
   margin: 0;
   color: var(--text-dark);
   font-weight: 700;
+}
+
+.listing-detail-seller-card {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+  padding: 9px 10px;
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  background: color-mix(in srgb, var(--bg-white) 88%, var(--bg-light));
+}
+
+.listing-detail-seller-card > div {
+  display: grid;
+  gap: 3px;
+  min-width: 0;
+}
+
+.listing-detail-seller-card p,
+.listing-detail-seller-card h2 {
+  margin: 0;
+}
+
+.listing-detail-seller-card p,
+.listing-detail-seller-card .listing-detail-seller-link {
+  font-size: 15px;
+  font-weight: 800;
+  line-height: 1.35;
+  overflow-wrap: anywhere;
 }
 
 .listing-detail-seller-link {
@@ -5016,7 +5178,7 @@ body {
 /* ===== DESIGN PASS B: HEADER + SEARCH RESPONSIVE ===== */
 @media (max-width: 640px) {
   .header {
-    padding: 10px 12px 8px;
+    padding: 14px 12px 10px;
   }
 
   .header-inner {
