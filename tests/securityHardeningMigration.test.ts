@@ -11,6 +11,8 @@ const MESSAGE_ATTACHMENT_STORAGE_FIX_MIGRATION =
   'supabase/migrations/20260830_fix_message_attachment_storage_upload_policy.sql';
 const LISTING_FAVORITES_INTEGRITY_FIX_MIGRATION =
   'supabase/migrations/20260831_enforce_listing_favorites_integrity.sql';
+const REMOVE_BUILTIN_LISTING_FAVORITES_MIGRATION =
+  'supabase/migrations/20260901_remove_builtin_listing_favorites.sql';
 
 function readMigration(path: string): string {
   return readFileSync(path, 'utf8');
@@ -330,9 +332,14 @@ test('listing favorites integrity is enforced at the database write boundary', (
     .filter((name) => name.endsWith('.sql'))
     .sort();
   const fix = readMigration(LISTING_FAVORITES_INTEGRITY_FIX_MIGRATION);
+  const removeBuiltins = readMigration(REMOVE_BUILTIN_LISTING_FAVORITES_MIGRATION);
   const triggerFunction = getFunctionDefinition(
-    fix,
+    removeBuiltins,
     'prepare_listing_favorite_write'
+  );
+  const insertPolicy = getPolicyDefinition(
+    removeBuiltins,
+    'listing_favorites_insert_own'
   );
 
   assert.ok(
@@ -341,7 +348,28 @@ test('listing favorites integrity is enforced at the database write boundary', (
         '20260831_enforce_listing_favorites_integrity.sql'
       )
   );
+  assert.ok(
+    migrationNames.indexOf(
+      '20260831_enforce_listing_favorites_integrity.sql'
+    ) <
+      migrationNames.indexOf(
+        '20260901_remove_builtin_listing_favorites.sql'
+      )
+  );
   assert.equal(fix.includes('begin;'), true);
+  assert.equal(removeBuiltins.includes('begin;'), true);
+  assert.equal(
+    removeBuiltins.includes(
+      "delete from public.listing_favorites\nwhere listing_source = 'builtin';"
+    ),
+    true
+  );
+  assert.equal(
+    removeBuiltins.includes(
+      "add constraint listing_favorites_listing_source_valid check (\n  listing_source = 'database'\n)"
+    ),
+    true
+  );
   assert.equal(triggerFunction.includes('security definer'), true);
   assert.equal(triggerFunction.includes("set search_path = ''"), true);
   assert.equal(triggerFunction.includes('viewer_id := auth.uid();'), true);
@@ -350,7 +378,7 @@ test('listing favorites integrity is enforced at the database write boundary', (
     true
   );
   assert.equal(
-    triggerFunction.includes("new.listing_source = 'database'"),
+    triggerFunction.includes("normalized_source <> 'database'"),
     true
   );
   assert.equal(triggerFunction.includes('from public.listings l'), true);
@@ -362,15 +390,15 @@ test('listing favorites integrity is enforced at the database write boundary', (
   );
   assert.equal(
     triggerFunction.includes("new.listing_source = 'builtin'"),
-    true
+    false
   );
   assert.equal(
     triggerFunction.includes("allowed_builtin_listing_ids constant text[]"),
-    true
+    false
   );
   assert.equal(
     triggerFunction.includes('new.listing_id <> all(allowed_builtin_listing_ids)'),
-    true
+    false
   );
   assert.equal(
     fix.includes(
@@ -379,9 +407,13 @@ test('listing favorites integrity is enforced at the database write boundary', (
     true
   );
   assert.equal(
+    insertPolicy.includes("listing_source = 'database'"),
+    true
+  );
+  assert.equal(
     fix.includes('grant select, insert, delete on public.listing_favorites to authenticated;'),
     true
   );
-  assert.equal(fix.includes('grant update on public.listing_favorites'), false);
-  assert.equal(fix.includes('disable row level security'), false);
+  assert.equal(removeBuiltins.includes('grant update on public.listing_favorites'), false);
+  assert.equal(removeBuiltins.includes('disable row level security'), false);
 });

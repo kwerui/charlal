@@ -53,7 +53,7 @@ function isPendingFavoriteIntent(value: unknown): value is PendingFavoriteIntent
     typeof intent.key === 'string' &&
     typeof intent.createdAt === 'number' &&
     Boolean(reference) &&
-    (reference?.source === 'database' || reference?.source === 'builtin') &&
+    reference?.source === 'database' &&
     typeof reference?.listingId === 'string'
   );
 }

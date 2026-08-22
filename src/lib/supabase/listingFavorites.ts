@@ -1,5 +1,4 @@
 import { connection } from 'next/server';
-import { listings as builtInListings } from '@/data/listings';
 import type { Listing } from '@/data/listings';
 import { getCurrentViewerId } from '@/lib/auth/server';
 import {
@@ -67,7 +66,7 @@ function isListingFavoriteRow(value: unknown): value is ListingFavoriteRow {
   const row = value as Partial<Record<keyof ListingFavoriteRow, unknown>>;
 
   return (
-    (row.listing_source === 'database' || row.listing_source === 'builtin') &&
+    row.listing_source === 'database' &&
     typeof row.listing_id === 'string' &&
     typeof row.created_at === 'string'
   );
@@ -88,10 +87,7 @@ function rowToFavorite(row: ListingFavoriteRow): ListingFavoriteRecord {
 }
 
 function isValidReference(reference: ListingFavoriteReference): boolean {
-  return (
-    (reference.source === 'database' || reference.source === 'builtin') &&
-    reference.listingId.trim().length > 0
-  );
+  return reference.source === 'database' && reference.listingId.trim().length > 0;
 }
 
 type SupabaseErrorDiagnostic = {
@@ -150,12 +146,6 @@ async function canSaveListingReference(
 
   if (!safeUserId || !safeListingId) {
     return { ok: false, reason: 'invalid-listing' };
-  }
-
-  if (reference.source === 'builtin') {
-    return builtInListings.some((listing) => String(listing.id) === safeListingId)
-      ? { ok: true }
-      : { ok: false, reason: 'invalid-listing' };
   }
 
   const supabase = await createClient();
@@ -409,7 +399,6 @@ export async function listCurrentUserSavedListings(): Promise<SavedListingsResul
 
   return buildSavedListingsPayload(
     favorites,
-    databaseListingsResult.listings,
-    builtInListings
+    databaseListingsResult.listings
   );
 }

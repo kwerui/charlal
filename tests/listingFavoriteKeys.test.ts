@@ -35,25 +35,17 @@ test('returns no database listing ids for empty favorites', () => {
   assert.deepEqual(getDatabaseListingIdsFromFavorites([]), []);
 });
 
-test('classifies database and builtin favorite references from listing ids', () => {
+test('returns database favorite references only for database listing ids', () => {
   assert.deepEqual(getListingFavoriteReference(createListing('db-abc')), {
     source: 'database',
     listingId: 'db-abc',
   });
-  assert.deepEqual(getListingFavoriteReference(createListing(42)), {
-    source: 'builtin',
-    listingId: '42',
-  });
+  assert.equal(getListingFavoriteReference(createListing(42)), null);
   assert.equal(getListingFavoriteReference(createListing('local-draft')), null);
 });
 
 test('extracts unique database listing ids from favorites in saved order', () => {
   const favorites: ListingFavoriteRecord[] = [
-    {
-      source: 'builtin',
-      listingId: '1',
-      createdAt: '2026-08-18T12:00:00.000Z',
-    },
     {
       source: 'database',
       listingId: ' db-listing-2 ',
@@ -85,11 +77,6 @@ test('builds saved listings in favorite order and omits inaccessible listings', 
       createdAt: '2026-08-18T12:00:00.000Z',
     },
     {
-      source: 'builtin',
-      listingId: '7',
-      createdAt: '2026-08-18T11:00:00.000Z',
-    },
-    {
       source: 'database',
       listingId: 'db-deleted',
       createdAt: '2026-08-18T10:00:00.000Z',
@@ -110,26 +97,19 @@ test('builds saved listings in favorite order and omits inaccessible listings', 
     createListing('db-owned', { isOwnedByViewer: true }),
     createListing('db-visible-2'),
   ];
-  const fallbackListings = [createListing(7)];
-
-  const result = buildSavedListingsPayload(
-    favorites,
-    databaseListings,
-    fallbackListings
-  );
+  const result = buildSavedListingsPayload(favorites, databaseListings);
 
   assert.deepEqual(
     result.listings.map((listing) => String(listing.id)),
-    ['db-visible-2', '7', 'db-visible-1']
+    ['db-visible-2', 'db-visible-1']
   );
   assert.deepEqual(result.savedKeys, [
     'database:db-visible-2',
-    'builtin:7',
     'database:db-visible-1',
   ]);
   assert.deepEqual(
     result.favorites.map((favorite) => favorite.listingId),
-    ['db-visible-2', '7', 'db-visible-1']
+    ['db-visible-2', 'db-visible-1']
   );
 });
 
