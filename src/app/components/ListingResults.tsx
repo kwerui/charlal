@@ -9,7 +9,6 @@ import type { Listing } from '@/data/listings';
 import { filterListings, type ListingFilterCriteria } from '@/lib/listingFilters';
 
 type Props = {
-  builtInListings: Listing[];
   databaseListings?: Listing[];
   databaseError?: string;
   criteria?: ListingFilterCriteria;
@@ -23,20 +22,7 @@ type Props = {
   currentViewerId?: string | null;
 };
 
-function combineListings(
-  builtInListings: Listing[],
-  databaseListings: Listing[]
-): Listing[] {
-  const builtInIds = new Set(builtInListings.map((listing) => String(listing.id)));
-  const safeDatabaseListings = databaseListings.filter(
-    (listing) => !builtInIds.has(String(listing.id))
-  );
-
-  return [...safeDatabaseListings, ...builtInListings];
-}
-
 export default function ListingResults({
-  builtInListings,
   databaseListings = [],
   databaseError = '',
   criteria = {},
@@ -54,10 +40,8 @@ export default function ListingResults({
       return [];
     }
 
-    const combinedListings = combineListings(builtInListings, databaseListings);
-
-    return filterListings(combinedListings, criteria);
-  }, [builtInListings, criteria, databaseListings, requireSearchQuery]);
+    return filterListings(databaseListings, criteria);
+  }, [criteria, databaseListings, requireSearchQuery]);
 
   const visibleListings =
     typeof limit === 'number' ? matchingListings.slice(0, limit) : matchingListings;

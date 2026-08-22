@@ -2,7 +2,6 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import ListingResults from '@/app/components/ListingResults';
 import { content } from '@/content/tyv';
-import { listings } from '@/data/listings';
 import { buildHrefWithSearchParams } from '@/lib/resultReturnHref';
 import { getCurrentUserFavoriteState } from '@/lib/supabase/listingFavorites';
 import { listPublicDatabaseListings } from '@/lib/supabase/listingsServer';
@@ -230,7 +229,6 @@ export default async function SubcategoryPage({ params, searchParams }: Subcateg
           />
 
           <ListingResults
-            builtInListings={listings}
             databaseListings={databaseListings}
             databaseError={databaseError}
             savedListingKeys={favoriteState.savedKeys}

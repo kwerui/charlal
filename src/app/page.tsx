@@ -2,7 +2,6 @@ import Link from 'next/link';
 import ListingResults from '@/app/components/ListingResults';
 import SearchForm from '@/app/components/SearchForm';
 import { content } from '@/content/tyv';
-import { listings } from '@/data/listings';
 import { getCurrentUserFavoriteState } from '@/lib/supabase/listingFavorites';
 import { listPublicDatabaseListings } from '@/lib/supabase/listingsServer';
 
@@ -46,7 +45,6 @@ export default async function Home(): Promise<React.ReactNode> {
 
       <section className="listings-section">
         <ListingResults
-          builtInListings={listings}
           databaseListings={databaseListings}
           databaseError={databaseError}
           savedListingKeys={favoriteState.savedKeys}

@@ -1,7 +1,6 @@
 import ListingResults from '@/app/components/ListingResults';
 import SearchForm from '@/app/components/SearchForm';
 import { content } from '@/content/tyv';
-import { listings } from '@/data/listings';
 import { hasPublicListingSearchQuery } from '@/lib/publicListingQuery';
 import { buildHrefWithSearchParams } from '@/lib/resultReturnHref';
 import { getCurrentUserFavoriteState } from '@/lib/supabase/listingFavorites';
@@ -48,7 +47,6 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
         </div>
 
         <ListingResults
-          builtInListings={listings}
           databaseListings={databaseListings}
           databaseError={databaseError}
           savedListingKeys={favoriteState.savedKeys}
