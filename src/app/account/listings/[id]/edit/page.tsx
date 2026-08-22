@@ -1,6 +1,5 @@
 import { redirect } from 'next/navigation';
 import { content } from '@/content/tyv';
-import { listings } from '@/data/listings';
 import { getCurrentViewerId } from '@/lib/auth/server';
 import { getSafeEditReturnHref } from '@/lib/resultReturnHref';
 import { getOwnedDatabaseListingById } from '@/lib/supabase/listingsServer';
@@ -27,19 +26,17 @@ export default async function EditListingPage({
     );
   }
 
-  const builtInListing = listings.find((listing) => String(listing.id) === id);
-  const databaseListingResult = builtInListing
-    ? { ok: true as const, listing: null }
-    : await getOwnedDatabaseListingById(id, viewer.status === 'signed-in' ? viewer.userId : '');
+  const databaseListingResult = await getOwnedDatabaseListingById(
+    id,
+    viewer.status === 'signed-in' ? viewer.userId : ''
+  );
   const initialEditState =
     viewer.status === 'unresolved'
       ? 'checking'
       : !databaseListingResult.ok
       ? 'unavailable'
       : !databaseListingResult.listing
-      ? builtInListing
-        ? 'not-owned'
-        : 'not-found'
+      ? 'not-found'
       : 'ready';
   const initialListing =
     initialEditState === 'ready' && databaseListingResult.ok

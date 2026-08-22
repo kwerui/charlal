@@ -1,7 +1,6 @@
 import { notFound } from 'next/navigation';
 import ListingDetailView from '@/app/components/ListingDetailView';
 import { content } from '@/content/tyv';
-import { listings } from '@/data/listings';
 import {
   getCurrentViewerId,
   type CurrentViewerIdResult,
@@ -37,30 +36,9 @@ function getListingDetailViewerState(
 export default async function ListingPage({ params, searchParams }: ListingPageProps) {
   const { id } = await params;
   const query = await searchParams;
-  const builtInListing = listings.find((item) => String(item.id) === id);
   const safeFromHref = getSafeResultsHref(query.from);
   const favoriteReturnHref = buildHrefWithSearchParams(`/listing/${id}`, query);
   const favoriteState = await getCurrentUserFavoriteState();
-
-  if (builtInListing) {
-    const backHref =
-      safeFromHref || getListingFallbackResultsHref(builtInListing);
-
-    return (
-      <div className="app-container">
-        <ListingDetailView
-          listing={builtInListing}
-          categories={content.categories}
-          backHref={backHref}
-          initialViewerState="signed-out"
-          savedListingKeys={favoriteState.savedKeys}
-          currentViewerId={favoriteState.userId}
-          favoriteReturnHref={favoriteReturnHref}
-        />
-      </div>
-    );
-  }
-
   const databaseListingResult = await getPublicDatabaseListingById(id);
 
   if (!databaseListingResult.ok) {

@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import { content } from '@/content/tyv';
-import { getListingStatus, listings } from '@/data/listings';
+import { getListingStatus } from '@/data/listings';
 import { getCurrentUserResult } from '@/lib/auth/server';
 import {
   findConversationIdForListing,
@@ -31,24 +31,6 @@ export default async function ContactSellerPage({
           <div className="empty-results" role="alert">
             <h1 id="contact-seller-title">{content.unableStartConversationMessage}</h1>
             <p>{content.authNetworkFailureMessage}</p>
-          </div>
-        </section>
-      </main>
-    );
-  }
-
-  const builtInListing = listings.find((listing) => String(listing.id) === listingId);
-
-  if (builtInListing) {
-    return (
-      <main className="form-page">
-        <section className="form-panel" aria-labelledby="contact-seller-title">
-          <div className="empty-results" role="status">
-            <h1 id="contact-seller-title">{content.messageSellerTitle}</h1>
-            <p>{content.demoListingMessagingUnavailableMessage}</p>
-            <Link href={`/listing/${listingId}`} className="secondary-button edit-listing-state-link">
-              {content.backToResults}
-            </Link>
           </div>
         </section>
       </main>
