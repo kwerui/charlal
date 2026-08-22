@@ -3325,8 +3325,9 @@ body {
 
 .listing-detail-panel {
   display: grid;
-  gap: 16px;
-  padding: 22px;
+  align-content: start;
+  gap: 12px;
+  padding: 18px;
   border: 1px solid var(--border-color);
   border-radius: 12px;
   background: var(--bg-white);
@@ -3335,22 +3336,27 @@ body {
 
 .listing-detail-title {
   margin: 0;
-  font-size: 32px;
-  line-height: 1.15;
+  font-size: 29px;
+  font-weight: 760;
+  line-height: 1.2;
   color: var(--text-dark);
+  overflow-wrap: anywhere;
 }
 
 .listing-detail-price {
   margin: 0;
-  font-size: 28px;
-  font-weight: 800;
+  font-size: 25px;
+  font-weight: 760;
+  line-height: 1.2;
   color: var(--primary-color);
 }
 
 .listing-detail-location {
   margin: 0;
   color: var(--text-light);
-  font-weight: 700;
+  font-size: 15px;
+  font-weight: 500;
+  line-height: 1.4;
 }
 
 .listing-detail-status-note {
@@ -3366,25 +3372,29 @@ body {
 
 .listing-detail-meta {
   display: grid;
-  gap: 10px;
+  gap: 6px;
   margin: 0;
 }
 
 .listing-detail-meta div {
   display: grid;
   grid-template-columns: minmax(130px, 0.5fr) minmax(0, 1fr);
-  gap: 12px;
+  gap: 10px;
 }
 
 .listing-detail-meta dt {
   color: var(--text-light);
-  font-weight: 700;
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 1.35;
 }
 
 .listing-detail-meta dd {
   margin: 0;
   color: var(--text-dark);
-  font-weight: 700;
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 1.35;
 }
 
 .listing-detail-seller-card {
@@ -3412,7 +3422,7 @@ body {
 .listing-detail-seller-card p,
 .listing-detail-seller-card .listing-detail-seller-link {
   font-size: 15px;
-  font-weight: 800;
+  font-weight: 600;
   line-height: 1.35;
   overflow-wrap: anywhere;
 }
@@ -3443,18 +3453,23 @@ body {
 
 .listing-detail-description {
   display: grid;
-  gap: 8px;
+  gap: 6px;
 }
 
 .listing-detail-description h2 {
   margin: 0;
-  font-size: 20px;
+  font-size: 17px;
+  font-weight: 650;
+  line-height: 1.35;
   color: var(--text-dark);
 }
 
 .listing-detail-description p {
   margin: 0;
   color: var(--text-dark);
+  font-weight: 400;
+  line-height: 1.6;
+  overflow-wrap: anywhere;
 }
 
 .listing-contact-button {
@@ -5069,16 +5084,16 @@ body {
   }
 
   .listing-detail-panel {
-    padding: 16px;
+    padding: 15px;
     border-radius: 8px;
   }
 
   .listing-detail-title {
-    font-size: 26px;
+    font-size: 24px;
   }
 
   .listing-detail-price {
-    font-size: 24px;
+    font-size: 22px;
   }
 
   .listing-detail-meta div {
