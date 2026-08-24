@@ -6,15 +6,15 @@ A classifieds marketplace web application built with Next.js, React and TypeScri
 
 <img width="1512" height="870" alt="image" src="https://github.com/user-attachments/assets/ff58922b-1c7f-4a55-99bf-4c4ed7305bbe" />
 
-Homepage
+### Homepage
 
 <img width="1512" height="864" alt="image" src="https://github.com/user-attachments/assets/c65f08c5-6562-44e6-b7b9-1d6205b72456" />
 
-Listing Page
+### Listing Page
 
 <img width="1510" height="869" alt="image" src="https://github.com/user-attachments/assets/c2bc1bcb-1200-4480-89ed-1e6ef73a3d67" />
 
-Messages
+### Messages
 
 ## About the Project
 
@@ -36,7 +36,7 @@ Charlal is a marketplace platform where users can create listings, browse produc
 - TypeScript
 - Supabase
 - PostgreSQL
-- Tailwind/CSS
+- CSS
 
 ## What I Learned
 
@@ -45,7 +45,21 @@ Charlal is a marketplace platform where users can create listings, browse produc
 - Designing user flows for marketplace features
 - Debugging complex frontend and backend interactions
 
+## Project Status
 
+Currently in active development.
+
+Completed:
+- User authentication
+- Listings
+- Search
+- Messaging
+- Image uploads
+
+Planned:
+- Notifications
+- Moderation tools
+- Additional marketplace improvements
 
 
 
@@ -69,7 +83,8 @@ bun dev
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
-
 This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+
+## Local Development
+See setup.md
 
