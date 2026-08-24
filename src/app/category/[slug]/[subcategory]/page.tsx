@@ -5,9 +5,11 @@ import { content } from '@/content/tyv';
 import { buildHrefWithSearchParams } from '@/lib/resultReturnHref';
 import { getCurrentUserFavoriteState } from '@/lib/supabase/listingFavorites';
 import { listPublicDatabaseListings } from '@/lib/supabase/listingsServer';
+import CategoryResultsSearch from './CategoryResultsSearch';
 import HousingFilterControls from './HousingFilterControls';
-import MarketplaceBuyTypeDropdown from './MarketplaceBuyTypeDropdown';
+import MarketplaceTypeFilterControls from './MarketplaceTypeFilterControls';
 import PriceFilterControls from './PriceFilterControls';
+import SubcategoryFilterBar from './SubcategoryFilterBar';
 
 type TypeOption = {
   name: string;
@@ -66,11 +68,11 @@ export default async function SubcategoryPage({ params, searchParams }: Subcateg
   const selectedSearchQuery = Array.isArray(rawSearchQuery)
     ? rawSearchQuery[0] || ''
     : rawSearchQuery || '';
+  const showMarketplaceBuyTypes = category.slug === 'marketplace' && subcategory === 'buy';
   const selectedBuyType =
-    category.slug === 'marketplace' && subcategory === 'buy'
+    showMarketplaceBuyTypes
       ? marketplaceBuyTypes.find((typeItem) => typeItem.slug === selectedTypeSlug)
       : undefined;
-  const showMarketplaceBuyTypes = category.slug === 'marketplace' && subcategory === 'buy';
   const validQueryPropertyType =
     selectedPropertyTypeFromQuery === 'all' ||
     Boolean(typedCategory.types?.some((typeItem) => typeItem.slug === selectedPropertyTypeFromQuery));
@@ -136,27 +138,23 @@ export default async function SubcategoryPage({ params, searchParams }: Subcateg
     }
   }
 
-  const preservedMarketplaceTypeParams: Record<string, string> =
-    showMarketplaceBuyTypes && selectedTypeSlug ? { type: selectedTypeSlug } : {};
-  const preservedPriceFilterParams: Record<string, string> = showMarketplaceBuyTypes
-    ? { ...preservedMarketplaceTypeParams, q: selectedSearchQuery }
-    : { ...preservedHousingParams, q: selectedSearchQuery };
-  const preservedSearchParams: Record<string, string> = showMarketplaceBuyTypes
-    ? {
-        ...preservedMarketplaceTypeParams,
-        minPrice: selectedMinPrice,
-        maxPrice: selectedMaxPrice,
-      }
-    : {
-        ...preservedHousingParams,
-        minPrice: selectedMinPrice,
-        maxPrice: selectedMaxPrice,
-      };
-  const preservedTypeFilterParams: Record<string, string> = {
+  const preservedPriceFilterParams: Record<string, string> = {
+    ...(showMarketplaceBuyTypes && selectedTypeSlug ? { type: selectedTypeSlug } : {}),
+    ...(!showMarketplaceBuyTypes ? preservedHousingParams : {}),
     q: selectedSearchQuery,
+  };
+  const preservedSearchParams: Record<string, string> = {
+    ...(showMarketplaceBuyTypes && selectedTypeSlug ? { type: selectedTypeSlug } : {}),
+    ...(!showMarketplaceBuyTypes ? preservedHousingParams : {}),
     minPrice: selectedMinPrice,
     maxPrice: selectedMaxPrice,
   };
+  const searchPlaceholder =
+    category.slug === 'services'
+      ? content.servicesSearchPlaceholder
+      : category.slug === 'marketplace'
+      ? content.marketplaceSearchPlaceholder
+      : content.searchPlaceholder;
   const [databaseListingsResult, favoriteState] = await Promise.all([
     listPublicDatabaseListings({
       categorySlug: category.slug,
@@ -190,7 +188,7 @@ export default async function SubcategoryPage({ params, searchParams }: Subcateg
           </Link>
         </div>
 
-        <div className="category-hero has-image" style={{ backgroundImage: `linear-gradient(135deg, rgba(17,24,39,0.72), rgba(37,99,235,0.5)), url(${category.image})` }}>
+        <div className="category-hero category-hero--compact has-image" style={{ backgroundImage: `linear-gradient(135deg, rgba(17,24,39,0.72), rgba(37,99,235,0.5)), url(${category.image})` }}>
           <div className="category-hero-inner">
             <div className="category-hero-copy">
               <p className="hero-kicker">{content.categoryPageTitle}</p>
@@ -198,35 +196,60 @@ export default async function SubcategoryPage({ params, searchParams }: Subcateg
                 {category.name} · {activeListingLabel}
               </h2>
             </div>
-            {showMarketplaceBuyTypes ? (
-              <MarketplaceBuyTypeDropdown
-                basePath={`/category/${category.slug}/${subcategory}`}
-                options={marketplaceBuyTypes}
-                selectedValue={selectedBuyType?.slug || ''}
-                preservedParams={preservedTypeFilterParams}
-              />
-            ) : null}
           </div>
         </div>
 
         <div className="category-page-content">
-          {category.slug === 'housing' ? (
-            <HousingFilterControls
-              propertyTypeOptions={typedCategory.types || []}
-              transactionValue={housingTransactionValue}
-              propertyTypeValue={housingPropertyTypeValue}
-              preservedParams={preservedListingFilterParams}
-            />
-          ) : null}
-
-          <PriceFilterControls
+          <CategoryResultsSearch
             basePath={`/category/${category.slug}/${subcategory}`}
-            minPrice={selectedMinPrice}
-            maxPrice={selectedMaxPrice}
-            searchQuery={selectedSearchQuery}
-            preservedPriceParams={preservedPriceFilterParams}
-            preservedSearchParams={preservedSearchParams}
+            defaultQuery={selectedSearchQuery}
+            placeholder={searchPlaceholder}
+            preservedParams={preservedSearchParams}
           />
+
+          <SubcategoryFilterBar
+            quickControls={
+              category.slug === 'housing' ? (
+                <HousingFilterControls
+                  propertyTypeOptions={typedCategory.types || []}
+                  transactionValue={housingTransactionValue}
+                  propertyTypeValue={housingPropertyTypeValue}
+                  preservedParams={preservedListingFilterParams}
+                  idPrefix="housing-quick"
+                  isCompact
+                />
+              ) : showMarketplaceBuyTypes ? (
+                <MarketplaceTypeFilterControls
+                  basePath={`/category/${category.slug}/${subcategory}`}
+                  options={marketplaceBuyTypes}
+                  selectedValue={selectedTypeSlug}
+                  preservedParams={preservedListingFilterParams}
+                />
+              ) : null
+            }
+          >
+            <PriceFilterControls
+              basePath={`/category/${category.slug}/${subcategory}`}
+              minPrice={selectedMinPrice}
+              maxPrice={selectedMaxPrice}
+              typeLabel={content.typeLabel}
+              typePlaceholder={content.typePlaceholder}
+              priceLabel={
+                category.slug === 'jobs' ? content.salaryFilterLabel : content.priceFilterLabel
+              }
+              minLabel={
+                category.slug === 'jobs'
+                  ? content.salaryMinPlaceholder
+                  : content.priceMinPlaceholder
+              }
+              maxLabel={
+                category.slug === 'jobs'
+                  ? content.salaryMaxPlaceholder
+                  : content.priceMaxPlaceholder
+              }
+              preservedPriceParams={preservedPriceFilterParams}
+            />
+          </SubcategoryFilterBar>
 
           <ListingResults
             databaseListings={databaseListings}

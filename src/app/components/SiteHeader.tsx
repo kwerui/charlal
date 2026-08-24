@@ -81,7 +81,6 @@ export default function SiteHeader({
     }
   }
 
-  const [postAdEnglish, postAdTuvan] = content.headerPostAd.split(' / ');
 
   return (
     <header className="header">
@@ -128,15 +127,14 @@ export default function SiteHeader({
           )}
         </nav>
 
-        <button
-          type="button"
-          className="header-button primary-header-button header-post-ad-button"
-          onClick={handlePostAdClick}
-          disabled={authStatus === 'checking'}
-        >
-          <span className="post-ad-label-en">{postAdEnglish} / </span>
-          <span>{postAdTuvan}</span>
-        </button>
+<button
+  type="button"
+  className="header-button primary-header-button header-post-ad-button"
+  onClick={handlePostAdClick}
+  disabled={authStatus === 'checking'}
+>
+  {content.headerPostAd}
+</button>
 
         {signedIn && user ? (
           <span className="sr-only">

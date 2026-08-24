@@ -2,15 +2,26 @@
 
 import { useRouter } from 'next/navigation';
 import type { FormEvent } from 'react';
+import { useState } from 'react';
 import { content } from '@/content/tyv';
+
+type FilterOption = {
+  name: string;
+  slug: string;
+};
 
 type Props = {
   basePath: string;
   minPrice: string;
   maxPrice: string;
-  searchQuery: string;
+  minLabel?: string;
+  maxLabel?: string;
+  priceLabel?: string;
+  typeOptions?: FilterOption[];
+  selectedType?: string;
+  typeLabel?: string;
+  typePlaceholder?: string;
   preservedPriceParams?: Record<string, string>;
-  preservedSearchParams?: Record<string, string>;
 };
 
 function buildFilterHref(basePath: string, params: Record<string, string>) {
@@ -31,103 +42,111 @@ export default function PriceFilterControls({
   basePath,
   minPrice,
   maxPrice,
-  searchQuery,
+  minLabel = content.priceMinPlaceholder,
+  maxLabel = content.priceMaxPlaceholder,
+  priceLabel = content.priceFilterLabel,
+  typeOptions = [],
+  selectedType = '',
+  typeLabel = content.typeLabel,
+  typePlaceholder = content.typePlaceholder,
   preservedPriceParams = {},
-  preservedSearchParams = {},
 }: Props) {
   const router = useRouter();
+  const [draftMinPrice, setDraftMinPrice] = useState(minPrice);
+  const [draftMaxPrice, setDraftMaxPrice] = useState(maxPrice);
+  const [draftType, setDraftType] = useState(selectedType);
 
-  function handlePriceSubmit(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
+  function applyFilters() {
+    const nextParams: Record<string, string> = {
+      ...preservedPriceParams,
+      minPrice: draftMinPrice.trim(),
+      maxPrice: draftMaxPrice.trim(),
+    };
 
-    const formData = new FormData(event.currentTarget);
-    const nextMinPrice = String(formData.get('minPrice') || '').trim();
-    const nextMaxPrice = String(formData.get('maxPrice') || '').trim();
+    if (typeOptions.length > 0) {
+      nextParams.type = draftType;
+    }
 
-    router.push(
-      buildFilterHref(basePath, {
-        ...preservedPriceParams,
-        minPrice: nextMinPrice,
-        maxPrice: nextMaxPrice,
-      }),
-      { scroll: false }
-    );
+    router.push(buildFilterHref(basePath, nextParams), { scroll: false });
   }
 
-  function handleSearchSubmit(event: FormEvent<HTMLFormElement>) {
+  function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-
-    const formData = new FormData(event.currentTarget);
-    const nextSearchQuery = String(formData.get('searchQuery') || '').trim();
-
-    router.push(
-      buildFilterHref(basePath, {
-        ...preservedSearchParams,
-        q: nextSearchQuery,
-      }),
-      { scroll: false }
-    );
+    applyFilters();
   }
 
   function handleClearFilter() {
-    router.push(buildFilterHref(basePath, preservedPriceParams), { scroll: false });
+    if (typeOptions.length > 0) {
+      setDraftType('');
+    }
+
+    setDraftMinPrice('');
+    setDraftMaxPrice('');
   }
 
   return (
     <div className="price-filter-card">
-      <div className="listing-filter-grid">
-        <form className="filter-field" onSubmit={handleSearchSubmit}>
-          <span className="filter-label">{content.filterSearchLabel}</span>
-          <input
-            key={`search-${searchQuery}`}
-            type="text"
-            name="searchQuery"
-            className="price-filter-input"
-            placeholder={content.filterSearchPlaceholder}
-            defaultValue={searchQuery}
-          />
-          <button type="submit" className="search-button price-filter-button">
-            {content.categorySearchButton}
-          </button>
-        </form>
-        <form className="filter-field" onSubmit={handlePriceSubmit}>
-          <span className="filter-label">{content.priceFilterLabel}</span>
+      <form className="listing-filter-grid" onSubmit={handleSubmit}>
+        {typeOptions.length > 0 ? (
+          <label className="filter-field" htmlFor="listing-type-filter">
+            <span className="filter-label">{typeLabel}</span>
+            <select
+              id="listing-type-filter"
+              className={`filter-select ${draftType ? '' : 'placeholder-selected'}`}
+              value={draftType}
+              onChange={(event) => setDraftType(event.target.value)}
+            >
+              <option value="" disabled>
+                {typePlaceholder}
+              </option>
+              {typeOptions.map((typeItem) => (
+                <option key={typeItem.slug} value={typeItem.slug}>
+                  {typeItem.name}
+                </option>
+              ))}
+            </select>
+          </label>
+        ) : null}
+
+        <div className="filter-field">
+          <span className="filter-label">{priceLabel}</span>
           <div className="price-filter-inputs">
             <input
-              key={`min-${minPrice}`}
               type="number"
               name="minPrice"
               className="price-filter-input"
-              placeholder={content.priceMinPlaceholder}
+              placeholder={minLabel}
               min="0"
               inputMode="numeric"
-              defaultValue={minPrice}
+              value={draftMinPrice}
+              onChange={(event) => setDraftMinPrice(event.target.value)}
             />
             <input
-              key={`max-${maxPrice}`}
               type="number"
               name="maxPrice"
               className="price-filter-input"
-              placeholder={content.priceMaxPlaceholder}
+              placeholder={maxLabel}
               min="0"
               inputMode="numeric"
-              defaultValue={maxPrice}
+              value={draftMaxPrice}
+              onChange={(event) => setDraftMaxPrice(event.target.value)}
             />
           </div>
-          <div className="price-filter-actions">
-            <button type="submit" className="search-button price-filter-button">
-              {content.filterButton}
-            </button>
-            <button
-              type="button"
-              className="secondary-button price-filter-button"
-              onClick={handleClearFilter}
-            >
-              {content.clearFilterButton}
-            </button>
-          </div>
-        </form>
-      </div>
+        </div>
+
+        <div className="price-filter-actions">
+          <button type="submit" className="search-button price-filter-button">
+            {content.filterButton}
+          </button>
+          <button
+            type="button"
+            className="secondary-button price-filter-button"
+            onClick={handleClearFilter}
+          >
+            {content.clearFilterButton}
+          </button>
+        </div>
+      </form>
     </div>
   );
 }

@@ -1,11 +1,10 @@
 import Link from 'next/link';
-
-
-
-
 import { notFound } from 'next/navigation';
+import ListingResults from '@/app/components/ListingResults';
 import { content } from '@/content/tyv';
-import CategoryHeroControls from "./CategoryHeroControls";
+import { getCurrentUserFavoriteState } from '@/lib/supabase/listingFavorites';
+import { listPublicDatabaseListings } from '@/lib/supabase/listingsServer';
+import CategoryHeroControls from './CategoryHeroControls';
 
 type CategoryPageProps = {
   params: Promise<{ slug: string }>;
@@ -20,13 +19,32 @@ export function generateStaticParams(): { slug: string }[] {
 export default async function CategoryPage({ params }: CategoryPageProps) {
   const { slug } = await params;
   const category = content.categories.find((item) => item.slug === slug);
-  const showTypeSelect = category?.slug === 'housing';
-  const showSearchBar = category?.slug === 'marketplace' || category?.slug === 'services';
+  const showSearchBar =
+    category?.slug === 'housing' ||
+    category?.slug === 'marketplace' ||
+    category?.slug === 'services' ||
+    category?.slug === 'jobs';
   const showHeroSubcategories = category ? category.slug !== 'services' : false;
 
   if (!category) {
     notFound();
   }
+
+  const [databaseListingsResult, favoriteState] = await Promise.all([
+    listPublicDatabaseListings({
+      categorySlug: category.slug,
+      housingTransaction: category.slug === 'housing' ? 'all' : undefined,
+      housingPropertyType: category.slug === 'housing' ? 'all' : undefined,
+      limit: 6,
+    }),
+    getCurrentUserFavoriteState(),
+  ]);
+  const databaseListings = databaseListingsResult.ok
+    ? databaseListingsResult.listings
+    : [];
+  const databaseError = databaseListingsResult.ok
+    ? ''
+    : content.databaseListingsLoadFailedMessage;
 
   return (
     <div className="app-container">
@@ -55,12 +73,33 @@ export default async function CategoryPage({ params }: CategoryPageProps) {
             <div className="category-hero-controls">
               <CategoryHeroControls
                 category={category}
-                showTypeSelect={showTypeSelect}
                 showHeroSubcategories={showHeroSubcategories}
                 showSearchBar={showSearchBar}
               />
             </div>
           </div>
+        </section>
+
+        <section className="category-listings-section" aria-labelledby="category-latest-listings">
+          <div className="category-section-heading">
+            <h2 id="category-latest-listings">{content.latestListingsTitle}</h2>
+          </div>
+          <ListingResults
+            databaseListings={databaseListings}
+            databaseError={databaseError}
+            savedListingKeys={favoriteState.savedKeys}
+            currentViewerId={favoriteState.userId}
+            criteria={{
+              categorySlug: category.slug,
+              isAllPage: true,
+              housingTransaction: category.slug === 'housing' ? 'all' : undefined,
+              housingPropertyType: category.slug === 'housing' ? 'all' : undefined,
+            }}
+            resultsHref={`/category/${category.slug}`}
+            limit={6}
+            showResultsSummary={false}
+            showEmptyState={false}
+          />
         </section>
 
       </section>

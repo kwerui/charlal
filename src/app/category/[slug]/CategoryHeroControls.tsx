@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import type { ChangeEvent } from 'react';
+import type { FormEvent } from 'react';
 import { useState } from 'react';
 import { content } from '@/content/tyv';
 
@@ -11,32 +11,32 @@ type Subcategory = {
   slug: string;
 };
 
-type TypeOption = {
-  name: string;
-  slug: string;
-};
-
 type CategoryProps = {
   slug: string;
   subcategories: Subcategory[];
-  types?: TypeOption[];
 };
 
 type Props = {
   category: CategoryProps;
-  showTypeSelect: boolean;
   showHeroSubcategories: boolean;
   showSearchBar: boolean;
 };
 
 export default function CategoryHeroControls({
   category,
-  showTypeSelect,
   showHeroSubcategories,
   showSearchBar,
 }: Props) {
   const router = useRouter();
   const [searchValue, setSearchValue] = useState('');
+  const usesSegmentedNavigation =
+    category.slug === 'housing' ||
+    category.slug === 'marketplace' ||
+    category.slug === 'jobs';
+  const navigationSubcategories =
+    category.slug === 'housing'
+      ? [{ name: content.housingAllOption, slug: 'all' }, ...category.subcategories]
+      : category.subcategories;
   const searchPlaceholder =
     category.slug === 'services'
       ? content.servicesSearchPlaceholder
@@ -56,41 +56,48 @@ export default function CategoryHeroControls({
       searchPlaceholder
     );
 
-function handleTypeChange(event: ChangeEvent<HTMLSelectElement>) {  
-      const value = event.target.value;
-    if (value) {
-      router.push(`/category/${category.slug}/${value}`);
+  function handleSearchSubmit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+
+    const query = searchValue.trim();
+    const params = new URLSearchParams();
+
+    if (query) {
+      params.set('q', query);
     }
+
+    const href = `/category/${category.slug}/all${params.toString() ? `?${params.toString()}` : ''}`;
+
+    router.push(href);
   }
 
   return (
     <>
-      {showTypeSelect ? (
-        <label className="filter-card" htmlFor="category-type">
-          <span className="filter-label">
-            {category.slug === 'housing' ? content.housingPropertyTypeLabel : content.typeLabel}
-          </span>
-          <select id="category-type" className="filter-select" defaultValue="" onChange={handleTypeChange}>
-            <option value="" disabled>
-              {category.slug === 'housing' ? content.housingPropertyTypeLabel : content.typePlaceholder}
-            </option>
-            {(category.types || []).map((typeItem) => (
-              <option key={typeItem.slug} value={typeItem.slug}>
-                {typeItem.name}
-              </option>
-            ))}
-          </select>
-        </label>
-      ) : null}
-
       {showHeroSubcategories ? (
-        <div className="subcategory-pill-row" role="list" aria-label={content.subcategoriesTitle}>
-          {category.subcategories.map((subcategory) => (
+        <nav
+          className={
+            usesSegmentedNavigation
+              ? 'subcategory-tabs'
+              : 'subcategory-pill-row'
+          }
+          aria-label={content.subcategoriesTitle}
+        >
+          {navigationSubcategories.map((subcategory, index) => (
             <Link
               key={subcategory.slug}
               href={`/category/${category.slug}/${subcategory.slug}`}
-              className="subcategory-pill"
-              role="listitem"
+              className={
+                usesSegmentedNavigation && category.slug === 'housing' && index === 0
+                  ? 'subcategory-tab is-active'
+                  : usesSegmentedNavigation
+                  ? 'subcategory-tab'
+                  : 'subcategory-pill'
+              }
+              aria-current={
+                usesSegmentedNavigation && category.slug === 'housing' && index === 0
+                  ? 'page'
+                  : undefined
+              }
             >
               {subcategory.name}
             </Link>
@@ -100,12 +107,12 @@ function handleTypeChange(event: ChangeEvent<HTMLSelectElement>) {
               {content.viewAllLabel}
             </Link>
           ) : null}
-        </div>
+        </nav>
       ) : null}
 
       {showSearchBar ? (
         <section className="search-section category-search-section">
-          <div className="search-container">
+          <form className="search-container" onSubmit={handleSearchSubmit}>
             <div className="search-input-frame">
               <input
                 type="text"
@@ -120,10 +127,10 @@ function handleTypeChange(event: ChangeEvent<HTMLSelectElement>) {
                 </span>
               )}
             </div>
-            <button type="button" className="search-button">
+            <button type="submit" className="search-button">
               {content.categorySearchButton}
             </button>
-          </div>
+          </form>
           {category.slug === 'services' ? (
             <div className="category-cta-row">
               <Link href={`/category/${category.slug}/all`} className="explore-button">

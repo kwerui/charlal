@@ -30,7 +30,7 @@ function buildTypeHref(basePath: string, params: Record<string, string>) {
   return queryString ? `${basePath}?${queryString}` : basePath;
 }
 
-export default function MarketplaceBuyTypeDropdown({
+export default function MarketplaceTypeFilterControls({
   basePath,
   options,
   selectedValue,
@@ -53,26 +53,27 @@ export default function MarketplaceBuyTypeDropdown({
   }
 
   return (
-    <div className="category-hero-controls">
-      <label className="filter-card" htmlFor="marketplace-buy-type">
-        <span className="filter-label">{content.typeLabel}</span>
-        <select
-          key={selectedValue}
-          id="marketplace-buy-type"
-          className="filter-select"
-          defaultValue={selectedValue}
-          onChange={handleTypeChange}
-        >
-          <option value="" disabled>
-            {content.typePlaceholder}
-          </option>
-          {options.map((typeItem) => (
-            <option key={typeItem.slug} value={typeItem.slug}>
-              {typeItem.name}
+    <section className="housing-filter-card housing-filter-card--compact" aria-label={content.typeLabel}>
+      <div className="housing-filter-grid">
+        <label className="filter-field" htmlFor="marketplace-quick-type-filter">
+          <span className="sr-only">{content.typeLabel}</span>
+          <select
+            id="marketplace-quick-type-filter"
+            className={`filter-select ${selectedValue ? '' : 'placeholder-selected'}`}
+            value={selectedValue}
+            onChange={handleTypeChange}
+          >
+            <option value="" disabled>
+              {content.typePlaceholder}
             </option>
-          ))}
-        </select>
-      </label>
-    </div>
+            {options.map((typeItem) => (
+              <option key={typeItem.slug} value={typeItem.slug}>
+                {typeItem.name}
+              </option>
+            ))}
+          </select>
+        </label>
+      </div>
+    </section>
   );
 }

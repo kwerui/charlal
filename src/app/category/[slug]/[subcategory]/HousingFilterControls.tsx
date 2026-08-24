@@ -14,6 +14,8 @@ type Props = {
   transactionValue: string;
   propertyTypeValue: string;
   preservedParams?: Record<string, string>;
+  idPrefix?: string;
+  isCompact?: boolean;
 };
 
 function addPreservedParams(params: URLSearchParams, preservedParams: Record<string, string>) {
@@ -81,53 +83,32 @@ export default function HousingFilterControls({
   transactionValue,
   propertyTypeValue,
   preservedParams = {},
+  idPrefix = 'housing',
+  isCompact = false,
 }: Props) {
   const router = useRouter();
-
-  function handleTransactionChange(event: ChangeEvent<HTMLSelectElement>) {
-    router.push(getHousingFilterHref(event.target.value, propertyTypeValue, preservedParams), { scroll: false });
-  }
+  const propertyTypeSelectId = `${idPrefix}-property-type-filter`;
 
   function handlePropertyTypeChange(event: ChangeEvent<HTMLSelectElement>) {
     router.push(getHousingFilterHref(transactionValue, event.target.value, preservedParams), { scroll: false });
   }
 
-  function clearTransaction() {
-    router.push(getHousingFilterHref('', propertyTypeValue, preservedParams), { scroll: false });
-  }
-
-  function clearPropertyType() {
-    router.push(getHousingFilterHref(transactionValue, '', preservedParams), { scroll: false });
-  }
-
-  function clearAllFilters() {
-    router.push(getHousingFilterHref('', '', preservedParams), { scroll: false });
-  }
-
   return (
-    <section className="housing-filter-card" aria-label={content.housingTransactionLabel}>
+    <section
+      className={
+        isCompact
+          ? 'housing-filter-card housing-filter-card--compact'
+          : 'housing-filter-card'
+      }
+      aria-label={content.housingPropertyTypeLabel}
+    >
       <div className="housing-filter-grid">
-        <label className="filter-field" htmlFor="housing-transaction-filter">
-          <span className="filter-label">{content.housingTransactionLabel}</span>
+        <label className="filter-field" htmlFor={propertyTypeSelectId}>
+          <span className={isCompact ? 'sr-only' : 'filter-label'}>
+            {content.housingPropertyTypeLabel}
+          </span>
           <select
-            id="housing-transaction-filter"
-            className={`filter-select ${transactionValue ? '' : 'placeholder-selected'}`}
-            value={transactionValue}
-            onChange={handleTransactionChange}
-          >
-            <option value="" disabled>
-              {content.housingTransactionPlaceholder}
-            </option>
-            <option value="all">{content.housingAllOption}</option>
-            <option value="sale">{content.housingSaleOption}</option>
-            <option value="rent">{content.housingRentOption}</option>
-          </select>
-        </label>
-
-        <label className="filter-field" htmlFor="housing-property-type-filter">
-          <span className="filter-label">{content.housingPropertyTypeLabel}</span>
-          <select
-            id="housing-property-type-filter"
+            id={propertyTypeSelectId}
             className={`filter-select ${propertyTypeValue ? '' : 'placeholder-selected'}`}
             value={propertyTypeValue}
             onChange={handlePropertyTypeChange}
@@ -143,18 +124,6 @@ export default function HousingFilterControls({
             ))}
           </select>
         </label>
-      </div>
-
-      <div className="housing-filter-actions">
-        <button type="button" className="secondary-button housing-filter-button" onClick={clearTransaction}>
-          {content.housingClearTransaction}
-        </button>
-        <button type="button" className="secondary-button housing-filter-button" onClick={clearPropertyType}>
-          {content.housingClearPropertyType}
-        </button>
-        <button type="button" className="secondary-button housing-filter-button" onClick={clearAllFilters}>
-          {content.housingClearAllFilters}
-        </button>
       </div>
     </section>
   );
