@@ -38,10 +38,15 @@ implemented yet.
 ```bash
 NEXT_PUBLIC_SUPABASE_URL=your_project_url
 NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=your_publishable_key
+NEXT_PUBLIC_SITE_URL=http://localhost:3000
 ```
 
 Do not commit `.env.local`; it is ignored by Git. `.env.example` contains only
 empty placeholders for the required variable names.
+
+`NEXT_PUBLIC_SITE_URL` must be set to the canonical Charlal web origin in
+production so Auth callback redirects use the public app URL instead of the
+request origin.
 
 Restart the development server after editing environment variables so Next.js
 loads the new values.
@@ -54,6 +59,9 @@ temporary check before production.
 
 Until both public Supabase variables are present, the root `proxy.ts` leaves
 application requests unchanged so local development can still load the app.
+
+For the self-hosted Supabase production cutover prerequisites, see
+[`docs/self-hosted-supabase-precutover.md`](docs/self-hosted-supabase-precutover.md).
 
 ### Apply the SQL Migrations
 
