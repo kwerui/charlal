@@ -59,6 +59,7 @@ import {
   type AppMessageAttachment,
   type DatabaseConversationReadRow,
   type DatabaseMessageRow,
+  type DatabaseMessageAttachmentRow,
 } from '@/lib/messagingTypes';
 import { createClient } from '@/lib/supabase/client';
 import {
@@ -2027,6 +2028,25 @@ export default function ConversationThread({
       );
     }
 
+    function handleIncomingAttachment(
+      payload: RealtimePostgresInsertPayload<DatabaseMessageAttachmentRow>
+    ) {
+      if (
+        !active ||
+        activeThreadChannelGenerationRef.current !== channelGeneration
+      ) {
+        return;
+      }
+
+      if (!payload.new.message_id) {
+        return;
+      }
+
+      void hydrateRealtimeMessageSnapshot(
+        payload.new.message_id,
+        'attachment-insert'
+      );
+    }
     function handleIncomingMessage(
       payload: RealtimePostgresInsertPayload<DatabaseMessageRow>
     ) {
@@ -2318,6 +2338,15 @@ export default function ConversationThread({
               filter: conversationRealtimeFilter,
             },
             handleReadMarkerChange
+          )
+          .on<DatabaseMessageAttachmentRow>(
+            'postgres_changes',
+            {
+              event: 'INSERT',
+              schema: 'public',
+              table: 'message_attachments',
+            },
+            handleIncomingAttachment
           );
 
         subscribeWithRealtimeDiagnostics(

@@ -160,7 +160,7 @@ test('hides new database saves when viewer ownership is unavailable', () => {
   );
 });
 
-test('allows builtin and known non-owned database favorite controls', () => {
+test('allows known non-owned database favorite controls and rejects builtin controls', () => {
   const builtinListing = createListing(9);
   const databaseListing = createListing('db-visible');
 
@@ -171,7 +171,7 @@ test('allows builtin and known non-owned database favorite controls', () => {
       isSaved: false,
       currentViewerId: 'viewer-1',
     }),
-    true
+    false
   );
   assert.equal(
     canOfferListingFavoriteControl({
