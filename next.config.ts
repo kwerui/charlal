@@ -1,8 +1,9 @@
 import type { NextConfig } from "next";
 
 type SupabaseStorageRemotePattern = {
-  protocol: 'https';
+  protocol: "http" | "https";
   hostname: string;
+  port?: string;
   pathname: string;
 };
 
@@ -16,20 +17,32 @@ function getSupabaseStorageRemotePatterns(): SupabaseStorageRemotePattern[] {
   try {
     const parsedUrl = new URL(supabaseUrl);
 
-    if (parsedUrl.protocol !== 'https:') {
+    const isHttps = parsedUrl.protocol === "https:";
+    const isLocalDevelopmentHttp =
+      process.env.NODE_ENV !== "production" &&
+      parsedUrl.protocol === "http:" &&
+      (parsedUrl.hostname === "127.0.0.1" ||
+        parsedUrl.hostname === "localhost");
+
+    if (!isHttps && !isLocalDevelopmentHttp) {
       return [];
     }
 
+    const protocol: "http" | "https" =
+      parsedUrl.protocol === "https:" ? "https" : "http";
+
     return [
       {
-        protocol: 'https',
+        protocol,
         hostname: parsedUrl.hostname,
-        pathname: '/storage/v1/object/public/listing-images/**',
+        port: parsedUrl.port || undefined,
+        pathname: "/storage/v1/object/public/listing-images/**",
       },
       {
-        protocol: 'https',
+        protocol,
         hostname: parsedUrl.hostname,
-        pathname: '/storage/v1/object/public/profile-avatars/**',
+        port: parsedUrl.port || undefined,
+        pathname: "/storage/v1/object/public/profile-avatars/**",
       },
     ];
   } catch {
@@ -37,7 +50,9 @@ function getSupabaseStorageRemotePatterns(): SupabaseStorageRemotePattern[] {
   }
 }
 
-const supabaseStorageRemotePatterns = getSupabaseStorageRemotePatterns();
+const supabaseStorageRemotePatterns =
+  getSupabaseStorageRemotePatterns();
+
 type SupabaseCspOrigins = {
   supabaseOrigin: string;
   supabaseRealtimeOrigin: string;
@@ -48,23 +63,27 @@ export function getSupabaseCspOrigins(
 ): SupabaseCspOrigins {
   if (!supabaseUrl) {
     return {
-      supabaseOrigin: '',
-      supabaseRealtimeOrigin: '',
+      supabaseOrigin: "",
+      supabaseRealtimeOrigin: "",
     };
   }
 
   try {
     const parsedUrl = new URL(supabaseUrl);
 
-    if (parsedUrl.protocol !== 'https:' && parsedUrl.protocol !== 'http:') {
+    if (
+      parsedUrl.protocol !== "https:" &&
+      parsedUrl.protocol !== "http:"
+    ) {
       return {
-        supabaseOrigin: '',
-        supabaseRealtimeOrigin: '',
+        supabaseOrigin: "",
+        supabaseRealtimeOrigin: "",
       };
     }
 
     const realtimeUrl = new URL(supabaseUrl);
-    realtimeUrl.protocol = parsedUrl.protocol === 'https:' ? 'wss:' : 'ws:';
+    realtimeUrl.protocol =
+      parsedUrl.protocol === "https:" ? "wss:" : "ws:";
 
     return {
       supabaseOrigin: parsedUrl.origin,
@@ -72,8 +91,8 @@ export function getSupabaseCspOrigins(
     };
   } catch {
     return {
-      supabaseOrigin: '',
-      supabaseRealtimeOrigin: '',
+      supabaseOrigin: "",
+      supabaseRealtimeOrigin: "",
     };
   }
 }
@@ -156,35 +175,39 @@ const securityHeaders = [
 
 const nextConfig: NextConfig = {
   poweredByHeader: false,
+
   headers() {
     return [
       {
-        source: '/:path*',
+        source: "/:path*",
         headers: securityHeaders,
       },
     ];
   },
+
   images: {
+    dangerouslyAllowLocalIP: process.env.NODE_ENV !== "production",
+
     remotePatterns: [
       {
-        protocol: 'https',
-        hostname: 'i.pinimg.com',
-        pathname: '/**',
+        protocol: "https",
+        hostname: "i.pinimg.com",
+        pathname: "/**",
       },
       {
-        protocol: 'https',
-        hostname: 'img.magnific.com',
-        pathname: '/**',
+        protocol: "https",
+        hostname: "img.magnific.com",
+        pathname: "/**",
       },
       {
-        protocol: 'https',
-        hostname: 'encrypted-tbn0.gstatic.com',
-        pathname: '/**',
+        protocol: "https",
+        hostname: "encrypted-tbn0.gstatic.com",
+        pathname: "/**",
       },
       {
-        protocol: 'https',
-        hostname: 'thumbs.dreamstime.com',
-        pathname: '/**',
+        protocol: "https",
+        hostname: "thumbs.dreamstime.com",
+        pathname: "/**",
       },
       ...supabaseStorageRemotePatterns,
     ],
