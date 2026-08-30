@@ -1,12 +1,20 @@
 import { takeLocaleHistoryNormalizationRedirect } from '@/i18n/localeHistory';
 import { recordNativeHistoryTraversalIntent } from '@/lib/nativeHistoryIntentStorage';
+import { requestResultsScrollRestoreAfterNativeTraversal } from '@/lib/resultsScrollStorage';
 
 declare global {
   interface Window {
     __charlalNativeHistoryPopstateHandler?: (
       event: PopStateEvent
     ) => void;
+
+    __charlalDocumentInstanceId?: string;
   }
+}
+
+if (!window.__charlalDocumentInstanceId) {
+  window.__charlalDocumentInstanceId =
+    crypto.randomUUID();
 }
 
 const existingHandler =
@@ -33,10 +41,15 @@ function handleNativeHistoryTraversal(): void {
     );
 
   if (redirectHref) {
+    requestResultsScrollRestoreAfterNativeTraversal(
+      redirectHref
+    );
+
     window.location.replace(redirectHref);
   }
 }
 
+// IMPORTANT: these stay OUTSIDE the function.
 window.__charlalNativeHistoryPopstateHandler =
   handleNativeHistoryTraversal;
 
@@ -45,3 +58,4 @@ window.addEventListener(
   handleNativeHistoryTraversal,
   true
 );
+

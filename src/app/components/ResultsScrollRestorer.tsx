@@ -1,26 +1,114 @@
 'use client';
 
 import { useLayoutEffect } from 'react';
-import { takeResultsScrollPosition } from '@/lib/resultsScrollStorage';
+import {
+  completeResultsScrollRestore,
+  peekResultsScrollRestorePosition,
+} from '@/lib/resultsScrollStorage';
 
 type Props = {
   resultsHref: string;
 };
 
-export default function ResultsScrollRestorer({ resultsHref }: Props) {
-  useLayoutEffect(() => {
-    const scrollY = takeResultsScrollPosition(resultsHref);
+const MAX_RESTORE_MS = 3000;
+const SCROLL_TOLERANCE_PX = 1;
 
-    if (scrollY === undefined) {
-      return;
+export default function ResultsScrollRestorer({
+  resultsHref,
+}: Props) {
+  useLayoutEffect(() => {
+    const startedAt = performance.now();
+    let frameId = 0;
+    let cancelled = false;
+
+    function restore(): void {
+      if (cancelled) {
+        return;
+      }
+
+      const savedPosition =
+        peekResultsScrollRestorePosition(
+          resultsHref
+        );
+
+      if (!savedPosition) {
+        return;
+      }
+
+      const maximumScrollY = Math.max(
+        0,
+        document.documentElement.scrollHeight -
+          window.innerHeight
+      );
+
+      let targetScrollY: number;
+
+      if (savedPosition.nearBottom) {
+        /*
+         * Preserve "at the bottom" semantically even when
+         * translated/responsive content changes page height.
+         */
+        targetScrollY = maximumScrollY;
+      } else if (
+        savedPosition.maximumScrollY > 0
+      ) {
+        /*
+         * Preserve approximately the same relative position
+         * when the destination page's height differs.
+         */
+        const scrollRatio =
+          savedPosition.scrollY /
+          savedPosition.maximumScrollY;
+
+        targetScrollY = Math.min(
+          maximumScrollY,
+          Math.max(
+            0,
+            scrollRatio * maximumScrollY
+          )
+        );
+      } else {
+        targetScrollY = Math.min(
+          savedPosition.scrollY,
+          maximumScrollY
+        );
+      }
+
+      window.scrollTo({
+        top: targetScrollY,
+        left: 0,
+        behavior: 'auto',
+      });
+
+      if (
+        Math.abs(
+          window.scrollY - targetScrollY
+        ) <= SCROLL_TOLERANCE_PX
+      ) {
+        completeResultsScrollRestore(
+          resultsHref
+        );
+        return;
+      }
+
+      if (
+        performance.now() - startedAt <
+        MAX_RESTORE_MS
+      ) {
+        frameId =
+          window.requestAnimationFrame(
+            restore
+          );
+      }
     }
 
-    window.scrollTo({ top: scrollY, left: 0, behavior: 'auto' });
-    const frameId = window.requestAnimationFrame(() => {
-      window.scrollTo({ top: scrollY, left: 0, behavior: 'auto' });
-    });
+    frameId =
+      window.requestAnimationFrame(
+        restore
+      );
 
     return () => {
+      cancelled = true;
       window.cancelAnimationFrame(frameId);
     };
   }, [resultsHref]);

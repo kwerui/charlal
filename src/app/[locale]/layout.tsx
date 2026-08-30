@@ -4,7 +4,6 @@ import { hasLocale } from 'next-intl';
 import { NextIntlClientProvider } from 'next-intl';
 import { notFound } from 'next/navigation';
 import { Suspense } from 'react';
-import NativeHistoryIntentMarker from '../components/NativeHistoryIntentMarker';
 import SiteHeader from '../components/SiteHeader';
 import SiteFooter from '../components/SiteFooter';
 import { AuthProvider } from '@/lib/auth/client';
@@ -50,7 +49,6 @@ export default async function RootLayout({
         <NextIntlClientProvider>
           <AuthProvider>
             <MessagingRealtimeProvider>
-              <NativeHistoryIntentMarker />
               <Suspense fallback={null}>
                 <SiteHeader />
               </Suspense>
