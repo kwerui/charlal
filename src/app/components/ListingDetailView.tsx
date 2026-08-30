@@ -1,4 +1,4 @@
-import Link from 'next/link';
+import { Link } from '@/i18n/navigation';
 import BackToResultsLink from '@/app/components/BackToResultsLink';
 import FavoriteListingButton from '@/app/components/FavoriteListingButton';
 import ListingImageGallery from '@/app/components/ListingImageGallery';

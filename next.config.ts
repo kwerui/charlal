@@ -1,4 +1,5 @@
 import type { NextConfig } from "next";
+import createNextIntlPlugin from 'next-intl/plugin';
 
 type SupabaseStorageRemotePattern = {
   protocol: "http" | "https";
@@ -139,7 +140,9 @@ const contentSecurityPolicy = [
   `img-src ${imageSources.join(' ')}`,
   "font-src 'self' data:",
   `connect-src ${connectSources.join(' ')}`,
-  "upgrade-insecure-requests",
+  ...(process.env.NODE_ENV === 'production'
+    ? ["upgrade-insecure-requests"]
+    : []),
 ].join('; ');
 
 const securityHeaders = [
@@ -214,4 +217,6 @@ const nextConfig: NextConfig = {
   },
 };
 
-export default nextConfig;
+const withNextIntl = createNextIntlPlugin();
+
+export default withNextIntl(nextConfig);

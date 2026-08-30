@@ -1,7 +1,8 @@
 'use client';
 
-import { usePathname, useRouter, useSearchParams } from 'next/navigation';
+import { usePathname, useSearchParams } from 'next/navigation';
 import { useEffect } from 'react';
+import { useRouter } from '@/i18n/navigation';
 import { shouldRefreshForListingMutation } from '@/lib/listingMutationRefreshStorage';
 
 type Props = {

@@ -1,3 +1,5 @@
+import { removeKnownLocalePrefix } from '@/i18n/localePath';
+
 export type RouteSearchParams = {
   [key: string]: string | string[] | undefined;
 };
@@ -31,7 +33,9 @@ export function buildHrefWithSearchParams(
 export function getSafeResultsHref(
   from: string | string[] | undefined
 ): string | undefined {
+  
   const href = Array.isArray(from) ? from[0] : from;
+  
 
   if (!href || !href.startsWith('/') || href.startsWith('//') || href.includes('\\')) {
     return undefined;
@@ -39,24 +43,30 @@ export function getSafeResultsHref(
 
   try {
     const parsedHref = new URL(href, 'https://internal.local');
-    const isHomepageRoute =
-      parsedHref.pathname === '/' && parsedHref.search === '' && parsedHref.hash === '';
-    const isAccountRoute =
-      parsedHref.pathname === '/account' &&
-      parsedHref.search === '' &&
-      parsedHref.hash === '';
-    const isResultsRoute =
-      isHomepageRoute ||
-      isAccountRoute ||
-      parsedHref.pathname === '/search' ||
-      parsedHref.pathname.startsWith('/category/') ||
-      parsedHref.pathname.startsWith('/seller/');
+    const normalizedPathname = removeKnownLocalePrefix(parsedHref.pathname);
+
+const isHomepageRoute =
+  normalizedPathname === '/' &&
+  parsedHref.search === '' &&
+  parsedHref.hash === '';
+
+const isAccountRoute =
+  normalizedPathname === '/account' &&
+  parsedHref.search === '' &&
+  parsedHref.hash === '';
+
+const isResultsRoute =
+  isHomepageRoute ||
+  isAccountRoute ||
+  normalizedPathname === '/search' ||
+  normalizedPathname.startsWith('/category/') ||
+  normalizedPathname.startsWith('/seller/');
 
     if (parsedHref.origin !== 'https://internal.local' || !isResultsRoute) {
       return undefined;
     }
 
-    return `${parsedHref.pathname}${parsedHref.search}${parsedHref.hash}`;
+return `${normalizedPathname}${parsedHref.search}${parsedHref.hash}`;
   } catch {
     return undefined;
   }

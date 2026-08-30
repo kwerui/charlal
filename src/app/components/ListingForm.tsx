@@ -1,6 +1,6 @@
 'use client';
 
-import Link from 'next/link';
+import { Link } from '@/i18n/navigation';
 import type { ChangeEvent, FormEvent, ReactNode } from 'react';
 import { useEffect, useRef, useState } from 'react';
 import { content } from '@/content/tyv';

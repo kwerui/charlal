@@ -1,3 +1,9 @@
+import {
+  localizeReturnPathQuery,
+  removeKnownLocalePrefix,
+} from '@/i18n/localePath';
+import { routing } from '@/i18n/routing';
+
 const ACTIVE_LISTING_NAVIGATION_KEY = 'charlal-active-listing-navigation';
 const RESTORE_INTENT_KEY = 'charlal-restore-results-scroll';
 const SCROLL_KEY_PREFIX = 'charlal-results-scroll:';
@@ -30,6 +36,27 @@ type StoredRestoreIntent = {
 
 function isBrowser(): boolean {
   return typeof window !== 'undefined';
+}
+
+function getLogicalNavigationHref(href: string): string {
+  try {
+    const parsedHref = new URL(href, 'https://internal.local');
+
+    if (parsedHref.origin !== 'https://internal.local') {
+      return href;
+    }
+
+    const logicalQueryString = localizeReturnPathQuery(
+      parsedHref.searchParams.toString(),
+      routing.defaultLocale
+    );
+
+    return `${removeKnownLocalePrefix(parsedHref.pathname)}${
+      logicalQueryString ? `?${logicalQueryString}` : ''
+    }${parsedHref.hash}`;
+  } catch {
+    return href;
+  }
 }
 
 function getScrollStorageKey(resultsHref: string): string {
@@ -90,15 +117,20 @@ export function requestResultsScrollRestore(resultsHref: string): void {
     return;
   }
 
-  const currentHref = `${window.location.pathname}${window.location.search}`;
+  const logicalResultsHref = getLogicalNavigationHref(resultsHref);
+
+  const currentHref = getLogicalNavigationHref(
+    `${window.location.pathname}${window.location.search}`
+  );
+
   const activeNavigation = readJson<StoredListingNavigation>(
     ACTIVE_LISTING_NAVIGATION_KEY
   );
 
   if (
     !activeNavigation ||
-    activeNavigation.resultsHref !== resultsHref ||
-    activeNavigation.targetHref !== currentHref ||
+    getLogicalNavigationHref(activeNavigation.resultsHref) !== logicalResultsHref ||
+    getLogicalNavigationHref(activeNavigation.targetHref) !== currentHref ||
     !isFresh(activeNavigation.savedAt)
   ) {
     window.sessionStorage.removeItem(ACTIVE_LISTING_NAVIGATION_KEY);
@@ -106,11 +138,15 @@ export function requestResultsScrollRestore(resultsHref: string): void {
   }
 
   const restoreIntent: StoredRestoreIntent = {
-    resultsHref,
+    resultsHref: logicalResultsHref,
     requestedAt: Date.now(),
   };
 
-  window.sessionStorage.setItem(RESTORE_INTENT_KEY, JSON.stringify(restoreIntent));
+  window.sessionStorage.setItem(
+    RESTORE_INTENT_KEY,
+    JSON.stringify(restoreIntent)
+  );
+
   window.sessionStorage.removeItem(ACTIVE_LISTING_NAVIGATION_KEY);
 }
 
@@ -165,15 +201,18 @@ export function hasActiveResultsNavigation(resultsHref: string): boolean {
     return false;
   }
 
-  const currentHref = `${window.location.pathname}${window.location.search}`;
+const currentHref = getLogicalNavigationHref(
+  `${window.location.pathname}${window.location.search}`
+);
   const activeNavigation = readJson<StoredListingNavigation>(
     ACTIVE_LISTING_NAVIGATION_KEY
   );
 
   if (
     !activeNavigation ||
-    activeNavigation.resultsHref !== resultsHref ||
-    activeNavigation.targetHref !== currentHref ||
+    getLogicalNavigationHref(activeNavigation.resultsHref) !==
+  getLogicalNavigationHref(resultsHref) ||
+getLogicalNavigationHref(activeNavigation.targetHref) !== currentHref ||
     !isFresh(activeNavigation.savedAt)
   ) {
     window.sessionStorage.removeItem(ACTIVE_LISTING_NAVIGATION_KEY);

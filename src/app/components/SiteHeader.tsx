@@ -1,9 +1,12 @@
 "use client";
 
-import Link from 'next/link';
-import { usePathname, useRouter } from 'next/navigation';
+import { useSyncExternalStore } from 'react';
+import { useLocale, useTranslations } from 'next-intl';
+import { useSearchParams } from 'next/navigation';
 import CharlalLogo from '@/app/components/CharlalLogo';
-import { content } from '@/content/tyv';
+import { Link, usePathname, useRouter } from '@/i18n/navigation';
+import { recordLocaleHistoryNormalization } from '@/i18n/localeHistory';
+import { localizeReturnPathQuery } from '@/i18n/localePath';
 import { useAuthStatus } from '@/lib/auth/client';
 import { useMessagingRealtime } from '@/lib/messagingRealtime';
 import { clearNativeHistoryTraversalIntent } from '@/lib/nativeHistoryIntentStorage';
@@ -34,29 +37,54 @@ function UserIcon() {
   );
 }
 
+function subscribeToHydrationStore() {
+  return () => {};
+}
+
+function getClientHydrationSnapshot() {
+  return true;
+}
+
+function getServerHydrationSnapshot() {
+  return false;
+}
+
+function useHasHydrated() {
+  return useSyncExternalStore(
+    subscribeToHydrationStore,
+    getClientHydrationSnapshot,
+    getServerHydrationSnapshot
+  );
+}
+
 export default function SiteHeader({
   initialAuthStatus,
 }: Props) {
+  const t = useTranslations('Header');
+  const locale = useLocale();
   const router = useRouter();
   const pathname = usePathname();
+  const searchParams = useSearchParams();
   const { status: authStatus, user, signOut } = useAuthStatus();
+  const hasHydrated = useHasHydrated();
+  const renderAuthStatus = hasHydrated ? authStatus : 'checking';
   const { unreadConversationCount: liveUnreadConversationCount } =
     useMessagingRealtime();
   const signedIn =
-    authStatus === 'authenticated' ||
-    (authStatus === 'checking' && initialAuthStatus === 'authenticated');
-  const checkingAuth = authStatus === 'checking' && !signedIn;
+    renderAuthStatus === 'authenticated' ||
+    (renderAuthStatus === 'checking' && initialAuthStatus === 'authenticated');
+  const checkingAuth = renderAuthStatus === 'checking' && !signedIn;
   const unreadConversationCount = signedIn
     ? liveUnreadConversationCount
     : 0;
   const messagesLabel =
     unreadConversationCount > 0
-      ? `${content.messagesTitle}, ${unreadConversationCount} ${
+      ? `${t('messages')}, ${unreadConversationCount} ${
           unreadConversationCount === 1
             ? 'unread conversation'
             : 'unread conversations'
         }`
-      : content.messagesTitle;
+      : t('messages');
 
   function handlePostAdClick() {
     if (signedIn) {
@@ -81,15 +109,43 @@ export default function SiteHeader({
     }
   }
 
+  function handleLocaleChange(nextLocale: 'tyv' | 'ru') {
+    const currentQueryString = searchParams.toString();
+    const queryString = localizeReturnPathQuery(currentQueryString, nextLocale);
+    const href = queryString ? `${pathname}?${queryString}` : pathname;
+
+    recordLocaleHistoryNormalization(currentQueryString, locale, nextLocale);
+    router.replace(href, { locale: nextLocale });
+  }
 
   return (
     <header className="header">
       <div className="header-inner">
-        <Link href="/" className="site-name-link" aria-label={content.homeLinkLabel}>
+        <Link href="/" className="site-name-link" aria-label={t('homeLinkLabel')}>
           <CharlalLogo />
         </Link>
 
-        <nav className="header-actions" aria-label={content.headerActionsLabel}>
+        <nav className="header-actions" aria-label={t('actionsLabel')}>
+          <div className="language-switcher" aria-label={t('languageSwitcherLabel')}>
+            <button
+              type="button"
+              className="header-button secondary-header-button"
+              aria-current={locale === 'tyv' ? 'true' : undefined}
+              disabled={locale === 'tyv'}
+              onClick={() => handleLocaleChange('tyv')}
+            >
+              TYV
+            </button>
+            <button
+              type="button"
+              className="header-button secondary-header-button"
+              aria-current={locale === 'ru' ? 'true' : undefined}
+              disabled={locale === 'ru'}
+              onClick={() => handleLocaleChange('ru')}
+            >
+              RU
+            </button>
+          </div>
           {checkingAuth ? null : signedIn ? (
             <>
               <Link
@@ -97,7 +153,7 @@ export default function SiteHeader({
                 className="header-button secondary-header-button header-messages-button"
                 aria-label={messagesLabel}
               >
-                <span>{content.messagesTitle}</span>
+                <span>{t('messages')}</span>
                 {unreadConversationCount > 0 ? (
                   <span className="header-unread-badge" aria-hidden="true">
                     {formatUnreadBadge(unreadConversationCount)}
@@ -109,20 +165,20 @@ export default function SiteHeader({
                 className="header-button secondary-header-button"
                 onClick={clearNativeHistoryTraversalIntent}
               >
-                {content.headerAccount}
+                {t('account')}
               </Link>
               <button
                 type="button"
                 className="header-button header-sign-out-button"
                 onClick={handleSignOut}
               >
-                {content.headerSignOut}
+                {t('signOut')}
               </button>
             </>
           ) : (
             <Link href="/sign-in" className="header-button secondary-header-button">
               <UserIcon />
-              {content.headerSignIn}
+              {t('signIn')}
             </Link>
           )}
         </nav>
@@ -131,14 +187,14 @@ export default function SiteHeader({
   type="button"
   className="header-button primary-header-button header-post-ad-button"
   onClick={handlePostAdClick}
-  disabled={authStatus === 'checking'}
+  disabled={renderAuthStatus === 'checking'}
 >
-  {content.headerPostAd}
+  {t('postAd')}
 </button>
 
         {signedIn && user ? (
           <span className="sr-only">
-            {content.signedInAsLabel} {user.email}
+            {t('signedInAs')} {user.email}
           </span>
         ) : null}
       </div>

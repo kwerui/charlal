@@ -2,15 +2,24 @@ import { createServerClient } from '@supabase/ssr';
 import { NextResponse, type NextRequest } from 'next/server';
 import { getSupabaseEnvironmentCheck } from '@/lib/supabase/env';
 
-export async function updateSession(request: NextRequest): Promise<NextResponse> {
+type ResponseFactory = (request: NextRequest) => NextResponse;
+
+function createDefaultResponse(request: NextRequest): NextResponse {
+  return NextResponse.next({ request });
+}
+
+export async function updateSession(
+  request: NextRequest,
+  createResponse: ResponseFactory = createDefaultResponse
+): Promise<NextResponse> {
   const envCheck = getSupabaseEnvironmentCheck();
 
   if (!envCheck.ok) {
-    return NextResponse.next({ request });
+    return createResponse(request);
   }
 
   const { supabaseUrl, supabasePublishableKey } = envCheck.env;
-  let supabaseResponse = NextResponse.next({ request });
+  let supabaseResponse = createResponse(request);
 
   const supabase = createServerClient(supabaseUrl, supabasePublishableKey, {
     cookies: {
@@ -22,7 +31,7 @@ export async function updateSession(request: NextRequest): Promise<NextResponse>
           request.cookies.set(name, value);
         });
 
-        supabaseResponse = NextResponse.next({ request });
+        supabaseResponse = createResponse(request);
 
         cookiesToSet.forEach(({ name, value, options }) => {
           supabaseResponse.cookies.set(name, value, options);

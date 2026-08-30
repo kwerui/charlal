@@ -1,0 +1,14 @@
+{
+  "Header": {
+    "homeLinkLabel": "На главную",
+    "actionsLabel": "Действия аккаунта",
+    "signIn": "Войти",
+    "signOut": "Выйти",
+    "account": "Аккаунт",
+    "postAd": "Выложить объявление",
+    "signedInAs": "Вошли как",
+    "messages": "Сообщения",
+    "languageSwitcherLabel": "Язык"
+  }
+}
+

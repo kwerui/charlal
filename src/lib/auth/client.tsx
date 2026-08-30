@@ -27,6 +27,10 @@ import {
   type AuthStatus,
   type ProfileStatus,
 } from '@/lib/auth/types';
+import {
+  unknownInitialAuthState,
+  type ResolvedAuthState,
+} from '@/lib/auth/initialState';
 
 type AuthFailureReason =
   | 'invalid-credentials'
@@ -67,13 +71,6 @@ type AuthContextValue = {
 };
 
 const AuthContext = createContext<AuthContextValue | undefined>(undefined);
-
-type ResolvedAuthState = {
-  status: AuthStatus;
-  profileStatus: ProfileStatus;
-  user: AppUser | null;
-  profile: AppProfile | null;
-};
 
 let cachedAuthState: ResolvedAuthState | null = null;
 
@@ -338,15 +335,13 @@ export async function signUpWithEmailPassword({
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const supabase = useMemo(() => createClient(), []);
-  const [status, setStatus] = useState<AuthStatus>(
-    cachedAuthState?.status || 'checking'
-  );
+  const [status, setStatus] = useState<AuthStatus>(unknownInitialAuthState.status);
   const [profileStatus, setProfileStatus] = useState<ProfileStatus>(
-    cachedAuthState?.profileStatus || 'idle'
+    unknownInitialAuthState.profileStatus
   );
-  const [user, setUser] = useState<AppUser | null>(cachedAuthState?.user || null);
+  const [user, setUser] = useState<AppUser | null>(unknownInitialAuthState.user);
   const [profile, setProfile] = useState<AppProfile | null>(
-    cachedAuthState?.profile || null
+    unknownInitialAuthState.profile
   );
   const statusRef = useRef(status);
   const userIdRef = useRef(user?.id || null);

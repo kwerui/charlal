@@ -1,0 +1,14 @@
+{
+  "Header": {
+    "homeLinkLabel": "Кол арынче",
+    "actionsLabel": "Account actions / Аккаунттуң ажыл-чорудулгазы",
+    "signIn": " Кирер",
+    "signOut": "Sign Out / Үнер",
+    "account": "Аккаунт",
+    "postAd": " Чарлалдан үндүрер",
+    "signedInAs": "Signed in as / Кылдыр кирген",
+    "messages": "Messages / Медээлер",
+    "languageSwitcherLabel": "Language"
+  }
+}
+

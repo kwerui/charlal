@@ -1,8 +1,9 @@
 'use client';
 
-import { usePathname, useRouter, useSearchParams } from 'next/navigation';
+import { usePathname, useSearchParams } from 'next/navigation';
 import type { FormEvent } from 'react';
 import { useCallback, useEffect, useId, useRef, useState } from 'react';
+import { useRouter } from '@/i18n/navigation';
 import { reportListingAction } from '@/app/listing/reportActions';
 import { content } from '@/content/tyv';
 import {
