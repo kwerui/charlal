@@ -52,6 +52,27 @@ function isLogicalResultsHref(path: string): boolean {
   }
 }
 
+function isSafeStoredNormalization(
+  normalization: LocaleHistoryNormalization
+): boolean {
+  const safeSourceHref = getSafeNextPath(
+    normalization.sourceHref,
+    ''
+  );
+
+  const safeTargetHref = getSafeNextPath(
+    normalization.targetHref,
+    ''
+  );
+
+  return (
+    safeSourceHref === normalization.sourceHref &&
+    safeTargetHref === normalization.targetHref &&
+    isLogicalResultsHref(safeSourceHref) &&
+    isLogicalResultsHref(safeTargetHref)
+  );
+}
+
 export function createLocaleHistoryNormalization(
   queryString: string,
   currentLocale: string,
@@ -135,18 +156,21 @@ export function takeLocaleHistoryNormalizationRedirect(
     return null;
   }
 
-  const normalization = readStoredNormalization();
+const normalization = readStoredNormalization();
 
-  if (!normalization) {
-    window.sessionStorage.removeItem(LOCALE_HISTORY_NORMALIZATION_KEY);
-    return null;
-  }
-
-  if (currentHref !== normalization.sourceHref) {
-    window.sessionStorage.removeItem(LOCALE_HISTORY_NORMALIZATION_KEY);
-    return null;
-  }
-
+if (
+  !normalization ||
+  !isSafeStoredNormalization(normalization)
+) {
   window.sessionStorage.removeItem(LOCALE_HISTORY_NORMALIZATION_KEY);
-  return normalization.targetHref;
+  return null;
+}
+
+if (currentHref !== normalization.sourceHref) {
+  window.sessionStorage.removeItem(LOCALE_HISTORY_NORMALIZATION_KEY);
+  return null;
+}
+
+window.sessionStorage.removeItem(LOCALE_HISTORY_NORMALIZATION_KEY);
+return normalization.targetHref;
 }

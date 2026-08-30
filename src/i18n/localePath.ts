@@ -18,7 +18,13 @@ export function removeKnownLocalePrefix(path: string): string {
 }
 
 export function localizePath(path: string, locale: string): string {
-  if (routing.locales.some((knownLocale) => path === `/${knownLocale}` || path.startsWith(`/${knownLocale}/`))) {
+  if (
+    routing.locales.some(
+      (knownLocale) =>
+        path === `/${knownLocale}` ||
+        path.startsWith(`/${knownLocale}/`)
+    )
+  ) {
     return path;
   }
 
@@ -26,13 +32,11 @@ export function localizePath(path: string, locale: string): string {
     return path;
   }
 
+  if (path === '/') {
+    return `/${locale}`;
+  }
+
   return `/${locale}${path}`;
-}
-
-export function getSignInHref(path: string, locale: string): string {
-  const nextPath = localizePath(path, locale);
-
-  return `${localizePath('/sign-in', locale)}?next=${encodeURIComponent(nextPath)}`;
 }
 
 export function localizeSafeInternalPath(path: string, locale: string): string {
