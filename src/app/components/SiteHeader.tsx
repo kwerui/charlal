@@ -180,7 +180,7 @@ export default function SiteHeader({
               handleLocaleChange('tyv')
             }
           >
-            TYV
+            ТУВ
           </button>
 
           <button
@@ -196,7 +196,7 @@ export default function SiteHeader({
               handleLocaleChange('ru')
             }
           >
-            RU
+            РУ
           </button>
         </div>
 
