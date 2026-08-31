@@ -2,7 +2,7 @@
 
 import { Link } from '@/i18n/navigation';
 import { usePathname, useSearchParams } from 'next/navigation';
-import { content } from '@/content/tyv';
+import { useTranslations } from 'next-intl';
 import type { Listing } from '@/data/listings';
 import { useAuthStatus } from '@/lib/auth/client';
 import { recordEditNavigation } from '@/lib/editNavigationStorage';
@@ -24,6 +24,7 @@ export default function ListingDetailOwnerActions({
   listing,
   initialViewerState,
 }: Props) {
+  const t = useTranslations('ListingOwnerActions');
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const { status: authStatus, user: currentUser } = useAuthStatus();
@@ -57,7 +58,7 @@ export default function ListingDetailOwnerActions({
           className="listing-detail-owner-button listing-detail-owner-button--edit"
           onClick={() => recordEditNavigation(editHref, currentHref)}
         >
-          {content.editAdvertisementButton}
+          {t('editAdvertisementButton')}
         </Link>
       </div>
     );
@@ -76,8 +77,8 @@ export default function ListingDetailOwnerActions({
       <div className="listing-detail-actions">
         <p className="listing-messaging-unavailable">
           {listingStatus === 'sold'
-            ? content.listingSoldMessagingUnavailableMessage
-            : content.listingArchivedMessagingUnavailableMessage}
+            ? t('soldMessagingUnavailableMessage')
+            : t('archivedMessagingUnavailableMessage')}
         </p>
       </div>
     );
@@ -90,7 +91,7 @@ export default function ListingDetailOwnerActions({
           href={`/contact/${listing.id}`}
           className="search-button listing-contact-button"
         >
-          {content.contactSellerButton}
+          {t('contactSellerButton')}
         </Link>
       </div>
     );
@@ -99,7 +100,7 @@ export default function ListingDetailOwnerActions({
   return (
     <div className="listing-detail-actions">
       <p className="listing-messaging-unavailable">
-        {content.demoListingMessagingUnavailableMessage}
+        {t('demoListingMessagingUnavailableMessage')}
       </p>
     </div>
   );

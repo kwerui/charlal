@@ -25,7 +25,13 @@ export type ListingReportMutationResult =
       reason: ListingReportFailureReason;
     };
 
-function classifyReportErrorMessage(message: string): ListingReportFailureReason {
+export type CurrentUserListingReportState = {
+  alreadyReported: boolean;
+};
+
+function classifyReportErrorMessage(
+  message: string
+): ListingReportFailureReason {
   const normalizedMessage = message.toLocaleLowerCase();
 
   if (normalizedMessage.includes('authenticated user is required')) {
@@ -49,6 +55,39 @@ function classifyReportErrorMessage(message: string): ListingReportFailureReason
   }
 
   return 'database-unavailable';
+}
+
+export async function getCurrentUserListingReportState(
+  listingId: string
+): Promise<CurrentUserListingReportState> {
+  await connection();
+
+  const safeListingId = listingId.trim();
+
+  if (!safeListingId || /^\d+$/.test(safeListingId)) {
+    return { alreadyReported: false };
+  }
+
+  const viewer = await getCurrentViewerId();
+
+  if (viewer.status !== 'signed-in') {
+    return { alreadyReported: false };
+  }
+
+  const supabase = await createClient();
+  const { data, error } = await supabase.rpc('has_reported_listing', {
+    p_listing_id: safeListingId,
+  });
+
+if (error) {
+  console.warn(
+    `[listing-report-state] lookup failed: ${error.code ?? 'unknown'}`
+  );
+
+    return { alreadyReported: false };
+  }
+
+  return { alreadyReported: data === true };
 }
 
 export async function reportListing({

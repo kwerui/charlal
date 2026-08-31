@@ -45,6 +45,79 @@
       "archived": "Архивтелген"
     }
   },
+  "ListingDetail": {
+    "homeBreadcrumb": "Бажың",
+    "backToHomepage": "Кол арынче",
+    "backToAccount": "Back to account / Аккаунтче эглип келир",
+    "backToSellerProfile": "Back to seller profile / Садыгжы профилинге эглип келир",
+    "backToCategory": "Хевирлерже",
+    "backToResults": "Back to results / Түңнелдерже эглип келир",
+    "freePriceLabel": "Халас",
+    "listingDatabaseUnavailableTitle": "Listings unavailable / Даңзылар чок",
+    "databaseListingsLoadFailedMessage": "Unable to load the latest advertisements. / Сөөлгү чарлалдарны үндүрүп шыдаваан.",
+    "listingReservedDetailMessage": "This advertisement is reserved, but you can still contact the seller. / Бо чарлал аңгылаттынган, ынчалза-даа садыгжы-биле харылзажып болур силер.",
+    "listingSoldDetailMessage": "This advertisement has been sold. / Бо чарлал садыпкан.",
+    "listingArchivedDetailMessage": "This advertisement is archived and visible only to its owner. / Бо чарлал архивте чыдар болгаш чүгле ооң ээзинге көстүп турар.",
+    "sellerLabel": "Seller / Садыгжы",
+    "datePostedLabel": "Date posted / үндүрген хүнү",
+    "updatedAtLabel": "Last updated / Сөөлгү катап чаарткан",
+    "descriptionTitle": "Description / Тодарадып бижиири",
+    "gallery": {
+      "photosLabel": "Photos / Чуруктар",
+      "photoAlt": "Чурук {current} деп {total}",
+      "viewPhoto": "Чурукту көрүңер {current} деп {total}",
+      "openViewerWithPhoto": "Долу чурукту ажыдып алыңар: {photo}",
+      "viewerTitleWithPhoto": "Чарлал чурук: {photo}",
+      "closeViewer": "Хаар / Close",
+      "previousPhoto": "Previous photo / Эрткен чурук",
+      "nextPhoto": "Next photo / Дараазында чурук",
+      "position": "{current} / {total}"
+    }
+  },
+  "ListingOwnerActions": {
+    "editAdvertisementButton": "Edit advertisement / Чарлалды өскертир",
+    "contactSellerButton": "Contact seller / Садыгжы-биле харылзажыңар",
+    "soldMessagingUnavailableMessage": "This advertisement has been sold, so new seller conversations are unavailable. / Бо чарлал садыпкан, ынчангаш чаа садыгжылар-биле чугаалажыр арга чок.",
+    "archivedMessagingUnavailableMessage": "This advertisement is archived, so new seller conversations are unavailable. / Бо чарлал архивте чыдар, ынчангаш чаа садыгжылар-биле чугаалажыр арга чок.",
+    "demoListingMessagingUnavailableMessage": "Messaging unavailable for this demo listing / Бо демо-чарлалдың медээлери чок"
+  },
+  "ListingReport": {
+    "button": "Чарлалды дыңнадыр",
+    "title": "Чарлалды дыңнадыр",
+    "question": "Why are you reporting this ad? / Бо чарлалды чүге дыңнадып тур силер?",
+    "detailsLabel": "Tell us more (optional) / Оон-даа хөйнү чугаалаңар (негелде чок)",
+    "detailsHelp": "Maximum 1000 characters. / Эң хөйү 1000 демдек.",
+    "sendButton": "Send report / Хомудалды киирер",
+    "sendingButton": "Sending report... / Хомудалды чоргузуп турар...",
+    "successTitle": " Хомудалды чоруткан.",
+    "successMessage": " Четтирдим.  ",
+    "alreadyReportedTitle": "Already reported / Олар ам-на хомудаан.",
+    "alreadyReportedMessage": "You already reported this ad. / Силер бо чарлалды дыңнаткан-дыр силер.",
+    "alreadyReportedButton": "Already reported / Олар ам-на хомудаан",
+    "reasonRequiredMessage": "Choose a reason for the report. / Хомудалдың чылдагаанын шилип алыңар.",
+    "detailsTooLongMessage": "The details are too long. Use 1000 characters or fewer. / Детализациязы дыка узун. 1000 азы оон эвээш демдектерни ажыглаар.",
+    "ownListingMessage": "You cannot report your own ad. / Бодуңарның чарлалыңарны дыңнадып шыдавас силер.",
+    "unavailableMessage": "This ad cannot be reported. / Бо чарлалды дыңнадып болбас.",
+    "failedMessage": "Unable to send report. / Хомудалды чорудуп шыдаваан.",
+    "signInRequiredMessage": "Sign in to report advertisements. / Чарлалдарны дыңнадыр дээш кирип алыңар.",
+    "cancelButton": "Cancel / Узуткаар",
+    "closeButton": "Close / Хаар",
+    "reasons": {
+      "scam": "Мошенничество",
+      "prohibited_item": "Prohibited item / Хоруглуг чүүл",
+      "misleading": "Misleading information / Частырыглыг медээ",
+      "duplicate_spam": "Дубликат / спам",
+      "other": "Other / Өске"
+    }
+  },
+  "Footer": {
+    "label": "Site footer / Сайтының адаанда",
+    "navLabel": "Footer links / Адаанда ссылкалар",
+    "aboutLink": " Сайт дугайында",
+    "termsLink": "Дүрүмнер",
+    "privacyLink": "Чажыт",
+    "contactLink": " Харылзаа"
+  },
   "CategoryPage": {
     "subcategoriesTitle": "Дайындар",
     "servicesSearchPlaceholder": "Электрик дээн ышкаш кылдыр парлаптыңар",

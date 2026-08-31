@@ -1,6 +1,7 @@
 import { notFound } from 'next/navigation';
+import { getTranslations } from 'next-intl/server';
 import ListingDetailView from '@/app/components/ListingDetailView';
-import { content } from '@/content/tyv';
+import { categoryTaxonomy } from '@/content/categoryTaxonomy';
 import {
   getCurrentViewerId,
   type CurrentViewerIdResult,
@@ -12,6 +13,7 @@ import {
   getSafeResultsHref,
 } from '@/lib/resultReturnHref';
 import { getCurrentUserFavoriteState } from '@/lib/supabase/listingFavorites';
+import { getCurrentUserListingReportState } from '@/lib/supabase/listingReports';
 import {
   getPublicDatabaseListingById,
   getPublicSellerProfileForListingId,
@@ -36,6 +38,7 @@ function getListingDetailViewerState(
 export default async function ListingPage({ params, searchParams }: ListingPageProps) {
   const { id } = await params;
   const query = await searchParams;
+  const t = await getTranslations('ListingDetail');
   const safeFromHref = getSafeResultsHref(query.from);
   const favoriteReturnHref = buildHrefWithSearchParams(`/listing/${id}`, query);
   const favoriteState = await getCurrentUserFavoriteState();
@@ -46,8 +49,8 @@ export default async function ListingPage({ params, searchParams }: ListingPageP
       <div className="app-container">
         <article className="listing-detail-page">
           <div className="empty-results" role="alert">
-            <h1>{content.listingDatabaseUnavailableTitle}</h1>
-            <p>{content.databaseListingsLoadFailedMessage}</p>
+            <h1>{t('listingDatabaseUnavailableTitle')}</h1>
+            <p>{t('databaseListingsLoadFailedMessage')}</p>
           </div>
         </article>
       </div>
@@ -59,9 +62,10 @@ export default async function ListingPage({ params, searchParams }: ListingPageP
   }
 
   const listing = databaseListingResult.listing;
-  const [viewer, sellerProfileResult] = await Promise.all([
+  const [viewer, sellerProfileResult, reportState] = await Promise.all([
     getCurrentViewerId(),
     getPublicSellerProfileForListingId(String(listing.id)),
+    getCurrentUserListingReportState(String(listing.id)),
   ]);
   const initialViewerState = getListingDetailViewerState(
     listing.isOwnedByViewer === true,
@@ -76,7 +80,7 @@ export default async function ListingPage({ params, searchParams }: ListingPageP
     <div className="app-container">
       <ListingDetailView
         listing={listing}
-        categories={content.categories}
+        categories={categoryTaxonomy}
         backHref={backHref}
         sellerPublicSlug={sellerPublicProfile?.publicSlug || null}
         sellerAvatarPath={sellerPublicProfile?.avatarPath || null}
@@ -88,6 +92,7 @@ export default async function ListingPage({ params, searchParams }: ListingPageP
         savedListingKeys={favoriteState.savedKeys}
         currentViewerId={favoriteState.userId}
         favoriteReturnHref={favoriteReturnHref}
+        initialAlreadyReported={reportState.alreadyReported}
       />
     </div>
   );

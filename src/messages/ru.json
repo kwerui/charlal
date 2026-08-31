@@ -45,6 +45,79 @@
       "archived": "В архиве"
     }
   },
+  "ListingDetail": {
+    "homeBreadcrumb": "Главная",
+    "backToHomepage": "На главную",
+    "backToAccount": "К аккаунту",
+    "backToSellerProfile": "На страницу продавца",
+    "backToCategory": "К категории",
+    "backToResults": "К результатам",
+    "freePriceLabel": "Бесплатно",
+    "listingDatabaseUnavailableTitle": "Объявление недоступно",
+    "databaseListingsLoadFailedMessage": "Не удалось загрузить последние объявления.",
+    "listingReservedDetailMessage": "Объявление зарезервировано, но вы можете связаться с владельцем.",
+    "listingSoldDetailMessage": "Объявление продано.",
+    "listingArchivedDetailMessage": "Объявление в архиве и доступно только владельцу.",
+    "sellerLabel": "Продавец",
+    "datePostedLabel": "Опубликовано",
+    "updatedAtLabel": "Последнее обновление",
+    "descriptionTitle": "Описание",
+    "gallery": {
+      "photosLabel": "Фото",
+      "photoAlt": "Фото {current} из {total}",
+      "viewPhoto": "Открыть фото {current} из {total}",
+      "openViewerWithPhoto": "Открыть фото полностью: {photo}",
+      "viewerTitleWithPhoto": "Фото объявления: {photo}",
+      "closeViewer": "Закрыть",
+      "previousPhoto": "Предыдущее фото",
+      "nextPhoto": "Следующее фото",
+      "position": "{current} / {total}"
+    }
+  },
+  "ListingOwnerActions": {
+    "editAdvertisementButton": "Редактировать объявление",
+    "contactSellerButton": "Связаться с владельцем",
+    "soldMessagingUnavailableMessage": "Объявление продано, создать новый диалог невозможно.",
+    "archivedMessagingUnavailableMessage": "Объявление архивировано, создать новый диалог невозможно.",
+    "demoListingMessagingUnavailableMessage": "Сообщения недоступны для этой демо-публикации."
+  },
+  "ListingReport": {
+    "button": "Пожаловаться",
+    "title": "Пожаловаться на объявление",
+    "question": "Почему вы подаете жалобу?",
+    "detailsLabel": "Расскажите подробнее (необязательно)",
+    "detailsHelp": "Максимум 1000 символов.",
+    "sendButton": "Отправить жалобу.",
+    "sendingButton": "Отправка...",
+    "successTitle": "Успешная отправка.",
+    "successMessage": "Жалоба отправлена. Спасибо.",
+    "alreadyReportedTitle": "Жалоба уже отправлена",
+    "alreadyReportedMessage": "Вы уже отправили жалобу на это объявление.",
+    "alreadyReportedButton": "Жалоба уже отправлена.",
+    "reasonRequiredMessage": "Выберите причину жалобы.",
+    "detailsTooLongMessage": "Описание слишком длинное. Используйте не более 1000 символов.",
+    "ownListingMessage": "Вы не можете пожаловаться на свое объявление.",
+    "unavailableMessage": "На это объявление нельзя отправить жалобу.",
+    "failedMessage": "Не удалось отправить жалобу.",
+    "signInRequiredMessage": "Войдите в аккаунт чтобы отправить жалобу.",
+    "cancelButton": "Отмена",
+    "closeButton": "Закрыть",
+    "reasons": {
+      "scam": " Мошенничество",
+      "prohibited_item": "Запрещенный товар",
+      "misleading": "Недостоверная информация",
+      "duplicate_spam": "Дубликат / спам",
+      "other": "Другое"
+    }
+  },
+  "Footer": {
+    "label": "Нижняя часть сайта",
+    "navLabel": "Ссылки нижней части сайта",
+    "aboutLink": "О сайте",
+    "termsLink": "Условия",
+    "privacyLink": "Конфиденциальность",
+    "contactLink": "Контакты"
+  },
   "CategoryPage": {
     "categoryPageTitle": "Категории",
     "subcategoriesTitle": "Подкатегории",

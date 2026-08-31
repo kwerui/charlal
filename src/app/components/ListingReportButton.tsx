@@ -3,9 +3,9 @@
 import { usePathname, useSearchParams } from 'next/navigation';
 import type { FormEvent } from 'react';
 import { useCallback, useEffect, useId, useRef, useState } from 'react';
+import { useTranslations } from 'next-intl';
 import { useRouter } from '@/i18n/navigation';
 import { reportListingAction } from '@/app/listing/reportActions';
-import { content } from '@/content/tyv';
 import {
   LISTING_REPORT_DETAILS_MAX_LENGTH,
   LISTING_REPORT_REASONS,
@@ -17,6 +17,7 @@ import { getSafeNextPath } from '@/lib/auth/safeNextPath';
 type Props = {
   listingId: string;
   returnHref?: string;
+  initialAlreadyReported?: boolean;
 };
 
 type ReportFeedbackStatus = 'idle' | 'created' | 'already-reported';
@@ -30,34 +31,39 @@ function getSafeCurrentHref(
   return search ? `${pathname}?${search}` : pathname;
 }
 
-function getReportErrorMessage(reason: string): string {
+function getReportErrorMessage(
+  reason: string,
+  t: ReturnType<typeof useTranslations>
+): string {
   if (reason === 'auth-required') {
-    return content.signInToReportAdvertisementMessage;
+    return t('signInRequiredMessage');
   }
 
   if (reason === 'invalid-reason') {
-    return content.reportAdvertisementReasonRequiredMessage;
+    return t('reasonRequiredMessage');
   }
 
   if (reason === 'details-too-long') {
-    return content.reportAdvertisementDetailsTooLongMessage;
+    return t('detailsTooLongMessage');
   }
 
   if (reason === 'own-listing') {
-    return content.reportAdvertisementOwnListingMessage;
+    return t('ownListingMessage');
   }
 
   if (reason === 'invalid-listing') {
-    return content.reportAdvertisementUnavailableMessage;
+    return t('unavailableMessage');
   }
 
-  return content.reportAdvertisementFailedMessage;
+  return t('failedMessage');
 }
 
 export default function ListingReportButton({
   listingId,
   returnHref,
+  initialAlreadyReported = false,
 }: Props) {
+  const t = useTranslations('ListingReport');
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -71,6 +77,7 @@ export default function ListingReportButton({
   );
   const [details, setDetails] = useState('');
   const [error, setError] = useState('');
+  const [hasReported, setHasReported] = useState(initialAlreadyReported);
   const [reportStatus, setReportStatus] = useState<ReportFeedbackStatus>('idle');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const activeUserId = status === 'authenticated' && user ? user.id : null;
@@ -79,6 +86,7 @@ export default function ListingReportButton({
     '/'
   );
   const errorId = `${dialogId}-error`;
+  const reasonErrorId = `${dialogId}-reason-error`;
   const detailsHelpId = `${dialogId}-details-help`;
 
   const closeDialog = useCallback((): void => {
@@ -90,6 +98,7 @@ export default function ListingReportButton({
     setError('');
     setSelectedReason('');
     setDetails('');
+    setReportStatus('idle');
     window.setTimeout(() => triggerRef.current?.focus(), 0);
   }, [isSubmitting]);
 
@@ -121,6 +130,10 @@ export default function ListingReportButton({
       return;
     }
 
+    if (hasReported) {
+      setReportStatus('already-reported');
+    }
+
     setIsOpen(true);
   }
 
@@ -132,12 +145,12 @@ export default function ListingReportButton({
     }
 
     if (!selectedReason) {
-      setError(content.reportAdvertisementReasonRequiredMessage);
+      setError(t('reasonRequiredMessage'));
       return;
     }
 
     if (details.length > LISTING_REPORT_DETAILS_MAX_LENGTH) {
-      setError(content.reportAdvertisementDetailsTooLongMessage);
+      setError(t('detailsTooLongMessage'));
       return;
     }
 
@@ -153,7 +166,7 @@ export default function ListingReportButton({
     setIsSubmitting(false);
 
     if (!result.ok) {
-      setError(getReportErrorMessage(result.reason));
+      setError(getReportErrorMessage(result.reason, t));
 
       if (result.reason === 'auth-required') {
         router.push(`/sign-in?next=${encodeURIComponent(signInReturnHref)}`);
@@ -162,19 +175,18 @@ export default function ListingReportButton({
       return;
     }
 
-    setReportStatus(
-      result.status === 'already-reported' ? 'already-reported' : 'created'
-    );
+    setHasReported(true);
+    setReportStatus(result.status);
     setSelectedReason('');
     setDetails('');
   }
 
-  const reportButtonLabel =
-    reportStatus === 'created'
-      ? content.reportAdvertisementSuccessTitle
-      : reportStatus === 'already-reported'
-      ? content.reportAdvertisementAlreadyReportedButton
-      : content.reportAdvertisementButton;
+  const reportButtonLabel = hasReported
+    ? t('alreadyReportedButton')
+    : t('button');
+  const reasonRequiredMessage = t('reasonRequiredMessage');
+  const reasonError = error === reasonRequiredMessage ? error : '';
+  const formError = reasonError ? '' : error;
 
   return (
     <div className="listing-report-control">
@@ -202,10 +214,10 @@ export default function ListingReportButton({
             {reportStatus === 'created' ? (
               <>
                 <h2 id={`${dialogId}-title`}>
-                  {content.reportAdvertisementSuccessTitle}
+                  {t('successTitle')}
                 </h2>
                 <p className="listing-report-success" role="status">
-                  {content.reportAdvertisementSuccessMessage}
+                  {t('successMessage')}
                 </p>
                 <div className="listing-report-actions">
                   <button
@@ -213,17 +225,17 @@ export default function ListingReportButton({
                     className="message-confirmation-button message-confirmation-button--secondary"
                     onClick={closeDialog}
                   >
-                    {content.closeListingPhotoViewerButton}
+                    {t('closeButton')}
                   </button>
                 </div>
               </>
             ) : reportStatus === 'already-reported' ? (
               <>
                 <h2 id={`${dialogId}-title`}>
-                  {content.reportAdvertisementAlreadyReportedTitle}
+                  {t('alreadyReportedTitle')}
                 </h2>
                 <p className="listing-report-success" role="status">
-                  {content.reportAdvertisementAlreadyReportedMessage}
+                  {t('alreadyReportedMessage')}
                 </p>
                 <div className="listing-report-actions">
                   <button
@@ -231,17 +243,24 @@ export default function ListingReportButton({
                     className="message-confirmation-button message-confirmation-button--secondary"
                     onClick={closeDialog}
                   >
-                    {content.closeListingPhotoViewerButton}
+                    {t('closeButton')}
                   </button>
                 </div>
               </>
             ) : (
-              <form className="listing-report-form" onSubmit={handleSubmit}>
+              <form
+                className="listing-report-form"
+                onSubmit={handleSubmit}
+                noValidate
+              >
                 <h2 id={`${dialogId}-title`}>
-                  {content.reportAdvertisementTitle}
+                  {t('title')}
                 </h2>
-                <fieldset className="listing-report-reasons">
-                  <legend>{content.reportAdvertisementQuestion}</legend>
+                <fieldset
+                  className="listing-report-reasons"
+                  aria-describedby={reasonError ? reasonErrorId : undefined}
+                >
+                  <legend>{t('question')}</legend>
                   {LISTING_REPORT_REASONS.map((reason) => (
                     <label key={reason} className="listing-report-reason">
                       <input
@@ -255,20 +274,25 @@ export default function ListingReportButton({
                         }}
                         required
                       />
-                      <span>{content.listingReportReasonLabels[reason]}</span>
+                      <span>{t(`reasons.${reason}`)}</span>
                     </label>
                   ))}
                 </fieldset>
+                {reasonError ? (
+                  <p id={reasonErrorId} className="form-error" role="alert">
+                    {reasonError}
+                  </p>
+                ) : null}
 
                 <label className="listing-report-details" htmlFor={`${dialogId}-details`}>
-                  <span>{content.reportAdvertisementDetailsLabel}</span>
+                  <span>{t('detailsLabel')}</span>
                   <textarea
                     id={`${dialogId}-details`}
                     name="details"
                     value={details}
                     rows={4}
                     maxLength={LISTING_REPORT_DETAILS_MAX_LENGTH}
-                    aria-describedby={`${detailsHelpId}${error ? ` ${errorId}` : ''}`}
+                    aria-describedby={`${detailsHelpId}${formError ? ` ${errorId}` : ''}`}
                     onChange={(event) => {
                       setDetails(event.target.value);
                       setError('');
@@ -276,12 +300,12 @@ export default function ListingReportButton({
                   />
                 </label>
                 <p id={detailsHelpId} className="listing-report-help">
-                  {content.reportAdvertisementDetailsHelp}
+                  {t('detailsHelp')}
                 </p>
 
-                {error ? (
+                {formError ? (
                   <p id={errorId} className="form-error" role="alert">
-                    {error}
+                    {formError}
                   </p>
                 ) : null}
 
@@ -292,7 +316,7 @@ export default function ListingReportButton({
                     onClick={closeDialog}
                     disabled={isSubmitting}
                   >
-                    {content.cancelButton}
+                    {t('cancelButton')}
                   </button>
                   <button
                     type="submit"
@@ -300,8 +324,8 @@ export default function ListingReportButton({
                     disabled={isSubmitting}
                   >
                     {isSubmitting
-                      ? content.reportAdvertisementSendingButton
-                      : content.reportAdvertisementSendButton}
+                      ? t('sendingButton')
+                      : t('sendButton')}
                   </button>
                 </div>
               </form>

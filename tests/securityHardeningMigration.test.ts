@@ -13,6 +13,8 @@ const LISTING_FAVORITES_INTEGRITY_FIX_MIGRATION =
   'supabase/migrations/20260831_enforce_listing_favorites_integrity.sql';
 const REMOVE_BUILTIN_LISTING_FAVORITES_MIGRATION =
   'supabase/migrations/20260901_remove_builtin_listing_favorites.sql';
+const LISTING_REPORT_READ_STATE_MIGRATION =
+  'supabase/migrations/20260830_add_listing_report_read_state.sql';
 
 function readMigration(path: string): string {
   return readFileSync(path, 'utf8');
@@ -416,4 +418,40 @@ test('listing favorites integrity is enforced at the database write boundary', (
   );
   assert.equal(removeBuiltins.includes('grant update on public.listing_favorites'), false);
   assert.equal(removeBuiltins.includes('disable row level security'), false);
+});
+
+test('listing report read state is exposed only through a narrow current-user RPC', () => {
+  const migrationNames = readdirSync(MIGRATIONS_DIR)
+    .filter((name) => name.endsWith('.sql'))
+    .sort();
+  const fix = readMigration(LISTING_REPORT_READ_STATE_MIGRATION);
+  const helper = getFunctionDefinition(fix, 'has_reported_listing');
+
+  assert.ok(
+    migrationNames.indexOf('20260825_add_listing_reports.sql') <
+      migrationNames.indexOf('20260830_add_listing_report_read_state.sql')
+  );
+  assert.equal(fix.includes('begin;'), true);
+  assert.equal(helper.includes('security definer'), true);
+  assert.equal(helper.includes("set search_path = ''"), true);
+  assert.equal(helper.includes('viewer_id := auth.uid();'), true);
+  assert.equal(helper.includes('from public.listing_reports lr'), true);
+  assert.equal(helper.includes('lr.reporter_id = viewer_id'), true);
+  assert.equal(helper.includes('lr.listing_reference = safe_listing_id'), true);
+  assert.equal(
+    fix.includes('grant select on public.listing_reports'),
+    false
+  );
+  assert.equal(
+    fix.includes('grant execute on function public.has_reported_listing(text) to authenticated;'),
+    true
+  );
+  assert.equal(
+    fix.includes('grant execute on function public.has_reported_listing(text) to anon;'),
+    false
+  );
+  assert.equal(
+    fix.includes('grant execute on function public.has_reported_listing(text) to public;'),
+    false
+  );
 });
