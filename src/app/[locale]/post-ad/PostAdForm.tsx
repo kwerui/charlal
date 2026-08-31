@@ -2,8 +2,8 @@
 
 import { useRouter } from '@/i18n/navigation';
 import { useEffect, useState } from 'react';
-import ListingForm from '@/app/components/ListingForm';
-import { content } from '@/content/tyv';
+import ListingForm, { type ListingFormMessages } from '@/app/components/ListingForm';
+import { useTranslations } from 'next-intl';
 import type {
   ListingFormCategory,
   ValidatedListingFormValues,
@@ -25,10 +25,51 @@ type Props = {
 
 export default function PostAdForm({ categories }: Props) {
   const router = useRouter();
+  const t = useTranslations('PostAd');
+  const accountT = useTranslations('Account');
+  const listingReportT = useTranslations('ListingReport');
   const [successMessage, setSuccessMessage] = useState('');
   const [errors, setErrors] = useState<string[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { status: authStatus, profileStatus, user: currentUser } = useAuthStatus();
+  const listingFormMessages: ListingFormMessages = {
+    titleLabel: t('form.titleLabel'),
+    categoryLabel: t('form.categoryLabel'),
+    categoryPlaceholder: t('form.categoryPlaceholder'),
+    subcategoryLabel: t('form.subcategoryLabel'),
+    subcategoryPlaceholder: t('form.subcategoryPlaceholder'),
+    typeLabel: t('form.typeLabel'),
+    typePlaceholder: t('form.typePlaceholder'),
+    buyTypeLabel: t('form.buyTypeLabel'),
+    buyTypePlaceholder: t('form.buyTypePlaceholder'),
+    descriptionLabel: t('form.descriptionLabel'),
+    priceLabel: t('form.priceLabel'),
+    locationLabel: t('form.locationLabel'),
+    photosLabel: t('form.photosLabel'),
+    photosHelp: t('form.photosHelp'),
+    addPhotosButton: t('form.addPhotosButton'),
+    coverPhotoLabel: t('form.coverPhotoLabel'),
+    positionLabel: t('form.positionLabel'),
+    movePhotoEarlierButton: t('form.movePhotoEarlierButton'),
+    movePhotoLaterButton: t('form.movePhotoLaterButton'),
+    removePhotoButton: t('form.removePhotoButton'),
+    noPhotosMessage: t('form.noPhotosMessage'),
+    imageRequirements: t('form.imageRequirements'),
+    photoMaximumMessage: t('form.photoMaximumMessage'),
+    photoTooLargeMessage: t('form.photoTooLargeMessage'),
+    photoUnsupportedTypeMessage: t('form.photoUnsupportedTypeMessage'),
+    photoAlt: ({ current, total }) => t('form.photoAlt', { current, total }),
+    cancelButton: listingReportT('cancelButton'),
+    validation: {
+      titleRequired: t('validation.titleRequired'),
+      descriptionRequired: t('validation.descriptionRequired'),
+      locationRequired: t('validation.locationRequired'),
+      categoryRequired: t('validation.categoryRequired'),
+      priceRequired: t('validation.priceRequired'),
+      housingTypeRequired: t('validation.housingTypeRequired'),
+      marketplaceTypeRequired: t('validation.marketplaceTypeRequired'),
+    },
+  };
 
   useEffect(() => {
     if (authStatus === 'unauthenticated') {
@@ -52,11 +93,11 @@ export default function PostAdForm({ categories }: Props) {
     const validationErrors: string[] = [];
 
     if (!publicDisplayName) {
-      validationErrors.push(content.accountPublicNameRequiredMessage);
+      validationErrors.push(accountT('publicNameRequiredMessage'));
     }
 
     if (!ownerId) {
-      validationErrors.push(content.postAdErrorSaveFailed);
+      validationErrors.push(t('saveFailedMessage'));
     }
 
     if (validationErrors.length > 0) {
@@ -65,7 +106,7 @@ export default function PostAdForm({ categories }: Props) {
     }
 
     if (!ownerId) {
-      setErrors([content.postAdErrorSaveFailed]);
+      setErrors([t('saveFailedMessage')]);
       return;
     }
 
@@ -75,7 +116,7 @@ export default function PostAdForm({ categories }: Props) {
       const createResult = await createDatabaseListingFromFormValues(values);
 
       if (!createResult.ok) {
-        setErrors([content.postAdErrorSaveFailed]);
+        setErrors([t('saveFailedMessage')]);
         setIsSubmitting(false);
         return;
       }
@@ -88,8 +129,8 @@ export default function PostAdForm({ categories }: Props) {
         );
 
         if (!photoResult.ok) {
-          setSuccessMessage(content.postAdSuccessMessage);
-          setErrors([content.listingSavedPhotosFailedMessage]);
+          setSuccessMessage(t('successMessage'));
+          setErrors([t('photosSaveFailedMessage')]);
           setIsSubmitting(false);
           return;
         }
@@ -102,38 +143,39 @@ export default function PostAdForm({ categories }: Props) {
 
         if (!imageSaveResult.ok) {
           await cleanupUploadedListingPhotos(photoResult.uploadedStoragePaths);
-          setSuccessMessage(content.postAdSuccessMessage);
-          setErrors([content.listingSavedPhotosFailedMessage]);
+          setSuccessMessage(t('successMessage'));
+          setErrors([t('photosSaveFailedMessage')]);
           setIsSubmitting(false);
           return;
         }
       }
 
-      setSuccessMessage(content.postAdSuccessMessage);
+      setSuccessMessage(t('successMessage'));
       router.push(`/listing/${createResult.listing.id}`);
     } catch {
-      setErrors([content.postAdErrorSaveFailed]);
+      setErrors([t('saveFailedMessage')]);
       setIsSubmitting(false);
     }
   }
 
   if (authStatus === 'authenticated' && profileStatus === 'error') {
-    return <p className="form-error" role="alert">{content.unableLoadProfileMessage}</p>;
+    return <p className="form-error" role="alert">{accountT('unableLoadProfileMessage')}</p>;
   }
 
   if (authStatus !== 'authenticated' || profileStatus !== 'loaded' || !currentUser) {
-    return <p className="page-description">{content.checkingAuthMessage}</p>;
+    return <p className="page-description">{t('checkingAuthMessage')}</p>;
   }
 
   return (
     <ListingForm
       mode="create"
       categories={categories}
-      submitButtonLabel={content.postAdSubmitButton}
-      submittingButtonLabel={content.postAdSubmittingButton}
+      submitButtonLabel={t('submitButton')}
+      submittingButtonLabel={t('submittingButton')}
       isSubmitting={isSubmitting}
       externalErrors={errors}
       successMessage={successMessage}
+      messages={listingFormMessages}
       onSubmit={handleSubmit}
     />
   );

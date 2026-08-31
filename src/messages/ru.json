@@ -220,5 +220,292 @@
         }
       }
     }
+  },
+  "Account": {
+    "title": "Аккаунт",
+    "infoTitle": "Информация аккаунта",
+    "emailLabel": "Вошли как",
+    "publicNameLabel": "Публичное имя",
+    "viewPublicProfileLabel": "Посмотреть публичный профиль",
+    "publicNameTitle": "Изменить публичное имя",
+    "publicNamePlaceholder": "Введите публичное имя владельца",
+    "publicNameHelp": "Это имя будет отображаться в объявлениях вместо вашей электронной почты.",
+    "publicLocationHelp": "Укажите только город или регион, без адреса.",
+    "saveProfileButton": "Сохранить профиль",
+    "publicNameRequiredMessage": "Введите публичное имя перед публикацией объявления.",
+    "publicNameSaveFailedMessage": "Не удалось обновить публичное имя.",
+    "displayNameInvalidMessage": "Введите публичное имя, которое не является адресом электронной почты.",
+    "profileDetailsInvalidMessage": "Описание профиля или местоположение слишком длинное.",
+    "profileLoadFailedMessage": "Вы вошли в аккаунт, но профиль не удалось загрузить.",
+    "unableLoadProfileMessage": "Не удалось загрузить профиль",
+    "profileUpdatedMessage": "Профиль обновлен.",
+    "myAdvertisementsTitle": "Мои объявления",
+    "myAdvertisementsCountLabel": "Мои объявления",
+    "deleteAdvertisementButton": "Удалить объявление",
+    "confirmDeleteAdvertisementTitle": "Подтвердите удаление",
+    "confirmDeleteAdvertisementMessage": "Удалить это объявление?",
+    "advertisementDeletedMessage": "Объявление удалено.",
+    "advertisementDeleteFailedMessage": "Не удалось удалить объявление.",
+    "noAdvertisementsPostedTitle": "У вас пока нет объявлений",
+    "noAdvertisementsPostedMessage": "Созданные вами объявления будут отображаться здесь.",
+    "reviewsSummaryTitle": "Отзывы",
+    "reviewsSummary": "Ожидают отзыва: {toReview}  · Написано: {written}",
+    "viewReviewsButton": "Посмотреть отзывы"
+  },
+  "SavedListings": {
+    "title": "Сохраненные объявления",
+    "countLabel": "Сохраненные объявления",
+    "emptyTitle": "Нет сохраненных объявлений",
+    "emptyMessage": "Сохраненные вами объявления появятся здесь.",
+    "unableLoadTitle": "Не удалось загрузить сохраненные объявления ",
+    "unableLoadMessage": "Попробуйте еще раз через некоторое время."
+  },
+  "SellerProfile": {
+    "title": "Профиль продавца",
+    "unavailableTitle": "Профиль продавца недоступен",
+    "sellerFallbackLabel": "Продавец",
+    "locationLabel": "Локация",
+    "memberSinceLabel": "Участник с",
+    "bioLabel": "О себе",
+    "reviewsTitle": "Отзывы",
+    "seeAllReviewsLabel": "Посмотреть все отзывы",
+    "noReviewsYetLabel": "Пока нет отзывов",
+    "ratingSummary": " {rating} · {count, plural, one {# отзыв} few {# отзыва} many {# отзывов} other {# отзыва}}",
+    "activeListingsTitle": "Активные объявления",
+    "noActiveListingsMessage": "У этого продавца пока нет активных объявлений.",
+    "backToSellerProfileLabel": "Назад к профилю продавца",
+    "profilePhotoLabel": "Фото профиля",
+    "openProfilePhotoViewerLabel": "Открыть фото профиля",
+    "closeProfilePhotoViewerButton": "Закрыть"
+  },
+  "PublicSellerReviews": {
+    "noReviewsYetLabel": "Пока нет отзывов",
+    "starsLabel": "{count, plural, one {# звезда} few {# звезды} many {# звёзд} other {# звезды}}",
+    "verifiedPurchaseLabel": "Подтвержденная покупка",
+    "editedReviewLabel": "Отредактировано",
+    "responseLabel": "Ответ продавца",
+    "addResponseButton": "Добавить ответ",
+    "editResponseButton": "Изменить ответ",
+    "saveResponseChangesButton": "Сохранить изменения",
+    "deleteResponseButton": "Удалить ответ",
+    "responseSavingButton": "Сохранение...",
+    "responseSavedMessage": "Ответ продавца сохранен.",
+    "responseDeletedMessage": "Ответ продавца удален.",
+    "responseSaveFailedMessage": "Не удалось сохранить ответ продавца.",
+    "responseDeleteFailedMessage": "Не удалось удалить ответ продавца.",
+    "deleteResponseConfirmMessage": "Удалить этот ответ продавца?"
+  },
+  "ProfilePhoto": {
+    "label": "Фото профиля",
+    "chooseButton": "Выберите фото",
+    "changeButton": "Изменить фотo",
+    "saveButton": "Сохранить фото",
+    "removeButton": "Удалить фото",
+    "uploadingMessage": "Обновление...",
+    "updatedMessage": "Фото профиля обновлено.",
+    "removedMessage": "Фото профиля удалено.",
+    "uploadFailedMessage": "Невозможно обновить фото профиля.",
+    "removeFailedMessage": "Невозможно удалить фото профиля.",
+    "requirementsMessage": "JPEG, PNG, или WebP. Максимальный размер файла 5 МБ.",
+    "invalidFormatMessage": "Недопустимый формат фото. Используйте JPEG, PNG, или WebP.",
+    "tooLargeMessage": "Фото слишком большое. Максимальный размер файла 5 МБ.",
+    "previewTitle": "Предпросмотр фото профиля",
+    "adjustButton": "Отредактировать фото",
+    "previewHelp": "Так будет выглядеть фото вашего профиля.",
+    "dragZoomHelp": "Перетащите фото, чтобы изменить его положение. Прокручивайте или используйте кнопки для масштабирования.",
+    "positionControlLabel": " Настроить положение фото профиля",
+    "zoomControlsLabel": "Элементы управления масштабированием фото профиля",
+    "zoomOutButton": "Отдалить",
+    "zoomInButton": "Приблизить",
+    "resetFocusButton": "Поставить в центр",
+    "savePositionButton": "Сохранить позицию",
+    "removeConfirmTitle": "Удалить фото профиля?",
+    "removeConfirmMessage": "До загрузки нового фото будет использоваться аватар по умолчанию.",
+    "focusSaveFailedMessage": "Не удалось сохранить положение фото."
+  },
+  "PostAd": {
+    "title": "Выложить объявление",
+    "checkingAuthMessage": "Проверяем вход в аккаунт...",
+    "submitButton": "Опубликовать объявление",
+    "submittingButton": "Сохраняем объявление...",
+    "successMessage": "Объявление опубликовано.",
+    "saveFailedMessage": "Не удалось сохранить объявление.",
+    "photosSaveFailedMessage": "Объявление сохранено, но некоторые фотографии не удалось загрузить. Откройте редактирование объявления, чтобы попробовать ещё раз.",
+    "form": {
+      "titleLabel": "Название объявления",
+      "categoryLabel": "Категория",
+      "categoryPlaceholder": "Выберите категорию",
+      "subcategoryLabel": "Подкатегория",
+      "subcategoryPlaceholder": "Выберите подкатегорию",
+      "typeLabel": "Тип",
+      "typePlaceholder": "Выберите тип",
+      "buyTypeLabel": "Тип объявления",
+      "buyTypePlaceholder": "Выберите тип объявления",
+      "descriptionLabel": "Описание",
+      "priceLabel": "Цена",
+      "locationLabel": "Местопололожение",
+      "photosLabel": "Фото",
+      "photosHelp": "Можно добавить до 8 фотографий. Первая фотография будет обложкой.",
+      "addPhotosButton": "Добавить фото",
+      "coverPhotoLabel": "Обложка",
+      "positionLabel": "Позиция",
+      "movePhotoEarlierButton": "Переместить назад",
+      "movePhotoLaterButton": "Переместить вперед",
+      "removePhotoButton": "Удалить фото",
+      "noPhotosMessage": "Фотографии не выбраны. Будет использовано изображение категории.",
+      "imageRequirements": "Только JPEG, PNG, или WebP. Максимальный размер одного фото - 5 МБ.",
+      "photoMaximumMessage": "К объявлению можно добавить не более 8 фотографий.",
+      "photoTooLargeMessage": "Фото слишком большое. Максимальный размер 5 МБ.",
+      "photoUnsupportedTypeMessage": "Неподдерживаемый формат фото. Используйте JPEG, PNG или WebP.",
+      "photoAlt": "Фото {current} из {total}"
+    },
+    "validation": {
+      "titleRequired": "Введите название объявления.",
+      "descriptionRequired": "Введите описание.",
+      "locationRequired": "Укажите местоположение.",
+      "categoryRequired": "Выберите категорию и подкатегорию.",
+      "priceRequired": "Введите цену. Можно указать 0.",
+      "housingTypeRequired": "Выберите тип сделки и тип недвижимости.",
+      "marketplaceTypeRequired": "Выберите тип объявления."
+    }
+  },
+  "AboutPage": {
+    "kicker": " О Charlal",
+    "title": " О Charlal",
+    "body": [
+          "Charlal — сайт объявлений на тувинском языке, связанный с Тувой. Название Charlal записано латиницей от слова «Чарлал».",
+    "Каждый пользователь может переключить сайт на русский язык. Charlal помогает искать и размещать объявления — например, находить товары или жильё в аренду.",
+    "Перед использованием Charlal пользователям следует ознакомиться с Условиями использования. Для публикации объявления необходимо зарегистрироваться. Регистрируясь, пользователь принимает Условия использования.",
+    "По вопросам работы Charlal можно обратиться в техническую поддержку. Дополнительная полезная информация доступна в нижней части главной страницы."
+    ]
+  },
+  "TermsPage": {
+    "kicker": "Информация",
+    "title": "Правила пользования",
+    "intro": "[RU REVIEW] This page is a placeholder structure for Charlal's future reviewed user agreement. It is not final legal text.",
+    "sections": [
+      {
+        "title": "О Charlal",
+        "body": "[RU REVIEW] TODO: Add reviewed legal text describing the marketplace service."
+      },
+      {
+        "title": "Условия допуска и использование учетной записи",
+        "body": "[RU REVIEW] TODO: Add reviewed legal text covering who may use Charlal and how accounts should be used."
+      },
+      {
+        "title": "[RU REVIEW] Posting advertisements",
+        "body": "[RU REVIEW] TODO: Add reviewed legal text covering advertisement posting rules."
+      },
+      {
+        "title": "Запрещенные материалы",
+        "body": "[RU REVIEW] TODO: Add reviewed legal text listing prohibited advertisements, content, and conduct."
+      },
+      {
+        "title": "Ответственность покупателя и продавца",
+        "body": "[RU REVIEW] TODO: Add reviewed legal text explaining user responsibility for transactions and communications."
+      },
+      {
+        "title": "Обмен сообщениями и правила поведения",
+        "body": "[RU REVIEW] TODO: Add reviewed legal text covering acceptable messaging and user conduct."
+      },
+      {
+        "title": "Контент, созданный пользователями",
+        "body": "[RU REVIEW] TODO: Add reviewed legal text covering rights and responsibilities for user-created listings, photos, and messages."
+      },
+      {
+        "title": "Приостановка или удаление учетной записи",
+        "body": "[RU REVIEW] TODO: Add reviewed legal text covering moderation, suspension, and removal."
+      },
+      {
+        "title": "Доступность сервиса",
+        "body": "[RU REVIEW] TODO: Add reviewed legal text covering availability, maintenance, and changes to the service."
+      },
+      {
+        "title": "Ответственность и разногласия",
+        "body": "[RU REVIEW] TODO: Add reviewed legal text covering liability limits, dispute handling, and applicable law."
+      },
+      {
+        "title": "Изменения настоящих условий",
+        "body": "[RU REVIEW] TODO: Add reviewed legal text explaining how terms updates will be handled."
+      },
+      {
+        "title": "Контракт",
+        "body": "[RU REVIEW] TODO: Add reviewed official contact details for terms questions."
+      }
+    ]
+  },
+  "PrivacyPage": {
+    "kicker": "Информация",
+    "title": "Политика конфиденциальности",
+    "intro": "[RU REVIEW] This page is a placeholder structure for Charlal's future reviewed privacy and personal data policy. It is not final legal text.",
+    "sections": [
+      {
+        "title": "Введение",
+        "body": "[RU REVIEW] TODO: Add reviewed legal text explaining the purpose and scope of this policy."
+      },
+      {
+        "title": "[RU REVIEW] Who operates Charlal",
+        "body": "[RU REVIEW] TODO: Add reviewed operator, responsible-party, and jurisdiction details when they are available."
+      },
+      {
+        "title": "[RU REVIEW] Information we collect",
+        "body": "[RU REVIEW] TODO: Add reviewed legal text describing the categories of information collected."
+      },
+      {
+        "title": "[RU REVIEW] Account information",
+        "body": "[RU REVIEW] TODO: Add reviewed legal text covering account registration, profile names, and authentication information."
+      },
+      {
+        "title": "[RU REVIEW] Listings and uploaded photos",
+        "body": "[RU REVIEW] TODO: Add reviewed legal text covering advertisement details, listing photos, and public listing content."
+      },
+      {
+        "title": "[RU REVIEW] Messages",
+        "body": "[RU REVIEW] TODO: Add reviewed legal text covering private buyer and seller messages."
+      },
+      {
+        "title": "[RU REVIEW] Technical and security information",
+        "body": "[RU REVIEW] TODO: Add reviewed legal text covering cookies, security logs, device/browser data, and abuse prevention."
+      },
+      {
+        "title": "[RU REVIEW] Why information is processed",
+        "body": "[RU REVIEW] TODO: Add reviewed legal text explaining the purposes and lawful basis for processing where applicable."
+      },
+      {
+        "title": "[RU REVIEW] Who information may be shared with",
+        "body": "[RU REVIEW] TODO: Add reviewed legal text covering service providers, legal requests, safety, and required disclosures."
+      },
+      {
+        "title": "[RU REVIEW] Data retention",
+        "body": "[RU REVIEW] TODO: Add reviewed legal text explaining how long different kinds of information are kept."
+      },
+      {
+        "title": "[RU REVIEW] Account and data deletion",
+        "body": "[RU REVIEW] TODO: Add reviewed legal text explaining how users can request account or data deletion."
+      },
+      {
+        "title": "[RU REVIEW] User rights",
+        "body": "[RU REVIEW] TODO: Add reviewed legal text describing applicable access, correction, deletion, and objection rights."
+      },
+      {
+        "title": "[RU REVIEW] Security",
+        "body": "[RU REVIEW] TODO: Add reviewed legal text describing security practices without exposing implementation secrets."
+      },
+      {
+        "title": "[RU REVIEW] Changes to this policy",
+        "body": "[RU REVIEW] TODO: Add reviewed legal text explaining how policy updates will be communicated."
+      },
+      {
+        "title": "[RU REVIEW] Contact",
+        "body": "[RU REVIEW] TODO: Add reviewed official contact details for privacy questions."
+      }
+    ]
+  },
+  "ContactPage": {
+    "kicker": "Контакты",
+    "title": "Связаться с Charlal",
+    "intro": "[RU REVIEW] This page is a placeholder for official Charlal contact details. A database-backed contact form is not included yet.",
+    "detailsTitle": "Контактные данные",
+    "detailsPlaceholder": "[RU REVIEW] TODO: Add official email address, phone number, mailing address, or other approved contact details."
   }
 }

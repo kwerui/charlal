@@ -1,7 +1,7 @@
 import { Link } from '@/i18n/navigation';
 import { notFound } from 'next/navigation';
+import { getTranslations } from 'next-intl/server';
 import PublicSellerReviews from '@/app/[locale]/seller/[slug]/PublicSellerReviews';
-import { content } from '@/content/tyv';
 import { getCurrentUserResult } from '@/lib/auth/server';
 import { createClient } from '@/lib/supabase/server';
 import {
@@ -14,20 +14,27 @@ type SellerReviewsPageProps = {
   params: Promise<{ slug: string }>;
 };
 
-function formatSellerRating(averageRating: number | null, reviewCount: number): string {
+function formatSellerRating(
+  averageRating: number | null,
+  reviewCount: number,
+  t: Awaited<ReturnType<typeof getTranslations>>
+): string {
   if (!averageRating || reviewCount === 0) {
-    return content.noReviewsYetLabel;
+    return t('noReviewsYetLabel');
   }
 
-  return `${averageRating.toFixed(1)} · ${reviewCount} ${
-    reviewCount === 1 ? content.reviewSingularLabel : content.reviewsPluralLabel
-  }`;
+  return t('ratingSummary', {
+    rating: averageRating.toFixed(1),
+    count: reviewCount,
+  });
 }
 
 export default async function SellerReviewsPage({
   params,
 }: SellerReviewsPageProps) {
   const { slug } = await params;
+  const t = await getTranslations('SellerProfile');
+  const listingResultsT = await getTranslations('ListingResults');
   const sellerResult = await getPublicSellerPageBySlug(slug);
 
   if (!sellerResult.ok) {
@@ -35,9 +42,9 @@ export default async function SellerReviewsPage({
       <main className="seller-profile-page" aria-labelledby="seller-reviews-title">
         <div className="empty-results" role="alert">
           <h1 id="seller-reviews-title">
-            {content.sellerProfileUnavailableTitle}
+            {t('unavailableTitle')}
           </h1>
-          <p>{content.databaseListingsLoadFailedMessage}</p>
+          <p>{listingResultsT('databaseListingsLoadFailedMessage')}</p>
         </div>
       </main>
     );
@@ -64,17 +71,17 @@ export default async function SellerReviewsPage({
           href={`/seller/${sellerResult.profile.publicSlug}`}
           className="page-back-link"
         >
-          {content.backToSellerProfileLabel}
+          {t('backToSellerProfileLabel')}
         </Link>
         <div className="seller-section-heading">
           <div>
-            <p className="hero-kicker">{content.sellerProfileTitle}</p>
+            <p className="hero-kicker">{t('title')}</p>
             <h1 id="seller-reviews-title">
-              {content.sellerReviewsTitle}: {sellerResult.profile.displayName}
+              {t('reviewsTitle')}: {sellerResult.profile.displayName}
             </h1>
             <p className="seller-reputation-summary">
               <span aria-hidden="true">★</span>{' '}
-              {formatSellerRating(summary.averageRating, summary.reviewCount)}
+              {formatSellerRating(summary.averageRating, summary.reviewCount, t)}
             </p>
           </div>
         </div>

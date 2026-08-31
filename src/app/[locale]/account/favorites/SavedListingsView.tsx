@@ -2,8 +2,8 @@
 
 import { useState } from 'react';
 import ListingCard from '@/app/components/ListingCard';
-import { content } from '@/content/tyv';
 import type { Listing } from '@/data/listings';
+import { useTranslations } from 'next-intl';
 
 type Props = {
   initialListings: Listing[];
@@ -16,12 +16,13 @@ export default function SavedListingsView({
   savedListingKeys,
   currentViewerId,
 }: Props) {
+  const t = useTranslations('SavedListings');
   const [listings, setListings] = useState(initialListings);
 
   return (
     <>
       <p className="results-summary saved-advertisements-count" aria-live="polite">
-        {content.savedAdvertisementsCountLabel}: {listings.length}
+        {t('countLabel')}: {listings.length}
       </p>
 
       {listings.length > 0 ? (
@@ -45,8 +46,8 @@ export default function SavedListingsView({
         </div>
       ) : (
         <div className="empty-results" role="status">
-          <h2>{content.noSavedAdvertisementsTitle}</h2>
-          <p>{content.noSavedAdvertisementsMessage}</p>
+          <h2>{t('emptyTitle')}</h2>
+          <p>{t('emptyMessage')}</p>
         </div>
       )}
     </>

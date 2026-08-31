@@ -2,7 +2,7 @@
 
 import { Link } from '@/i18n/navigation';
 import { useCallback, useEffect, useState } from 'react';
-import { content } from '@/content/tyv';
+import { useTranslations } from 'next-intl';
 import { shouldRefreshForReviewMutation } from '@/lib/reviewMutationRefreshStorage';
 import { createClient } from '@/lib/supabase/client';
 import {
@@ -17,6 +17,7 @@ type Props = {
 export default function AccountReviewsSummary({
   initialTransactions,
 }: Props) {
+  const t = useTranslations('Account');
   const [transactions, setTransactions] = useState(initialTransactions);
 
   const refreshSummary = useCallback(async () => {
@@ -57,15 +58,16 @@ export default function AccountReviewsSummary({
   return (
     <section className="account-reviews-summary" aria-labelledby="account-reviews-title">
       <div>
-        <h3 id="account-reviews-title">{content.reviewsAccountSummaryTitle}</h3>
+        <h3 id="account-reviews-title">{t('reviewsSummaryTitle')}</h3>
         <p>
-          {content.reviewsAccountSummaryTemplate
-            .replace('{toReview}', String(toReviewCount))
-            .replace('{written}', String(writtenCount))}
+          {t('reviewsSummary', {
+            toReview: toReviewCount,
+            written: writtenCount,
+          })}
         </p>
       </div>
       <Link href="/account/reviews" className="secondary-button">
-        {content.viewReviewsButton}
+        {t('viewReviewsButton')}
       </Link>
     </section>
   );

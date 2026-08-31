@@ -1,20 +1,32 @@
 import type { Metadata } from 'next';
-import { content } from '@/content/tyv';
+import { getTranslations } from 'next-intl/server';
 
-export const metadata: Metadata = {
-  title: `${content.termsPageTitle} | Charlal`,
+type InfoSection = {
+  title: string;
+  body: string;
 };
 
-export default function TermsPage() {
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations('TermsPage');
+
+  return {
+    title: `${t('title')} | Charlal`,
+  };
+}
+
+export default async function TermsPage() {
+  const t = await getTranslations('TermsPage');
+  const sections = t.raw('sections') as InfoSection[];
+
   return (
     <main className="info-page">
       <article className="info-page-panel" aria-labelledby="terms-title">
-        <p className="hero-kicker">{content.legalPageKicker}</p>
-        <h1 id="terms-title">{content.termsPageTitle}</h1>
-        <p className="info-page-intro">{content.termsPageIntro}</p>
+        <p className="hero-kicker">{t('kicker')}</p>
+        <h1 id="terms-title">{t('title')}</h1>
+        <p className="info-page-intro">{t('intro')}</p>
 
         <div className="info-section-list">
-          {content.termsSections.map((section) => (
+          {sections.map((section) => (
             <section key={section.title} className="info-section">
               <h2>{section.title}</h2>
               <p>{section.body}</p>

@@ -1,7 +1,7 @@
 import { Link } from '@/i18n/navigation';
 import { redirect } from 'next/navigation';
+import { getTranslations } from 'next-intl/server';
 import SavedListingsView from '@/app/[locale]/account/favorites/SavedListingsView';
-import { content } from '@/content/tyv';
 import { getSignInHref } from '@/i18n/localePath';
 import { getCurrentUserResult } from '@/lib/auth/server';
 import { listCurrentUserSavedListings } from '@/lib/supabase/listingFavorites';
@@ -14,6 +14,8 @@ export default async function SavedAdvertisementsPage({
   params,
 }: SavedAdvertisementsPageProps) {
   const { locale } = await params;
+  const t = await getTranslations('SavedListings');
+  const listingDetailT = await getTranslations('ListingDetail');
   const authResult = await getCurrentUserResult();
 
   if (authResult.status === 'signed-out') {
@@ -34,11 +36,11 @@ export default async function SavedAdvertisementsPage({
         aria-labelledby="saved-advertisements-title"
       >
         <Link href="/account" className="page-back-link">
-          {content.backToAccount}
+          {listingDetailT('backToAccount')}
         </Link>
         <div className="form-page-heading">
           <h1 id="saved-advertisements-title" className="auth-title">
-            {content.savedAdvertisementsTitle}
+            {t('title')}
           </h1>
         </div>
 
@@ -50,8 +52,8 @@ export default async function SavedAdvertisementsPage({
           />
         ) : (
           <div className="empty-results" role="alert">
-            <h2>{content.unableLoadSavedAdvertisementsTitle}</h2>
-            <p>{content.unableLoadSavedAdvertisementsMessage}</p>
+            <h2>{t('unableLoadTitle')}</h2>
+            <p>{t('unableLoadMessage')}</p>
           </div>
         )}
       </section>

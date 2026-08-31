@@ -7,13 +7,13 @@ import type {
   WheelEvent,
 } from 'react';
 import { useCallback, useEffect, useId, useRef, useState } from 'react';
+import { useTranslations } from 'next-intl';
 import {
   removeProfileAvatarAction,
   saveProfileAvatarAction,
   saveProfileAvatarFocusAction,
 } from '@/app/account/avatarActions';
 import ProfileAvatar from '@/app/components/ProfileAvatar';
-import { content } from '@/content/tyv';
 import type { AppProfile } from '@/lib/auth/types';
 import { useAuthStatus } from '@/lib/auth/client';
 import {
@@ -63,12 +63,15 @@ function focusChanged(
   );
 }
 
-function getFileValidationMessage(reason: string): string {
+function getFileValidationMessage(
+  reason: string,
+  t: ReturnType<typeof useTranslations>
+): string {
   if (reason === 'file-too-large') {
-    return content.profilePhotoTooLargeMessage;
+    return t('tooLargeMessage');
   }
 
-  return content.profilePhotoInvalidFormatMessage;
+  return t('invalidFormatMessage');
 }
 
 export default function ProfilePhotoManager({
@@ -76,6 +79,9 @@ export default function ProfilePhotoManager({
   displayName,
   onChanged,
 }: Props) {
+  const t = useTranslations('ProfilePhoto');
+  const listingDetailGalleryT = useTranslations('ListingDetail.gallery');
+  const listingReportT = useTranslations('ListingReport');
   const { refreshAuth } = useAuthStatus();
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const closeButtonRef = useRef<HTMLButtonElement | null>(null);
@@ -197,7 +203,7 @@ export default function ProfilePhotoManager({
         fileInputRef.current.value = '';
       }
 
-      setError(getFileValidationMessage(validationError));
+      setError(getFileValidationMessage(validationError, t));
       return;
     }
 
@@ -473,12 +479,12 @@ export default function ProfilePhotoManager({
 
       if (!saveResult.ok) {
         setIsSubmitting(false);
-        setError(content.profilePhotoFocusSaveFailedMessage);
+        setError(t('focusSaveFailedMessage'));
         return;
       }
 
       closeEditor();
-      await refreshAfterAvatarChange(content.profilePhotoUpdatedMessage);
+      await refreshAfterAvatarChange(t('updatedMessage'));
       setIsSubmitting(false);
       return;
     }
@@ -497,8 +503,8 @@ export default function ProfilePhotoManager({
       setIsSubmitting(false);
       setError(
         uploadResult.reason === 'upload-failed'
-          ? content.profilePhotoUploadFailedMessage
-          : getFileValidationMessage(uploadResult.reason)
+          ? t('uploadFailedMessage')
+          : getFileValidationMessage(uploadResult.reason, t)
       );
       return;
     }
@@ -513,12 +519,12 @@ export default function ProfilePhotoManager({
     if (!saveResult.ok) {
       await cleanupUploadedProfileAvatar(uploadResult.storagePath);
       setIsSubmitting(false);
-      setError(content.profilePhotoUploadFailedMessage);
+      setError(t('uploadFailedMessage'));
       return;
     }
 
     closeEditor();
-    await refreshAfterAvatarChange(content.profilePhotoUpdatedMessage);
+    await refreshAfterAvatarChange(t('updatedMessage'));
     setIsSubmitting(false);
   }
 
@@ -535,21 +541,21 @@ export default function ProfilePhotoManager({
 
     if (!removeResult.ok) {
       setIsSubmitting(false);
-      setError(content.profilePhotoRemoveFailedMessage);
+      setError(t('removeFailedMessage'));
       return;
     }
 
     setRemoveDialogOpen(false);
     closeEditor();
-    await refreshAfterAvatarChange(content.profilePhotoRemovedMessage);
+    await refreshAfterAvatarChange(t('removedMessage'));
     setIsSubmitting(false);
   }
 
   const canRemovePhoto = Boolean(profile.avatarPath) && !editorState;
   const editorSaveLabel =
     editorState?.mode === 'existing'
-      ? content.saveProfilePhotoPositionButton
-      : content.saveProfilePhotoButton;
+      ? t('savePositionButton')
+      : t('saveButton');
 
   return (
     <section className="profile-photo-manager" aria-labelledby="profile-photo-title">
@@ -559,7 +565,7 @@ export default function ProfilePhotoManager({
             type="button"
             className="profile-photo-avatar-button"
             onClick={openExistingEditor}
-            aria-label={content.adjustProfilePhotoButton}
+            aria-label={t('adjustButton')}
             disabled={isSubmitting}
           >
             <ProfileAvatar
@@ -583,9 +589,9 @@ export default function ProfilePhotoManager({
         )}
       </div>
       <div className="profile-photo-controls">
-        <h4 id="profile-photo-title">{content.profilePhotoLabel}</h4>
+        <h4 id="profile-photo-title">{t('label')}</h4>
         <p className="account-help-text">
-          {content.profilePhotoRequirementsMessage}
+          {t('requirementsMessage')}
         </p>
         <div className="profile-photo-main-actions">
           <label
@@ -593,8 +599,8 @@ export default function ProfilePhotoManager({
             htmlFor={inputId}
           >
             {profile.avatarPath
-              ? content.changeProfilePhotoButton
-              : content.chooseProfilePhotoButton}
+              ? t('changeButton')
+              : t('chooseButton')}
           </label>
           {canRemovePhoto ? (
             <button
@@ -607,7 +613,7 @@ export default function ProfilePhotoManager({
               }}
               disabled={isSubmitting}
             >
-              {content.removeProfilePhotoButton}
+              {t('removeButton')}
             </button>
           ) : null}
         </div>
@@ -657,17 +663,17 @@ export default function ProfilePhotoManager({
               onClick={closeEditor}
               disabled={isSubmitting}
             >
-              {content.closeListingPhotoViewerButton}
+              {listingDetailGalleryT('closeViewer')}
             </button>
             <div className="avatar-editor-content">
               <div className="avatar-editor-copy">
                 <h2 id="avatar-editor-title">
                   {editorState.mode === 'existing'
-                    ? content.adjustProfilePhotoButton
-                    : content.profilePhotoPreviewTitle}
+                    ? t('adjustButton')
+                    : t('previewTitle')}
                 </h2>
                 <p id={editorTextareaLabelId}>
-                  {content.profilePhotoPreviewHelp}
+                  {t('previewHelp')}
                 </p>
               </div>
 
@@ -675,7 +681,7 @@ export default function ProfilePhotoManager({
                 className="avatar-focus-preview"
                 role="application"
                 tabIndex={0}
-                aria-label={content.profilePhotoPositionControlLabel}
+                aria-label={t('positionControlLabel')}
                 onKeyDown={moveCropWithKeyboard}
                 onPointerDown={handleCropPointerDown}
                 onPointerMove={handleCropPointerMove}
@@ -703,11 +709,11 @@ export default function ProfilePhotoManager({
               </div>
 
               <div className="avatar-editor-hint">
-                {content.profilePhotoDragZoomHelp}
+                {t('dragZoomHelp')}
               </div>
 
               <div className="avatar-focus-controls">
-                <div className="avatar-zoom-buttons" aria-label={content.profilePhotoZoomControlsLabel}>
+                <div className="avatar-zoom-buttons" aria-label={t('zoomControlsLabel')}>
                   <button
                     type="button"
                     className="profile-photo-button profile-photo-button--secondary profile-photo-button--compact"
@@ -716,7 +722,7 @@ export default function ProfilePhotoManager({
                       isSubmitting ||
                       editorState.zoom <= MIN_PROFILE_AVATAR_ZOOM
                     }
-                    aria-label={content.profilePhotoZoomOutButton}
+                    aria-label={t('zoomOutButton')}
                   >
                     -
                   </button>
@@ -728,7 +734,7 @@ export default function ProfilePhotoManager({
                       isSubmitting ||
                       editorState.zoom >= MAX_PROFILE_AVATAR_ZOOM
                     }
-                    aria-label={content.profilePhotoZoomInButton}
+                    aria-label={t('zoomInButton')}
                   >
                     +
                   </button>
@@ -741,7 +747,7 @@ export default function ProfilePhotoManager({
                   }
                   disabled={isSubmitting}
                 >
-                  {content.profilePhotoResetFocusButton}
+                  {t('resetFocusButton')}
                 </button>
               </div>
 
@@ -753,7 +759,7 @@ export default function ProfilePhotoManager({
                   disabled={isSubmitting}
                 >
                   {isSubmitting
-                    ? content.profilePhotoUploadingMessage
+                    ? t('uploadingMessage')
                     : editorSaveLabel}
                 </button>
                 <button
@@ -762,7 +768,7 @@ export default function ProfilePhotoManager({
                   onClick={closeEditor}
                   disabled={isSubmitting}
                 >
-                  {content.cancelButton}
+                  {listingReportT('cancelButton')}
                 </button>
               </div>
             </div>
@@ -789,10 +795,10 @@ export default function ProfilePhotoManager({
             onClick={(event) => event.stopPropagation()}
           >
             <h2 id="remove-profile-photo-title">
-              {content.removeProfilePhotoConfirmTitle}
+              {t('removeConfirmTitle')}
             </h2>
             <p id="remove-profile-photo-description">
-              {content.removeProfilePhotoConfirmMessage}
+              {t('removeConfirmMessage')}
             </p>
             <div className="message-confirmation-actions">
               <button
@@ -802,7 +808,7 @@ export default function ProfilePhotoManager({
                 onClick={() => setRemoveDialogOpen(false)}
                 disabled={isSubmitting}
               >
-                {content.cancelButton}
+                {listingReportT('cancelButton')}
               </button>
               <button
                 type="button"
@@ -811,8 +817,8 @@ export default function ProfilePhotoManager({
                 disabled={isSubmitting}
               >
                 {isSubmitting
-                  ? content.profilePhotoUploadingMessage
-                  : content.removeProfilePhotoButton}
+                  ? t('uploadingMessage')
+                  : t('removeButton')}
               </button>
             </div>
           </div>

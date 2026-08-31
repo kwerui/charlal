@@ -10,8 +10,8 @@ import AccountReviewsSummary from '@/app/[locale]/account/AccountReviewsSummary'
 import ProfilePhotoManager from '@/app/[locale]/account/ProfilePhotoManager';
 import ListingCard from '@/app/components/ListingCard';
 import ResultsScrollRestorer from '@/app/components/ResultsScrollRestorer';
-import { content } from '@/content/tyv';
 import type { Listing } from '@/data/listings';
+import { useTranslations } from 'next-intl';
 import { useMessagingRealtime } from '@/lib/messagingRealtime';
 import {
   getUserOwnerId,
@@ -62,6 +62,13 @@ export default function AccountDashboard({
   initialListingsError,
 }: Props) {
   const router = useRouter();
+  const t = useTranslations('Account');
+  const headerT = useTranslations('Header');
+  const listingResultsT = useTranslations('ListingResults');
+  const listingOwnerActionsT = useTranslations('ListingOwnerActions');
+  const listingReportT = useTranslations('ListingReport');
+  const sellerProfileT = useTranslations('SellerProfile');
+  const savedListingsT = useTranslations('SavedListings');
   const accountContentRef = useRef<HTMLDivElement | null>(null);
   const {
     status: authStatus,
@@ -85,7 +92,9 @@ export default function AccountDashboard({
   const [listingSectionsLoaded, setListingSectionsLoaded] =
     useState(initialListingsLoaded);
   const [listingSectionsError, setListingSectionsError] = useState(
-    initialListingsError ? content.databaseListingsLoadFailedMessage : ''
+    initialListingsError
+      ? listingResultsT('databaseListingsLoadFailedMessage')
+      : ''
   );
   const [displayNameInput, setDisplayNameInput] = useState(
     initialUser?.displayName || ''
@@ -156,7 +165,7 @@ export default function AccountDashboard({
       setListingSectionsError('');
     } else {
       setOwnedListings([]);
-      setListingSectionsError(content.databaseListingsLoadFailedMessage);
+      setListingSectionsError(listingResultsT('databaseListingsLoadFailedMessage'));
     }
 
     setListingSectionsLoaded(true);
@@ -165,6 +174,7 @@ export default function AccountDashboard({
     authStatus,
     hasUsableInitialListings,
     initialListingsLoaded,
+    listingResultsT,
     ownerId,
   ]);
 
@@ -250,8 +260,8 @@ export default function AccountDashboard({
     if (!isValidProfileDisplayName(safeDisplayName)) {
       setPublicNameError(
         safeDisplayName
-          ? content.displayNameInvalidMessage
-          : content.accountPublicNameRequiredMessage
+          ? t('displayNameInvalidMessage')
+          : t('publicNameRequiredMessage')
       );
       return;
     }
@@ -260,7 +270,7 @@ export default function AccountDashboard({
       trimmedBio.length > PROFILE_BIO_MAX_LENGTH ||
       trimmedLocation.length > PROFILE_LOCATION_MAX_LENGTH
     ) {
-      setPublicNameError(content.accountProfileDetailsInvalidMessage);
+      setPublicNameError(t('profileDetailsInvalidMessage'));
       return;
     }
 
@@ -273,10 +283,10 @@ export default function AccountDashboard({
     if (!updateResult.ok) {
       setPublicNameError(
         updateResult.reason === 'invalid-display-name'
-          ? content.accountPublicNameRequiredMessage
+          ? t('publicNameRequiredMessage')
           : updateResult.reason === 'invalid-profile-details'
-          ? content.accountProfileDetailsInvalidMessage
-          : content.accountPublicNameSaveFailedMessage
+          ? t('profileDetailsInvalidMessage')
+          : t('publicNameSaveFailedMessage')
       );
       return;
     }
@@ -293,7 +303,7 @@ export default function AccountDashboard({
         PROFILE_LOCATION_MAX_LENGTH
       ) || ''
     );
-    setPublicNameMessage(content.profileUpdatedMessage);
+    setPublicNameMessage(t('profileUpdatedMessage'));
   }
 
   function startDelete(listing: Listing): void {
@@ -328,12 +338,12 @@ export default function AccountDashboard({
       setListingToDelete(null);
       setDeleteErrorListingId(null);
       setDeleteErrorMessage('');
-      setDeleteMessage(content.advertisementDeletedMessage);
+      setDeleteMessage(t('advertisementDeletedMessage'));
       return;
     }
 
     setDeleteErrorListingId(String(listingToDelete.id));
-    setDeleteErrorMessage(content.advertisementDeleteFailedMessage);
+    setDeleteErrorMessage(t('advertisementDeleteFailedMessage'));
   }
 
   function saveAccountScrollForEdit(
@@ -370,8 +380,8 @@ export default function AccountDashboard({
         />
         <AccountRefreshScrollManager ready={false} />
         <div className="empty-results" role="alert">
-          <h3>{content.unableLoadProfileMessage}</h3>
-          <p>{content.accountProfileLoadFailedMessage}</p>
+          <h3>{t('unableLoadProfileMessage')}</h3>
+          <p>{t('profileLoadFailedMessage')}</p>
         </div>
       </>
     );
@@ -403,16 +413,16 @@ export default function AccountDashboard({
   return (
     <div className="account-content" ref={accountContentRef}>
       <section className="account-overview" aria-labelledby="account-info-title">
-        <h3 id="account-info-title">{content.accountInfoTitle}</h3>
+        <h3 id="account-info-title">{t('infoTitle')}</h3>
         <div className="account-overview-meta">
           <p className="account-overview-row">
-            <span>{content.accountEmailLabel}</span>
+            <span>{t('emailLabel')}</span>
             <strong>{renderedUser.email}</strong>
           </p>
           <p className="account-overview-row">
-            <span>{content.accountPublicNameLabel}</span>
+            <span>{t('publicNameLabel')}</span>
             <strong>
-              {renderedUser.displayName || content.publicSellerFallbackLabel}
+              {renderedUser.displayName || sellerProfileT('sellerFallbackLabel')}
             </strong>
           </p>
         </div>
@@ -422,11 +432,11 @@ export default function AccountDashboard({
               href={`/seller/${accountProfile.publicSlug}`}
               className="secondary-button account-public-profile-link"
             >
-              {content.viewPublicProfileLabel}
+              {t('viewPublicProfileLabel')}
             </Link>
           ) : null}
           <Link href="/account/messages" className="secondary-button account-messages-link">
-            <span>{content.messagesTitle}</span>
+            <span>{headerT('messages')}</span>
             {unreadConversationCount > 0 ? (
               <span className="header-unread-badge">
                 {unreadConversationCount > 99
@@ -437,7 +447,7 @@ export default function AccountDashboard({
           </Link>
           <Link href="/account/favorites" className="secondary-button">
             <span aria-hidden="true">♥</span>
-            <span>{content.savedAdvertisementsTitle}</span>
+            <span>{savedListingsT('title')}</span>
           </Link>
         </div>
       </section>
@@ -446,7 +456,7 @@ export default function AccountDashboard({
         {accountProfile ? (
           <ProfilePhotoManager
             profile={accountProfile}
-            displayName={renderedUser.displayName || content.publicSellerFallbackLabel}
+            displayName={renderedUser.displayName || sellerProfileT('sellerFallbackLabel')}
             onChanged={async () => {
               router.refresh();
             }}
@@ -454,14 +464,14 @@ export default function AccountDashboard({
         ) : null}
         <form className="public-name-form" onSubmit={handlePublicNameSubmit} noValidate>
           <label className="form-field" htmlFor="account-public-name">
-            <span>{content.accountPublicNameTitle}</span>
+            <span>{t('publicNameTitle')}</span>
             <input
               id="account-public-name"
               name="displayName"
               type="text"
               value={displayNameInput}
               maxLength={PROFILE_DISPLAY_NAME_MAX_LENGTH}
-              placeholder={content.accountPublicNamePlaceholder}
+              placeholder={t('publicNamePlaceholder')}
               onChange={(event) => {
                 setDisplayNameInput(event.target.value);
                 setPublicNameError('');
@@ -470,9 +480,9 @@ export default function AccountDashboard({
               required
             />
           </label>
-          <p className="account-help-text">{content.accountPublicNameHelp}</p>
+          <p className="account-help-text">{t('publicNameHelp')}</p>
           <label className="form-field" htmlFor="account-profile-bio">
-            <span>{content.bioLabel}</span>
+            <span>{sellerProfileT('bioLabel')}</span>
             <textarea
               id="account-profile-bio"
               name="bio"
@@ -487,7 +497,7 @@ export default function AccountDashboard({
             />
           </label>
           <label className="form-field" htmlFor="account-profile-location">
-            <span>{content.profileLocationLabel}</span>
+            <span>{sellerProfileT('locationLabel')}</span>
             <input
               id="account-profile-location"
               name="location"
@@ -501,7 +511,7 @@ export default function AccountDashboard({
               }}
             />
           </label>
-          <p className="account-help-text">{content.publicLocationHelp}</p>
+          <p className="account-help-text">{t('publicLocationHelp')}</p>
           {publicNameMessage ? (
             <p
               className="account-status-message account-status-message--success"
@@ -519,7 +529,7 @@ export default function AccountDashboard({
             </p>
           ) : null}
           <button type="submit" className="search-button account-save-profile-button">
-            {content.accountSaveProfileButton}
+            {t('saveProfileButton')}
           </button>
         </form>
       </section>
@@ -528,9 +538,9 @@ export default function AccountDashboard({
 
       <section className="my-ads-section" aria-labelledby="my-ads-title">
         <div className="my-ads-heading">
-          <h3 id="my-ads-title">{content.myAdvertisementsTitle}</h3>
+          <h3 id="my-ads-title">{t('myAdvertisementsTitle')}</h3>
           <p className="results-summary" aria-live="polite">
-            <span className="sr-only">{content.myAdvertisementsCountLabel}: </span>
+            <span className="sr-only">{t('myAdvertisementsCountLabel')}: </span>
             {ownedListings.length}
           </p>
         </div>
@@ -571,7 +581,7 @@ export default function AccountDashboard({
                       className="listing-management-button listing-management-button--edit my-ad-edit-button"
                       onClick={saveAccountScrollForEdit}
                     >
-                      {content.editAdvertisementButton}
+                      {listingOwnerActionsT('editAdvertisementButton')}
                     </Link>
                     <button
                       type="button"
@@ -579,7 +589,7 @@ export default function AccountDashboard({
                       onClick={() => startDelete(listing)}
                       disabled={isDeleting}
                     >
-                      {content.deleteAdvertisementButton}
+                      {t('deleteAdvertisementButton')}
                     </button>
                   </div>
                   {confirmingThisListing ? (
@@ -592,10 +602,10 @@ export default function AccountDashboard({
                       }}
                     >
                       <h4 id={deleteConfirmationTitleId}>
-                        {content.confirmDeleteAdvertisementTitle}
+                        {t('confirmDeleteAdvertisementTitle')}
                       </h4>
                       <p>
-                        {content.confirmDeleteAdvertisementMessage} {listing.title}
+                        {t('confirmDeleteAdvertisementMessage')} {listing.title}
                       </p>
                       {deleteErrorForThisListing ? (
                         <p className="form-error" role="alert">
@@ -609,7 +619,7 @@ export default function AccountDashboard({
                           onClick={cancelDelete}
                           disabled={isDeleting}
                         >
-                          {content.cancelButton}
+                          {listingReportT('cancelButton')}
                         </button>
                         <button
                           type="button"
@@ -617,7 +627,7 @@ export default function AccountDashboard({
                           onClick={confirmDelete}
                           disabled={isDeleting || !deleteTargetStillOwned}
                         >
-                          {content.deleteAdvertisementButton}
+                          {t('deleteAdvertisementButton')}
                         </button>
                       </div>
                     </section>
@@ -628,8 +638,8 @@ export default function AccountDashboard({
           </div>
         ) : (
           <div className="empty-results" role="status">
-            <h3>{content.noAdvertisementsPostedTitle}</h3>
-            <p>{content.noAdvertisementsPostedMessage}</p>
+            <h3>{t('noAdvertisementsPostedTitle')}</h3>
+            <p>{t('noAdvertisementsPostedMessage')}</p>
           </div>
         )}
       </section>

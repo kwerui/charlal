@@ -1,5 +1,5 @@
 import { redirect } from 'next/navigation';
-import { content } from '@/content/tyv';
+import { getTranslations } from 'next-intl/server';
 import { getSignInHref } from '@/i18n/localePath';
 import { getCurrentUserResult } from '@/lib/auth/server';
 import { getListingFavoriteKey } from '@/lib/listingFavoriteKeys';
@@ -15,6 +15,7 @@ type AccountPageProps = {
 
 export default async function AccountPage({ params }: AccountPageProps) {
   const { locale } = await params;
+  const t = await getTranslations('Account');
   const authResult = await getCurrentUserResult();
 
   if (authResult.status === 'signed-out') {
@@ -42,7 +43,7 @@ export default async function AccountPage({ params }: AccountPageProps) {
       >
         <div className="form-page-heading">
           <h1 id="account-title" className="auth-title">
-            {content.accountTitle}
+            {t('title')}
           </h1>
         </div>
         <AccountDashboard

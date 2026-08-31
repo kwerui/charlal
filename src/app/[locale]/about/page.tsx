@@ -1,21 +1,28 @@
 import type { Metadata } from "next";
+import { getTranslations } from 'next-intl/server';
 import ReactMarkdown from "react-markdown";
-import { content } from "@/content/tyv";
 
-export const metadata: Metadata = {
-  title: `${content.aboutPageTitle} | Charlal`,
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations('AboutPage');
 
-export default function AboutPage() {
+  return {
+    title: `${t('title')} | Charlal`,
+  };
+}
+
+export default async function AboutPage() {
+  const t = await getTranslations('AboutPage');
+  const body = t.raw('body') as string[];
+
   return (
     <main className="info-page">
       <article className="info-page-panel" aria-labelledby="about-title">
-        <p className="hero-kicker">{content.aboutPageKicker}</p>
+        <p className="hero-kicker">{t('kicker')}</p>
 
-        <h1 id="about-title">{content.aboutPageTitle}</h1>
+        <h1 id="about-title">{t('title')}</h1>
 
         <div className="info-section-list">
-          {content.aboutPageBody.map((paragraph) => (
+          {body.map((paragraph) => (
             <div key={paragraph}>
               <ReactMarkdown
                 components={{

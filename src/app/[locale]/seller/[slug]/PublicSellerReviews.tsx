@@ -3,9 +3,9 @@
 import { useRouter } from '@/i18n/navigation';
 import type { FormEvent } from 'react';
 import { useEffect, useMemo, useRef, useState, useTransition } from 'react';
+import { useLocale, useTranslations } from 'next-intl';
 import ProfileAvatar from '@/app/components/ProfileAvatar';
 import ReviewPhotoViewer from '@/app/components/ReviewPhotoViewer';
-import { content } from '@/content/tyv';
 import type { PublicSellerReview } from '@/lib/supabase/reviews';
 import {
   deleteSellerResponseAction,
@@ -24,14 +24,14 @@ type ResponseDraft = {
   updatedAt: string | null;
 };
 
-function formatDate(value: string): string {
+function formatDate(value: string, locale: string): string {
   const date = new Date(value);
 
   if (Number.isNaN(date.getTime())) {
     return value.slice(0, 10);
   }
 
-  return new Intl.DateTimeFormat('en', {
+  return new Intl.DateTimeFormat(locale, {
     month: 'short',
     day: 'numeric',
     year: 'numeric',
@@ -63,6 +63,9 @@ export default function PublicSellerReviews({
   canRespond,
 }: Props) {
   const router = useRouter();
+  const locale = useLocale();
+  const t = useTranslations('PublicSellerReviews');
+  const listingReportT = useTranslations('ListingReport');
   const [isPending, startTransition] = useTransition();
   const [responseState, setResponseState] = useState(() =>
     getInitialResponseState(reviews)
@@ -157,7 +160,7 @@ export default function PublicSellerReviews({
     if (!body) {
       setActionErrorByReviewId((currentErrors) => ({
         ...currentErrors,
-        [review.reviewId]: content.sellerResponseSaveFailedMessage,
+        [review.reviewId]: t('responseSaveFailedMessage'),
       }));
       clearActionSuccess(review.reviewId);
       return;
@@ -177,7 +180,7 @@ export default function PublicSellerReviews({
       if (!result.ok || !result.responseId) {
         setActionErrorByReviewId((currentErrors) => ({
           ...currentErrors,
-          [review.reviewId]: content.sellerResponseSaveFailedMessage,
+          [review.reviewId]: t('responseSaveFailedMessage'),
         }));
         return;
       }
@@ -192,7 +195,7 @@ export default function PublicSellerReviews({
       }));
       setActionSuccessByReviewId((currentSuccesses) => ({
         ...currentSuccesses,
-        [review.reviewId]: content.sellerResponseSavedMessage,
+        [review.reviewId]: t('responseSavedMessage'),
       }));
       setEditingReviewId(null);
       router.refresh();
@@ -217,7 +220,7 @@ export default function PublicSellerReviews({
       if (!result.ok) {
         setActionErrorByReviewId((currentErrors) => ({
           ...currentErrors,
-          [review.reviewId]: content.sellerResponseDeleteFailedMessage,
+          [review.reviewId]: t('responseDeleteFailedMessage'),
         }));
         return;
       }
@@ -232,7 +235,7 @@ export default function PublicSellerReviews({
       }));
       setActionSuccessByReviewId((currentSuccesses) => ({
         ...currentSuccesses,
-        [review.reviewId]: content.sellerResponseDeletedMessage,
+        [review.reviewId]: t('responseDeletedMessage'),
       }));
       setConfirmingDeleteReviewId(null);
       setEditingReviewId(null);
@@ -243,7 +246,7 @@ export default function PublicSellerReviews({
   if (reviews.length === 0) {
     return (
       <div className="empty-results" role="status">
-        <p>{content.noReviewsYetLabel}</p>
+        <p>{t('noReviewsYetLabel')}</p>
       </div>
     );
   }
@@ -270,14 +273,14 @@ export default function PublicSellerReviews({
               <div>
                 <p
                   className="seller-review-stars"
-                  aria-label={`${review.rating} ${content.starsLabel}`}
+                  aria-label={t('starsLabel', { count: review.rating })}
                 >
                   <span aria-hidden="true">{renderStars(review.rating)}</span>
                 </p>
                 <h3>{review.buyerDisplayName}</h3>
                 <p className="seller-review-meta">
-                  {content.verifiedPurchaseLabel} · {review.listingTitleSnapshot} ·{' '}
-                  {formatDate(review.completedAt)}
+                  {t('verifiedPurchaseLabel')} · {review.listingTitleSnapshot} ·{' '}
+                  {formatDate(review.completedAt, locale)}
                 </p>
               </div>
             </header>
@@ -290,20 +293,20 @@ export default function PublicSellerReviews({
 
             <p className="seller-review-date">
               {review.reviewUpdatedAt !== review.reviewCreatedAt
-                ? `${content.editedReviewLabel} ${formatDate(review.reviewUpdatedAt)}`
-                : formatDate(review.reviewCreatedAt)}
+                ? `${t('editedReviewLabel')} ${formatDate(review.reviewUpdatedAt, locale)}`
+                : formatDate(review.reviewCreatedAt, locale)}
             </p>
 
             {hasResponse && !isEditing ? (
               <section
                 className="seller-response"
-                aria-label={content.sellerResponseLabel}
+                aria-label={t('responseLabel')}
               >
-                <h4>{content.sellerResponseLabel}</h4>
+                <h4>{t('responseLabel')}</h4>
                 <p>{review.responseBody}</p>
                 {review.responseUpdatedAt ? (
                   <time dateTime={review.responseUpdatedAt}>
-                    {formatDate(review.responseUpdatedAt)}
+                    {formatDate(review.responseUpdatedAt, locale)}
                   </time>
                 ) : null}
               </section>
@@ -323,7 +326,7 @@ export default function PublicSellerReviews({
                       }}
                       disabled={isPending}
                     >
-                      {content.editSellerResponseButton}
+                      {t('editResponseButton')}
                     </button>
                     <button
                       type="button"
@@ -331,7 +334,7 @@ export default function PublicSellerReviews({
                       onClick={() => setConfirmingDeleteReviewId(review.reviewId)}
                       disabled={isPending}
                     >
-                      {content.deleteSellerResponseButton}
+                      {t('deleteResponseButton')}
                     </button>
                   </div>
                 ) : null}
@@ -347,7 +350,7 @@ export default function PublicSellerReviews({
                     }}
                     disabled={isPending}
                   >
-                    {content.addSellerResponseButton}
+                    {t('addResponseButton')}
                   </button>
                 ) : null}
 
@@ -357,7 +360,7 @@ export default function PublicSellerReviews({
                       className="form-field"
                       htmlFor={`response-${review.reviewId}`}
                     >
-                      <span>{content.sellerResponseLabel}</span>
+                      <span>{t('responseLabel')}</span>
                       <textarea
                         id={`response-${review.reviewId}`}
                         name="body"
@@ -379,8 +382,8 @@ export default function PublicSellerReviews({
                         disabled={isPending}
                       >
                         {isPending
-                          ? content.sellerResponseSavingButton
-                          : content.saveSellerResponseChangesButton}
+                          ? t('responseSavingButton')
+                          : t('saveResponseChangesButton')}
                       </button>
                       <button
                         type="button"
@@ -391,7 +394,7 @@ export default function PublicSellerReviews({
                         }}
                         disabled={isPending}
                       >
-                        {content.cancelButton}
+                        {listingReportT('cancelButton')}
                       </button>
                     </div>
                   </form>
@@ -421,10 +424,10 @@ export default function PublicSellerReviews({
                   onClick={(event) => event.stopPropagation()}
                 >
                   <h2 id={`response-delete-title-${review.reviewId}`}>
-                    {content.deleteSellerResponseButton}
+                    {t('deleteResponseButton')}
                   </h2>
                   <p id={`response-delete-description-${review.reviewId}`}>
-                    {content.deleteSellerResponseConfirmMessage}
+                    {t('deleteResponseConfirmMessage')}
                   </p>
                   {actionError ? (
                     <p className="form-error" role="alert">
@@ -438,7 +441,7 @@ export default function PublicSellerReviews({
                       onClick={() => setConfirmingDeleteReviewId(null)}
                       disabled={isPending}
                     >
-                      {content.cancelButton}
+                      {listingReportT('cancelButton')}
                     </button>
                     <button
                       type="button"
@@ -446,7 +449,7 @@ export default function PublicSellerReviews({
                       onClick={() => handleDeleteResponse(review)}
                       disabled={isPending}
                     >
-                      {content.deleteSellerResponseButton}
+                      {t('deleteResponseButton')}
                     </button>
                   </div>
                 </div>

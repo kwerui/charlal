@@ -125,8 +125,7 @@
     "marketplaceSearchSample": "Тон дээн ышкаш кылдыр одуругче парлаптыңар",
     "marketplaceSearchPlaceholder": "Тон дээн ышкаш кылдыр парлаптыңар",
     "searchPlaceholder": "Чүнү дилеп тур силер бээр парлаптыңар",
-        "searchPromptSuffix": "",
-
+    "searchPromptSuffix": "",
     "searchButton": "Дилээр",
     "typeLabel": "Хевир",
     "typePlaceholder": "Хевир",
@@ -220,5 +219,292 @@
         }
       }
     }
+  },
+  "Account": {
+    "title": "Аккаунт",
+    "infoTitle": "Account information / Аккаунт дугайында медээ",
+    "emailLabel": "Signed in as / Кылдыр кирген",
+    "publicNameLabel": "Public name / Хөй-ниити ады",
+    "viewPublicProfileLabel": "View public profile / Хөй-ниити профилин көрүңер",
+    "publicNameTitle": "Change public name / Хөй-ниити адын өскертир",
+    "publicNamePlaceholder": "Enter a public seller name / Хөй-ниити садыгжы адын киирер",
+    "publicNameHelp": "This name is shown publicly on advertisements instead of your email. / Бо ат силерниң электроннуг почтаңарның орнунга чарлалдарда хөй-ниитиге көстүп турар.",
+    "publicLocationHelp": "Public city or region only; do not enter a street address. / Чүгле хөй-ниити хоорай азы регион; кудумчу адрезин киирбес.",
+    "saveProfileButton": "Save profile / Профильди кадагала",
+    "publicNameRequiredMessage": "Enter a public name before posting an advertisement. / Чарлал үндүрер мурнунда хөй-ниити адын киирер.",
+    "publicNameSaveFailedMessage": "Unable to update public name. / Хөй-ниити адын чаартып шыдаваан.",
+    "displayNameInvalidMessage": "Enter a public display name that is not an email address. / Электроннуг почта адрези эвес, хөй-ниитиге көргүзер атты киирер.",
+    "profileDetailsInvalidMessage": "Bio or location is too long. / 'Силерниң дугайыңарда' азы турар чери дыка узун.",
+    "profileLoadFailedMessage": "Your account is signed in, but the profile could not be loaded. / Силерниң аккаунтуңар кирген, ынчалза-даа профильди үндүрүп шыдаваан.",
+    "unableLoadProfileMessage": "Unable to load profile / Профильди үндүрүп шыдаваан",
+    "profileUpdatedMessage": "Profile updated. / Профиль чаарттынган.",
+    "myAdvertisementsTitle": "My advertisements / Мээң чарлалдарым",
+    "myAdvertisementsCountLabel": "My advertisements / Мээң чарлалдарым",
+    "deleteAdvertisementButton": "Delete advertisement / Чарлалды өжүрүп кааптыңар",
+    "confirmDeleteAdvertisementTitle": "Confirm deletion / Өжүргенин бадыткаар",
+    "confirmDeleteAdvertisementMessage": "Delete this advertisement? / Бо чарлалды өжүрүп кааптыңар бе?",
+    "advertisementDeletedMessage": "Advertisement deleted. / Чарлал өжүрүп каан.",
+    "advertisementDeleteFailedMessage": "This advertisement could not be deleted. / Бо чарлалды өжүрүп шыдаваан.",
+    "noAdvertisementsPostedTitle": "No advertisements posted / Чарлал чок",
+    "noAdvertisementsPostedMessage": "Advertisements you create while signed in will appear here. / Кирип тургаш кылган чарлалдарыңар мында көстүп кээр.",
+    "reviewsSummaryTitle": " Хыналдалар",
+    "reviewsSummary": "Харыы манап тур мен: {toReview} · Бижиттинген: {written} ",
+    "viewReviewsButton": "Үнелелдерни көрүңер"
+  },
+  "SavedListings": {
+    "title": "Камгалаттынган чарлалдар",
+    "countLabel": "Камгалаттынган чарлалдар",
+    "emptyTitle": "Камгалаттынган чарлалдар чок",
+    "emptyMessage": "Advertisements you save will appear here / Сактып алган чарлалдарыңар мында көстүп кээр..",
+    "unableLoadTitle": " Unable to load saved advertisements / Камгалаттынган чарлалдарны үндүрүп шыдаваан",
+    "unableLoadMessage": " Try again in a moment. / Бир секунда болгаш катап шенеп көрүңер."
+  },
+  "SellerProfile": {
+    "title": "Seller profile / Садыгжының профили",
+    "unavailableTitle": "Seller profile unavailable / Садыгжы профили чок",
+    "sellerFallbackLabel": "Seller / Садыгжы",
+    "locationLabel": "Location / Турар чер",
+    "memberSinceLabel": "Member since / Чылдан эгелеп кежигүн",
+    "bioLabel": "Bio / Мен дугайымда",
+    "reviewsTitle": "Reviews / Үнелелдер",
+    "seeAllReviewsLabel": " See all reviews / Шупту үнелелдерни көрүңер",
+    "noReviewsYetLabel": "No reviews yet / Амдыызында үнелелдер чок",
+    "ratingSummary": " {rating} · {count, plural, one {# Допчулал} other {# Хыналдалар}}",
+    "activeListingsTitle": "Active listings / Ажылдап турар даңзылар",
+    "noActiveListingsMessage": "No active listings from this seller. / Бо садыгжыдан ажылдап турар дыңнадыглар чок.",
+    "backToSellerProfileLabel": " Back to seller profile / Садыгжы профилинге эглип келир",
+    "profilePhotoLabel": " Profile photo / Профиль чурук",
+    "openProfilePhotoViewerLabel": " Профиль чуруун ажыдып алыңар / Open profile photo",
+    "closeProfilePhotoViewerButton": "Хаар / Close"
+  },
+  "PublicSellerReviews": {
+    "noReviewsYetLabel": "Амдыызында үнелелдер чок No reviews yet",
+    "starsLabel": " {count} Сылдыс",
+    "verifiedPurchaseLabel": "Бадыткаан садып алыышкын / Verified purchase",
+    "editedReviewLabel": "Өскерткен / Edited",
+    "responseLabel": "Садыгжының харыызы / Seller response",
+    "addResponseButton": "Харыы немээр / Add response",
+    "editResponseButton": "Харыызын эде көөр / Edit response",
+    "saveResponseChangesButton": "Өскерлиишкиннерни кадагала / Save changes",
+    "deleteResponseButton": "Харыызын өжүрүп кааптыңар / Delete response",
+    "responseSavingButton": "Кадагалап турар ...",
+    "responseSavedMessage": "Садыгжының харыызы камгалаттынган. / Seller response saved.",
+    "responseDeletedMessage": "Садыгжы харыызын өжүрүп каан. / Seller response deleted.",
+    "responseSaveFailedMessage": "Садыгжы харыызын кадагалап шыдаваан. / Unable to save seller response.",
+    "responseDeleteFailedMessage": "Садыгжы харыызын өжүрүп шыдаваан. / Unable to delete seller response.",
+    "deleteResponseConfirmMessage": "Бо садыгжы харыызын өжүрүп кааптыңар бе? / Delete this seller response?"
+  },
+  "ProfilePhoto": {
+    "label": "Профиль чурук / Profile photo",
+    "chooseButton": "Чурукту шилип алыңар / Choose photo",
+    "changeButton": "Чурукту өскертир / Change photo",
+    "saveButton": "Чурукту кадагала / Save photo",
+    "removeButton": "Чурукту үндүрер / Remove photo",
+    "uploadingMessage": "Чүдүрүп турар / Uploading...",
+    "updatedMessage": "Профиль чуруун чаарткан. / Profile photo updated.",
+    "removedMessage": "Профиль чуруун үндүрген. / Profile photo removed.",
+    "uploadFailedMessage": "Профиль чуруун үндүрүп шыдаваан. / Unable to upload profile photo.",
+    "removeFailedMessage": "Профиль чуруун ап шыдаваан. / Unable to remove profile photo.",
+    "requirementsMessage": "JPEG, PNG азы WebP. Файлдың эң улуг хемчээли 5 МБ. / JPEG, PNG, or WebP. Maximum file size 5 MB.",
+    "invalidFormatMessage": "Чуруктуң шын эвес хевири. JPEG, PNG азы WebP ажыглаар. / Invalid image format. Use JPEG, PNG, or WebP.",
+    "tooLargeMessage": "Чурук дыка улуг. Файлдың эң улуг хемчээли 5 МБ. / Image is too large. Maximum file size is 5 MB.",
+    "previewTitle": "Профиль чуруктуң мурнады көрүжү / Profile photo preview",
+    "adjustButton": "Чурукту таарыштырар / Adjust photo",
+    "previewHelp": "Силерниң арын чуруктарыңар ынчаар көстүп кээр. / This is how your profile photo will appear.",
+    "dragZoomHelp": "Чурукту өскертир дээш сөөртүп алыңар. Кнопкаларны ажыглап азы улгаттырар. / Drag photo to reposition. Scroll or use the buttons to zoom.",
+    "positionControlLabel": "Профиль чуруктуң туружун таарыштыр / Adjust profile photo position",
+    "zoomControlsLabel": "Профиль чуруктарын улгаттырар башкарылгалар / Profile photo zoom controls",
+    "zoomOutButton": "Улгаттырар / Zoom out",
+    "zoomInButton": "Улугладыр / Zoom in ",
+    "resetFocusButton": "Төпче эгидип алыр / Reset to center",
+    "savePositionButton": "Туружун кадагалап алыр / Save position",
+    "removeConfirmTitle": "Профиль чуруун үндүрер бе? / Remove profile photo?",
+    "removeConfirmMessage": "Силерниң профилиңер өске чурукту немеп каарыңарга чедир эге аватарны ажыглап турар. / Your profile will use the default avatar until you add another photo.",
+    "focusSaveFailedMessage": "Чуруктуң туружун кадагалап шыдаваан. / Unable to save photo position."
+  },
+  "PostAd": {
+    "title": "Чарлалдан үндүрер",
+    "checkingAuthMessage": "Киргенин хынап тур мен... / Checking sign-in...",
+    "submitButton": "Submit Ad / Чарлал киирер",
+    "submittingButton": "Saving ad... / Рекламаны кадагалап турар...",
+    "successMessage": "Advertisement saved. / Чарлал камгалаттынган.",
+    "saveFailedMessage": "The advertisement could not be saved. / Чарлалды камгалап шыдаваан.",
+    "photosSaveFailedMessage": "Чарлал камгалаттынган, ынчалза-даа чамдык чуруктарны үндүрүп шыдаваан. Катап шенеп көөр дээш, чарлалды өскертирин ажыдып алыңар. / The advertisement was saved, but some photos could not be uploaded. Open Edit advertisement to try again.",
+    "form": {
+      "titleLabel": "ListingSaving title / Даңзы ады",
+      "categoryLabel": "Category / Категория",
+      "categoryPlaceholder": "Choose a category / Категория шилип алыңар",
+      "subcategoryLabel": "Subcategory / Подкатегория",
+      "subcategoryPlaceholder": "Choose a subcategory / Подкатегория шилип алыңар",
+      "typeLabel": "Хевир",
+      "typePlaceholder": "Choose a type / Хевирни шилип алыңар",
+      "buyTypeLabel": "Marketplace type / Рынок хевири",
+      "buyTypePlaceholder": "Choose a marketplace type / Рыноктуң хевирин шилип алыңар",
+      "descriptionLabel": "Тайлбыр",
+      "priceLabel": "өртээ",
+      "locationLabel": "Location / Турар чер",
+      "photosLabel": "Photos / Чуруктар",
+      "photosHelp": "Чедир чуруктарны немеп алыңар. Бир дугаар чурук арын болур. / Add up to 8 photos. The first photo will be the cover.",
+      "addPhotosButton": "Чуруктарны немеп каар / Add photos",
+      "coverPhotoLabel": "Кавер чурук /  Cover photo",
+      "positionLabel": "Туруш / Position",
+      "movePhotoEarlierButton": "Эртежик шимче / Move earlier",
+      "movePhotoLaterButton": "Соонда көжүп кел / Move later",
+      "removePhotoButton": "Чурукту үндүрер / Remove photo",
+      "noPhotosMessage": "Чуруктар шилиттинмээн. Категорияның орнунга ажыглаар. / No photos selected. A category placeholder will be used.",
+      "imageRequirements": "Чүгле JPEG, PNG азы WebP. Бир чурукка эң хөйү 5 МБ. / JPEG, PNG, or WebP only. Maximum 5 MB per photo.",
+      "photoMaximumMessage": "Бир даңзыда хөй дизе 8 чурук бар болур. / A listing can have at most 8 photos.",
+      "photoTooLargeMessage": "Чурук дыка улуг. Эң улуг хемчээли 5 МБ. / Photo is too large. Maximum size is 5 MB.",
+      "photoUnsupportedTypeMessage": "Деткиттинмээн чурук хевири. JPEG, PNG азы WebP ажыглаар. / Unsupported photo type. Use JPEG, PNG, or WebP.",
+      "photoAlt": " Чурук {current} дан {total}"
+    },
+    "validation": {
+      "titleRequired": "Enter a listing title. / Даңзының адын киирер.",
+      "descriptionRequired": "Enter a description. / Тайылбырны киирер.",
+      "locationRequired": "Enter a location. / Бир-ле черни киирер.",
+      "categoryRequired": "Choose a category and subcategory. / Категория болгаш подкатегория шилип алыңар.",
+      "priceRequired": "Enter a valid price. Zero is allowed. / Шын өртекти киирер. Ноль чөпшээрелдиг.",
+      "housingTypeRequired": "Choose a housing transaction and property type. / Бажың-балгат дугайында садыглажыышкынның хевирин болгаш өнчү-хөреңгиниң хевирин шилип алыңар. ",
+      "marketplaceTypeRequired": "Choose a marketplace type. / Рынок хевирин шилип алыңар."
+    }
+  },
+  "AboutPage": {
+    "kicker": "Charlal дугайында",
+    "title": "Charlal дугайында",
+    "body": [
+      "**Charlal** дээрге *Чарлал* деп сөстен үнген латин үжүктерлиг бижик. **Charlal** болза шупту кижилерге ажыглаарда эптиг болгаш билдингир, Тывага хамаарышкан янзы-бүрү чарлалдарлыг тыва дыл кырында интернет-сайт-дыр (бөдүүнү-биле сайт).",
+      "Орус дылче сайт ажыглакчы бүрүзү боду өскертип ап болур. **Charlal**’дың соруглазы дээрге бараан дилеп турар азы бажың арендада дужаап турар дээн ышкаш чарлалдарны дүргени-биле дилээринге азы үндүр салырынга кижилерге база бир арганы бээри.",
+      "**Charlal**’ды ажыглаарының бертинде баштай Дүрүмнер болгаш оларны сагыырының чуруму-биле таныжып алыр ужурлуг. Ажыглакчы бүрүзү Дүрүмнерни сагыыр ужурлуг. Чарлалды үндүр салырда баштай бүрүткедип алыр. Бир дугаар бүрүткеткен соонда шупту Дүрүмнерни номчаан, олар-биле чөпшээрешкен, дүрүмнер сагыырынга хүлээлгени берген-деп санаттынып турар.",
+      "**Charlal**’дың ажылы дугайнда айтырыгларны техниктиг дуза бөлүүнче салыр. Оон-даа хөй ажыктыг информацияны **Charlal**’дың кол арнында адаакы кезектен тып ап болур."
+    ]
+  },
+  "TermsPage": {
+    "kicker": "Information / Медегдел",
+    "title": "Ажыглаарының чуруму",
+    "intro": "[TYV REVIEW] This page is a placeholder structure for Charlal's future reviewed user agreement. It is not final legal text.",
+    "sections": [
+      {
+        "title": "[TYV REVIEW] About Charlal",
+        "body": "[TYV REVIEW] TODO: Add reviewed legal text describing the marketplace service."
+      },
+      {
+        "title": "[TYV REVIEW] Eligibility and account use",
+        "body": "[TYV REVIEW] TODO: Add reviewed legal text covering who may use Charlal and how accounts should be used."
+      },
+      {
+        "title": "[TYV REVIEW] Posting advertisements",
+        "body": "[TYV REVIEW] TODO: Add reviewed legal text covering advertisement posting rules."
+      },
+      {
+        "title": "[TYV REVIEW] Prohibited content",
+        "body": "[TYV REVIEW] TODO: Add reviewed legal text listing prohibited advertisements, content, and conduct."
+      },
+      {
+        "title": "[TYV REVIEW] Buyer and seller responsibility",
+        "body": "[TYV REVIEW] TODO: Add reviewed legal text explaining user responsibility for transactions and communications."
+      },
+      {
+        "title": "[TYV REVIEW] Messaging and conduct",
+        "body": "[TYV REVIEW] TODO: Add reviewed legal text covering acceptable messaging and user conduct."
+      },
+      {
+        "title": "[TYV REVIEW] User-generated content",
+        "body": "[TYV REVIEW] TODO: Add reviewed legal text covering rights and responsibilities for user-created listings, photos, and messages."
+      },
+      {
+        "title": "[TYV REVIEW] Account suspension or removal",
+        "body": "[TYV REVIEW] TODO: Add reviewed legal text covering moderation, suspension, and removal."
+      },
+      {
+        "title": "[TYV REVIEW] Service availability",
+        "body": "[TYV REVIEW] TODO: Add reviewed legal text covering availability, maintenance, and changes to the service."
+      },
+      {
+        "title": "[TYV REVIEW] Liability and disputes",
+        "body": "[TYV REVIEW] TODO: Add reviewed legal text covering liability limits, dispute handling, and applicable law."
+      },
+      {
+        "title": "[TYV REVIEW] Changes to these terms",
+        "body": "[TYV REVIEW] TODO: Add reviewed legal text explaining how terms updates will be handled."
+      },
+      {
+        "title": "Харылзаа",
+        "body": "[TYV REVIEW] TODO: Add reviewed official contact details for terms questions."
+      }
+    ]
+  },
+  "PrivacyPage": {
+    "kicker": "Information / Медегдел",
+    "title": "Privacy Policy / Чажыт чоруктуң политиказы",
+    "intro": "[TYV REVIEW] This page is a placeholder structure for Charlal's future reviewed privacy and personal data policy. It is not final legal text.",
+    "sections": [
+      {
+        "title": "[TYV REVIEW] Introduction",
+        "body": "[TYV REVIEW] TODO: Add reviewed legal text explaining the purpose and scope of this policy."
+      },
+      {
+        "title": "[TYV REVIEW] Who operates Charlal",
+        "body": "[TYV REVIEW] TODO: Add reviewed operator, responsible-party, and jurisdiction details when they are available."
+      },
+      {
+        "title": "[TYV REVIEW] Information we collect",
+        "body": "[TYV REVIEW] TODO: Add reviewed legal text describing the categories of information collected."
+      },
+      {
+        "title": "[TYV REVIEW] Account information",
+        "body": "[TYV REVIEW] TODO: Add reviewed legal text covering account registration, profile names, and authentication information."
+      },
+      {
+        "title": "[TYV REVIEW] Listings and uploaded photos",
+        "body": "[TYV REVIEW] TODO: Add reviewed legal text covering advertisement details, listing photos, and public listing content."
+      },
+      {
+        "title": "[TYV REVIEW] Messages",
+        "body": "[TYV REVIEW] TODO: Add reviewed legal text covering private buyer and seller messages."
+      },
+      {
+        "title": "[TYV REVIEW] Technical and security information",
+        "body": "[TYV REVIEW] TODO: Add reviewed legal text covering cookies, security logs, device/browser data, and abuse prevention."
+      },
+      {
+        "title": "[TYV REVIEW] Why information is processed",
+        "body": "[TYV REVIEW] TODO: Add reviewed legal text explaining the purposes and lawful basis for processing where applicable."
+      },
+      {
+        "title": "[TYV REVIEW] Who information may be shared with",
+        "body": "[TYV REVIEW] TODO: Add reviewed legal text covering service providers, legal requests, safety, and required disclosures."
+      },
+      {
+        "title": "[TYV REVIEW] Data retention",
+        "body": "[TYV REVIEW] TODO: Add reviewed legal text explaining how long different kinds of information are kept."
+      },
+      {
+        "title": "[TYV REVIEW] Account and data deletion",
+        "body": "[TYV REVIEW] TODO: Add reviewed legal text explaining how users can request account or data deletion."
+      },
+      {
+        "title": "[TYV REVIEW] User rights",
+        "body": "[TYV REVIEW] TODO: Add reviewed legal text describing applicable access, correction, deletion, and objection rights."
+      },
+      {
+        "title": "[TYV REVIEW] Security",
+        "body": "[TYV REVIEW] TODO: Add reviewed legal text describing security practices without exposing implementation secrets."
+      },
+      {
+        "title": "[TYV REVIEW] Changes to this policy",
+        "body": "[TYV REVIEW] TODO: Add reviewed legal text explaining how policy updates will be communicated."
+      },
+      {
+        "title": "Харылзаа",
+        "body": "[TYV REVIEW] TODO: Add reviewed official contact details for privacy questions."
+      }
+    ]
+  },
+  "ContactPage": {
+    "kicker": "Харылзаа",
+    "title": "Чарлал-биле харылзажыңар / Contact Charlal",
+    "intro": "This page is a placeholder for official Charlal contact details. A database-backed contact form is not included yet.",
+    "detailsTitle": "Харылзажыр аргалар / Contact details",
+    "detailsPlaceholder": "[TYV REVIEW] TODO: Add official email address, phone number, mailing address, or other approved contact details."
   }
 }
