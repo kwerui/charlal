@@ -3090,6 +3090,44 @@ min-height: calc(100dvh - 80px);
   text-align: left;
 }
 
+@media (max-width: 640px) {
+  .saved-listings-grid {
+    width: 100%;
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .saved-listings-grid .listing-card {
+    width: 100%;
+    max-width: none;
+  }
+
+  .favorite-control--card {
+    left: auto;
+    right: 10px;
+    bottom: 10px;
+    width: auto;
+    max-width: calc(100% - 20px);
+    justify-items: end;
+  }
+
+  .favorite-control--card .favorite-button {
+    width: auto;
+    max-width: 100%;
+    min-width: 88px;
+    height: auto;
+    min-height: 42px;
+    padding: 7px 10px;
+    white-space: nowrap;
+    overflow-wrap: normal;
+    word-break: normal;
+    text-align: center;
+  }
+
+  .favorite-control--card .favorite-button-icon {
+    flex: 0 0 auto;
+  }
+}
+
 @media (prefers-color-scheme: dark) {
   .favorite-error {
     border-color: rgba(254,202,202,0.36);
@@ -3098,6 +3136,7 @@ min-height: calc(100dvh - 80px);
     box-shadow: 0 14px 30px rgba(0,0,0,0.32);
   }
 }
+
 
 .listing-status-badge {
   display: inline-flex;
@@ -6291,6 +6330,10 @@ min-height: calc(100dvh - 80px);
     gap: 12px;
   }
 
+  .listings-grid.saved-listings-grid {
+  grid-template-columns: minmax(0, 1fr);
+}
+
   /* Homepage recent listings are secondary to category navigation. */
   .listings-section {
     padding-right: 14px;
@@ -7608,33 +7651,7 @@ body {
     align-content: start;
     padding-bottom: 82px;
   }
-
-  .favorite-control--card {
-    right: 10px;
-    bottom: 10px;
-    max-width: calc(100% - 20px);
-  }
-
-  .favorite-control--card .favorite-button {
-    min-width: 88px;
-    min-height: 42px;
-    height: auto;
-    padding: 7px 10px;
-    white-space: normal;
-    overflow-wrap: anywhere;
-    text-align: center;
-  }
-
-  .favorite-control--card .favorite-button-icon {
-    flex: 0 0 auto;
-  }
-
-  .favorite-control--card .favorite-button-label {
-    min-width: 0;
-    line-height: 1.15;
-  }
 }
-
 
 
 @media (max-width: 768px) {
