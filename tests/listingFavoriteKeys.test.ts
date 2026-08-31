@@ -134,6 +134,27 @@ test('does not offer a favorite save control for known own database listings', (
   );
 });
 
+test('does not offer a favorite save control when the viewer owns the listing id', () => {
+  const listing = createListing('db-owned-by-id', {
+    ownerId: 'viewer-1',
+  });
+  const reference = getListingFavoriteReference(listing);
+
+  assert.equal(
+    isKnownOwnDatabaseFavoriteListing(listing, reference, 'viewer-1'),
+    true
+  );
+  assert.equal(
+    canOfferListingFavoriteControl({
+      listing,
+      reference,
+      isSaved: false,
+      currentViewerId: 'viewer-1',
+    }),
+    false
+  );
+});
+
 test('hides new database saves when viewer ownership is unavailable', () => {
   const listing = createListing('db-unknown-owner', {
     viewerOwnershipUnavailable: true,

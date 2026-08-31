@@ -16,6 +16,7 @@ import {
   attachImageRowsToListings,
   listListingImageRowsForListingIds,
 } from '@/lib/supabase/listingImages';
+import { attachViewerOwnership } from '@/lib/supabase/listingViewerOwnership';
 
 export type PublicSellerProfile = {
   publicSlug: string;
@@ -152,7 +153,10 @@ export async function getPublicSellerPageBySlug(
     return { ok: false, reason: 'database-unavailable' };
   }
 
-  const listings = publicDatabaseRowsToListings(listingRows);
+  const listings = await attachViewerOwnership(
+    publicDatabaseRowsToListings(listingRows),
+    supabase
+  );
   const imageRows = await listListingImageRowsForListingIds(
     supabase,
     listings.map((listing) => String(listing.id))
