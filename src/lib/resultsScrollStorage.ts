@@ -300,13 +300,14 @@ export function requestResultsScrollRestoreAfterNativeTraversal(
       ACTIVE_LISTING_NAVIGATION_KEY
     );
 
-  if (
+  const rejected =
     !activeNavigation ||
     getLogicalNavigationHref(
       activeNavigation.resultsHref
     ) !== logicalResultsHref ||
-    !isFresh(activeNavigation.savedAt)
-  ) {
+    !isFresh(activeNavigation.savedAt);
+
+  if (rejected) {
     window.sessionStorage.removeItem(
       ACTIVE_LISTING_NAVIGATION_KEY
     );
@@ -535,7 +536,6 @@ export function peekResultsScrollPosition(
   return scrollPosition.scrollY;
 }
 
-
 export function peekResultsScrollRestorePosition(
   resultsHref: string
 ): SavedResultsScrollPosition | undefined {
@@ -551,9 +551,18 @@ export function peekResultsScrollRestorePosition(
       RESTORE_INTENT_KEY
     );
 
+  if (!restoreIntent) {
+    return undefined;
+  }
+
   if (
-    !restoreIntent ||
-    restoreIntent.resultsHref !== logicalResultsHref ||
+    restoreIntent.resultsHref !==
+    logicalResultsHref
+  ) {
+    return undefined;
+  }
+
+  if (
     !isFresh(restoreIntent.requestedAt)
   ) {
     return undefined;

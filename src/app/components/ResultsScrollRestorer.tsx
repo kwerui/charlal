@@ -13,11 +13,20 @@ type Props = {
 const MAX_RESTORE_MS = 3000;
 const SCROLL_TOLERANCE_PX = 1;
 
+function getMaximumScrollY(): number {
+  return Math.max(
+    0,
+    document.documentElement.scrollHeight -
+      window.innerHeight
+  );
+}
+
 export default function ResultsScrollRestorer({
   resultsHref,
 }: Props) {
   useLayoutEffect(() => {
     const startedAt = performance.now();
+
     let frameId = 0;
     let cancelled = false;
 
@@ -35,11 +44,8 @@ export default function ResultsScrollRestorer({
         return;
       }
 
-      const maximumScrollY = Math.max(
-        0,
-        document.documentElement.scrollHeight -
-          window.innerHeight
-      );
+      const maximumScrollY =
+        getMaximumScrollY();
 
       let targetScrollY: number;
 
@@ -88,6 +94,7 @@ export default function ResultsScrollRestorer({
         completeResultsScrollRestore(
           resultsHref
         );
+
         return;
       }
 
@@ -109,7 +116,10 @@ export default function ResultsScrollRestorer({
 
     return () => {
       cancelled = true;
-      window.cancelAnimationFrame(frameId);
+
+      window.cancelAnimationFrame(
+        frameId
+      );
     };
   }, [resultsHref]);
 

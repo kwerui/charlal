@@ -7,9 +7,15 @@ import { routing } from '../src/i18n/routing.js';
 import {
   clearLocaleHistoryNormalization,
   createLocaleHistoryNormalization,
+  getNativeHistoryLocaleCorrectionHref,
+  isNativeHistoryLocaleNormalizationHref,
+  readPreferredHistoryLocale,
+  recordPreferredHistoryLocale,
+  syncPreferredHistoryLocaleToUrl,
   takeLocaleHistoryNormalizationRedirect,
 } from '../src/i18n/localeHistory.js';
 import {
+  getSignInHref,
   localizeReturnPathQuery,
   localizeSafeInternalPath,
 } from '../src/i18n/localePath.js';
@@ -129,6 +135,15 @@ test('Russian account path is accepted as a safe internal next path', () => {
   assert.equal(getSafeNextPath('/ru/account', '/account'), '/ru/account');
 });
 
+test('sign-in href keeps protected redirects localized', () => {
+  assert.equal(getSignInHref('/account', 'tyv'), '/sign-in?next=%2Faccount');
+  assert.equal(getSignInHref('/account', 'ru'), '/ru/sign-in?next=%2Fru%2Faccount');
+  assert.equal(
+    getSignInHref('/ru/account/messages', 'tyv'),
+    '/sign-in?next=%2Faccount%2Fmessages'
+  );
+});
+
 test('external next values remain rejected', () => {
   assert.equal(
     getSafeNextPath('https://attacker.example/account', '/account'),
@@ -144,8 +159,127 @@ test('locale switcher preserves the current query string', () => {
 
   assert.equal(headerSource.includes('const currentQueryString = searchParams.toString()'), true);
   assert.equal(headerSource.includes('localizeReturnPathQuery(currentQueryString, nextLocale)'), true);
-  assert.equal(headerSource.includes('recordLocaleHistoryNormalization(currentQueryString, locale, nextLocale)'), true);
+  assert.equal(headerSource.includes('recordPreferredHistoryLocale(nextLocale)'), true);
   assert.equal(headerSource.includes("router.replace(href, { locale: nextLocale })"), true);
+});
+
+test('locale switcher no longer derives route-specific native-back fallbacks', () => {
+  const headerSource = readFileSync('src/app/components/SiteHeader.tsx', 'utf8');
+
+  assert.equal(headerSource.includes('getNaturalLocaleHistoryBackTarget'), false);
+  assert.equal(headerSource.includes('getLocaleHistoryNormalizationQueryString'), false);
+  assert.equal(headerSource.includes('categoryMatch'), false);
+});
+
+test('preferred history locale follows explicit switches and normal URL sync', () => {
+  withMockWindow({}, () => {
+    assert.equal(readPreferredHistoryLocale(), undefined);
+
+    recordPreferredHistoryLocale('ru');
+    assert.equal(readPreferredHistoryLocale(), 'ru');
+
+    recordPreferredHistoryLocale('tyv');
+    assert.equal(readPreferredHistoryLocale(), 'tyv');
+
+    syncPreferredHistoryLocaleToUrl('ru');
+    assert.equal(readPreferredHistoryLocale(), 'ru');
+  });
+});
+
+test('preferred history locale correction keeps root canonical', () => {
+  withMockWindow({}, () => {
+    recordPreferredHistoryLocale('ru');
+    assert.equal(getNativeHistoryLocaleCorrectionHref('/'), '/ru');
+
+    recordPreferredHistoryLocale('tyv');
+    assert.equal(getNativeHistoryLocaleCorrectionHref('/ru'), '/');
+  });
+});
+
+test('preferred history locale correction localizes normal Charlal routes', () => {
+  const cases: Array<[string, string, string]> = [
+    ['ru', '/category/auto', '/ru/category/auto'],
+    ['tyv', '/ru/category/auto', '/category/auto'],
+    ['ru', '/category/auto/used-cars', '/ru/category/auto/used-cars'],
+    ['tyv', '/ru/category/auto/used-cars', '/category/auto/used-cars'],
+    ['ru', '/search?q=test', '/ru/search?q=test'],
+    ['tyv', '/ru/search?q=test', '/search?q=test'],
+    ['ru', '/listing/123', '/ru/listing/123'],
+    ['tyv', '/ru/listing/123', '/listing/123'],
+    ['ru', '/account', '/ru/account'],
+    ['tyv', '/ru/account', '/account'],
+    ['ru', '/account/favorites', '/ru/account/favorites'],
+    ['tyv', '/ru/account/favorites', '/account/favorites'],
+    ['ru', '/account/messages', '/ru/account/messages'],
+    ['tyv', '/ru/account/messages', '/account/messages'],
+    ['ru', '/seller/example', '/ru/seller/example'],
+    ['tyv', '/ru/seller/example', '/seller/example'],
+    ['ru', '/sign-in', '/ru/sign-in'],
+    ['tyv', '/ru/sign-in', '/sign-in'],
+    ['ru', '/sign-up', '/ru/sign-up'],
+    ['tyv', '/ru/sign-up', '/sign-up'],
+  ];
+
+  for (const [preferredLocale, currentHref, expectedHref] of cases) {
+    withMockWindow({}, () => {
+      recordPreferredHistoryLocale(preferredLocale);
+      assert.equal(getNativeHistoryLocaleCorrectionHref(currentHref), expectedHref);
+    });
+  }
+});
+
+test('preferred history locale correction preserves query params, return params, and hashes', () => {
+  withMockWindow({}, () => {
+    recordPreferredHistoryLocale('ru');
+
+    assert.equal(
+      getNativeHistoryLocaleCorrectionHref('/account/favorites?foo=bar#saved'),
+      '/ru/account/favorites?foo=bar#saved'
+    );
+    assert.equal(
+      getNativeHistoryLocaleCorrectionHref('/listing/123?from=%2Fsearch%3Fq%3Dtest#details'),
+      '/ru/listing/123?from=%2Fru%2Fsearch%3Fq%3Dtest#details'
+    );
+    assert.equal(
+      getNativeHistoryLocaleCorrectionHref('/sign-in?next=%2Faccount'),
+      '/ru/sign-in?next=%2Fru%2Faccount'
+    );
+  });
+});
+
+test('preferred history locale correction returns null for already-correct entries', () => {
+  withMockWindow({}, () => {
+    recordPreferredHistoryLocale('ru');
+    assert.equal(getNativeHistoryLocaleCorrectionHref('/ru/account'), null);
+
+    recordPreferredHistoryLocale('tyv');
+    assert.equal(getNativeHistoryLocaleCorrectionHref('/account'), null);
+  });
+});
+
+test('native history locale normalization policy excludes system and unsafe URLs', () => {
+  assert.equal(isNativeHistoryLocaleNormalizationHref('/auth/callback'), false);
+  assert.equal(isNativeHistoryLocaleNormalizationHref('/ru/auth/callback'), false);
+  assert.equal(isNativeHistoryLocaleNormalizationHref('/_next/static/app.js'), false);
+  assert.equal(isNativeHistoryLocaleNormalizationHref('/api/listings'), false);
+  assert.equal(isNativeHistoryLocaleNormalizationHref('/icon.svg'), false);
+  assert.equal(isNativeHistoryLocaleNormalizationHref('//evil.example/account'), false);
+  assert.equal(isNativeHistoryLocaleNormalizationHref('https://evil.example/account'), false);
+  assert.equal(isNativeHistoryLocaleNormalizationHref('/account'), true);
+  assert.equal(isNativeHistoryLocaleNormalizationHref('/ru/account'), true);
+});
+
+test('native history locale correction is safe for excluded, external, and malformed URLs', () => {
+  withMockWindow({}, () => {
+    recordPreferredHistoryLocale('ru');
+
+    assert.equal(getNativeHistoryLocaleCorrectionHref('/auth/callback'), null);
+    assert.equal(getNativeHistoryLocaleCorrectionHref('/_next/static/app.js'), null);
+    assert.equal(getNativeHistoryLocaleCorrectionHref('/icon.svg'), null);
+    assert.equal(getNativeHistoryLocaleCorrectionHref('//evil.example/account'), null);
+    assert.equal(getNativeHistoryLocaleCorrectionHref('https://evil.example/account'), null);
+    assert.equal(getNativeHistoryLocaleCorrectionHref('/account\\bad'), null);
+  });
 });
 
 test('locale switcher normalizes safe nested return paths to the target locale', () => {

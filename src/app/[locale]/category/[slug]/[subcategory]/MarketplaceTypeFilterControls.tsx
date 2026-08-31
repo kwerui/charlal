@@ -1,11 +1,10 @@
 "use client";
 
 import { useRouter } from '@/i18n/navigation';
+import { useTranslations } from 'next-intl';
 import type { ChangeEvent } from 'react';
-import { content } from '@/content/tyv';
 
 type TypeOption = {
-  name: string;
   slug: string;
 };
 
@@ -36,6 +35,8 @@ export default function MarketplaceTypeFilterControls({
   selectedValue,
   preservedParams = {},
 }: Props) {
+  const categoryPageT = useTranslations('CategoryPage');
+  const categoriesT = useTranslations('Categories');
   const router = useRouter();
 
   function handleTypeChange(event: ChangeEvent<HTMLSelectElement>) {
@@ -53,10 +54,10 @@ export default function MarketplaceTypeFilterControls({
   }
 
   return (
-    <section className="housing-filter-card housing-filter-card--compact" aria-label={content.typeLabel}>
+    <section className="housing-filter-card housing-filter-card--compact" aria-label={categoryPageT('typeLabel')}>
       <div className="housing-filter-grid">
         <label className="filter-field" htmlFor="marketplace-quick-type-filter">
-          <span className="sr-only">{content.typeLabel}</span>
+          <span className="sr-only">{categoryPageT('typeLabel')}</span>
           <select
             id="marketplace-quick-type-filter"
             className={`filter-select ${selectedValue ? '' : 'placeholder-selected'}`}
@@ -64,11 +65,11 @@ export default function MarketplaceTypeFilterControls({
             onChange={handleTypeChange}
           >
             <option value="" disabled>
-              {content.typePlaceholder}
+              {categoryPageT('typePlaceholder')}
             </option>
             {options.map((typeItem) => (
               <option key={typeItem.slug} value={typeItem.slug}>
-                {typeItem.name}
+                {categoriesT(`items.marketplace.buyTypes.${typeItem.slug}`)}
               </option>
             ))}
           </select>

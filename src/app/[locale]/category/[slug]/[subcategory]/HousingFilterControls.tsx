@@ -1,11 +1,10 @@
 "use client";
 
 import { useRouter } from '@/i18n/navigation';
+import { useTranslations } from 'next-intl';
 import type { ChangeEvent } from 'react';
-import { content } from '@/content/tyv';
 
 type FilterOption = {
-  name: string;
   slug: string;
 };
 
@@ -86,6 +85,8 @@ export default function HousingFilterControls({
   idPrefix = 'housing',
   isCompact = false,
 }: Props) {
+  const categoryPageT = useTranslations('CategoryPage');
+  const categoriesT = useTranslations('Categories');
   const router = useRouter();
   const propertyTypeSelectId = `${idPrefix}-property-type-filter`;
 
@@ -100,12 +101,12 @@ export default function HousingFilterControls({
           ? 'housing-filter-card housing-filter-card--compact'
           : 'housing-filter-card'
       }
-      aria-label={content.housingPropertyTypeLabel}
+      aria-label={categoryPageT('housingPropertyTypeLabel')}
     >
       <div className="housing-filter-grid">
         <label className="filter-field" htmlFor={propertyTypeSelectId}>
           <span className={isCompact ? 'sr-only' : 'filter-label'}>
-            {content.housingPropertyTypeLabel}
+            {categoryPageT('housingPropertyTypeLabel')}
           </span>
           <select
             id={propertyTypeSelectId}
@@ -114,12 +115,12 @@ export default function HousingFilterControls({
             onChange={handlePropertyTypeChange}
           >
             <option value="" disabled>
-              {content.housingPropertyTypePlaceholder}
+              {categoryPageT('housingPropertyTypePlaceholder')}
             </option>
-            <option value="all">{content.housingAllOption}</option>
+            <option value="all">{categoryPageT('housingAllOption')}</option>
             {propertyTypeOptions.map((propertyType) => (
               <option key={propertyType.slug} value={propertyType.slug}>
-                {propertyType.name}
+                {categoriesT(`items.housing.types.${propertyType.slug}`)}
               </option>
             ))}
           </select>

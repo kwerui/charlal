@@ -3,7 +3,7 @@
 import type { MouseEvent, ReactNode } from 'react';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
-import { content } from '@/content/tyv';
+import { useTranslations } from 'next-intl';
 
 type Props = {
   quickControls?: ReactNode;
@@ -11,6 +11,7 @@ type Props = {
 };
 
 export default function SubcategoryFilterBar({ quickControls, children }: Props) {
+  const t = useTranslations('CategoryPage');
   const [isOpen, setIsOpen] = useState(false);
   const closeButtonRef = useRef<HTMLButtonElement>(null);
   const drawerTitleId = 'category-filter-drawer-title';
@@ -91,12 +92,12 @@ export default function SubcategoryFilterBar({ quickControls, children }: Props)
               onClick={(event) => event.stopPropagation()}
             >
               <div className="category-filter-panel-heading">
-                <h2 id={drawerTitleId}>{content.filterControlsLabel}</h2>
+                <h2 id={drawerTitleId}>{t('filterControlsLabel')}</h2>
                 <button
                   ref={closeButtonRef}
                   type="button"
                   className="category-filter-close"
-                  aria-label={content.closeFiltersButton}
+                  aria-label={t('closeFiltersButton')}
                   onClick={closeFilters}
                 >
                   ×
@@ -116,7 +117,7 @@ export default function SubcategoryFilterBar({ quickControls, children }: Props)
 
   return (
     <>
-      <section className="category-filter-bar" aria-label={content.filterControlsLabel}>
+      <section className="category-filter-bar" aria-label={t('filterControlsLabel')}>
         <div className="category-filter-bar-inner">
           <div className="category-filter-actions">
             {quickControls ? (
@@ -132,7 +133,7 @@ export default function SubcategoryFilterBar({ quickControls, children }: Props)
               onClick={() => setIsOpen((current) => !current)}
             >
               <span aria-hidden="true">⚙</span>
-              {content.filterControlsButton}
+              {t('filterControlsButton')}
             </button>
           </div>
         </div>

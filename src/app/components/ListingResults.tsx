@@ -1,10 +1,10 @@
 'use client';
 
 import { useMemo } from 'react';
+import { useTranslations } from 'next-intl';
 import ListingCard from '@/app/components/ListingCard';
 import ListingMutationRefreshBoundary from '@/app/components/ListingMutationRefreshBoundary';
 import ResultsScrollRestorer from '@/app/components/ResultsScrollRestorer';
-import { content } from '@/content/tyv';
 import type { Listing } from '@/data/listings';
 import { filterListings, type ListingFilterCriteria } from '@/lib/listingFilters';
 
@@ -35,6 +35,7 @@ export default function ListingResults({
   savedListingKeys = [],
   currentViewerId = null,
 }: Props) {
+  const t = useTranslations('ListingResults');
   const matchingListings = useMemo(() => {
     if (requireSearchQuery && !criteria.searchQuery?.trim()) {
       return [];
@@ -55,7 +56,7 @@ export default function ListingResults({
       {showResultsSummary ? (
         <div className="results-summary" aria-live="polite">
           <p>
-            {content.resultsCountLabel}: {matchingListings.length}
+            {t('resultsCountLabel')}: {matchingListings.length}
           </p>
         </div>
       ) : null}
@@ -80,8 +81,8 @@ export default function ListingResults({
         </div>
       ) : showEmptyState ? (
         <div className="empty-results" role="status">
-          <EmptyHeading>{content.emptyResultsTitle}</EmptyHeading>
-          <p>{content.emptyResultsMessage}</p>
+          <EmptyHeading>{t('emptyResultsTitle')}</EmptyHeading>
+          <p>{t('emptyResultsMessage')}</p>
         </div>
       ) : null}
 

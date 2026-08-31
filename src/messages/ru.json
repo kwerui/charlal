@@ -8,7 +8,144 @@
     "postAd": "Выложить объявление",
     "signedInAs": "Вошли как",
     "messages": "Сообщения",
-    "languageSwitcherLabel": "Язык"
+    "languageSwitcherLabel": "Язык",
+    "unreadConversation": "{count, plural, one {# непрочитанное сообщение} few {# непрочитанных сообщений} many {# непрочитанных сообщений} other {# непрочитанных сообщений}}"
+  },
+  "Home": {
+    "categoryAriaLabel": "Категория: {category}",
+    "databaseListingsLoadFailedMessage": "Не удалось загрузить последние объявления."
+  },
+  "Search": {
+    "placeholder": "Что вы ищете?",
+    "inputLabel": "Искать объявления",
+    "button": "Найти",
+    "resultsTitle": "Результаты поиска"
+  },
+  "ListingResults": {
+    "resultsCountLabel": "Подходящие объявления",
+    "emptyResultsTitle": "Объявления не найдены",
+    "emptyResultsMessage": "Попробуйте изменить или сбросить фильтры.",
+    "databaseListingsLoadFailedMessage": "Не удалось загрузить последние объявления."
+  },
+  "ListingCard": {
+    "openListingLabel": "Открыть объявление",
+    "freePriceLabel": "Бесплатно",
+    "saveAdvertisementButton": "Сохранить объявление",
+    "saveAdvertisementShortButton": "Сохранить",
+    "savedAdvertisementButton": "Сохранено",
+    "removeSavedAdvertisementButton": "Удалить из сохраненных",
+    "signInToSaveAdvertisementMessage": "Войдите, чтобы сохранять объявления.",
+    "advertisementCannotBeSavedMessage": "Это объявление нельзя сохранить.",
+    "savedAdvertisementsTemporarilyUnavailableMessage": "Сохраненные объявления временно недоступны. Попробуйте позже.",
+    "unableUpdateSavedAdvertisementMessage": "Не удалось обновить сохраненное объявление.",
+    "status": {
+      "active": "Активно",
+      "reserved": "Зарезервировано",
+      "sold": "Продано",
+      "archived": "В архиве"
+    }
+  },
+  "CategoryPage": {
+    "categoryPageTitle": "Категории",
+    "subcategoriesTitle": "Подкатегории",
+    "servicesSearchPlaceholder": "Например, электрик",
+    "servicesSearchSample": "Например, электрик",
+    "marketplaceSearchPlaceholder": "Например, пальто",
+    "marketplaceSearchSample": "Например, пальто",
+    "searchPlaceholder": "Что вы ищете?",
+    "searchPromptSuffix": "",
+    "searchButton": "Найти",
+    "typeLabel": "Тип",
+    "typePlaceholder": "Тип",
+    "priceFilterLabel": "Цена",
+    "priceMinPlaceholder": "Цена от",
+    "priceMaxPlaceholder": "Цена до",
+    "filterButton": "Применить",
+    "filterControlsButton": "Фильтры",
+    "filterControlsLabel": "Фильтры",
+    "closeFiltersButton": "Закрыть фильтры",
+    "clearFilterButton": "Сбросить фильтр",
+    "latestListingsTitle": "Последние объявления",
+    "exploreAllServices": "Искать во всех объявлениях",
+    "viewAllLabel": "Все",
+    "backToCategories": "Назад к категориям",
+    "backToCategory": "К категории",
+    "backToHome": "На главную",
+    "housingPropertyTypeLabel": "Тип",
+    "housingPropertyTypePlaceholder": "Выберите тип",
+    "housingAllOption": "Все",
+    "housingSaleOption": "Продажа",
+    "housingRentOption": "Аренда",
+    "databaseListingsLoadFailedMessage": "Не удалось загрузить последние объявления."
+  },
+  "Categories": {
+    "items": {
+      "housing": {
+        "label": "Недвижимость",
+        "types": {
+          "apartments": "Квартиры и дома",
+          "land": "Земля",
+          "commercial": "Коммерческая недвижимость",
+          "storage": "Гаражи и парковки"
+        },
+        "subcategories": {
+          "sale": "Продажа",
+          "rent": "Аренда"
+        }
+      },
+      "marketplace": {
+        "label": "Купить/Продать",
+        "buyTypes": {
+          "all-categories": "Все типы",
+          "clothing": "Одежда",
+          "shoes": "Обувь",
+          "office": "Канцелярия",
+          "new": "Новое",
+          "used": "Б/У",
+          "home-goods": "Товары для дома",
+          "appliances": "Бытовая техника",
+          "furniture": "Мебель",
+          "pets": "Для животных",
+          "kids": "Для детей",
+          "construction materials": "Стройматериалы",
+          "books": "Книги",
+          "beauty": "Косметика",
+          "games": "Игры"
+        },
+        "subcategories": {
+          "buy": "Покупают",
+          "free": "Бесплатно",
+          "wanted": "Ищут"
+        }
+      },
+      "auto": {
+        "label": "Авто",
+        "subcategories": {
+          "used-cars": "Авто с пробегом",
+          "new-cars": "Новые авто",
+          "auto-parts": "Автозапчасти",
+          "rent": "Аренда/лизинг"
+        }
+      },
+      "jobs": {
+        "label": "Работа",
+        "subcategories": {
+          "find-talents": "Ищу сотрудников",
+          "find-jobs": "Ищу работу"
+        }
+      },
+      "services": {
+        "label": "Услуги",
+        "subcategories": {}
+      },
+      "events": {
+        "label": "Развлечения",
+        "subcategories": {
+          "events": "События",
+          "night-clubs": "Вечеринки",
+          "lost-found": "Потерянное и найденное"
+        }
+      }
+    }
   }
 }
-

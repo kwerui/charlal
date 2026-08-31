@@ -1,15 +1,25 @@
-"use client";
+'use client';
 
-import { useSyncExternalStore } from 'react';
+import {
+  useSyncExternalStore,
+} from 'react';
 import { useLocale, useTranslations } from 'next-intl';
 import { useSearchParams } from 'next/navigation';
 import CharlalLogo from '@/app/components/CharlalLogo';
-import { Link, usePathname, useRouter } from '@/i18n/navigation';
-import { recordLocaleHistoryNormalization } from '@/i18n/localeHistory';
+import {
+  Link,
+  usePathname,
+  useRouter,
+} from '@/i18n/navigation';
+import {
+  recordPreferredHistoryLocale,
+} from '@/i18n/localeHistory';
 import { localizeReturnPathQuery } from '@/i18n/localePath';
 import { useAuthStatus } from '@/lib/auth/client';
 import { useMessagingRealtime } from '@/lib/messagingRealtime';
-import { clearNativeHistoryTraversalIntent } from '@/lib/nativeHistoryIntentStorage';
+import {
+  clearNativeHistoryTraversalIntent,
+} from '@/lib/nativeHistoryIntentStorage';
 
 type Props = {
   initialAuthStatus?:
@@ -65,26 +75,42 @@ export default function SiteHeader({
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
-  const { status: authStatus, user, signOut } = useAuthStatus();
+
+  const {
+    status: authStatus,
+    user,
+    signOut,
+  } = useAuthStatus();
+
   const hasHydrated = useHasHydrated();
+
   const renderAuthStatus = hasHydrated ? authStatus : 'checking';
-  const { unreadConversationCount: liveUnreadConversationCount } =
-    useMessagingRealtime();
+
+  const {
+    unreadConversationCount:
+      liveUnreadConversationCount,
+  } = useMessagingRealtime();
+
   const signedIn =
     renderAuthStatus === 'authenticated' ||
-    (renderAuthStatus === 'checking' && initialAuthStatus === 'authenticated');
-  const checkingAuth = renderAuthStatus === 'checking' && !signedIn;
+    (renderAuthStatus === 'checking' &&
+      initialAuthStatus === 'authenticated');
+
+  const checkingAuth =
+    renderAuthStatus === 'checking' &&
+    !signedIn;
+
   const unreadConversationCount = signedIn
     ? liveUnreadConversationCount
     : 0;
+
   const messagesLabel =
     unreadConversationCount > 0
-      ? `${t('messages')}, ${unreadConversationCount} ${
-          unreadConversationCount === 1
-            ? 'unread conversation'
-            : 'unread conversations'
-        }`
+      ? `${t('messages')}, ${t('unreadConversation', {
+          count: unreadConversationCount,
+        })}`
       : t('messages');
+
 
   function handlePostAdClick() {
     if (signedIn) {
@@ -109,43 +135,75 @@ export default function SiteHeader({
     }
   }
 
-  function handleLocaleChange(nextLocale: 'tyv' | 'ru') {
+  function handleLocaleChange(
+    nextLocale: 'tyv' | 'ru'
+  ) {
     const currentQueryString = searchParams.toString();
     const queryString = localizeReturnPathQuery(currentQueryString, nextLocale);
-    const href = queryString ? `${pathname}?${queryString}` : pathname;
 
-    recordLocaleHistoryNormalization(currentQueryString, locale, nextLocale);
+    const href = queryString
+      ? `${pathname}?${queryString}`
+      : pathname;
+
+    recordPreferredHistoryLocale(nextLocale);
+
     router.replace(href, { locale: nextLocale });
   }
 
   return (
     <header className="header">
       <div className="header-inner">
-        <Link href="/" className="site-name-link" aria-label={t('homeLinkLabel')}>
+        <Link
+          href="/"
+          className="site-name-link"
+          aria-label={t('homeLinkLabel')}
+        >
           <CharlalLogo />
         </Link>
 
-        <nav className="header-actions" aria-label={t('actionsLabel')}>
-          <div className="language-switcher" aria-label={t('languageSwitcherLabel')}>
-            <button
-              type="button"
-              className="header-button secondary-header-button"
-              aria-current={locale === 'tyv' ? 'true' : undefined}
-              disabled={locale === 'tyv'}
-              onClick={() => handleLocaleChange('tyv')}
-            >
-              TYV
-            </button>
-            <button
-              type="button"
-              className="header-button secondary-header-button"
-              aria-current={locale === 'ru' ? 'true' : undefined}
-              disabled={locale === 'ru'}
-              onClick={() => handleLocaleChange('ru')}
-            >
-              RU
-            </button>
-          </div>
+        <div
+          className="language-switcher"
+          aria-label={t(
+            'languageSwitcherLabel'
+          )}
+        >
+          <button
+            type="button"
+            className="language-switcher-button"
+            aria-current={
+              locale === 'tyv'
+                ? 'true'
+                : undefined
+            }
+            disabled={locale === 'tyv'}
+            onClick={() =>
+              handleLocaleChange('tyv')
+            }
+          >
+            TYV
+          </button>
+
+          <button
+            type="button"
+            className="language-switcher-button"
+            aria-current={
+              locale === 'ru'
+                ? 'true'
+                : undefined
+            }
+            disabled={locale === 'ru'}
+            onClick={() =>
+              handleLocaleChange('ru')
+            }
+          >
+            RU
+          </button>
+        </div>
+
+        <nav
+          className="header-actions"
+          aria-label={t('actionsLabel')}
+        >
           {checkingAuth ? null : signedIn ? (
             <>
               <Link
@@ -154,19 +212,30 @@ export default function SiteHeader({
                 aria-label={messagesLabel}
               >
                 <span>{t('messages')}</span>
-                {unreadConversationCount > 0 ? (
-                  <span className="header-unread-badge" aria-hidden="true">
-                    {formatUnreadBadge(unreadConversationCount)}
+
+                {unreadConversationCount >
+                0 ? (
+                  <span
+                    className="header-unread-badge"
+                    aria-hidden="true"
+                  >
+                    {formatUnreadBadge(
+                      unreadConversationCount
+                    )}
                   </span>
                 ) : null}
               </Link>
+
               <Link
                 href="/account"
                 className="header-button secondary-header-button"
-                onClick={clearNativeHistoryTraversalIntent}
+                onClick={
+                  clearNativeHistoryTraversalIntent
+                }
               >
                 {t('account')}
               </Link>
+
               <button
                 type="button"
                 className="header-button header-sign-out-button"
@@ -176,21 +245,24 @@ export default function SiteHeader({
               </button>
             </>
           ) : (
-            <Link href="/sign-in" className="header-button secondary-header-button">
+            <Link
+              href="/sign-in"
+              className="header-button secondary-header-button"
+            >
               <UserIcon />
               {t('signIn')}
             </Link>
           )}
         </nav>
 
-<button
-  type="button"
-  className="header-button primary-header-button header-post-ad-button"
-  onClick={handlePostAdClick}
-  disabled={renderAuthStatus === 'checking'}
->
-  {t('postAd')}
-</button>
+        <button
+          type="button"
+          className="header-button primary-header-button header-post-ad-button"
+          onClick={handlePostAdClick}
+          disabled={renderAuthStatus === 'checking'}
+        >
+          {t('postAd')}
+        </button>
 
         {signedIn && user ? (
           <span className="sr-only">

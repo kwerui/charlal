@@ -1,10 +1,11 @@
 import { Link } from '@/i18n/navigation';
 import { notFound } from 'next/navigation';
 import ListingResults from '@/app/components/ListingResults';
-import { content } from '@/content/tyv';
+import { findCategoryTaxonomy } from '@/content/categoryTaxonomy';
 import { buildHrefWithSearchParams } from '@/lib/resultReturnHref';
 import { getCurrentUserFavoriteState } from '@/lib/supabase/listingFavorites';
 import { listPublicDatabaseListings } from '@/lib/supabase/listingsServer';
+import { getTranslations } from 'next-intl/server';
 import CategoryResultsSearch from './CategoryResultsSearch';
 import HousingFilterControls from './HousingFilterControls';
 import MarketplaceTypeFilterControls from './MarketplaceTypeFilterControls';
@@ -12,7 +13,6 @@ import PriceFilterControls from './PriceFilterControls';
 import SubcategoryFilterBar from './SubcategoryFilterBar';
 
 type TypeOption = {
-  name: string;
   slug: string;
 };
 
@@ -27,10 +27,12 @@ type SubcategoryPageProps = {
 };
 
 export default async function SubcategoryPage({ params, searchParams }: SubcategoryPageProps) {
+  const categoryPageT = await getTranslations('CategoryPage');
+  const categoriesT = await getTranslations('Categories');
   const { slug, subcategory } = await params;
   const query = await searchParams;
   const resultsHref = buildHrefWithSearchParams(`/category/${slug}/${subcategory}`, query);
-  const category = content.categories.find((item) => item.slug === slug);
+  const category = findCategoryTaxonomy(slug);
 
   if (!category) {
     notFound();
@@ -95,21 +97,31 @@ export default async function SubcategoryPage({ params, searchParams }: Subcateg
     notFound();
   }
 
-  const subcategoryLabel = isAllPage ? content.viewAllLabel : subcategoryData?.name;
+  const categoryLabel = categoriesT(`items.${category.slug}.label`);
+  const subcategoryLabel = isAllPage
+    ? categoryPageT('viewAllLabel')
+    : subcategoryData
+    ? category.slug === 'housing' && typeData
+      ? categoriesT(`items.housing.types.${subcategoryData.slug}`)
+      : categoriesT(`items.${category.slug}.subcategories.${subcategoryData.slug}`)
+    : '';
   const selectedHousingPropertyTypeData = typedCategory.types?.find(
     (typeItem) => typeItem.slug === selectedHousingPropertyType
   );
+  const selectedHousingPropertyTypeLabel = selectedHousingPropertyTypeData
+    ? categoriesT(`items.housing.types.${selectedHousingPropertyTypeData.slug}`)
+    : '';
   const housingTransactionLabel =
     housingTransaction === 'sale'
-      ? content.housingSaleOption
+      ? categoryPageT('housingSaleOption')
       : housingTransaction === 'rent'
-      ? content.housingRentOption
-      : content.housingAllOption;
+      ? categoryPageT('housingRentOption')
+      : categoryPageT('housingAllOption');
   const activeListingLabel = selectedBuyType
-    ? `${subcategoryLabel} · ${selectedBuyType.name}`
+    ? `${subcategoryLabel} · ${categoriesT(`items.marketplace.buyTypes.${selectedBuyType.slug}`)}`
     : category.slug === 'housing'
     ? selectedHousingPropertyTypeData
-      ? `${selectedHousingPropertyTypeData.name} · ${housingTransactionLabel}`
+      ? `${selectedHousingPropertyTypeLabel} · ${housingTransactionLabel}`
       : housingTransactionLabel
     : subcategoryLabel;
   const selectedMarketplaceType =
@@ -151,10 +163,10 @@ export default async function SubcategoryPage({ params, searchParams }: Subcateg
   };
   const searchPlaceholder =
     category.slug === 'services'
-      ? content.servicesSearchPlaceholder
+      ? categoryPageT('servicesSearchPlaceholder')
       : category.slug === 'marketplace'
-      ? content.marketplaceSearchPlaceholder
-      : content.searchPlaceholder;
+      ? categoryPageT('marketplaceSearchPlaceholder')
+      : categoryPageT('searchPlaceholder');
   const [databaseListingsResult, favoriteState] = await Promise.all([
     listPublicDatabaseListings({
       categorySlug: category.slug,
@@ -174,26 +186,25 @@ export default async function SubcategoryPage({ params, searchParams }: Subcateg
     : [];
   const databaseError = databaseListingsResult.ok
     ? ''
-    : content.databaseListingsLoadFailedMessage;
+    : categoryPageT('databaseListingsLoadFailedMessage');
 
   return (
     <div className="app-container">
       <section className="category-page">
         <div className="page-nav-buttons">
           <Link href="/" className="explore-button">
-            {content.backToCategories}
+            {categoryPageT('backToCategories')}
           </Link>
           <Link href={`/category/${category.slug}`} className="secondary-button">
-            {content.backToCategory}
+            {categoryPageT('backToCategory')}
           </Link>
         </div>
 
         <div className="category-hero category-hero--compact has-image" style={{ backgroundImage: `linear-gradient(135deg, rgba(17,24,39,0.72), rgba(37,99,235,0.5)), url(${category.image})` }}>
           <div className="category-hero-inner">
             <div className="category-hero-copy">
-              <p className="hero-kicker">{content.categoryPageTitle}</p>
               <h2 className="page-title">
-                {category.name} · {activeListingLabel}
+                {categoryLabel} · {activeListingLabel}
               </h2>
             </div>
           </div>
@@ -232,21 +243,9 @@ export default async function SubcategoryPage({ params, searchParams }: Subcateg
               basePath={`/category/${category.slug}/${subcategory}`}
               minPrice={selectedMinPrice}
               maxPrice={selectedMaxPrice}
-              typeLabel={content.typeLabel}
-              typePlaceholder={content.typePlaceholder}
-              priceLabel={
-                category.slug === 'jobs' ? content.salaryFilterLabel : content.priceFilterLabel
-              }
-              minLabel={
-                category.slug === 'jobs'
-                  ? content.salaryMinPlaceholder
-                  : content.priceMinPlaceholder
-              }
-              maxLabel={
-                category.slug === 'jobs'
-                  ? content.salaryMaxPlaceholder
-                  : content.priceMaxPlaceholder
-              }
+              typeLabel={categoryPageT('typeLabel')}
+              typePlaceholder={categoryPageT('typePlaceholder')}
+
               preservedPriceParams={preservedPriceFilterParams}
             />
           </SubcategoryFilterBar>

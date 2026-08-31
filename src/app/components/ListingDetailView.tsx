@@ -69,14 +69,16 @@ export default function ListingDetailView({
   const listingStatus = getListingStatus(listing);
   const hasDatabaseStatus = listing.status !== undefined;
   const publicSellerName = sellerName || listing.sellerName;
-  const backLabel =
-    backHref === '/'
-      ? content.backToHomepage
-      : backHref === '/account'
+const backLabel =
+  backHref === '/'
+    ? content.backToHomepage
+    : backHref === '/account'
       ? content.backToAccount
       : backHref.startsWith('/seller/')
-      ? content.backToSellerProfile
-      : content.backToResults;
+        ? content.backToSellerProfile
+        : backHref.startsWith('/category/')
+          ? content.backToCategory
+          : content.backToResults;
   const category = categories.find(
     (item) => item.slug === listing.categorySlug
   );

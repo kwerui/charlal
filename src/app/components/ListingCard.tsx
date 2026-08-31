@@ -1,11 +1,13 @@
+'use client';
+
 import { Link } from '@/i18n/navigation';
 import Image from 'next/image';
+import { useTranslations } from 'next-intl';
 import FavoriteListingButton from '@/app/components/FavoriteListingButton';
 import ListingCardLink from '@/app/components/ListingCardLink';
 import ListingStatusBadge from '@/app/components/ListingStatusBadge';
-import { content } from '@/content/tyv';
 import type { Listing } from '@/data/listings';
-import { formatListingPrice, getListingStatus } from '@/data/listings';
+import { getListingStatus } from '@/data/listings';
 import {
   canOfferListingFavoriteControl,
   getListingFavoriteKey,
@@ -30,6 +32,7 @@ export default function ListingCard({
   currentViewerId = null,
   onFavoriteRemoved,
 }: Props) {
+  const t = useTranslations('ListingCard');
   const listingPath = `/listing/${listing.id}`;
   const listingImage = resolveListingImage(listing);
   const listingStatus = getListingStatus(listing);
@@ -67,7 +70,15 @@ export default function ListingCard({
           showActive={showActiveStatus}
         />
         <h3 className="listing-title">{listing.title}</h3>
-        <p className="listing-price">{formatListingPrice(listing.price)}</p>
+        <p className="listing-price">
+          {listing.price === 0
+            ? t('freePriceLabel')
+            : new Intl.NumberFormat('ru-RU', {
+                style: 'currency',
+                currency: 'RUB',
+                maximumFractionDigits: 0,
+              }).format(listing.price)}
+        </p>
         <p className="listing-location">{listing.location}</p>
       </div>
     </>
@@ -92,7 +103,7 @@ export default function ListingCard({
         href={listingHref}
         fromHref={fromHref}
         className="listing-card"
-        ariaLabel={`${content.openListingLabel}: ${listing.title}`}
+        ariaLabel={`${t('openListingLabel')}: ${listing.title}`}
       >
         {cardContent}
       </ListingCardLink>
@@ -100,7 +111,7 @@ export default function ListingCard({
     <Link
       href={listingPath}
       className="listing-card"
-      aria-label={`${content.openListingLabel}: ${listing.title}`}
+      aria-label={`${t('openListingLabel')}: ${listing.title}`}
     >
       {cardContent}
     </Link>

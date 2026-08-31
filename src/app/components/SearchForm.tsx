@@ -1,7 +1,7 @@
 import Form from 'next/form';
-import { content } from '@/content/tyv';
 import { getPathname } from '@/i18n/navigation';
 import { getLocale } from 'next-intl/server';
+import { getTranslations } from 'next-intl/server';
 
 type Props = {
   defaultQuery?: string;
@@ -13,6 +13,7 @@ export default async function SearchForm({
   sectionClassName = 'search-section',
 }: Props) {
   const locale = await getLocale();
+  const t = await getTranslations('Search');
 
   return (
     <section className={sectionClassName}>
@@ -21,13 +22,13 @@ export default async function SearchForm({
           type="search"
           name="q"
           className="search-input"
-          placeholder={content.searchPlaceholder}
-          aria-label={content.searchInputLabel}
+          placeholder={t('placeholder')}
+          aria-label={t('inputLabel')}
           defaultValue={defaultQuery}
           required
         />
         <button type="submit" className="search-button">
-          {content.searchButton}
+          {t('button')}
         </button>
       </Form>
     </section>

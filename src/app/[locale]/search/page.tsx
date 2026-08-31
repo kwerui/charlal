@@ -1,16 +1,18 @@
 import ListingResults from '@/app/components/ListingResults';
 import SearchForm from '@/app/components/SearchForm';
-import { content } from '@/content/tyv';
 import { hasPublicListingSearchQuery } from '@/lib/publicListingQuery';
 import { buildHrefWithSearchParams } from '@/lib/resultReturnHref';
 import { getCurrentUserFavoriteState } from '@/lib/supabase/listingFavorites';
 import { listPublicDatabaseListings } from '@/lib/supabase/listingsServer';
+import { getTranslations } from 'next-intl/server';
 
 type SearchPageProps = {
   searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 };
 
 export default async function SearchPage({ searchParams }: SearchPageProps) {
+  const t = await getTranslations('Search');
+  const listingResultsT = await getTranslations('ListingResults');
   const query = await searchParams;
   const rawSearchQuery = query.q;
   const searchQuery = Array.isArray(rawSearchQuery)
@@ -32,7 +34,7 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
     : [];
   const databaseError = databaseListingsResult.ok
     ? ''
-    : content.databaseListingsLoadFailedMessage;
+    : listingResultsT('databaseListingsLoadFailedMessage');
 
   return (
     <div className="app-container">
@@ -43,7 +45,7 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
         />
 
         <div className="search-results-heading">
-          <h1 className="page-title">{content.searchResultsTitle}</h1>
+          <h1 className="page-title">{t('resultsTitle')}</h1>
         </div>
 
         <ListingResults

@@ -1,9 +1,9 @@
 "use client";
 
 import { useRouter } from '@/i18n/navigation';
+import { useTranslations } from 'next-intl';
 import type { FormEvent } from 'react';
 import { useState } from 'react';
-import { content } from '@/content/tyv';
 
 type Props = {
   basePath: string;
@@ -32,6 +32,7 @@ export default function CategoryResultsSearch({
   placeholder,
   preservedParams = {},
 }: Props) {
+  const t = useTranslations('CategoryPage');
   const router = useRouter();
   const [searchValue, setSearchValue] = useState(defaultQuery);
 
@@ -58,7 +59,7 @@ export default function CategoryResultsSearch({
           onChange={(event) => setSearchValue(event.target.value)}
         />
         <button type="submit" className="search-button">
-          {content.categorySearchButton}
+          {t('searchButton')}
         </button>
       </form>
     </section>

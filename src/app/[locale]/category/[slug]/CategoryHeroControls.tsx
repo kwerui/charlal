@@ -2,12 +2,11 @@
 
 import { Link } from '@/i18n/navigation';
 import { useRouter } from '@/i18n/navigation';
+import { useTranslations } from 'next-intl';
 import type { FormEvent } from 'react';
 import { useState } from 'react';
-import { content } from '@/content/tyv';
 
 type Subcategory = {
-  name: string;
   slug: string;
 };
 
@@ -27,6 +26,8 @@ export default function CategoryHeroControls({
   showHeroSubcategories,
   showSearchBar,
 }: Props) {
+  const categoryPageT = useTranslations('CategoryPage');
+  const categoriesT = useTranslations('Categories');
   const router = useRouter();
   const [searchValue, setSearchValue] = useState('');
   const usesSegmentedNavigation =
@@ -35,22 +36,24 @@ export default function CategoryHeroControls({
     category.slug === 'jobs';
   const navigationSubcategories =
     category.slug === 'housing'
-      ? [{ name: content.housingAllOption, slug: 'all' }, ...category.subcategories]
+      ? [{ slug: 'all' }, ...category.subcategories]
       : category.subcategories;
   const searchPlaceholder =
     category.slug === 'services'
-      ? content.servicesSearchPlaceholder
+      ? categoryPageT('servicesSearchPlaceholder')
       : category.slug === 'marketplace'
-      ? content.marketplaceSearchPlaceholder
-      : content.searchPlaceholder;
+      ? categoryPageT('marketplaceSearchPlaceholder')
+      : categoryPageT('searchPlaceholder');
   const formattedSearchPlaceholder =
     category.slug === 'services' ? (
       <>
-        <em className="search-sample">Электрик</em> дээн ышкаш кылдыр парлаптыңар
+        <em className="search-sample">{categoryPageT('servicesSearchSample')}</em>{' '}
+        {categoryPageT('searchPromptSuffix')}
       </>
     ) : category.slug === 'marketplace' ? (
       <>
-        <em className="search-sample">Тон</em> дээн ышкаш кылдыр парлаптыңар
+        <em className="search-sample">{categoryPageT('marketplaceSearchSample')}</em>{' '}
+        {categoryPageT('searchPromptSuffix')}
       </>
     ) : (
       searchPlaceholder
@@ -80,7 +83,7 @@ export default function CategoryHeroControls({
               ? 'subcategory-tabs'
               : 'subcategory-pill-row'
           }
-          aria-label={content.subcategoriesTitle}
+          aria-label={categoryPageT('subcategoriesTitle')}
         >
           {navigationSubcategories.map((subcategory, index) => (
             <Link
@@ -99,12 +102,14 @@ export default function CategoryHeroControls({
                   : undefined
               }
             >
-              {subcategory.name}
+              {subcategory.slug === 'all'
+                ? categoryPageT('viewAllLabel')
+                : categoriesT(`items.${category.slug}.subcategories.${subcategory.slug}`)}
             </Link>
           ))}
           {category.slug === 'events' ? (
             <Link href={`/category/${category.slug}/all`} className="explore-button">
-              {content.viewAllLabel}
+              {categoryPageT('viewAllLabel')}
             </Link>
           ) : null}
         </nav>
@@ -128,13 +133,13 @@ export default function CategoryHeroControls({
               )}
             </div>
             <button type="submit" className="search-button">
-              {content.categorySearchButton}
+              {categoryPageT('searchButton')}
             </button>
           </form>
           {category.slug === 'services' ? (
             <div className="category-cta-row">
               <Link href={`/category/${category.slug}/all`} className="explore-button">
-                {content.exploreAllServices}
+                {categoryPageT('exploreAllServices')}
               </Link>
             </div>
           ) : null}

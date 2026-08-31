@@ -1,4 +1,4 @@
-import { takeLocaleHistoryNormalizationRedirect } from '@/i18n/localeHistory';
+import { getNativeHistoryLocaleCorrectionHref } from '@/i18n/localeHistory';
 import { recordNativeHistoryTraversalIntent } from '@/lib/nativeHistoryIntentStorage';
 import { requestResultsScrollRestoreAfterNativeTraversal } from '@/lib/resultsScrollStorage';
 
@@ -8,7 +8,13 @@ declare global {
       event: PopStateEvent
     ) => void;
 
+    __charlalNativeHistoryPageShowHandler?: (
+      event: PageTransitionEvent
+    ) => void;
+
     __charlalDocumentInstanceId?: string;
+
+    __charlalInitialBackForwardCheckDone?: boolean;
   }
 }
 
@@ -17,41 +23,94 @@ if (!window.__charlalDocumentInstanceId) {
     crypto.randomUUID();
 }
 
-const existingHandler =
-  window.__charlalNativeHistoryPopstateHandler;
+let correctionInProgress = false;
 
-if (existingHandler) {
-  window.removeEventListener(
-    'popstate',
-    existingHandler,
-    true
-  );
-}
-
-function handleNativeHistoryTraversal(): void {
-  recordNativeHistoryTraversalIntent();
+function correctNativeHistoryLocaleIfNeeded(): void {
+  if (correctionInProgress) {
+    return;
+  }
 
   const currentHref =
     `${window.location.pathname}${window.location.search}${window.location.hash}`;
 
   const redirectHref =
-    takeLocaleHistoryNormalizationRedirect(
-      currentHref,
-      true
+    getNativeHistoryLocaleCorrectionHref(
+      currentHref
     );
 
-  if (redirectHref) {
-    requestResultsScrollRestoreAfterNativeTraversal(
-      redirectHref
-    );
-
-    window.location.replace(redirectHref);
+  if (!redirectHref) {
+    return;
   }
+
+  correctionInProgress = true;
+
+  requestResultsScrollRestoreAfterNativeTraversal(
+    redirectHref
+  );
+
+  window.location.replace(redirectHref);
 }
 
-// IMPORTANT: these stay OUTSIDE the function.
+function handleNativeHistoryTraversal(): void {
+  recordNativeHistoryTraversalIntent();
+
+  correctNativeHistoryLocaleIfNeeded();
+}
+
+function handleNativeHistoryPageShow(
+  event: PageTransitionEvent
+): void {
+  if (!event.persisted) {
+    return;
+  }
+
+  recordNativeHistoryTraversalIntent();
+
+  correctNativeHistoryLocaleIfNeeded();
+}
+
+function isBackForwardDocumentNavigation(): boolean {
+  const navigationEntry =
+    performance.getEntriesByType(
+      'navigation'
+    )[0] as
+      | PerformanceNavigationTiming
+      | undefined;
+
+  return navigationEntry?.type === 'back_forward';
+}
+
+/*
+ * HMR can execute this module again in development.
+ * Remove our previous document listeners before
+ * registering the current versions.
+ */
+const existingPopstateHandler =
+  window.__charlalNativeHistoryPopstateHandler;
+
+if (existingPopstateHandler) {
+  window.removeEventListener(
+    'popstate',
+    existingPopstateHandler,
+    true
+  );
+}
+
+const existingPageShowHandler =
+  window.__charlalNativeHistoryPageShowHandler;
+
+if (existingPageShowHandler) {
+  window.removeEventListener(
+    'pageshow',
+    existingPageShowHandler
+  );
+}
+
 window.__charlalNativeHistoryPopstateHandler =
   handleNativeHistoryTraversal;
+
+window.__charlalNativeHistoryPageShowHandler =
+  handleNativeHistoryPageShow;
 
 window.addEventListener(
   'popstate',
@@ -59,3 +118,32 @@ window.addEventListener(
   true
 );
 
+window.addEventListener(
+  'pageshow',
+  handleNativeHistoryPageShow
+);
+
+/*
+ * A cross-document Back/Forward navigation is not
+ * guaranteed to restore the document from BFCache.
+ *
+ * When the browser loads a fresh document instead,
+ * pageshow.persisted is false, but the Navigation
+ * Timing entry identifies it as a back_forward load.
+ *
+ * Run this once per document. The window flag avoids
+ * repeating it when this module is re-evaluated by
+ * development HMR.
+ */
+if (
+  !window.__charlalInitialBackForwardCheckDone
+) {
+  window.__charlalInitialBackForwardCheckDone =
+    true;
+
+  if (isBackForwardDocumentNavigation()) {
+    recordNativeHistoryTraversalIntent();
+
+    correctNativeHistoryLocaleIfNeeded();
+  }
+}

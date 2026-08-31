@@ -2,13 +2,150 @@
   "Header": {
     "homeLinkLabel": "Кол арынче",
     "actionsLabel": "Account actions / Аккаунттуң ажыл-чорудулгазы",
-    "signIn": " Кирер",
-    "signOut": "Sign Out / Үнер",
+    "signIn": "Кирер",
+    "signOut": "Үнер",
     "account": "Аккаунт",
-    "postAd": " Чарлалдан үндүрер",
+    "postAd": "Чарлалдан үндүрер",
     "signedInAs": "Signed in as / Кылдыр кирген",
-    "messages": "Messages / Медээлер",
-    "languageSwitcherLabel": "Language"
+    "messages": "Медээлер",
+    "languageSwitcherLabel": "Дыл",
+    "unreadConversation": "{count, plural, one {# номчуттунмаан медээ} other {# Номчуттунмаан медээлер}}"
+  },
+  "Home": {
+    "categoryAriaLabel": "Категория: {category}",
+    "databaseListingsLoadFailedMessage": "Unable to load the latest advertisements. / Сөөлгү чарлалдарны үндүрүп шыдаваан."
+  },
+  "Search": {
+    "placeholder": "Чүнү дилеп тур силер бээр парлаптыңар",
+    "inputLabel": "Search listings / Даңзыларны дилеп тывар",
+    "button": "Дилээр",
+    "resultsTitle": "Search results / Дилээшкинниң түңнелдери"
+  },
+  "ListingResults": {
+    "resultsCountLabel": "Matching listings / Таарыштырган даңзылар",
+    "emptyResultsTitle": "No listings found / Даңзылар тывылбаан",
+    "emptyResultsMessage": "Фильтрлерни өскертип азы арыглап көрүңер.",
+    "databaseListingsLoadFailedMessage": "Сөөлгү чарлалдарны үндүрүп шыдаваан."
+  },
+  "ListingCard": {
+    "openListingLabel": "Ажык даңзы",
+    "freePriceLabel": "Халас",
+    "saveAdvertisementButton": "Чарлалды кадагала",
+    "saveAdvertisementShortButton": "Кадагалаар",
+    "savedAdvertisementButton": "Камгалаттынган",
+    "removeSavedAdvertisementButton": "Камгалаттынгандан үндүрер",
+    "signInToSaveAdvertisementMessage": "Чарлалдарны кадагалаары-биле кирип алыңар.",
+    "advertisementCannotBeSavedMessage": "Бо чарлалды кадагалап болбас.",
+    "savedAdvertisementsTemporarilyUnavailableMessage": "Камгалаттынган чарлалдар түр када ажыглаттынмас. Соонда катап шенеп көрүңер.",
+    "unableUpdateSavedAdvertisementMessage": "Камгалаттынган чарлалды чаартып шыдаваан.",
+    "status": {
+      "active": "Идепкейлиг",
+      "reserved": "Камгалаттынган",
+      "sold": "Саттынган",
+      "archived": "Архивтелген"
+    }
+  },
+  "CategoryPage": {
+    "subcategoriesTitle": "Дайындар",
+    "servicesSearchPlaceholder": "Электрик дээн ышкаш кылдыр парлаптыңар",
+    "servicesSearchSample": "Электрик",
+    "marketplaceSearchSample": "Тон дээн ышкаш кылдыр одуругче парлаптыңар",
+    "marketplaceSearchPlaceholder": "Тон дээн ышкаш кылдыр парлаптыңар",
+    "searchPlaceholder": "Чүнү дилеп тур силер бээр парлаптыңар",
+        "searchPromptSuffix": "",
+
+    "searchButton": "Дилээр",
+    "typeLabel": "Хевир",
+    "typePlaceholder": "Хевир",
+    "priceFilterLabel": "Өртек",
+    "priceMinPlaceholder": "Эң эвээш өртек",
+    "priceMaxPlaceholder": "Эң бедик өртек",
+    "filterButton": "Ажыглаар",
+    "filterControlsButton": "Фильтрлер",
+    "filterControlsLabel": "Фильтрлер",
+    "closeFiltersButton": "Фильтрлерни хааптыңар",
+    "clearFilterButton": "Арыг фильтр",
+    "latestListingsTitle": "Сөөлгү чарлалдар",
+    "exploreAllServices": "Шупту чарлалдардан дилээр",
+    "viewAllLabel": "Шупту",
+    "backToCategories": "Дедир категорияларже",
+    "backToCategory": "Хевирлерже",
+    "backToHome": "Кол арынче",
+    "housingPropertyTypeLabel": "Хевир",
+    "housingPropertyTypePlaceholder": "Хевирни шилип алыңар",
+    "housingAllOption": "Шупту",
+    "housingSaleOption": "Садар",
+    "housingRentOption": "Аренда",
+    "databaseListingsLoadFailedMessage": "Сөөлгү чарлалдарны үндүрүп шыдаваан."
+  },
+  "Categories": {
+    "items": {
+      "housing": {
+        "label": "Бажың-малгат",
+        "types": {
+          "apartments": "Чер болгаш каът бажыңнар",
+          "land": "Чер",
+          "commercial": "Коммерциялыг оран-сава",
+          "storage": "Гараж болгаш парковклар"
+        },
+        "subcategories": {
+          "sale": "Садар",
+          "rent": "Аренда"
+        }
+      },
+      "marketplace": {
+        "label": "Алыр/Садар",
+        "buyTypes": {
+          "all-categories": "Шупту хевир",
+          "clothing": "Хептер",
+          "shoes": "Идиктер",
+          "office": "Канцелярия",
+          "new": "Чаа",
+          "used": "Эдилээн",
+          "home-goods": "Эт-херексел",
+          "appliances": "Септелге херексели",
+          "furniture": "Эт-сеп",
+          "pets": "Дириг амытаннарга",
+          "kids": "Чаштарга",
+          "construction materials": "Тудуг херекселдери",
+          "books": "Номнар",
+          "beauty": "Косметика",
+          "games": "Оюннар"
+        },
+        "subcategories": {
+          "buy": "Садып турар",
+          "free": "Халас",
+          "wanted": "Дилеп турар"
+        }
+      },
+      "auto": {
+        "label": "Авто",
+        "subcategories": {
+          "used-cars": "Эдилээн авто",
+          "new-cars": "Чап-чаа авто",
+          "auto-parts": "Авто херекселдери",
+          "rent": "Аренда/Лизинг"
+        }
+      },
+      "jobs": {
+        "label": "Ажыл",
+        "subcategories": {
+          "find-talents": "Ажылдакчы дилээннерге",
+          "find-jobs": "Ажыл дилээннерге"
+        }
+      },
+      "services": {
+        "label": "Дуза/Ус ажыл",
+        "subcategories": {}
+      },
+      "events": {
+        "label": "Хөглээшкин",
+        "subcategories": {
+          "events": "Чүү болур",
+          "night-clubs": "Кежээ",
+          "lost-found": "Тывыштар"
+        }
+      }
+    }
   }
 }
-

@@ -1,13 +1,23 @@
 'use client';
 
 import {
+  localizePath,
   localizeSafeInternalPath,
+  localizeReturnPathQuery,
   removeKnownLocalePrefix,
 } from './localePath';
+import { routing } from './routing';
 import { getSafeNextPath } from '../lib/auth/safeNextPath';
 
 const LOCALE_HISTORY_NORMALIZATION_KEY = 'charlal-locale-history-normalization';
+const PREFERRED_HISTORY_LOCALE_KEY = 'charlal-preferred-history-locale';
 const returnPathQueryKeys = ['from', 'next'] as const;
+const internalUrlBase = 'https://internal.local';
+const excludedPathPrefixes = ['/auth/', '/_next/', '/api/'];
+const staticAssetPathPattern =
+  /\.(?:avif|css|gif|ico|jpeg|jpg|js|json|map|pdf|png|svg|txt|webp|woff2?|xml|zip)$/i;
+
+type AppLocale = (typeof routing.locales)[number];
 
 type LocaleHistoryNormalization = {
   sourceHref: string;
@@ -17,6 +27,175 @@ type LocaleHistoryNormalization = {
 
 function isBrowser(): boolean {
   return typeof window !== 'undefined';
+}
+
+
+function isAppLocale(value: string): value is AppLocale {
+  return routing.locales.includes(value as AppLocale);
+}
+
+function getPhysicalLocaleFromPathname(
+  pathname: string
+): AppLocale {
+  const localeSegment = pathname.split('/')[1];
+
+  return isAppLocale(localeSegment)
+    ? localeSegment
+    : routing.defaultLocale;
+}
+
+function parseSameOriginHref(
+  href: string
+): URL | undefined {
+  if (
+    !href ||
+    href.startsWith('//') ||
+    href.includes('\\')
+  ) {
+    return undefined;
+  }
+
+  try {
+    const parsedHref = new URL(
+      href,
+      internalUrlBase
+    );
+
+    if (parsedHref.origin !== internalUrlBase) {
+      return undefined;
+    }
+
+    return parsedHref;
+  } catch {
+    return undefined;
+  }
+}
+
+export function isNativeHistoryLocaleNormalizationHref(
+  href: string
+): boolean {
+  const parsedHref = parseSameOriginHref(href);
+
+  if (!parsedHref) {
+    return false;
+  }
+
+  const logicalPathname = removeKnownLocalePrefix(
+    parsedHref.pathname
+  );
+
+  if (
+    excludedPathPrefixes.some(
+      (prefix) =>
+        logicalPathname === prefix.slice(0, -1) ||
+        logicalPathname.startsWith(prefix)
+    )
+  ) {
+    return false;
+  }
+
+  return !staticAssetPathPattern.test(logicalPathname);
+}
+
+export function recordPreferredHistoryLocale(
+  locale: string
+): void {
+  if (!isBrowser() || !isAppLocale(locale)) {
+    return;
+  }
+
+  try {
+    window.sessionStorage.setItem(
+      PREFERRED_HISTORY_LOCALE_KEY,
+      locale
+    );
+  } catch {
+    // If storage is unavailable, native history keeps browser defaults.
+  }
+}
+
+export function readPreferredHistoryLocale():
+  | AppLocale
+  | undefined {
+  if (!isBrowser()) {
+    return undefined;
+  }
+
+  try {
+    const storedLocale =
+      window.sessionStorage.getItem(
+        PREFERRED_HISTORY_LOCALE_KEY
+      );
+
+    return storedLocale && isAppLocale(storedLocale)
+      ? storedLocale
+      : undefined;
+  } catch {
+    return undefined;
+  }
+}
+
+export function syncPreferredHistoryLocaleToUrl(
+  locale: string
+): void {
+  recordPreferredHistoryLocale(locale);
+}
+
+export function getNativeHistoryLocaleCorrectionHref(
+  currentHref: string
+): string | null {
+  const preferredLocale =
+    readPreferredHistoryLocale();
+
+  if (!preferredLocale) {
+    return null;
+  }
+
+  if (
+    !isNativeHistoryLocaleNormalizationHref(
+      currentHref
+    )
+  ) {
+    return null;
+  }
+
+  const parsedHref = parseSameOriginHref(currentHref);
+
+  if (!parsedHref) {
+    return null;
+  }
+
+  const currentLocale =
+    getPhysicalLocaleFromPathname(
+      parsedHref.pathname
+    );
+
+  if (currentLocale === preferredLocale) {
+    return null;
+  }
+
+  const logicalPathname =
+    removeKnownLocalePrefix(
+      parsedHref.pathname
+    );
+  const localizedPathname = localizePath(
+    logicalPathname,
+    preferredLocale
+  );
+  const localizedQueryString =
+    localizeReturnPathQuery(
+      parsedHref.searchParams.toString(),
+      preferredLocale
+    );
+  const correctedHref = `${localizedPathname}${
+    localizedQueryString
+      ? `?${localizedQueryString}`
+      : ''
+  }${parsedHref.hash}`;
+
+  return correctedHref === currentHref
+    ? null
+    : correctedHref;
 }
 
 function readStoredNormalization(): LocaleHistoryNormalization | undefined {

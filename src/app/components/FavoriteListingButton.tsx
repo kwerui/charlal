@@ -1,13 +1,13 @@
 'use client';
 
 import { usePathname, useSearchParams } from 'next/navigation';
-import { useEffect, useMemo, useRef, useState, useTransition } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState, useTransition } from 'react';
+import { useTranslations } from 'next-intl';
 import { useRouter } from '@/i18n/navigation';
 import {
   removeFavoriteAction,
   saveFavoriteAction,
 } from '@/app/favorites/actions';
-import { content } from '@/content/tyv';
 import {
   getListingFavoriteKey,
   type ListingFavoriteMutationFailureReason,
@@ -124,27 +124,6 @@ function takeMatchingPendingFavoriteIntent(
   }
 }
 
-function getFavoriteMutationFailureMessage(
-  reason: ListingFavoriteMutationFailureReason
-): string {
-  if (reason === 'auth-required') {
-    return content.signInToSaveAdvertisementMessage;
-  }
-
-  if (reason === 'invalid-listing') {
-    return content.advertisementCannotBeSavedMessage;
-  }
-
-  if (
-    reason === 'database-unavailable' ||
-    reason === 'schema-unavailable'
-  ) {
-    return content.savedAdvertisementsTemporarilyUnavailableMessage;
-  }
-
-  return content.unableUpdateSavedAdvertisementMessage;
-}
-
 function logFavoriteClientFailure(
   action: 'save' | 'toggle',
   reason: ListingFavoriteMutationFailureReason,
@@ -169,6 +148,7 @@ export default function FavoriteListingButton({
   returnHref,
   onRemoved,
 }: Props) {
+  const t = useTranslations('ListingCard');
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -187,15 +167,37 @@ export default function FavoriteListingButton({
   const isSaved = Boolean(activeUserId && savedForUserId === activeUserId);
   const displayedError = status === 'authenticated' ? error : '';
   const buttonLabel = isSaved
-    ? content.removeSavedAdvertisementButton
-    : content.saveAdvertisementButton;
+    ? t('removeSavedAdvertisementButton')
+    : t('saveAdvertisementButton');
   const visibleLabel =
     isSaved
-      ? content.savedAdvertisementButton
-      : content.saveAdvertisementShortButton;
+      ? t('savedAdvertisementButton')
+      : t('saveAdvertisementShortButton');
   const signInReturnHref = getSafeNextPath(
     returnHref || getSafeCurrentHref(pathname, searchParams),
     '/'
+  );
+
+  const getFavoriteMutationFailureMessage = useCallback(
+    (reason: ListingFavoriteMutationFailureReason): string => {
+      if (reason === 'auth-required') {
+        return t('signInToSaveAdvertisementMessage');
+      }
+
+      if (reason === 'invalid-listing') {
+        return t('advertisementCannotBeSavedMessage');
+      }
+
+      if (
+        reason === 'database-unavailable' ||
+        reason === 'schema-unavailable'
+      ) {
+        return t('savedAdvertisementsTemporarilyUnavailableMessage');
+      }
+
+      return t('unableUpdateSavedAdvertisementMessage');
+    },
+    [t]
   );
 
   useEffect(() => {
@@ -235,12 +237,19 @@ export default function FavoriteListingButton({
           console.error('Favorite save failed.', error);
         }
 
-        setError(content.unableUpdateSavedAdvertisementMessage);
+        setError(t('unableUpdateSavedAdvertisementMessage'));
       } finally {
         mutationInFlightRef.current = false;
       }
     });
-  }, [activeUserId, favoriteKey, isPending, isSaved]);
+  }, [
+    activeUserId,
+    favoriteKey,
+    getFavoriteMutationFailureMessage,
+    isPending,
+    isSaved,
+    t,
+  ]);
 
   function handleToggle(): void {
     if (mutationInFlightRef.current) {
@@ -288,7 +297,7 @@ export default function FavoriteListingButton({
           console.error('Favorite toggle failed.', error);
         }
 
-        setError(content.unableUpdateSavedAdvertisementMessage);
+        setError(t('unableUpdateSavedAdvertisementMessage'));
       } finally {
         mutationInFlightRef.current = false;
       }

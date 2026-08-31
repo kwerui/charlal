@@ -49,6 +49,12 @@ export function localizeSafeInternalPath(path: string, locale: string): string {
   return localizePath(removeKnownLocalePrefix(safePath), locale);
 }
 
+export function getSignInHref(nextPath: string, locale: string): string {
+  const localizedNextPath = localizeSafeInternalPath(nextPath, locale);
+
+  return `${localizePath('/sign-in', locale)}?next=${encodeURIComponent(localizedNextPath)}`;
+}
+
 export function localizeReturnPathQuery(queryString: string, locale: string): string {
   if (!queryString) {
     return '';

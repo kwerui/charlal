@@ -1,12 +1,11 @@
 "use client";
 
 import { useRouter } from '@/i18n/navigation';
+import { useTranslations } from 'next-intl';
 import type { FormEvent } from 'react';
 import { useState } from 'react';
-import { content } from '@/content/tyv';
 
 type FilterOption = {
-  name: string;
   slug: string;
 };
 
@@ -42,15 +41,17 @@ export default function PriceFilterControls({
   basePath,
   minPrice,
   maxPrice,
-  minLabel = content.priceMinPlaceholder,
-  maxLabel = content.priceMaxPlaceholder,
-  priceLabel = content.priceFilterLabel,
+  minLabel,
+  maxLabel,
+  priceLabel,
   typeOptions = [],
   selectedType = '',
-  typeLabel = content.typeLabel,
-  typePlaceholder = content.typePlaceholder,
+  typeLabel,
+  typePlaceholder,
   preservedPriceParams = {},
 }: Props) {
+  const categoryPageT = useTranslations('CategoryPage');
+  const categoriesT = useTranslations('Categories');
   const router = useRouter();
   const [draftMinPrice, setDraftMinPrice] = useState(minPrice);
   const [draftMaxPrice, setDraftMaxPrice] = useState(maxPrice);
@@ -89,7 +90,9 @@ export default function PriceFilterControls({
       <form className="listing-filter-grid" onSubmit={handleSubmit}>
         {typeOptions.length > 0 ? (
           <label className="filter-field" htmlFor="listing-type-filter">
-            <span className="filter-label">{typeLabel}</span>
+            <span className="filter-label">
+              {typeLabel || categoryPageT('typeLabel')}
+            </span>
             <select
               id="listing-type-filter"
               className={`filter-select ${draftType ? '' : 'placeholder-selected'}`}
@@ -97,11 +100,11 @@ export default function PriceFilterControls({
               onChange={(event) => setDraftType(event.target.value)}
             >
               <option value="" disabled>
-                {typePlaceholder}
+                {typePlaceholder || categoryPageT('typePlaceholder')}
               </option>
               {typeOptions.map((typeItem) => (
                 <option key={typeItem.slug} value={typeItem.slug}>
-                  {typeItem.name}
+                  {categoriesT(`items.marketplace.buyTypes.${typeItem.slug}`)}
                 </option>
               ))}
             </select>
@@ -109,13 +112,15 @@ export default function PriceFilterControls({
         ) : null}
 
         <div className="filter-field">
-          <span className="filter-label">{priceLabel}</span>
+          <span className="filter-label">
+            {priceLabel || categoryPageT('priceFilterLabel')}
+          </span>
           <div className="price-filter-inputs">
             <input
               type="number"
               name="minPrice"
               className="price-filter-input"
-              placeholder={minLabel}
+              placeholder={minLabel || categoryPageT('priceMinPlaceholder')}
               min="0"
               inputMode="numeric"
               value={draftMinPrice}
@@ -125,7 +130,7 @@ export default function PriceFilterControls({
               type="number"
               name="maxPrice"
               className="price-filter-input"
-              placeholder={maxLabel}
+              placeholder={maxLabel || categoryPageT('priceMaxPlaceholder')}
               min="0"
               inputMode="numeric"
               value={draftMaxPrice}
@@ -136,14 +141,14 @@ export default function PriceFilterControls({
 
         <div className="price-filter-actions">
           <button type="submit" className="search-button price-filter-button">
-            {content.filterButton}
+            {categoryPageT('filterButton')}
           </button>
           <button
             type="button"
             className="secondary-button price-filter-button"
             onClick={handleClearFilter}
           >
-            {content.clearFilterButton}
+            {categoryPageT('clearFilterButton')}
           </button>
         </div>
       </form>

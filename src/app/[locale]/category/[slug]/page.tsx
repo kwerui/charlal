@@ -1,9 +1,10 @@
 import { Link } from '@/i18n/navigation';
 import { notFound } from 'next/navigation';
 import ListingResults from '@/app/components/ListingResults';
-import { content } from '@/content/tyv';
+import { categoryTaxonomy, findCategoryTaxonomy } from '@/content/categoryTaxonomy';
 import { getCurrentUserFavoriteState } from '@/lib/supabase/listingFavorites';
 import { listPublicDatabaseListings } from '@/lib/supabase/listingsServer';
+import { getTranslations } from 'next-intl/server';
 import CategoryHeroControls from './CategoryHeroControls';
 
 type CategoryPageProps = {
@@ -11,14 +12,16 @@ type CategoryPageProps = {
 };
 
 export function generateStaticParams(): { slug: string }[] {
-  return content.categories.map((category) => ({
+  return categoryTaxonomy.map((category) => ({
     slug: category.slug,
   }));
 }
 
 export default async function CategoryPage({ params }: CategoryPageProps) {
+  const categoryPageT = await getTranslations('CategoryPage');
+  const categoriesT = await getTranslations('Categories');
   const { slug } = await params;
-  const category = content.categories.find((item) => item.slug === slug);
+  const category = findCategoryTaxonomy(slug);
   const showSearchBar =
     category?.slug === 'housing' ||
     category?.slug === 'marketplace' ||
@@ -44,13 +47,14 @@ export default async function CategoryPage({ params }: CategoryPageProps) {
     : [];
   const databaseError = databaseListingsResult.ok
     ? ''
-    : content.databaseListingsLoadFailedMessage;
+    : categoryPageT('databaseListingsLoadFailedMessage');
+  const categoryLabel = categoriesT(`items.${category.slug}.label`);
 
   return (
     <div className="app-container">
       <section className="category-page">
         <Link href="/" className="page-back-link">
-          {content.backToHome}
+          {categoryPageT('backToHome')}
         </Link>
 
         <section
@@ -66,8 +70,7 @@ export default async function CategoryPage({ params }: CategoryPageProps) {
         >
           <div className="category-hero-inner">
             <div className="category-hero-copy">
-              <p className="hero-kicker">{content.categoryPageTitle}</p>
-              <h2 className="page-title">{category.name}</h2>
+              <h2 className="page-title">{categoryLabel}</h2>
             </div>
 
             <div className="category-hero-controls">
@@ -82,7 +85,7 @@ export default async function CategoryPage({ params }: CategoryPageProps) {
 
         <section className="category-listings-section" aria-labelledby="category-latest-listings">
           <div className="category-section-heading">
-            <h2 id="category-latest-listings">{content.latestListingsTitle}</h2>
+            <h2 id="category-latest-listings">{categoryPageT('latestListingsTitle')}</h2>
           </div>
           <ListingResults
             databaseListings={databaseListings}
