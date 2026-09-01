@@ -46,6 +46,7 @@
     }
   },
   "ListingDetail": {
+    "breadcrumbLabel": "[TYV REVIEW] Breadcrumb",
     "homeBreadcrumb": "Бажың",
     "backToHomepage": "Кол арынче",
     "backToAccount": "Back to account / Аккаунтче эглип келир",
@@ -251,6 +252,35 @@
     "reviewsSummary": "Харыы манап тур мен: {toReview} · Бижиттинген: {written} ",
     "viewReviewsButton": "Үнелелдерни көрүңер"
   },
+  "AccountReviews": {
+    "purchasesToReviewTitle": "Хыналдага барааннар / Purchases to review",
+    "noPurchasesToReviewMessage": "Ам-даа хыналда херек садып алыышкыннар мында көстүп кээр. / Purchases that still need a review will appear here.",
+    "myReviewsTitle": "Мээң үнелелдерим / My reviews",
+    "noMyReviewsMessage": "Силерниң бижээн үнелелдериңер мында көстүп кээр. / Reviews you have written will appear here.",
+    "purchasedFromLabel": "Садып алган / Purchased from",
+    "leaveReviewButton": "Үнелелди артырып каар / Leave review",
+    "editReviewButton": "Хыналданы эде көөр / Edit review",
+    "saveReviewChangesButton": "Өскерлиишкиннерни кадагала / Save changes",
+    "deleteReviewButton": "Хыналданы өжүрүп кааптыңар / Delete review",
+    "submitReviewButton": "Хыналданы үндүрер / Submit review",
+    "reviewSavingButton": "Камгалаттынган... / Saving review...",
+    "reviewDeletingButton": "Хыналданы өжүрүп тур мен... / Deleting review...",
+    "reviewSavedMessage": "Хыналда камгалаттынган / Review saved.",
+    "reviewDeletedMessage": "Хыналданы өжүрүп каан / Review deleted.",
+    "reviewSaveFailedMessage": "Хыналданы кадагалап шыдаваан. / Unable to save review.",
+    "reviewDeleteFailedMessage": "Хыналданы өжүрүп шыдаваан. / Unable to delete review.",
+    "deleteReviewConfirmTitle": "Хыналданы өжүрүп кааптыңар бе? / Delete review?",
+    "deleteReviewConfirmMessage": "Силерниң үнелелиңер, бижиктериңер болгаш чуруктарыңар өжүртүнүп каар. Бо садып алыышкынны соонда катап көрүп болур силер. / Your rating, text and photos will be removed. You can review this purchase again later.",
+    "reviewRatingLabel": "Үнелел / Rating",
+    "reviewRatingRequiredMessage": "1-ден 5 сылдыска чедир үнелелди шилип алыңар. / Choose a 1 to 5 star rating.",
+    "reviewTextLabel": "Сөзүглелди катаптаары (негелде чок) / Review text (optional)",
+    "addReviewPhotosButton": "Хыналдаңарга чурукту немеп алыңар / Add review photos",
+    "reviewPhotoRequirementsMessage": "чурукка чедир немеп каар. JPEG, PNG азы WebP. Эң хөйү 5 МБ. / Add up to 3 photos. JPEG, PNG, or WebP. Maximum 5 MB each.",
+    "reviewPhotoMaximumMessage": "Рецензияда эвээш дизе 3 чурук бар болур. / A review can have at most 3 photos.",
+    "reviewPhotoUnsupportedTypeMessage": "Деткиттинмээн чурук хевири. JPEG, PNG азы WebP ажыглаар. / Unsupported photo type. Use JPEG, PNG, or WebP.",
+    "reviewPhotoUploadFailedMessage": "Хыналда чуруун үндүрүп шыдаваан. / Unable to upload review photo.",
+    "reviewPhotoPreviewLabel": "Хыналданың чуруу / Review photo"
+  },
   "SavedListings": {
     "title": "Камгалаттынган чарлалдар",
     "countLabel": "Камгалаттынган чарлалдар",
@@ -316,6 +346,12 @@
     "todayLabel": "Бо хүн",
     "yesterdayLabel": "Дүүн "
   },
+  "ContactSeller": {
+    "messageSellerTitle": "Message seller / Медээ садыгжы",
+    "unableStartConversationMessage": "Unable to start conversation / Чугааны эгелеп шыдаваан",
+    "advertisementNotFoundMessage": "Advertisement not found / Чарлал тывылбаан",
+    "messagingCannotMessageSelfMessage": "You cannot message yourself / Бодуңга чагаа бижип шыдавас сен"
+  },
   "SellerProfile": {
     "title": "Seller profile / Садыгжының профили",
     "unavailableTitle": "Seller profile unavailable / Садыгжы профили чок",
@@ -335,7 +371,7 @@
     "closeProfilePhotoViewerButton": "Хаар / Close"
   },
   "PublicSellerReviews": {
-    "noReviewsYetLabel": "Амдыызында үнелелдер чок No reviews yet",
+    "noReviewsYetLabel": "Амдыызында үнелелдер чок / No reviews yet",
     "starsLabel": " {count} Сылдыс",
     "verifiedPurchaseLabel": "Бадыткаан садып алыышкын / Verified purchase",
     "editedReviewLabel": "Өскерткен / Edited",
@@ -350,6 +386,14 @@
     "responseSaveFailedMessage": "Садыгжы харыызын кадагалап шыдаваан. / Unable to save seller response.",
     "responseDeleteFailedMessage": "Садыгжы харыызын өжүрүп шыдаваан. / Unable to delete seller response.",
     "deleteResponseConfirmMessage": "Бо садыгжы харыызын өжүрүп кааптыңар бе? / Delete this seller response?"
+  },
+  "ReviewPhotoViewer": {
+    "openReviewPhotoLabel": "Ажык хыналда чурук / Open review photo {position}",
+    "reviewPhotoLabel": "Хыналданың чуруу / Review photo",
+    "closeButton": "Хаар / Close",
+    "previousPhotoButton": "Previous photo / Эрткен чурук",
+    "nextPhotoButton": "Next photo / Дараазында чурук",
+    "position": "{current} / {total}"
   },
   "ProfilePhoto": {
     "label": "Профиль чурук / Profile photo",
@@ -378,6 +422,10 @@
     "removeConfirmTitle": "Профиль чуруун үндүрер бе? / Remove profile photo?",
     "removeConfirmMessage": "Силерниң профилиңер өске чурукту немеп каарыңарга чедир эге аватарны ажыглап турар. / Your profile will use the default avatar until you add another photo.",
     "focusSaveFailedMessage": "Чуруктуң туружун кадагалап шыдаваан. / Unable to save photo position."
+  },
+  "NotFound": {
+    "title": "Арын тывылбаан / Not found",
+    "message": "Дилээн арын тывылбаан. / The requested page could not be found."
   },
   "PostAd": {
     "title": "Чарлалдан үндүрер",

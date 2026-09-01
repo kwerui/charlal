@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
-import { content } from '@/content/tyv';
+import { useTranslations } from 'next-intl';
 import type { ReviewPhoto } from '@/lib/supabase/reviews';
 
 type Props = {
@@ -9,16 +9,11 @@ type Props = {
   className?: string;
 };
 
-function getViewerPosition(current: number, total: number): string {
-  return content.listingPhotoPositionTemplate
-    .replace('{current}', String(current))
-    .replace('{total}', String(total));
-}
-
 export default function ReviewPhotoViewer({
   photos,
   className = 'seller-review-photos',
 }: Props) {
+  const t = useTranslations('ReviewPhotoViewer');
   const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
   const closeButtonRef = useRef<HTMLButtonElement | null>(null);
   const selectedPhoto =
@@ -73,10 +68,10 @@ export default function ReviewPhotoViewer({
             type="button"
             className="review-photo-thumb-button"
             onClick={() => setSelectedIndex(index)}
-            aria-label={`${content.openReviewPhotoLabel} ${index + 1}`}
+            aria-label={t('openReviewPhotoLabel', { position: index + 1 })}
           >
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={photo.url} alt={content.reviewPhotoPreviewLabel} />
+            <img src={photo.url} alt={t('reviewPhotoLabel')} />
           </button>
         ))}
       </div>
@@ -91,7 +86,7 @@ export default function ReviewPhotoViewer({
             className="listing-photo-viewer-dialog review-photo-viewer-dialog"
             role="dialog"
             aria-modal="true"
-            aria-label={content.reviewPhotoPreviewLabel}
+            aria-label={t('reviewPhotoLabel')}
             onClick={(event) => event.stopPropagation()}
           >
             <button
@@ -100,7 +95,7 @@ export default function ReviewPhotoViewer({
               className="listing-photo-viewer-close"
               onClick={() => setSelectedIndex(null)}
             >
-              {content.closeListingPhotoViewerButton}
+              {t('closeButton')}
             </button>
             {photos.length > 1 ? (
               <>
@@ -112,7 +107,7 @@ export default function ReviewPhotoViewer({
                       (selectedIndex - 1 + photos.length) % photos.length
                     )
                   }
-                  aria-label={content.previousListingPhotoButton}
+                  aria-label={t('previousPhotoButton')}
                 >
                   ‹
                 </button>
@@ -122,21 +117,24 @@ export default function ReviewPhotoViewer({
                   onClick={() =>
                     setSelectedIndex((selectedIndex + 1) % photos.length)
                   }
-                  aria-label={content.nextListingPhotoButton}
+                  aria-label={t('nextPhotoButton')}
                 >
                   ›
                 </button>
               </>
             ) : null}
             <div className="listing-photo-viewer-position">
-              {getViewerPosition(selectedIndex + 1, photos.length)}
+              {t('position', {
+                current: selectedIndex + 1,
+                total: photos.length,
+              })}
             </div>
             <div className="listing-photo-viewer-image-frame">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 className="listing-photo-viewer-image"
                 src={selectedPhoto.url}
-                alt={content.reviewPhotoPreviewLabel}
+                alt={t('reviewPhotoLabel')}
               />
             </div>
           </div>

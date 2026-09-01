@@ -46,6 +46,7 @@
     }
   },
   "ListingDetail": {
+    "breadcrumbLabel": "[RU REVIEW] Breadcrumb",
     "homeBreadcrumb": "Главная",
     "backToHomepage": "На главную",
     "backToAccount": "К аккаунту",
@@ -119,7 +120,6 @@
     "contactLink": "Контакты"
   },
   "CategoryPage": {
-    "categoryPageTitle": "Категории",
     "subcategoriesTitle": "Подкатегории",
     "servicesSearchPlaceholder": "Например, электрик",
     "servicesSearchSample": "Например, электрик",
@@ -252,6 +252,35 @@
     "reviewsSummary": "Ожидают отзыва: {toReview}  · Написано: {written}",
     "viewReviewsButton": "Посмотреть отзывы"
   },
+  "AccountReviews": {
+    "purchasesToReviewTitle": "Товары для отзыва",
+    "noPurchasesToReviewMessage": "Здесь появятся покупки, на которые вы ещё не оставили отзыв.",
+    "myReviewsTitle": "Мои отзывы",
+    "noMyReviewsMessage": "Здесь появятся оставленные вами отзывы.",
+    "purchasedFromLabel": "Куплено у",
+    "leaveReviewButton": "Оставить отзыв",
+    "editReviewButton": "Изменить отзыв",
+    "saveReviewChangesButton": "Сохранить изменения",
+    "deleteReviewButton":  "Удалить отзыв",
+    "submitReviewButton": "Опубликовать отзыв",
+    "reviewSavingButton": "Сохраняется...",
+    "reviewDeletingButton": "Удаляется...",
+    "reviewSavedMessage": "Отзыв сохранён.",
+    "reviewDeletedMessage":  "Отзыв удалён.",
+    "reviewSaveFailedMessage":  "Не удалось сохранить отзыв.",
+    "reviewDeleteFailedMessage": "Не удалось удалить отзыв.",
+    "deleteReviewConfirmTitle": "Удалить отзыв?",
+    "deleteReviewConfirmMessage": "Ваша оценка, текст и фотографии будут удалены. Позже вы сможете снова оставить отзыв об этом товаре.",
+    "reviewRatingLabel":  "Оценка",
+    "reviewRatingRequiredMessage":"Выберите оценку от 1 до 5 звезд.",
+    "reviewTextLabel": "Текст отзыва (необязательно)",
+    "addReviewPhotosButton": "Добавить фото к отзыву",
+    "reviewPhotoRequirementsMessage": "Можно добавить до 3 фото. JPEG, PNG или WebP. Максимальный размер каждого файла — 5 МБ.",
+    "reviewPhotoMaximumMessage": "К отзыву можно добавить не более 3 фото.",
+    "reviewPhotoUnsupportedTypeMessage":  "Неподдерживаемый формат фото. Используйте JPEG, PNG или WebP.",
+    "reviewPhotoUploadFailedMessage":"Не удалось загрузить фото к отзыву.",
+    "reviewPhotoPreviewLabel":"Фото к отзыву"
+  },
   "SavedListings": {
     "title": "Сохраненные объявления",
     "countLabel": "Сохраненные объявления",
@@ -276,7 +305,7 @@
     "liveUpdatesUnavailableMessage": "Автообновление сообщений недоступно. Обновите страницу, чтобы проверить новые сообщения.",
     "offlineThreadStatusMessage": "Нет подключения к интернету. Сообщения обновятся после восстановления соединения.",
     "offlineBeforeSendMessage": "Нет подключения к интернету. Подключитесь к сети перед отправкой.",
-    "reconnectingLabel": "Восстанавление соединения...",
+    "reconnectingLabel": "Восстановление соединения...",
     "messageDeliveryUnconfirmedMessage": "Не удалось подтвердить доставку сообщения. Проверьте диалог перед повторной отправкой.",
     "conversationLinkLabel": "{listingTitle} - {participantName}",
     "unreadMessagesLabel": "{count, plural, one {# непрочитанное сообщение} few {# непрочитанных сообщения} many {# непрочитанных сообщений} other {# непрочитанных сообщения}}",
@@ -315,7 +344,13 @@
     "messagePhotoViewerTitle":  "Фото из сообщения",
     "messagePhotoInMessagePosition": "Фото {current} из {total}",
     "todayLabel": "Сегодня",
-    "yesterdayLabel": " Вчера"
+    "yesterdayLabel": "Вчера"
+  },
+  "ContactSeller": {
+    "messageSellerTitle": "Написать владельцу",
+    "unableStartConversationMessage": "Не удалось начать диалог",
+    "advertisementNotFoundMessage":  "Объявление не найдено",
+    "messagingCannotMessageSelfMessage": "Нельзя отправить сообщение самому себе"
   },
   "SellerProfile": {
     "title": "Профиль продавца",
@@ -352,6 +387,14 @@
     "responseDeleteFailedMessage": "Не удалось удалить ответ продавца.",
     "deleteResponseConfirmMessage": "Удалить этот ответ продавца?"
   },
+  "ReviewPhotoViewer": {
+    "openReviewPhotoLabel": "Открыть фото к отзыву {position}",
+    "reviewPhotoLabel": "Фото к отзыву",
+    "closeButton": "Закрыть",
+    "previousPhotoButton": "Предыдущее фото",
+    "nextPhotoButton":"Следующее фото",
+    "position": "{current} / {total}"
+  },
   "ProfilePhoto": {
     "label": "Фото профиля",
     "chooseButton": "Выберите фото",
@@ -379,6 +422,10 @@
     "removeConfirmTitle": "Удалить фото профиля?",
     "removeConfirmMessage": "До загрузки нового фото будет использоваться аватар по умолчанию.",
     "focusSaveFailedMessage": "Не удалось сохранить положение фото."
+  },
+  "NotFound": {
+    "title": "Страница не найдена",
+    "message":"Не удалось найти запрошенную страницу."
   },
   "PostAd": {
     "title": "Выложить объявление",

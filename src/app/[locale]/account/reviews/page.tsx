@@ -1,11 +1,11 @@
 import { Link } from '@/i18n/navigation';
 import { redirect } from 'next/navigation';
 import PurchasesToReview from '@/app/[locale]/account/PurchasesToReview';
-import { content } from '@/content/tyv';
 import { getSignInHref } from '@/i18n/localePath';
 import { getCurrentUserResult } from '@/lib/auth/server';
 import { createClient } from '@/lib/supabase/server';
 import { listMyReviewableTransactions } from '@/lib/supabase/reviews';
+import { getTranslations } from 'next-intl/server';
 
 type AccountReviewsPageProps = {
   params: Promise<{ locale: string }>;
@@ -13,6 +13,8 @@ type AccountReviewsPageProps = {
 
 export default async function AccountReviewsPage({ params }: AccountReviewsPageProps) {
   const { locale } = await params;
+  const accountT = await getTranslations('Account');
+  const listingDetailT = await getTranslations('ListingDetail');
   const authResult = await getCurrentUserResult();
 
   if (authResult.status === 'signed-out') {
@@ -31,11 +33,11 @@ export default async function AccountReviewsPage({ params }: AccountReviewsPageP
         aria-labelledby="account-reviews-page-title"
       >
         <Link href="/account" className="page-back-link">
-          {content.backToAccount}
+          {listingDetailT('backToAccount')}
         </Link>
         <div className="form-page-heading">
           <h1 id="account-reviews-page-title" className="auth-title">
-            {content.reviewsAccountSummaryTitle}
+            {accountT('reviewsSummaryTitle')}
           </h1>
         </div>
         <PurchasesToReview initialTransactions={reviewableTransactions} />

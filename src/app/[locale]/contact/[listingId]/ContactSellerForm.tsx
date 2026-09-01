@@ -4,35 +4,41 @@ import { useRouter } from '@/i18n/navigation';
 import type { FormEvent } from 'react';
 import { useState } from 'react';
 import { startConversationAction } from '@/app/account/messages/actions';
-import { content } from '@/content/tyv';
 import { MESSAGE_BODY_MAX_LENGTH } from '@/lib/messagingTypes';
+import { useTranslations } from 'next-intl';
 
 type Props = {
   listingId: string;
 };
 
-function getMessagingErrorMessage(reason: string): string {
+function getMessagingErrorMessage(
+  reason: string,
+  t: ReturnType<typeof useTranslations<'ContactSeller'>>,
+  messagesT: ReturnType<typeof useTranslations<'Messages'>>
+): string {
   if (reason === 'empty-message') {
-    return content.messageEmptyMessage;
+    return messagesT('messageEmptyMessage');
   }
 
   if (reason === 'message-too-long') {
-    return content.messageTooLongMessage;
+    return messagesT('messageTooLongMessage');
   }
 
   if (reason === 'self-message') {
-    return content.messagingCannotMessageSelfMessage;
+    return t('messagingCannotMessageSelfMessage');
   }
 
   if (reason === 'unauthenticated') {
-    return content.unableStartConversationMessage;
+    return t('unableStartConversationMessage');
   }
 
-  return content.unableStartConversationMessage;
+  return t('unableStartConversationMessage');
 }
 
 export default function ContactSellerForm({ listingId }: Props) {
   const router = useRouter();
+  const t = useTranslations('ContactSeller');
+  const messagesT = useTranslations('Messages');
   const [body, setBody] = useState('');
   const [error, setError] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -48,12 +54,12 @@ export default function ContactSellerForm({ listingId }: Props) {
     const safeBody = body.trim();
 
     if (!safeBody) {
-      setError(content.messageEmptyMessage);
+      setError(messagesT('messageEmptyMessage'));
       return;
     }
 
     if (safeBody.length > MESSAGE_BODY_MAX_LENGTH) {
-      setError(content.messageTooLongMessage);
+      setError(messagesT('messageTooLongMessage'));
       return;
     }
 
@@ -68,7 +74,7 @@ export default function ContactSellerForm({ listingId }: Props) {
     setIsSubmitting(false);
 
     if (!result.ok) {
-      setError(getMessagingErrorMessage(result.reason));
+      setError(getMessagingErrorMessage(result.reason, t, messagesT));
       return;
     }
 
@@ -80,7 +86,7 @@ export default function ContactSellerForm({ listingId }: Props) {
   return (
     <form className="message-form" onSubmit={handleSubmit} noValidate>
       <label className="form-field" htmlFor="initial-message-body">
-        <span>{content.writeMessageLabel}</span>
+        <span>{messagesT('writeMessageLabel')}</span>
         <textarea
           id="initial-message-body"
           name="body"
@@ -101,7 +107,7 @@ export default function ContactSellerForm({ listingId }: Props) {
         </p>
       ) : null}
       <button type="submit" className="search-button form-submit-button" disabled={isSubmitting}>
-        {isSubmitting ? content.sendingMessageButton : content.sendMessageButton}
+        {isSubmitting ? messagesT('sendingMessageButton') : messagesT('sendMessageButton')}
       </button>
     </form>
   );

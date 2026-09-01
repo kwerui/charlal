@@ -4,7 +4,8 @@ import { Link } from '@/i18n/navigation';
 import { useCallback, useEffect, useRef, useState, type FormEvent } from 'react';
 import ProfileAvatar from '@/app/components/ProfileAvatar';
 import ReviewPhotoViewer from '@/app/components/ReviewPhotoViewer';
-import { content } from '@/content/tyv';
+import { useLocale, useTranslations } from 'next-intl';
+import { formatReviewDate } from '@/lib/reviewDateFormatting';
 import {
   recordReviewMutationRefreshIntent,
   shouldRefreshForReviewMutation,
@@ -39,22 +40,6 @@ type ReviewDraftFile = {
 type PendingDeleteReview = {
   reviewId: string;
 };
-
-const reviewDateFormatter = new Intl.DateTimeFormat('en', {
-  month: 'short',
-  day: 'numeric',
-  year: 'numeric',
-});
-
-function formatReviewDate(value: string): string {
-  const date = new Date(value);
-
-  if (Number.isNaN(date.getTime())) {
-    return value;
-  }
-
-  return reviewDateFormatter.format(date);
-}
 
 function getStars(rating: number | null): string {
   if (!rating) {
@@ -94,6 +79,10 @@ function ReviewEditor({
   onCancel,
   onSubmit,
 }: ReviewEditorProps) {
+  const t = useTranslations('AccountReviews');
+  const listingReportT = useTranslations('ListingReport');
+  const listingFormT = useTranslations('PostAd.form');
+  const publicSellerReviewsT = useTranslations('PublicSellerReviews');
   const [rating, setRating] = useState(transaction.rating || 0);
   const [body, setBody] = useState(transaction.reviewBody || '');
   const [keptPhotos, setKeptPhotos] = useState<ReviewPhoto[]>(
@@ -134,12 +123,12 @@ function ReviewEditor({
       MAX_REVIEW_PHOTOS - keptPhotos.length - draftFiles.length;
 
     if (availableSlots <= 0 || incomingFiles.length > availableSlots) {
-      setError(content.reviewPhotoMaximumMessage);
+      setError(t('reviewPhotoMaximumMessage'));
       return;
     }
 
     if (!incomingFiles.every(isReviewPhotoFile)) {
-      setError(content.reviewPhotoUnsupportedTypeMessage);
+      setError(t('reviewPhotoUnsupportedTypeMessage'));
       return;
     }
 
@@ -163,7 +152,7 @@ function ReviewEditor({
     setError('');
 
     if (rating < 1 || rating > 5) {
-      setError(content.reviewRatingRequiredMessage);
+      setError(t('reviewRatingRequiredMessage'));
       return;
     }
 
@@ -179,7 +168,7 @@ function ReviewEditor({
   return (
     <form className="review-form" onSubmit={handleSubmit}>
       <fieldset className="review-star-field">
-        <legend>{content.reviewRatingLabel}</legend>
+        <legend>{t('reviewRatingLabel')}</legend>
         <div className="review-star-options">
           {[1, 2, 3, 4, 5].map((star) => (
             <label key={star}>
@@ -196,7 +185,7 @@ function ReviewEditor({
               />
               <span aria-hidden="true">{star <= rating ? '★' : '☆'}</span>
               <span className="sr-only">
-                {star} {content.starsLabel}
+                {publicSellerReviewsT('starsLabel', { count: star })}
               </span>
             </label>
           ))}
@@ -204,7 +193,7 @@ function ReviewEditor({
       </fieldset>
 
       <label className="form-field">
-        <span>{content.reviewTextLabel}</span>
+        <span>{t('reviewTextLabel')}</span>
         <textarea
           value={body}
           onChange={(event) => setBody(event.target.value)}
@@ -216,7 +205,7 @@ function ReviewEditor({
 
       <div className="review-photo-editor">
         <label className="secondary-button review-photo-upload-button">
-          <span>{content.addReviewPhotosButton}</span>
+          <span>{t('addReviewPhotosButton')}</span>
           <input
             className="sr-only"
             type="file"
@@ -232,13 +221,13 @@ function ReviewEditor({
             }
           />
         </label>
-        <small>{content.reviewPhotoRequirementsMessage}</small>
+        <small>{t('reviewPhotoRequirementsMessage')}</small>
         {keptPhotos.length > 0 || draftFiles.length > 0 ? (
           <ul className="review-photo-preview-list">
             {keptPhotos.map((photo) => (
               <li key={photo.id}>
                 {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={photo.url} alt={content.reviewPhotoPreviewLabel} />
+                <img src={photo.url} alt={t('reviewPhotoPreviewLabel')} />
                 <button
                   type="button"
                   onClick={() =>
@@ -250,20 +239,20 @@ function ReviewEditor({
                   }
                   disabled={isSubmitting}
                 >
-                  {content.removePhotoButton}
+                  {listingFormT('photos.removePhotoButton')}
                 </button>
               </li>
             ))}
             {draftFiles.map((draftFile) => (
               <li key={draftFile.id}>
                 {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={draftFile.url} alt={content.reviewPhotoPreviewLabel} />
+                <img src={draftFile.url} alt={t('reviewPhotoPreviewLabel')} />
                 <button
                   type="button"
                   onClick={() => removeDraftFile(draftFile.id)}
                   disabled={isSubmitting}
                 >
-                  {content.removePhotoButton}
+                  {listingFormT('photos.removePhotoButton')}
                 </button>
               </li>
             ))}
@@ -279,7 +268,7 @@ function ReviewEditor({
 
       <div className="review-form-actions">
         <button type="submit" className="search-button" disabled={isSubmitting}>
-          {isSubmitting ? content.reviewSavingButton : submitLabel}
+          {isSubmitting ? t('reviewSavingButton') : submitLabel}
         </button>
         {onCancel ? (
           <button
@@ -288,7 +277,7 @@ function ReviewEditor({
             onClick={onCancel}
             disabled={isSubmitting}
           >
-            {content.cancelButton}
+            {listingReportT('cancelButton')}
           </button>
         ) : null}
       </div>
@@ -297,6 +286,10 @@ function ReviewEditor({
 }
 
 export default function PurchasesToReview({ initialTransactions }: Props) {
+  const locale = useLocale();
+  const t = useTranslations('AccountReviews');
+  const listingReportT = useTranslations('ListingReport');
+  const publicSellerReviewsT = useTranslations('PublicSellerReviews');
   const [transactions, setTransactions] = useState(initialTransactions);
   const [openCreateTransactionId, setOpenCreateTransactionId] = useState<
     string | null
@@ -484,7 +477,7 @@ export default function PurchasesToReview({ initialTransactions }: Props) {
 
       if (updateError) {
         setSubmittingTransactionId(null);
-        setError(content.reviewSaveFailedMessage);
+        setError(t('reviewSaveFailedMessage'));
         return;
       }
 
@@ -519,7 +512,7 @@ export default function PurchasesToReview({ initialTransactions }: Props) {
 
       if (!photosInserted) {
         setSubmittingTransactionId(null);
-        setError(content.reviewPhotoUploadFailedMessage);
+        setError(t('reviewPhotoUploadFailedMessage'));
         return;
       }
     } else {
@@ -539,7 +532,7 @@ export default function PurchasesToReview({ initialTransactions }: Props) {
         typeof insertedReview.id !== 'string'
       ) {
         setSubmittingTransactionId(null);
-        setError(content.reviewSaveFailedMessage);
+        setError(t('reviewSaveFailedMessage'));
         return;
       }
 
@@ -551,7 +544,7 @@ export default function PurchasesToReview({ initialTransactions }: Props) {
 
       if (!photosInserted) {
         setSubmittingTransactionId(null);
-        setError(content.reviewPhotoUploadFailedMessage);
+        setError(t('reviewPhotoUploadFailedMessage'));
         return;
       }
     }
@@ -560,7 +553,7 @@ export default function PurchasesToReview({ initialTransactions }: Props) {
     setOpenCreateTransactionId(null);
     setEditingReviewId(null);
     setSubmittingTransactionId(null);
-    setMessage(content.reviewSavedMessage);
+    setMessage(t('reviewSavedMessage'));
   }
 
   async function handleDeleteReview(): Promise<void> {
@@ -592,7 +585,7 @@ export default function PurchasesToReview({ initialTransactions }: Props) {
 
     if (deleteError) {
       setDeletingReviewId(null);
-      setError(content.reviewDeleteFailedMessage);
+      setError(t('reviewDeleteFailedMessage'));
       return;
     }
 
@@ -600,14 +593,14 @@ export default function PurchasesToReview({ initialTransactions }: Props) {
     setPendingDeleteReview(null);
     setEditingReviewId(null);
     setDeletingReviewId(null);
-    setMessage(content.reviewDeletedMessage);
+    setMessage(t('reviewDeletedMessage'));
   }
 
   return (
     <>
       <section className="purchases-review-section" aria-labelledby="purchases-review-title">
         <h3 id="purchases-review-title">
-          {content.purchasesToReviewTitle} ({unreviewedTransactions.length})
+          {t('purchasesToReviewTitle')} ({unreviewedTransactions.length})
         </h3>
 
         {message ? (
@@ -631,13 +624,13 @@ export default function PurchasesToReview({ initialTransactions }: Props) {
                 <div className="purchase-review-summary">
                   <div>
                     <p className="purchase-review-kicker">
-                      {content.purchasedFromLabel}{' '}
+                      {t('purchasedFromLabel')}{' '}
                       <Link href={`/seller/${transaction.sellerPublicSlug}`}>
                         {transaction.sellerDisplayName}
                       </Link>
                     </p>
                     <h4>{transaction.listingTitleSnapshot}</h4>
-                    <p>{formatReviewDate(transaction.completedAt)}</p>
+                    <p>{formatReviewDate(transaction.completedAt, locale)}</p>
                   </div>
                   <button
                     type="button"
@@ -651,7 +644,7 @@ export default function PurchasesToReview({ initialTransactions }: Props) {
                     }
                     disabled={submittingTransactionId === transaction.transactionId}
                   >
-                    {content.leaveReviewButton}
+                    {t('leaveReviewButton')}
                   </button>
                 </div>
 
@@ -662,7 +655,7 @@ export default function PurchasesToReview({ initialTransactions }: Props) {
                     isSubmitting={
                       submittingTransactionId === transaction.transactionId
                     }
-                    submitLabel={content.submitReviewButton}
+                    submitLabel={t('submitReviewButton')}
                     onCancel={() => setOpenCreateTransactionId(null)}
                     onSubmit={handleSaveReview}
                   />
@@ -671,13 +664,13 @@ export default function PurchasesToReview({ initialTransactions }: Props) {
             ))}
           </div>
         ) : (
-          <p className="account-help-text">{content.noPurchasesToReviewMessage}</p>
+          <p className="account-help-text">{t('noPurchasesToReviewMessage')}</p>
         )}
       </section>
 
       <section className="purchases-review-section my-reviews-section" aria-labelledby="my-reviews-title">
         <h3 id="my-reviews-title">
-          {content.myReviewsTitle} ({reviewedTransactions.length})
+          {t('myReviewsTitle')} ({reviewedTransactions.length})
         </h3>
 
         {reviewedTransactions.length > 0 ? (
@@ -698,14 +691,14 @@ export default function PurchasesToReview({ initialTransactions }: Props) {
                   />
                   <div>
                     <p className="purchase-review-kicker">
-                      {content.purchasedFromLabel}{' '}
+                      {t('purchasedFromLabel')}{' '}
                       <Link href={`/seller/${transaction.sellerPublicSlug}`}>
                         {transaction.sellerDisplayName}
                       </Link>
                     </p>
                     <h4>{transaction.listingTitleSnapshot}</h4>
                     <p className="seller-review-meta">
-                      {formatReviewDate(transaction.completedAt)}
+                      {formatReviewDate(transaction.completedAt, locale)}
                     </p>
                   </div>
                 </div>
@@ -717,13 +710,18 @@ export default function PurchasesToReview({ initialTransactions }: Props) {
                     isSubmitting={
                       submittingTransactionId === transaction.transactionId
                     }
-                    submitLabel={content.saveReviewChangesButton}
+                    submitLabel={t('saveReviewChangesButton')}
                     onCancel={() => setEditingReviewId(null)}
                     onSubmit={handleSaveReview}
                   />
                 ) : (
                   <>
-                    <p className="seller-review-stars" aria-label={`${transaction.rating} ${content.starsLabel}`}>
+                    <p
+                      className="seller-review-stars"
+                      aria-label={publicSellerReviewsT('starsLabel', {
+                        count: transaction.rating || 0,
+                      })}
+                    >
                       {getStars(transaction.rating)}
                     </p>
                     {transaction.reviewBody ? (
@@ -739,7 +737,7 @@ export default function PurchasesToReview({ initialTransactions }: Props) {
                         className="listing-management-button"
                         onClick={() => setEditingReviewId(transaction.reviewId)}
                       >
-                        {content.editReviewButton}
+                        {t('editReviewButton')}
                       </button>
                       {transaction.reviewId ? (
                         <button
@@ -751,7 +749,7 @@ export default function PurchasesToReview({ initialTransactions }: Props) {
                             })
                           }
                         >
-                          {content.deleteReviewButton}
+                          {t('deleteReviewButton')}
                         </button>
                       ) : null}
                     </div>
@@ -761,7 +759,7 @@ export default function PurchasesToReview({ initialTransactions }: Props) {
             ))}
           </div>
         ) : (
-          <p className="account-help-text">{content.noMyReviewsMessage}</p>
+          <p className="account-help-text">{t('noMyReviewsMessage')}</p>
         )}
       </section>
 
@@ -782,10 +780,10 @@ export default function PurchasesToReview({ initialTransactions }: Props) {
             onClick={(event) => event.stopPropagation()}
           >
             <h2 id="review-delete-confirmation-title">
-              {content.deleteReviewConfirmTitle}
+              {t('deleteReviewConfirmTitle')}
             </h2>
             <p id="review-delete-confirmation-description">
-              {content.deleteReviewConfirmMessage}
+              {t('deleteReviewConfirmMessage')}
             </p>
             <div className="message-confirmation-actions">
               <button
@@ -794,7 +792,7 @@ export default function PurchasesToReview({ initialTransactions }: Props) {
                 onClick={() => setPendingDeleteReview(null)}
                 disabled={deletingReviewId === pendingDeleteReview.reviewId}
               >
-                {content.cancelButton}
+                {listingReportT('cancelButton')}
               </button>
               <button
                 type="button"
@@ -803,8 +801,8 @@ export default function PurchasesToReview({ initialTransactions }: Props) {
                 disabled={deletingReviewId === pendingDeleteReview.reviewId}
               >
                 {deletingReviewId === pendingDeleteReview.reviewId
-                  ? content.reviewSavingButton
-                  : content.deleteReviewButton}
+                  ? t('reviewDeletingButton')
+                  : t('deleteReviewButton')}
               </button>
             </div>
           </div>

@@ -1,16 +1,19 @@
 import { Link } from '@/i18n/navigation';
-import { content } from '@/content/tyv';
+import { getTranslations } from 'next-intl/server';
 
-export default function NotFound() {
+export default async function NotFound() {
+  const t = await getTranslations('NotFound');
+  const listingDetailT = await getTranslations('ListingDetail');
+
   return (
     <div className="app-container">
       <section className="category-page">
         <Link href="/" className="page-back-link">
-          {content.backToHome}
+          {listingDetailT('backToHomepage')}
         </Link>
 
-        <h1 className="page-title">{content.notFoundTitle}</h1>
-        <p className="page-description">{content.notFoundMessage}</p>
+        <h1 className="page-title">{t('title')}</h1>
+        <p className="page-description">{t('message')}</p>
       </section>
     </div>
   );

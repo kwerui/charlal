@@ -132,7 +132,7 @@ export default function ListingDetailView({
       <BackToResultsLink href={backHref} className="page-back-link">
         {backLabel}
       </BackToResultsLink>
-      <nav className="listing-detail-breadcrumbs" aria-label="Breadcrumb">
+      <nav className="listing-detail-breadcrumbs" aria-label={t('breadcrumbLabel')}>
         <ol>
           <li>
             <Link href="/">{t('homeBreadcrumb')}</Link>
