@@ -7428,20 +7428,20 @@ min-height: calc(100dvh - 80px);
   }
 
   .listing-editor-form .listing-status-help {
-    grid-template-columns: 1fr;
-    gap: 5px;
-  }
+  grid-template-columns: 1fr;
+  gap: 10px;
+}
 
-  .listing-editor-form .listing-status-help div {
-    grid-template-columns: minmax(74px, max-content) minmax(0, 1fr);
-    gap: 4px 8px;
-  }
+.listing-editor-form .listing-status-help div {
+  grid-template-columns: 1fr;
+  gap: 2px;
+  align-items: start;
+}
 
-  .listing-editor-form .listing-status-help dt,
-  .listing-editor-form .listing-status-help dd {
-    font-size: 13px;
-  }
-
+.listing-editor-form .listing-status-help dt,
+.listing-editor-form .listing-status-help dd {
+  font-size: 13px;
+}
   .seller-section-heading {
     align-items: flex-start;
   }

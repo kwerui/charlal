@@ -1,7 +1,8 @@
 import { redirect } from 'next/navigation';
-import { content } from '@/content/tyv';
+import { getTranslations } from 'next-intl/server';
 import { getSignInHref } from '@/i18n/localePath';
 import { getCurrentViewerId } from '@/lib/auth/server';
+import { buildListingFormCategories } from '@/lib/listingFormCategories';
 import { getSafeEditReturnHref } from '@/lib/resultReturnHref';
 import { getOwnedDatabaseListingById } from '@/lib/supabase/listingsServer';
 import EditListingForm from './EditListingForm';
@@ -17,6 +18,8 @@ export default async function EditListingPage({
 }: EditListingPageProps) {
   const { locale, id } = await params;
   const query = await searchParams;
+  const titleT = await getTranslations('ListingOwnerActions');
+  const categoriesT = await getTranslations('Categories');
   const editPathname = `/account/listings/${id}/edit`;
   const editOrigin = getSafeEditReturnHref(query.from, editPathname);
   const viewer = await getCurrentViewerId();
@@ -50,12 +53,12 @@ export default async function EditListingPage({
       >
         <div className="form-page-heading">
           <h1 id="edit-listing-title" className="auth-title">
-            {content.editAdvertisementTitle}
+            {titleT('editAdvertisementButton')}
           </h1>
         </div>
         <EditListingForm
           id={id}
-          categories={content.categories}
+          categories={buildListingFormCategories(categoriesT)}
           initialEditStatus={initialEditState}
           initialListing={initialListing}
           editOrigin={editOrigin}

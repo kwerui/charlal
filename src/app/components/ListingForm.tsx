@@ -63,6 +63,12 @@ export type ListingFormMessages = {
   validation: ListingFormValidationMessages;
 };
 
+export type ListingFormStatusMessages = {
+  label: string;
+  options: Record<ListingStatus, string>;
+  help: Record<ListingStatus, string>;
+};
+
 type Props = {
   mode: ListingFormMode;
   categories: ListingFormCategory[];
@@ -79,6 +85,7 @@ type Props = {
     value: ListingStatus;
     onChange: (status: ListingStatus) => void;
     disabled?: boolean;
+    messages?: ListingFormStatusMessages;
     soldBuyerControl?: ReactNode;
   };
   onCancel?: () => void;
@@ -187,6 +194,21 @@ export default function ListingForm({
   const marketplaceBuyTypes =
     selectedCategory?.buyTypes?.filter((buyType) => buyType.slug !== 'all-categories') || [];
   const errors = [...validationErrors, ...photoErrors, ...externalErrors];
+  const statusMessages: ListingFormStatusMessages = statusField?.messages ?? {
+    label: content.advertisementStatusLabel,
+    options: {
+      active: content.listingStatusActive,
+      reserved: content.listingStatusReserved,
+      sold: content.listingStatusSold,
+      archived: content.listingStatusArchived,
+    },
+    help: {
+      active: content.listingStatusActiveHelp,
+      reserved: content.listingStatusReservedHelp,
+      sold: content.listingStatusSoldHelp,
+      archived: content.listingStatusArchivedHelp,
+    },
+  };
 
   useEffect(() => {
     photosRef.current = photos;
@@ -475,7 +497,7 @@ export default function ListingForm({
       {statusField ? (
         <fieldset className="listing-status-edit-field form-field-full">
           <label className="form-field" htmlFor="listing-status">
-            <span>{content.advertisementStatusLabel}</span>
+            <span>{statusMessages.label}</span>
             <select
               id="listing-status"
               name="status"
@@ -485,28 +507,28 @@ export default function ListingForm({
               }}
               disabled={Boolean(statusField.disabled)}
             >
-              <option value="active">{content.listingStatusActive}</option>
-              <option value="reserved">{content.listingStatusReserved}</option>
-              <option value="sold">{content.listingStatusSold}</option>
-              <option value="archived">{content.listingStatusArchived}</option>
+              <option value="active">{statusMessages.options.active}</option>
+              <option value="reserved">{statusMessages.options.reserved}</option>
+              <option value="sold">{statusMessages.options.sold}</option>
+              <option value="archived">{statusMessages.options.archived}</option>
             </select>
           </label>
           <dl className="listing-status-help">
             <div>
-              <dt>{content.listingStatusActive}</dt>
-              <dd>{content.listingStatusActiveHelp}</dd>
+              <dt>{statusMessages.options.active}</dt>
+              <dd>{statusMessages.help.active}</dd>
             </div>
             <div>
-              <dt>{content.listingStatusReserved}</dt>
-              <dd>{content.listingStatusReservedHelp}</dd>
+              <dt>{statusMessages.options.reserved}</dt>
+              <dd>{statusMessages.help.reserved}</dd>
             </div>
             <div>
-              <dt>{content.listingStatusSold}</dt>
-              <dd>{content.listingStatusSoldHelp}</dd>
+              <dt>{statusMessages.options.sold}</dt>
+              <dd>{statusMessages.help.sold}</dd>
             </div>
             <div>
-              <dt>{content.listingStatusArchived}</dt>
-              <dd>{content.listingStatusArchivedHelp}</dd>
+              <dt>{statusMessages.options.archived}</dt>
+              <dd>{statusMessages.help.archived}</dd>
             </div>
           </dl>
           {statusField.soldBuyerControl}

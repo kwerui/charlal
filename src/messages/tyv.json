@@ -368,6 +368,39 @@
       "marketplaceTypeRequired": "Choose a marketplace type. / Рынок хевирин шилип алыңар."
     }
   },
+  "EditListing": {
+    "unableTitle": "Чарлалды өскертип болбас. / Unable to edit advertisement.",
+    "notFoundTitle": "Чарлал тывылбаан / Advertisement not found",
+    "notOwnedTitle": "Чарлалды өскертип болбас / Unable to edit advertisement",
+    "notOwnedMessage": "Бо чарлалдың ээзи эвес силер. / You do not own this advertisement.",
+    "saveButton": "Өскерлиишкиннерни кадагала / Save changes",
+    "savingButton": "Өскерлиишкиннерни кадагалап турар... / Saving changes...",
+    "savedMessage": "Өскерлиишкиннер кадагалаттынган. / Changes saved.",
+    "saveFailedMessage": "Чарлалды өскертип болбас. / Unable to edit advertisement.",
+    "photosSaveFailedMessage": "Чурукту үндүрүп шыдаваан. / Unable to upload photo.",
+    "statusUpdateFailedMessage": "Чарлалдың байдалын чаартып шыдаваан. / Unable to update advertisement status.",
+    "status": {
+      "label": "Чарлалдың байдалы / Advertisement status",
+      "help": {
+        "active": "Эвилелдиг көстүп турар. / Visible normally.",
+        "reserved": "Ам-даа көстүп турар, ынчалза-даа камгалаттынган деп демдеглээн. / Still visible, but marked as reserved.",
+        "sold": "Рынок түңнелдеринде ам көргүспейн турар. / No longer shown in marketplace results.",
+        "archived": "Силерден өске кижи бүрүзүнден чажырып каан. / Hidden from everyone except you."
+      }
+    },
+    "soldBuyer": {
+      "label": "Бо бараанны кым садып алганыл? / Who bought this item?",
+      "placeholder": "Садып алыкчыны шилип алыңар... / Select buyer...",
+      "outsideCharlalOption": "Чарлалдан дашкаар садып турар / чок Чарлал садып алыкчызы - Sold outside Charlal / no Charlal buyer",
+      "help": "Садып алыкчыны чүгле бо Чарлал аккаунт бараанны садып алган болза шилип алыңар. Бо чүүл садыгжыларның немелде хыналдазын кылыр арганы бээр. / Choose a buyer only if this Charlal account bought the item. This enables an optional seller review.",
+      "requiredMessage": "Чарлал садып алыкчызын шилип алыңар азы ону Чарлалдан дашкаар садып турар деп демдеглеп алыңар. / Choose the Charlal buyer or mark this as sold outside Charlal.",
+      "noCandidatesHelp": "Чарлал садып алыкчылары бо чарлал дугайында медээ биживээн. Ам-даа Чарлалдан даштынга саткан деп демдеглеп болур силер. / No Charlal buyers messaged about this exact advertisement. You can still mark it sold outside Charlal.",
+      "loadingMessage": "Садып алыкчының аргаларын үндүрүп турар... / Loading buyer options...",
+      "recordedLabel": "Бижиттинген садып алыкчы: / Recorded buyer:",
+      "recordedFallback": "Бижиттинген Чарлал садып алыкчызы / Recorded Charlal buyer",
+      "recordedHelp": "Бо доозулган Чарлал садыглаашкыны ам-на бижиттинген. Садып алыкчыны мында солуп болбас. / This completed Charlal sale is already recorded. The buyer cannot be replaced here."
+    }
+  },
   "Auth": {
     "fields": {
       "displayName": "Display name / Көргүзер ат",
@@ -448,7 +481,7 @@
     "intro": "[TYV REVIEW] This page is a placeholder structure for Charlal's future reviewed user agreement. It is not final legal text.",
     "sections": [
       {
-        "title": "[TYV REVIEW] About Charlal",
+        "title": "Charlal дугайында",
         "body": "[TYV REVIEW] TODO: Add reviewed legal text describing the marketplace service."
       },
       {

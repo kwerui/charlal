@@ -4,8 +4,12 @@ import { Link } from '@/i18n/navigation';
 import { useRouter } from '@/i18n/navigation';
 import { useEffect, useState } from 'react';
 import { updateListingStatusAction } from '@/app/account/listingStatusActions';
-import ListingForm, { type ListingFormInitialValues } from '@/app/components/ListingForm';
-import { content } from '@/content/tyv';
+import ListingForm, {
+  type ListingFormInitialValues,
+  type ListingFormMessages,
+  type ListingFormStatusMessages,
+} from '@/app/components/ListingForm';
+import { useTranslations } from 'next-intl';
 import type { Listing, ListingStatus } from '@/data/listings';
 import { getListingStatus } from '@/data/listings';
 import { getUserOwnerId } from '@/lib/listingOwnership';
@@ -75,6 +79,12 @@ export default function EditListingForm({
   editOrigin,
 }: Props) {
   const router = useRouter();
+  const t = useTranslations('EditListing');
+  const postAdT = useTranslations('PostAd');
+  const accountT = useTranslations('Account');
+  const listingCardT = useTranslations('ListingCard');
+  const listingDetailT = useTranslations('ListingDetail');
+  const listingReportT = useTranslations('ListingReport');
   const { status: authStatus, profileStatus, user: currentUser } = useAuthStatus();
   const ownerId = getUserOwnerId(currentUser);
   const [listing, setListing] = useState<Listing | null>(initialListing);
@@ -97,6 +107,60 @@ export default function EditListingForm({
   const [recordedListingTransaction, setRecordedListingTransaction] =
     useState<RecordedListingTransaction | null>(null);
   const [soldBuyerValidationError, setSoldBuyerValidationError] = useState('');
+  const listingFormMessages: ListingFormMessages = {
+    titleLabel: postAdT('form.titleLabel'),
+    categoryLabel: postAdT('form.categoryLabel'),
+    categoryPlaceholder: postAdT('form.categoryPlaceholder'),
+    subcategoryLabel: postAdT('form.subcategoryLabel'),
+    subcategoryPlaceholder: postAdT('form.subcategoryPlaceholder'),
+    typeLabel: postAdT('form.typeLabel'),
+    typePlaceholder: postAdT('form.typePlaceholder'),
+    buyTypeLabel: postAdT('form.buyTypeLabel'),
+    buyTypePlaceholder: postAdT('form.buyTypePlaceholder'),
+    descriptionLabel: postAdT('form.descriptionLabel'),
+    priceLabel: postAdT('form.priceLabel'),
+    locationLabel: postAdT('form.locationLabel'),
+    photosLabel: postAdT('form.photosLabel'),
+    photosHelp: postAdT('form.photosHelp'),
+    addPhotosButton: postAdT('form.addPhotosButton'),
+    coverPhotoLabel: postAdT('form.coverPhotoLabel'),
+    positionLabel: postAdT('form.positionLabel'),
+    movePhotoEarlierButton: postAdT('form.movePhotoEarlierButton'),
+    movePhotoLaterButton: postAdT('form.movePhotoLaterButton'),
+    removePhotoButton: postAdT('form.removePhotoButton'),
+    noPhotosMessage: postAdT('form.noPhotosMessage'),
+    imageRequirements: postAdT('form.imageRequirements'),
+    photoMaximumMessage: postAdT('form.photoMaximumMessage'),
+    photoTooLargeMessage: postAdT('form.photoTooLargeMessage'),
+    photoUnsupportedTypeMessage: postAdT('form.photoUnsupportedTypeMessage'),
+    photoAlt: ({ current, total }) =>
+      postAdT('form.photoAlt', { current, total }),
+    cancelButton: listingReportT('cancelButton'),
+    validation: {
+      titleRequired: postAdT('validation.titleRequired'),
+      descriptionRequired: postAdT('validation.descriptionRequired'),
+      locationRequired: postAdT('validation.locationRequired'),
+      categoryRequired: postAdT('validation.categoryRequired'),
+      priceRequired: postAdT('validation.priceRequired'),
+      housingTypeRequired: postAdT('validation.housingTypeRequired'),
+      marketplaceTypeRequired: postAdT('validation.marketplaceTypeRequired'),
+    },
+  };
+  const listingFormStatusMessages: ListingFormStatusMessages = {
+    label: t('status.label'),
+    options: {
+      active: listingCardT('status.active'),
+      reserved: listingCardT('status.reserved'),
+      sold: listingCardT('status.sold'),
+      archived: listingCardT('status.archived'),
+    },
+    help: {
+      active: t('status.help.active'),
+      reserved: t('status.help.reserved'),
+      sold: t('status.help.sold'),
+      archived: t('status.help.archived'),
+    },
+  };
 
   useEffect(() => {
     if (authStatus === 'unauthenticated') {
@@ -226,7 +290,7 @@ export default function EditListingForm({
         : null;
 
     if (!publicDisplayName) {
-      setErrors([content.accountPublicNameRequiredMessage]);
+      setErrors([accountT('publicNameRequiredMessage')]);
       return;
     }
 
@@ -235,8 +299,8 @@ export default function EditListingForm({
       !recordedListingTransaction &&
       !saleBuyerCandidatesLoaded
     ) {
-      setSoldBuyerValidationError(content.soldBuyerLoadingMessage);
-      setErrors([content.soldBuyerLoadingMessage]);
+      setSoldBuyerValidationError(t('soldBuyer.loadingMessage'));
+      setErrors([t('soldBuyer.loadingMessage')]);
       return;
     }
 
@@ -246,8 +310,8 @@ export default function EditListingForm({
       saleBuyerCandidates.length > 0 &&
       soldBuyerChoice === SOLD_BUYER_PLACEHOLDER_VALUE
     ) {
-      setSoldBuyerValidationError(content.soldBuyerRequiredMessage);
-      setErrors([content.soldBuyerRequiredMessage]);
+      setSoldBuyerValidationError(t('soldBuyer.requiredMessage'));
+      setErrors([t('soldBuyer.requiredMessage')]);
       return;
     }
 
@@ -263,8 +327,8 @@ export default function EditListingForm({
       setIsSubmitting(false);
       setErrors([
         updateResult.reason === 'not-owned'
-          ? content.editAdvertisementNotOwnedMessage
-          : content.editAdvertisementSaveFailed,
+          ? t('notOwnedMessage')
+          : t('saveFailedMessage'),
       ]);
       return;
     }
@@ -277,8 +341,8 @@ export default function EditListingForm({
 
     if (!photoResult.ok) {
       setIsSubmitting(false);
-      setSuccessMessage(content.editAdvertisementSavedMessage);
-      setErrors([content.unableUploadPhotoMessage]);
+      setSuccessMessage(t('savedMessage'));
+      setErrors([t('photosSaveFailedMessage')]);
       return;
     }
 
@@ -291,8 +355,8 @@ export default function EditListingForm({
     if (!imageSaveResult.ok) {
       await cleanupUploadedListingPhotos(photoResult.uploadedStoragePaths);
       setIsSubmitting(false);
-      setSuccessMessage(content.editAdvertisementSavedMessage);
-      setErrors([content.unableUploadPhotoMessage]);
+      setSuccessMessage(t('savedMessage'));
+      setErrors([t('photosSaveFailedMessage')]);
       return;
     }
 
@@ -307,12 +371,12 @@ export default function EditListingForm({
         setIsSubmitting(false);
         setListing(imageSaveResult.listing);
         setSuccessMessage('');
-        setErrors([content.listingStatusUpdateFailedMessage]);
+        setErrors([t('statusUpdateFailedMessage')]);
         return;
       }
     }
 
-    setSuccessMessage(content.editAdvertisementSavedMessage);
+    setSuccessMessage(t('savedMessage'));
     await revalidateEditedListingRoutes({
       listingId: String(imageSaveResult.listing.id),
     });
@@ -354,10 +418,10 @@ export default function EditListingForm({
   if (authStatus === 'authenticated' && profileStatus === 'error') {
     return (
       <div className="empty-results" role="status">
-        <h3>{content.editAdvertisementUnableMessage}</h3>
-        <p>{content.unableLoadProfileMessage}</p>
+        <h3>{t('unableTitle')}</h3>
+        <p>{accountT('unableLoadProfileMessage')}</p>
         <Link href="/account" className="secondary-button edit-listing-state-link">
-          {content.backToAccount}
+          {listingDetailT('backToAccount')}
         </Link>
       </div>
     );
@@ -366,10 +430,10 @@ export default function EditListingForm({
   if (editStatus === 'not-found') {
     return (
       <div className="empty-results" role="status">
-        <h3>{content.editAdvertisementNotFoundTitle}</h3>
-        <p>{content.editAdvertisementUnableMessage}</p>
+        <h3>{t('notFoundTitle')}</h3>
+        <p>{t('unableTitle')}</p>
         <Link href="/account" className="secondary-button edit-listing-state-link">
-          {content.backToAccount}
+          {listingDetailT('backToAccount')}
         </Link>
       </div>
     );
@@ -378,10 +442,10 @@ export default function EditListingForm({
   if (editStatus === 'unavailable') {
     return (
       <div className="empty-results" role="alert">
-        <h3>{content.editAdvertisementUnableMessage}</h3>
-        <p>{content.databaseListingsLoadFailedMessage}</p>
+        <h3>{t('unableTitle')}</h3>
+        <p>{listingDetailT('databaseListingsLoadFailedMessage')}</p>
         <Link href="/account" className="secondary-button edit-listing-state-link">
-          {content.backToAccount}
+          {listingDetailT('backToAccount')}
         </Link>
       </div>
     );
@@ -390,10 +454,10 @@ export default function EditListingForm({
   if (editStatus === 'not-owned' || !listing) {
     return (
       <div className="empty-results" role="status">
-        <h3>{content.editAdvertisementNotOwnedTitle}</h3>
-        <p>{content.editAdvertisementNotOwnedMessage}</p>
+        <h3>{t('notOwnedTitle')}</h3>
+        <p>{t('notOwnedMessage')}</p>
         <Link href="/account" className="secondary-button edit-listing-state-link">
-          {content.backToAccount}
+          {listingDetailT('backToAccount')}
         </Link>
       </div>
     );
@@ -407,6 +471,7 @@ export default function EditListingForm({
       initialImages={listing.images || []}
       statusField={{
         value: selectedStatus,
+        messages: listingFormStatusMessages,
         onChange: (status) => {
           setSelectedStatus(status);
           if (status !== 'sold') {
@@ -425,17 +490,17 @@ export default function EditListingForm({
             <div className="sold-buyer-control">
               {recordedListingTransaction ? (
                 <div className="sold-buyer-recorded">
-                  <span>{content.recordedBuyerLabel}</span>
+                  <span>{t('soldBuyer.recordedLabel')}</span>
                   <strong>
                     {saleBuyerCandidates.find(
                       (candidate) =>
                         candidate.buyerId === recordedListingTransaction.buyerId
-                    )?.displayName || content.recordedBuyerFallback}
+                    )?.displayName || t('soldBuyer.recordedFallback')}
                   </strong>
                 </div>
               ) : (
                 <label className="form-field" htmlFor="sold-buyer">
-                  <span>{content.soldBuyerLabel}</span>
+                  <span>{t('soldBuyer.label')}</span>
                   <select
                     id="sold-buyer"
                     name="soldBuyer"
@@ -454,17 +519,17 @@ export default function EditListingForm({
                   >
                     {!saleBuyerCandidatesLoaded ? (
                       <option value={SOLD_BUYER_PLACEHOLDER_VALUE}>
-                        {content.soldBuyerLoadingMessage}
+                        {t('soldBuyer.loadingMessage')}
                       </option>
                     ) : null}
                     {saleBuyerCandidatesLoaded &&
                     saleBuyerCandidates.length > 0 ? (
                       <option value={SOLD_BUYER_PLACEHOLDER_VALUE} disabled>
-                        {content.selectSoldBuyerPlaceholder}
+                        {t('soldBuyer.placeholder')}
                       </option>
                     ) : null}
                     <option value={SOLD_OUTSIDE_CHARLAL_VALUE}>
-                      {content.soldOutsideCharlalOption}
+                      {t('soldBuyer.outsideCharlalOption')}
                     </option>
                     {saleBuyerCandidates.map((candidate) => (
                       <option key={candidate.buyerId} value={candidate.buyerId}>
@@ -476,12 +541,12 @@ export default function EditListingForm({
               )}
               <p className="form-help">
                 {recordedListingTransaction
-                  ? content.recordedBuyerHelp
+                  ? t('soldBuyer.recordedHelp')
                   : saleBuyerCandidatesLoaded
                   ? saleBuyerCandidates.length > 0
-                    ? content.soldBuyerHelp
-                    : content.soldBuyerNoCandidatesHelp
-                  : content.soldBuyerLoadingMessage}
+                    ? t('soldBuyer.help')
+                    : t('soldBuyer.noCandidatesHelp')
+                  : t('soldBuyer.loadingMessage')}
               </p>
               {soldBuyerValidationError ? (
                 <p id="sold-buyer-error" className="form-error" role="alert">
@@ -491,11 +556,12 @@ export default function EditListingForm({
             </div>
           ) : null,
       }}
-      submitButtonLabel={content.editAdvertisementSaveButton}
-      submittingButtonLabel={content.editAdvertisementSavingButton}
+      submitButtonLabel={t('saveButton')}
+      submittingButtonLabel={t('savingButton')}
       isSubmitting={isSubmitting}
       externalErrors={errors}
       successMessage={successMessage}
+      messages={listingFormMessages}
       cancelHref={editOrigin || '/account'}
       onCancel={handleCancel}
       onSubmit={handleSubmit}
