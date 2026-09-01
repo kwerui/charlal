@@ -7,6 +7,7 @@ import type {
 } from '@supabase/realtime-js';
 import { Link } from '@/i18n/navigation';
 import { useRouter } from '@/i18n/navigation';
+import { useLocale, useTranslations } from 'next-intl';
 import type { ChangeEvent, CSSProperties, FormEvent } from 'react';
 import {
   useCallback,
@@ -26,7 +27,6 @@ import {
   markConversationReadAction,
   sendMessageAction,
 } from '@/app/account/messages/actions';
-import { content } from '@/content/tyv';
 import { useAuthStatus } from '@/lib/auth/client';
 import {
   canStartThreadRealtime,
@@ -70,6 +70,7 @@ import {
   cleanupUploadedMessageAttachments,
   prepareMessageAttachmentMetadata,
 } from '@/lib/supabase/messageAttachmentUploadsClient';
+import { formatMessageDateTime } from '@/lib/messageDateFormatting';
 import type { MessageAttachmentMetadataInput } from '@/lib/supabase/messageAttachments';
 
 type Props = {
@@ -162,6 +163,7 @@ type ConfirmationDialogState =
     };
 
 type ThreadRealtimeDiagnosticSupabase = ReturnType<typeof createClient>;
+type MessagesTranslator = ReturnType<typeof useTranslations<'Messages'>>;
 
 const SEND_CONFIRMATION_TIMEOUT_MS = 12000;
 const MESSAGE_MENU_WIDTH = 152;
@@ -199,13 +201,17 @@ function getAttachmentSignature(
     .join('|');
 }
 
-function formatMessageTime(value: string, useLocalTime: boolean): string {
-  return new Intl.DateTimeFormat('en', {
+function formatMessageTime(
+  value: string,
+  locale: string,
+  useLocalTime: boolean
+): string {
+  return formatMessageDateTime(value, locale, {
     hour: '2-digit',
     minute: '2-digit',
     hour12: false,
     timeZone: useLocalTime ? undefined : 'UTC',
-  }).format(new Date(value));
+  });
 }
 
 function getDateParts(value: string, useLocalTime: boolean) {
@@ -238,45 +244,52 @@ function getRelativeDateKey(offsetDays: number, useLocalTime: boolean): string {
   return getDateKey(date.toISOString(), useLocalTime);
 }
 
-function formatMessageDateDivider(value: string, useLocalTime: boolean): string {
+function formatMessageDateDivider(
+  value: string,
+  locale: string,
+  useLocalTime: boolean,
+  t: MessagesTranslator
+): string {
   const dateKey = getDateKey(value, useLocalTime);
 
   if (dateKey === getRelativeDateKey(0, useLocalTime)) {
-    return content.todayLabel;
+    return t('todayLabel');
   }
 
   if (dateKey === getRelativeDateKey(1, useLocalTime)) {
-    return content.yesterdayLabel;
+    return t('yesterdayLabel');
   }
 
-  const parts = getDateParts(value, useLocalTime);
-  const monthName = content.monthNames[parts.month] || '';
-
-  return `${parts.day} ${monthName} ${parts.year}`.trim();
+  return formatMessageDateTime(value, locale, {
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric',
+    timeZone: useLocalTime ? undefined : 'UTC',
+  });
 }
 
-function getSendErrorMessage(reason: string): string {
+function getSendErrorMessage(reason: string, t: MessagesTranslator): string {
   if (reason === 'empty-message') {
-    return content.messageEmptyMessage;
+    return t('messageEmptyMessage');
   }
 
   if (reason === 'message-too-long') {
-    return content.messageTooLongMessage;
+    return t('messageTooLongMessage');
   }
 
   if (reason === 'too-many-attachments') {
-    return content.messageAttachmentMaximumMessage;
+    return t('messageAttachmentMaximumMessage');
   }
 
   if (reason === 'invalid-attachment') {
-    return content.messageAttachmentUnsupportedTypeMessage;
+    return t('messageAttachmentUnsupportedTypeMessage');
   }
 
   if (reason === 'attachment-upload-failed') {
-    return content.messageAttachmentUploadFailedMessage;
+    return t('messageAttachmentUploadFailedMessage');
   }
 
-  return content.unableSendMessageMessage;
+  return t('unableSendMessageMessage');
 }
 
 function compareMessagesByCreatedAt(left: AppMessage, right: AppMessage): number {
@@ -427,17 +440,20 @@ function getMenuOverlayPosition(triggerElement: HTMLElement): {
   };
 }
 
-function getConnectionStatusMessage(status: VisibleConnectionStatus): string {
+function getConnectionStatusMessage(
+  status: VisibleConnectionStatus,
+  t: MessagesTranslator
+): string {
   if (status === 'offline') {
-    return content.offlineThreadStatusMessage;
+    return t('offlineThreadStatusMessage');
   }
 
   if (status === 'reconnecting') {
-    return content.reconnectingLabel;
+    return t('reconnectingLabel');
   }
 
   if (status === 'unavailable') {
-    return content.liveUpdatesUnavailableMessage;
+    return t('liveUpdatesUnavailableMessage');
   }
 
   return '';
@@ -587,6 +603,11 @@ export default function ConversationThread({
   initialReadMarkers,
   currentUserId,
 }: Props) {
+  const t = useTranslations('Messages');
+  const accountT = useTranslations('Account');
+  const listingGalleryT = useTranslations('ListingDetail.gallery');
+  const listingReportT = useTranslations('ListingReport');
+  const locale = useLocale();
   const router = useRouter();
   const supabase = useMemo(() => createClient(), []);
   const { status: authStatus, user: authUser } = useAuthStatus();
@@ -783,19 +804,25 @@ export default function ConversationThread({
       ? pendingPhotoGallery[currentPendingGalleryIndex]
       : null;
   const viewerPositionLabel = selectedGalleryItem
-    ? content.messagePhotoInMessagePositionTemplate
-        .replace('{current}', String(selectedGalleryItem.positionInMessage))
-        .replace('{total}', String(selectedGalleryItem.messageAttachmentCount))
+    ? t('messagePhotoInMessagePosition', {
+        current: selectedGalleryItem.positionInMessage,
+        total: selectedGalleryItem.messageAttachmentCount,
+      })
     : selectedPendingGalleryItem
-      ? content.messagePhotoInMessagePositionTemplate
-          .replace('{current}', String(selectedPendingGalleryItem.position))
-          .replace('{total}', String(selectedPendingGalleryItem.total))
+      ? t('messagePhotoInMessagePosition', {
+          current: selectedPendingGalleryItem.position,
+          total: selectedPendingGalleryItem.total,
+        })
     : '';
   const viewerCaptionSnippet = selectedGalleryItem
     ? getCaptionSnippet(selectedGalleryItem.message.body)
     : '';
   const viewerMessageTime = selectedGalleryItem
-    ? formatMessageTime(selectedGalleryItem.message.createdAt, useLocalTime)
+    ? formatMessageTime(
+        selectedGalleryItem.message.createdAt,
+        locale,
+        useLocalTime
+      )
     : '';
   const viewerMetadataLabel =
     viewerPositionLabel && viewerMessageTime
@@ -1296,7 +1323,7 @@ export default function ConversationThread({
       const remainingSlots = MAX_MESSAGE_ATTACHMENTS - currentAttachments.length;
 
       if (remainingSlots <= 0 || selectedFiles.length > remainingSlots) {
-        setError(content.messageAttachmentMaximumMessage);
+        setError(t('messageAttachmentMaximumMessage'));
         return currentAttachments;
       }
 
@@ -1316,8 +1343,8 @@ export default function ConversationThread({
 
           setError(
             file.size > MAX_MESSAGE_ATTACHMENT_BYTES
-              ? content.messageAttachmentTooLargeMessage
-              : content.messageAttachmentUnsupportedTypeMessage
+              ? t('messageAttachmentTooLargeMessage')
+              : t('messageAttachmentUnsupportedTypeMessage')
           );
           return currentAttachments;
         }
@@ -1545,7 +1572,7 @@ export default function ConversationThread({
 
     if (!result.ok) {
       lastRequestedReadBoundaryRef.current = null;
-      setReadStatusError(content.unableUpdateMessageStatusMessage);
+      setReadStatusError(t('unableUpdateMessageStatusMessage'));
       return;
     }
 
@@ -1558,7 +1585,7 @@ export default function ConversationThread({
       })
     );
     void refreshMessagingState();
-  }, [conversation.id, currentUserId, refreshMessagingState]);
+  }, [conversation.id, currentUserId, refreshMessagingState, t]);
 
   const markVisibleUnreadBoundaryRead = useCallback((): void => {
     const sentinelIsVisible =
@@ -1815,7 +1842,7 @@ export default function ConversationThread({
       if (sendStatusRef.current === 'sending') {
         sendAttemptRef.current += 1;
         updateSendStatus('delivery-uncertain');
-        setError(content.messageDeliveryUnconfirmedMessage);
+        setError(t('messageDeliveryUnconfirmedMessage'));
       }
     }
 
@@ -1839,7 +1866,7 @@ export default function ConversationThread({
       window.removeEventListener('offline', handleOffline);
       window.removeEventListener('online', handleOnline);
     };
-  }, [reconcileThread, updateSendStatus]);
+  }, [reconcileThread, t, updateSendStatus]);
 
   useEffect(() => {
     readSentinelVisibleRef.current = false;
@@ -2696,18 +2723,18 @@ export default function ConversationThread({
     const safeBody = body.trim();
 
     if (!safeBody && pendingAttachments.length === 0) {
-      setError(content.messageEmptyMessage);
+      setError(t('messageEmptyMessage'));
       return;
     }
 
     if (safeBody.length > MESSAGE_BODY_MAX_LENGTH) {
-      setError(content.messageTooLongMessage);
+      setError(t('messageTooLongMessage'));
       return;
     }
 
     if (!isBrowserOnline) {
       updateSendStatus('failed');
-      setError(content.offlineBeforeSendMessage);
+      setError(t('offlineBeforeSendMessage'));
       return;
     }
 
@@ -2752,7 +2779,7 @@ export default function ConversationThread({
         if (!uploadResult.ok) {
           handledAttempt = true;
           updateSendStatus('failed');
-          setError(content.messageAttachmentUploadFailedMessage);
+          setError(t('messageAttachmentUploadFailedMessage'));
           return;
         }
 
@@ -2794,7 +2821,7 @@ export default function ConversationThread({
         pendingDeliveryRef.current = null;
         handledAttempt = true;
         updateSendStatus('failed');
-        setError(getSendErrorMessage(result.reason));
+        setError(getSendErrorMessage(result.reason, t));
         return;
       }
 
@@ -2832,7 +2859,7 @@ export default function ConversationThread({
 
       handledAttempt = true;
       updateSendStatus('delivery-uncertain');
-      setError(content.messageDeliveryUnconfirmedMessage);
+      setError(t('messageDeliveryUnconfirmedMessage'));
 
       if (isBrowserOnline) {
         void reconcileThread();
@@ -2906,12 +2933,12 @@ export default function ConversationThread({
       attachmentsByMessageId[editingMessageId] || [];
 
     if (!safeBody && editingMessageAttachments.length === 0) {
-      setMessageActionError(content.messageEmptyMessage);
+      setMessageActionError(t('messageEmptyMessage'));
       return;
     }
 
     if (safeBody.length > MESSAGE_BODY_MAX_LENGTH) {
-      setMessageActionError(content.messageTooLongMessage);
+      setMessageActionError(t('messageTooLongMessage'));
       return;
     }
 
@@ -2933,10 +2960,10 @@ export default function ConversationThread({
     if (!result.ok) {
       setMessageActionError(
         result.reason === 'empty-message'
-          ? content.messageEmptyMessage
+          ? t('messageEmptyMessage')
           : result.reason === 'message-too-long'
-            ? content.messageTooLongMessage
-            : content.unableEditMessageMessage
+            ? t('messageTooLongMessage')
+            : t('unableEditMessageMessage')
       );
       return;
     }
@@ -2971,7 +2998,7 @@ export default function ConversationThread({
 
     if (!result.ok) {
       setConfirmationDialog(null);
-      setMessageActionError(content.unableDeleteMessageMessage);
+      setMessageActionError(t('unableDeleteMessageMessage'));
       return;
     }
 
@@ -3000,7 +3027,7 @@ export default function ConversationThread({
     setIsDeletingConversation(false);
 
     if (!result.ok) {
-      setDeleteConversationError(content.unableDeleteConversationMessage);
+      setDeleteConversationError(t('unableDeleteConversationMessage'));
       return;
     }
 
@@ -3012,7 +3039,7 @@ export default function ConversationThread({
     <div className="conversation-thread">
       <div className="conversation-thread-heading">
         <div className="conversation-thread-title-block">
-          <p className="hero-kicker">{content.messagesTitle}</p>
+          <p className="hero-kicker">{t('title')}</p>
           <h1>{conversation.listingTitle}</h1>
           <Link
             href={`/seller/${counterpart.publicSlug}`}
@@ -3031,7 +3058,7 @@ export default function ConversationThread({
                 {otherParticipantName}
               </span>
               <span className="conversation-view-profile-label">
-                {content.viewPublicProfileLabel}
+                {accountT('viewPublicProfileLabel')}
               </span>
             </span>
           </Link>
@@ -3039,11 +3066,11 @@ export default function ConversationThread({
         <div className="conversation-heading-actions">
           {conversation.listingId ? (
             <Link href={`/listing/${conversation.listingId}`} className="secondary-button">
-              {content.openListingLabel}
+              {t('openListingLabel')}
             </Link>
           ) : (
             <p className="conversation-listing-unavailable">
-              {content.advertisementNoLongerAvailableMessage}
+              {t('advertisementNoLongerAvailableMessage')}
             </p>
           )}
           <div className="conversation-delete-control">
@@ -3054,7 +3081,7 @@ export default function ConversationThread({
               onClick={openConversationDeleteConfirmation}
               aria-expanded={confirmationDialog?.kind === 'conversation'}
             >
-              {content.deleteConversationButton}
+              {t('deleteConversationButton')}
             </button>
           </div>
         </div>
@@ -3065,14 +3092,14 @@ export default function ConversationThread({
           className={`messaging-live-status messaging-live-status--${visibleConnectionStatus}`}
           role="status"
         >
-          {getConnectionStatusMessage(visibleConnectionStatus)}
+          {getConnectionStatusMessage(visibleConnectionStatus, t)}
         </p>
       ) : null}
 
       <div
         ref={messageHistoryRef}
         className="message-list"
-        aria-label={content.messagesTitle}
+        aria-label={t('title')}
         aria-live="polite"
         tabIndex={0}
         onScroll={handleMessageHistoryScroll}
@@ -3099,7 +3126,12 @@ export default function ConversationThread({
               <div key={message.id} className="message-list-item">
               {messageDateKey !== previousDateKey ? (
                 <div className="message-date-divider" role="separator">
-                  {formatMessageDateDivider(message.createdAt, useLocalTime)}
+                  {formatMessageDateDivider(
+                    message.createdAt,
+                    locale,
+                    useLocalTime,
+                    t
+                  )}
                 </div>
               ) : null}
               <article
@@ -3120,7 +3152,7 @@ export default function ConversationThread({
                     onSubmit={handleEditMessage}
                   >
                     <label className="sr-only" htmlFor={`edit-message-${message.id}`}>
-                      {content.editMessageButton}
+                      {t('editMessageButton')}
                     </label>
                     <textarea
                       ref={editTextareaRef}
@@ -3150,7 +3182,7 @@ export default function ConversationThread({
                         }}
                         disabled={editingSubmittingMessageId === message.id}
                       >
-                        {content.cancelButton}
+                        {listingReportT('cancelButton')}
                       </button>
                       <button
                         type="submit"
@@ -3158,20 +3190,20 @@ export default function ConversationThread({
                         disabled={editingSubmittingMessageId === message.id}
                         aria-busy={editingSubmittingMessageId === message.id}
                       >
-                        {content.saveMessageButton}
+                        {t('saveMessageButton')}
                       </button>
                     </div>
                   </form>
                 ) : (
                   <>
                     {isDeleted ? (
-                      <p>{content.messageDeletedLabel}</p>
+                      <p>{t('messageDeletedLabel')}</p>
                     ) : (
                       <>
                         {messageAttachments.length > 0 ? (
                           <div
                             className={`message-attachments message-attachments--count-${messageAttachments.length}`}
-                            aria-label={content.messagePhotosLabel}
+                            aria-label={t('messagePhotosLabel')}
                           >
                             {messageAttachments.map((attachment, attachmentIndex) => (
                               <button
@@ -3184,15 +3216,10 @@ export default function ConversationThread({
                                     attachmentId: attachment.id,
                                   })
                                 }
-                                aria-label={content.openMessagePhotoViewerLabel
-                                  .replace(
-                                    '{current}',
-                                    String(attachmentIndex + 1)
-                                  )
-                                  .replace(
-                                    '{total}',
-                                    String(messageAttachments.length)
-                                  )}
+                                aria-label={t('openMessagePhotoViewerLabel', {
+                                  current: attachmentIndex + 1,
+                                  total: messageAttachments.length,
+                                })}
                               >
                                 {/* eslint-disable-next-line @next/next/no-img-element */}
                                 <img
@@ -3222,11 +3249,15 @@ export default function ConversationThread({
                     )}
                     <div className="message-meta">
                       <time dateTime={message.createdAt}>
-                        {formatMessageTime(message.createdAt, useLocalTime)}
+                        {formatMessageTime(
+                          message.createdAt,
+                          locale,
+                          useLocalTime
+                        )}
                       </time>
                       {message.editedAt && !isDeleted ? (
                         <span className="message-edited-label">
-                          {content.editedMessageLabel}
+                          {t('editedMessageLabel')}
                         </span>
                       ) : null}
                       {isOwnMessage && isLatestOwnMessage ? (
@@ -3238,8 +3269,8 @@ export default function ConversationThread({
                           }
                         >
                           {readByOtherParticipant
-                            ? content.readMessageReceiptLabel
-                            : content.sentMessageReceiptLabel}
+                            ? t('readMessageReceiptLabel')
+                            : t('sentMessageReceiptLabel')}
                         </span>
                       ) : null}
                     </div>
@@ -3259,8 +3290,8 @@ export default function ConversationThread({
                           }}
                           type="button"
                           className="message-actions-trigger"
-                          aria-label={content.messageActionsLabel}
-                          title={content.messageActionsLabel}
+                          aria-label={t('messageActionsLabel')}
+                          title={t('messageActionsLabel')}
                           aria-expanded={
                             messageMenuOverlay?.messageId === message.id
                           }
@@ -3299,7 +3330,7 @@ export default function ConversationThread({
             window.requestAnimationFrame(markVisibleUnreadBoundaryRead);
           }}
         >
-          {content.jumpToNewestMessageButton}
+          {t('jumpToNewestMessageButton')}
         </button>
       ) : null}
 
@@ -3345,7 +3376,7 @@ export default function ConversationThread({
                 pendingAttachments.length >= MAX_MESSAGE_ATTACHMENTS
               }
             >
-              {content.addMessagePhotosButton}
+              {t('addMessagePhotosButton')}
             </button>
           </div>
 
@@ -3353,7 +3384,7 @@ export default function ConversationThread({
             className="form-field message-composer-field"
             htmlFor="thread-message-body"
           >
-            <span className="sr-only">{content.writeMessageLabel}</span>
+            <span className="sr-only">{t('writeMessageLabel')}</span>
             <textarea
               ref={textareaRef}
               id="thread-message-body"
@@ -3361,7 +3392,7 @@ export default function ConversationThread({
               value={body}
               maxLength={MESSAGE_BODY_MAX_LENGTH}
               rows={2}
-              placeholder={content.writeMessageLabel}
+              placeholder={t('writeMessageLabel')}
               aria-describedby={error ? errorId : undefined}
               onChange={(event) => {
                 const nextBody = event.target.value;
@@ -3392,20 +3423,20 @@ export default function ConversationThread({
             aria-busy={sendStatus === 'sending'}
           >
             {sendStatus === 'sending'
-              ? content.sendingMessageButton
-              : content.sendMessageButton}
+              ? t('sendingMessageButton')
+              : t('sendMessageButton')}
           </button>
         </div>
 
         <p className="form-help message-attachment-help">
-          {content.messageAttachmentRequirementsMessage}
+          {t('messageAttachmentRequirementsMessage')}
         </p>
 
         {pendingAttachments.length > 0 ? (
           <div
             ref={pendingAttachmentPreviewListRef}
             className="message-attachment-preview-list"
-            aria-label={content.messagePhotosLabel}
+            aria-label={t('messagePhotosLabel')}
           >
             {pendingAttachments.map((attachment, index) => (
               <div key={attachment.id} className="message-attachment-preview">
@@ -3418,9 +3449,10 @@ export default function ConversationThread({
                       attachmentId: attachment.id,
                     })
                   }
-                  aria-label={content.openMessagePhotoViewerLabel
-                    .replace('{current}', String(index + 1))
-                    .replace('{total}', String(pendingAttachments.length))}
+                  aria-label={t('openMessagePhotoViewerLabel', {
+                    current: index + 1,
+                    total: pendingAttachments.length,
+                  })}
                 >
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
@@ -3434,7 +3466,9 @@ export default function ConversationThread({
                   className="message-attachment-remove-button"
                   onClick={() => removePendingAttachment(attachment.id)}
                   disabled={sendStatus === 'sending'}
-                  aria-label={`${content.removeMessagePhotoButton} ${index + 1}`}
+                  aria-label={t('removeMessagePhotoButton', {
+                    position: index + 1,
+                  })}
                 >
                   ×
                 </button>
@@ -3478,7 +3512,7 @@ export default function ConversationThread({
                   }
                 }}
               >
-                {content.editMessageButton}
+                {t('editMessageButton')}
               </button>
             ) : null;
           })()}
@@ -3489,7 +3523,7 @@ export default function ConversationThread({
               openMessageDeleteConfirmation(messageMenuOverlay.messageId)
             }
           >
-            {content.deleteMessageButton}
+            {t('deleteMessageButton')}
           </button>
         </div>
       ) : null}
@@ -3515,13 +3549,13 @@ export default function ConversationThread({
           >
             <h2 id="message-confirmation-title">
               {confirmationDialog.kind === 'message'
-                ? content.deleteMessageConfirmTitle
-                : content.deleteConversationConfirmTitle}
+                ? t('deleteMessageConfirmTitle')
+                : t('deleteConversationConfirmTitle')}
             </h2>
             <p id="message-confirmation-description">
               {confirmationDialog.kind === 'message'
-                ? content.deleteMessageConfirmMessage
-                : content.deleteConversationConfirmMessage}
+                ? t('deleteMessageConfirmMessage')
+                : t('deleteConversationConfirmMessage')}
             </p>
             {confirmationDialog.kind === 'message' && messageActionError ? (
               <p className="form-error" role="alert">
@@ -3545,7 +3579,7 @@ export default function ConversationThread({
                     : isDeletingConversation
                 }
               >
-                {content.cancelButton}
+                {listingReportT('cancelButton')}
               </button>
               <button
                 type="button"
@@ -3570,8 +3604,8 @@ export default function ConversationThread({
                 }
               >
                 {confirmationDialog.kind === 'message'
-                  ? content.deleteMessageButton
-                  : content.deleteConversationButton}
+                  ? t('deleteMessageButton')
+                  : t('deleteConversationButton')}
               </button>
             </div>
           </div>
@@ -3588,14 +3622,14 @@ export default function ConversationThread({
             className="listing-photo-viewer-dialog message-photo-viewer-dialog"
             role="dialog"
             aria-modal="true"
-            aria-label={content.messagePhotoViewerTitle}
+            aria-label={t('messagePhotoViewerTitle')}
             onClick={(event) => event.stopPropagation()}
           >
             <button
               ref={attachmentViewerCloseButtonRef}
               type="button"
               className="listing-photo-viewer-close"
-              aria-label={content.closeListingPhotoViewerButton}
+              aria-label={listingGalleryT('closeViewer')}
               onClick={() => setAttachmentViewer(null)}
             >
               ×
@@ -3606,7 +3640,7 @@ export default function ConversationThread({
                   <button
                     type="button"
                     className="listing-photo-viewer-nav listing-photo-viewer-nav--previous"
-                    aria-label={content.previousListingPhotoButton}
+                    aria-label={listingGalleryT('previousPhoto')}
                     onClick={showPreviousViewerPhoto}
                   >
                     ‹
@@ -3616,7 +3650,7 @@ export default function ConversationThread({
                   <button
                     type="button"
                     className="listing-photo-viewer-nav listing-photo-viewer-nav--next"
-                    aria-label={content.nextListingPhotoButton}
+                    aria-label={listingGalleryT('nextPhoto')}
                     onClick={showNextViewerPhoto}
                   >
                     ›
@@ -3646,7 +3680,7 @@ export default function ConversationThread({
               <img
                 className="listing-photo-viewer-image"
                 src={selectedViewerPhotoUrl}
-                alt={content.messagePhotoViewerTitle}
+                alt={t('messagePhotoViewerTitle')}
               />
             </div>
           </div>

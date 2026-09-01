@@ -17,6 +17,7 @@
     "src/lib/auth/server.ts",
     "src/lib/auth/safeNextPath.ts",
     "src/lib/messageThreadClientBehavior.ts",
+    "src/lib/messageDateFormatting.ts",
     "src/lib/messagingRealtimeClientBehavior.ts",
     "src/lib/listingFavoriteKeys.ts",
     "src/lib/publicListingQuery.ts",

@@ -1,6 +1,6 @@
 import { Link } from '@/i18n/navigation';
 import { redirect } from 'next/navigation';
-import { content } from '@/content/tyv';
+import { getTranslations } from 'next-intl/server';
 import { getSignInHref } from '@/i18n/localePath';
 import { getCurrentUserResult } from '@/lib/auth/server';
 import { listCurrentUserConversationSummaries } from '@/lib/supabase/messagingServer';
@@ -12,6 +12,9 @@ type MessagesPageProps = {
 
 export default async function MessagesPage({ params }: MessagesPageProps) {
   const { locale } = await params;
+  const t = await getTranslations('Messages');
+  const accountT = await getTranslations('Account');
+  const listingDetailT = await getTranslations('ListingDetail');
   const authResult = await getCurrentUserResult();
 
   if (authResult.status === 'signed-out') {
@@ -23,8 +26,8 @@ export default async function MessagesPage({ params }: MessagesPageProps) {
       <main className="account-page">
         <section className="account-panel" aria-labelledby="messages-title">
           <div className="empty-results" role="alert">
-            <h1 id="messages-title">{content.messagesTitle}</h1>
-            <p>{content.unableLoadConversationsMessage}</p>
+            <h1 id="messages-title">{t('title')}</h1>
+            <p>{t('unableLoadConversationsMessage')}</p>
           </div>
         </section>
       </main>
@@ -37,21 +40,21 @@ export default async function MessagesPage({ params }: MessagesPageProps) {
     <main className="account-page">
       <section className="account-panel" aria-labelledby="messages-title">
         <div className="form-page-heading">
-          <p className="hero-kicker">{content.accountKicker}</p>
+          <p className="hero-kicker">{accountT('title')}</p>
           <h1 id="messages-title" className="auth-title">
-            {content.messagesTitle}
+            {t('title')}
           </h1>
         </div>
 
         <Link href="/account" className="page-back-link">
-          {content.backToAccount}
+          {listingDetailT('backToAccount')}
         </Link>
 
         {!conversationsResult.ok ? (
           <div className="empty-results" role="alert">
-            <h2>{content.unableLoadConversationsMessage}</h2>
+            <h2>{t('unableLoadConversationsMessage')}</h2>
             <Link href="/account/messages" className="secondary-button edit-listing-state-link">
-              {content.retryButton}
+              {t('retryButton')}
             </Link>
           </div>
         ) : (

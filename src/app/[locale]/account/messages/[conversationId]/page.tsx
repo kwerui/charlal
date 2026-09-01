@@ -1,6 +1,6 @@
 import { Link } from '@/i18n/navigation';
 import { redirect } from 'next/navigation';
-import { content } from '@/content/tyv';
+import { getTranslations } from 'next-intl/server';
 import { getSignInHref } from '@/i18n/localePath';
 import { getCurrentUserResult } from '@/lib/auth/server';
 import { getCurrentUserConversationThread } from '@/lib/supabase/messagingServer';
@@ -14,6 +14,7 @@ export default async function ConversationPage({
   params,
 }: ConversationPageProps) {
   const { locale, conversationId } = await params;
+  const t = await getTranslations('Messages');
   const nextPath = `/account/messages/${encodeURIComponent(conversationId)}`;
   const authResult = await getCurrentUserResult();
 
@@ -26,8 +27,8 @@ export default async function ConversationPage({
       <main className="account-page">
         <section className="account-panel" aria-labelledby="messages-title">
           <div className="empty-results" role="alert">
-            <h1 id="messages-title">{content.messagesTitle}</h1>
-            <p>{content.unableLoadMessagesMessage}</p>
+            <h1 id="messages-title">{t('title')}</h1>
+            <p>{t('unableLoadMessagesMessage')}</p>
           </div>
         </section>
       </main>
@@ -43,13 +44,13 @@ export default async function ConversationPage({
         aria-labelledby="messages-title"
       >
         <Link href="/account/messages" className="page-back-link">
-          {content.backToMessages}
+          {t('backToMessages')}
         </Link>
 
         {!threadResult.ok ? (
           <div className="empty-results" role="status">
-            <h1 id="messages-title">{content.messagesTitle}</h1>
-            <p>{content.unableLoadMessagesMessage}</p>
+            <h1 id="messages-title">{t('title')}</h1>
+            <p>{t('unableLoadMessagesMessage')}</p>
           </div>
         ) : (
           <ConversationThread
