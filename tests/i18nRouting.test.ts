@@ -112,6 +112,41 @@ test('auth callback routes remain outside localized routing', () => {
   assert.equal(confirmSource.includes('getSafeNextPath'), true);
 });
 
+test('localized auth pages use runtime message catalogs without moving callback routes', () => {
+  const authPagePaths = [
+    'src/app/[locale]/sign-in/page.tsx',
+    'src/app/[locale]/sign-in/SignInForm.tsx',
+    'src/app/[locale]/sign-up/page.tsx',
+    'src/app/[locale]/sign-up/SignUpForm.tsx',
+    'src/app/[locale]/forgot-password/page.tsx',
+    'src/app/[locale]/forgot-password/ForgotPasswordForm.tsx',
+  ];
+  const authPageSources = authPagePaths.map((path) => readFileSync(path, 'utf8'));
+  const tyvMessages = JSON.parse(readFileSync('src/messages/tyv.json', 'utf8'));
+  const ruMessages = JSON.parse(readFileSync('src/messages/ru.json', 'utf8'));
+
+  for (const source of authPageSources) {
+    assert.equal(source.includes("@/content/tyv"), false);
+  }
+
+  assert.equal(
+    authPageSources.filter((source) => source.includes('noValidate')).length,
+    3
+  );
+  assert.equal(authPageSources.some((source) => source.includes("getTranslations('Auth')")), true);
+  assert.equal(authPageSources.some((source) => source.includes("useTranslations('Auth')")), true);
+  assert.equal(typeof tyvMessages.Auth.signIn.title, 'string');
+  assert.equal(typeof ruMessages.Auth.signIn.title, 'string');
+  assert.equal(typeof tyvMessages.Auth.errors.invalidEmail, 'string');
+  assert.equal(typeof ruMessages.Auth.errors.invalidEmail, 'string');
+  assert.equal(typeof tyvMessages.Auth.forgotPassword.errors.required, 'string');
+  assert.equal(typeof ruMessages.Auth.forgotPassword.errors.required, 'string');
+  assert.equal(existsSync('src/app/auth/callback/route.ts'), true);
+  assert.equal(existsSync('src/app/auth/confirm/route.ts'), true);
+  assert.equal(existsSync('src/app/[locale]/auth/callback/route.ts'), false);
+  assert.equal(existsSync('src/app/[locale]/auth/confirm/route.ts'), false);
+});
+
 test('proxy entry point is colocated with src/app', () => {
   assert.equal(existsSync('src/proxy.ts'), true);
   assert.equal(existsSync('proxy.ts'), false);

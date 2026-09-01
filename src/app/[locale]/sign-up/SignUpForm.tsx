@@ -4,13 +4,14 @@ import { Link } from '@/i18n/navigation';
 import { useRouter } from '@/i18n/navigation';
 import type { FormEvent } from 'react';
 import { useState } from 'react';
-import { content } from '@/content/tyv';
+import { useTranslations } from 'next-intl';
 import {
   signUpWithEmailPassword,
   useAuthStatus,
 } from '@/lib/auth/client';
 import {
   MINIMUM_PASSWORD_LENGTH,
+  isValidAuthEmail,
   isValidProfileDisplayName,
   sanitizeProfileDisplayName,
 } from '@/lib/auth/types';
@@ -19,19 +20,20 @@ type Props = {
   nextPath: string;
 };
 
-function getSignUpErrorMessage(reason: string): string {
+function getSignUpErrorMessage(reason: string, t: (key: string) => string): string {
   if (reason === 'rate-limited') {
-    return content.signInRateLimitMessage;
+    return t('errors.rateLimited');
   }
 
   if (reason === 'network') {
-    return content.authNetworkFailureMessage;
+    return t('errors.networkFailure');
   }
 
-  return content.unableCreateAccountMessage;
+  return t('signUp.errors.unable');
 }
 
 export default function SignUpForm({ nextPath }: Props) {
+  const t = useTranslations('Auth');
   const router = useRouter();
   const { refreshAuth } = useAuthStatus();
   const [errorMessage, setErrorMessage] = useState('');
@@ -53,27 +55,32 @@ export default function SignUpForm({ nextPath }: Props) {
     const agreedToPolicy = formData.get('policy') === 'on';
 
     if (!displayName || !email || !password || !passwordConfirmation) {
-      setErrorMessage(content.signUpErrorRequired);
+      setErrorMessage(t('signUp.errors.required'));
       return;
     }
 
     if (!isValidProfileDisplayName(displayName)) {
-      setErrorMessage(content.displayNameInvalidMessage);
+      setErrorMessage(t('signUp.errors.displayNameInvalid'));
+      return;
+    }
+
+    if (!isValidAuthEmail(email)) {
+      setErrorMessage(t('errors.invalidEmail'));
       return;
     }
 
     if (password.length < MINIMUM_PASSWORD_LENGTH) {
-      setErrorMessage(content.signUpPasswordTooShortMessage);
+      setErrorMessage(t('signUp.errors.passwordTooShort'));
       return;
     }
 
     if (password !== passwordConfirmation) {
-      setErrorMessage(content.signUpPasswordMismatchMessage);
+      setErrorMessage(t('signUp.errors.passwordMismatch'));
       return;
     }
 
     if (!agreedToPolicy) {
-      setErrorMessage(content.signUpErrorPolicy);
+      setErrorMessage(t('signUp.errors.policyRequired'));
       return;
     }
 
@@ -92,13 +99,13 @@ export default function SignUpForm({ nextPath }: Props) {
 
     if (!signUpResult.ok) {
       setIsSubmitting(false);
-      setErrorMessage(getSignUpErrorMessage(signUpResult.reason));
+      setErrorMessage(getSignUpErrorMessage(signUpResult.reason, t));
       return;
     }
 
     if (signUpResult.requiresEmailConfirmation) {
       setIsSubmitting(false);
-      setSuccessMessage(content.confirmYourEmailMessage);
+      setSuccessMessage(t('signUp.confirmEmailMessage'));
       return;
     }
 
@@ -108,24 +115,24 @@ export default function SignUpForm({ nextPath }: Props) {
   }
 
   return (
-    <form className="auth-form" onSubmit={handleSubmit}>
+    <form className="auth-form" onSubmit={handleSubmit} noValidate>
       <label className="form-field" htmlFor="display-name">
-        <span>{content.displayNameLabel}</span>
+        <span>{t('fields.displayName')}</span>
         <input id="display-name" name="displayName" type="text" autoComplete="name" required />
       </label>
 
       <label className="form-field" htmlFor="sign-up-email">
-        <span>{content.emailLabel}</span>
+        <span>{t('fields.email')}</span>
         <input id="sign-up-email" name="email" type="email" autoComplete="email" required />
       </label>
 
       <label className="form-field" htmlFor="sign-up-password">
-        <span>{content.passwordLabel}</span>
+        <span>{t('fields.password')}</span>
         <input id="sign-up-password" name="password" type="password" autoComplete="new-password" required />
       </label>
 
       <label className="form-field" htmlFor="sign-up-password-confirmation">
-        <span>{content.passwordConfirmationLabel}</span>
+        <span>{t('fields.passwordConfirmation')}</span>
         <input
           id="sign-up-password-confirmation"
           name="passwordConfirmation"
@@ -138,15 +145,15 @@ export default function SignUpForm({ nextPath }: Props) {
       <div className="checkbox-field policy-checkbox">
         <input id="policy-agreement" type="checkbox" name="policy" required />
         <label htmlFor="policy-agreement">
-          {content.policyAgreementPrefix}{' '}
+          {t('signUp.policy.prefix')}{' '}
           <Link href="/terms" className="inline-link">
-            {content.termsPageTitle}
+            {t('signUp.policy.termsLink')}
           </Link>{' '}
-          {content.policyAgreementMiddle}{' '}
+          {t('signUp.policy.middle')}{' '}
           <Link href="/privacy" className="inline-link">
-            {content.privacyPageTitle}
+            {t('signUp.policy.privacyLink')}
           </Link>
-          {content.policyAgreementSuffix}
+          {t('signUp.policy.suffix')}
         </label>
       </div>
 
@@ -158,13 +165,13 @@ export default function SignUpForm({ nextPath }: Props) {
 
       {successMessage ? (
         <div className="form-success" role="status">
-          <strong>{content.checkYourEmailTitle}</strong>
+          <strong>{t('signUp.checkEmailTitle')}</strong>
           <p>{successMessage}</p>
         </div>
       ) : null}
 
       <button type="submit" className="search-button form-submit-button" disabled={isSubmitting}>
-        {content.signUpButton}
+        {isSubmitting ? t('signUp.submittingButton') : t('signUp.button')}
       </button>
     </form>
   );

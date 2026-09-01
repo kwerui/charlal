@@ -3,9 +3,10 @@
 import { Link } from '@/i18n/navigation';
 import type { FormEvent } from 'react';
 import { useState } from 'react';
-import { content } from '@/content/tyv';
+import { useTranslations } from 'next-intl';
 import { signInWithEmailPassword, useAuthStatus } from '@/lib/auth/client';
 import { getSafeNextPath } from '@/lib/auth/safeNextPath';
+import { isValidAuthEmail } from '@/lib/auth/types';
 
 type Props = {
   nextPath: string;
@@ -38,24 +39,24 @@ function getAuthenticatedRedirectPath(nextPath: string): string {
   return nextPath;
 }
 
-function getSignInErrorMessage(reason: string): string {
+function getSignInErrorMessage(reason: string, t: (key: string) => string): string {
   if (reason === 'invalid-credentials') {
-    return content.signInInvalidCredentialsMessage;
+    return t('signIn.errors.invalidCredentials');
   }
 
   if (reason === 'email-not-confirmed') {
-    return content.signInUnconfirmedEmailMessage;
+    return t('signIn.errors.unconfirmedEmail');
   }
 
   if (reason === 'rate-limited') {
-    return content.signInRateLimitMessage;
+    return t('errors.rateLimited');
   }
 
   if (reason === 'network') {
-    return content.authNetworkFailureMessage;
+    return t('errors.networkFailure');
   }
 
-  return content.unableSignInMessage;
+  return t('signIn.errors.unable');
 }
 
 export default function SignInForm({
@@ -63,6 +64,7 @@ export default function SignInForm({
   initialMessage = '',
   initialMessageTone = 'success',
 }: Props) {
+  const t = useTranslations('Auth');
   const { refreshAuth } = useAuthStatus();
   const [formMessage, setFormMessage] = useState(initialMessage);
   const [messageTone, setMessageTone] = useState<'success' | 'error'>(
@@ -80,7 +82,13 @@ export default function SignInForm({
 
     if (!email || !password) {
       setMessageTone('error');
-      setFormMessage(content.signInErrorRequired);
+      setFormMessage(t('signIn.errors.required'));
+      return;
+    }
+
+    if (!isValidAuthEmail(email)) {
+      setMessageTone('error');
+      setFormMessage(t('errors.invalidEmail'));
       return;
     }
 
@@ -95,7 +103,7 @@ export default function SignInForm({
     if (!signInResult.ok) {
       setIsSubmitting(false);
       setMessageTone('error');
-      setFormMessage(getSignInErrorMessage(signInResult.reason));
+      setFormMessage(getSignInErrorMessage(signInResult.reason, t));
       return;
     }
 
@@ -107,20 +115,20 @@ export default function SignInForm({
   }
 
   return (
-    <form className="auth-form" onSubmit={handleSubmit}>
+    <form className="auth-form" onSubmit={handleSubmit} noValidate>
       <label className="form-field" htmlFor="email">
-        <span>{content.emailLabel}</span>
+        <span>{t('fields.email')}</span>
         <input id="email" name="email" type="email" autoComplete="email" required />
       </label>
 
       <label className="form-field" htmlFor="password">
-        <span>{content.passwordLabel}</span>
+        <span>{t('fields.password')}</span>
         <input id="password" name="password" type="password" autoComplete="current-password" required />
       </label>
 
       <div className="auth-options-row">
         <Link href="/forgot-password" className="inline-link">
-          {content.forgotPasswordLink}
+          {t('signIn.forgotPasswordLink')}
         </Link>
       </div>
 
@@ -134,7 +142,7 @@ export default function SignInForm({
       ) : null}
 
       <button type="submit" className="search-button form-submit-button" disabled={isSubmitting}>
-        {content.signInButton}
+        {isSubmitting ? t('signIn.submittingButton') : t('signIn.button')}
       </button>
     </form>
   );

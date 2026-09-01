@@ -47,6 +47,10 @@ export function isEmailLikeDisplayName(displayName: string): boolean {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(displayName.trim());
 }
 
+export function isValidAuthEmail(email: string): boolean {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim());
+}
+
 export function isValidProfileDisplayName(displayName: string): boolean {
   const safeDisplayName = sanitizeProfileDisplayName(displayName);
 

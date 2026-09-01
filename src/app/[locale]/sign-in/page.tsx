@@ -1,6 +1,6 @@
 import { Link } from '@/i18n/navigation';
 import { redirect } from 'next/navigation';
-import { content } from '@/content/tyv';
+import { getTranslations } from 'next-intl/server';
 import { localizePath } from '@/i18n/localePath';
 import { getSafeNextPath } from '@/lib/auth/safeNextPath';
 import { getCurrentUserResult } from '@/lib/auth/server';
@@ -34,6 +34,7 @@ export default async function SignInPage({ params, searchParams }: SignInPagePro
   const fallbackNextPath = localizePath('/account', locale);
   const nextPath = getSafeNextPath(query.next, fallbackNextPath);
   const authResult = await getCurrentUserResult();
+  const t = await getTranslations('Auth');
 
   if (authResult.status === 'authenticated') {
     redirect(localizePath(getAuthenticatedRedirectPath(nextPath), locale));
@@ -47,12 +48,12 @@ export default async function SignInPage({ params, searchParams }: SignInPagePro
       <section className="auth-card" aria-labelledby="sign-in-title">
         <div className="auth-card-copy">
           <h2 id="sign-in-title" className="auth-title">
-            {content.signInTitle}
+            {t('signIn.title')}
           </h2>
           <p className="auth-register-copy">
-            {content.signInRegisterPrompt}{' '}
+            {t('signIn.registerPrompt')}{' '}
             <Link href={`/sign-up?next=${encodeURIComponent(nextPath)}`} className="inline-link">
-              {content.signInRegisterLink}
+              {t('signIn.registerLink')}
             </Link>
           </p>
         </div>
@@ -60,9 +61,9 @@ export default async function SignInPage({ params, searchParams }: SignInPagePro
           nextPath={nextPath}
           initialMessage={
             emailConfirmed
-              ? content.emailConfirmedMessage
+              ? t('signIn.emailConfirmedMessage')
               : confirmationFailed
-              ? content.confirmationInvalidMessage
+              ? t('signIn.confirmationInvalidMessage')
               : ''
           }
           initialMessageTone={emailConfirmed ? 'success' : 'error'}

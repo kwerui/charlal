@@ -1,5 +1,5 @@
 import { Link } from '@/i18n/navigation';
-import { content } from '@/content/tyv';
+import { getTranslations } from 'next-intl/server';
 import { localizePath } from '@/i18n/localePath';
 import { getSafeNextPath } from '@/lib/auth/safeNextPath';
 import SignUpForm from './SignUpForm';
@@ -13,18 +13,19 @@ export default async function SignUpPage({ params, searchParams }: SignUpPagePro
   const { locale } = await params;
   const query = await searchParams;
   const nextPath = getSafeNextPath(query.next, localizePath('/account', locale));
+  const t = await getTranslations('Auth');
 
   return (
     <main className="auth-page">
       <section className="auth-card" aria-labelledby="sign-up-title">
         <div className="auth-card-copy">
           <h2 id="sign-up-title" className="auth-title">
-            {content.signUpTitle}
+            {t('signUp.title')}
           </h2>
           <p className="auth-register-copy">
-            {content.signUpSignInPrompt}{' '}
+            {t('signUp.signInPrompt')}{' '}
             <Link href={`/sign-in?next=${encodeURIComponent(nextPath)}`} className="inline-link">
-              {content.signUpSignInLink}
+              {t('signUp.signInLink')}
             </Link>
           </p>
         </div>

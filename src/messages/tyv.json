@@ -368,6 +368,70 @@
       "marketplaceTypeRequired": "Choose a marketplace type. / Рынок хевирин шилип алыңар."
     }
   },
+  "Auth": {
+    "fields": {
+      "displayName": "Display name / Көргүзер ат",
+      "email": "Электроннуг почта",
+      "password": "Пароль",
+      "passwordConfirmation": "Confirm password / Пароль бадыткаар"
+    },
+    "errors": {
+      "invalidEmail": "Шын электроннуг почта адрезин киирер. / Enter a valid email address.",
+      "rateLimited": "Please wait before trying again. / Катап шенээр мурнунда манап көрүңерем.",
+      "networkFailure": "Network request failed. Check your connection and try again. / Сеткил дилээ үрелген. Холбааңарны хынап алгаш, катап шенеп көрүңер."
+    },
+    "signIn": {
+      "title": "Кирер",
+      "registerPrompt": "Мында бир дугаар бе?",
+      "registerLink": "Бүрүткээр",
+      "forgotPasswordLink": "Пароль уттупкан бе?",
+      "button": "Кирер",
+      "submittingButton": "Кирип турар / Signing in...",
+      "emailConfirmedMessage": "Email confirmed. / Электроннуг почта бадыткаан.",
+      "confirmationInvalidMessage": "Confirmation link invalid or expired. / Бадыткал ссылказы шын эвес азы хуусаазы эрткен.",
+      "errors": {
+        "required": "Enter both email and password to continue. / Улаштыр уламчылаар дизе, электроннуг почтаны болгаш пароль киирер.",
+        "invalidCredentials": "The email or password is incorrect. / Электроннуг почта азы пароль шын эвес.",
+        "unconfirmedEmail": "Confirm your email before signing in. / Кирер мурнунда электроннуг почтаңарны бадыткаңар.",
+        "unable": "Unable to sign in. / Кирип шыдаваан."
+      }
+    },
+    "signUp": {
+      "title": "Sign Up / Бижидип алыңар",
+      "signInPrompt": "Already have an account? / Аккаунтуңар бар бе?",
+      "signInLink": "Sign in here / Мында кирип алыңар",
+      "button": "Sign Up / Бижидип алыңар",
+      "submittingButton": "Аккаунт тургузуп турар... / Creating account...",
+      "checkEmailTitle": "Check your email / Электроннуг почтаңарны хынап көрүңер",
+      "confirmEmailMessage": "Confirm your email to finish registration. / Бүрүткелди доозарынга электроннуг почтаңарны бадыткаңар.",
+      "policy": {
+        "prefix": "Аккаунт тургузуп тургаш, мен чөпшээрежип тур мен / By creating an account, I agree to the",
+        "termsLink": "Ажыглаарының чуруму",
+        "middle": "база ону хүлээп алыр / and acknowledge the",
+        "privacyLink": "Privacy Policy / Чажыт чоруктуң политиказы",
+        "suffix": "."
+      },
+      "errors": {
+        "required": "Enter display name, email, password, and password confirmation to continue. / Улаштыр ажылдаар дизе, көргүзер адын, электроннуг почтазын, пароль болгаш пароль бадыткалын киирер.",
+        "displayNameInvalid": "Enter a public display name that is not an email address. / Электроннуг почта адрези эвес, хөй-ниитиге көргүзер атты киирер.",
+        "passwordTooShort": "Password must be at least 8 characters. / Пароль 8 демдектен эвээш эвес болур ужурлуг.",
+        "passwordMismatch": "Passwords do not match. / Парольдар дүүшпес.",
+        "policyRequired": "Agree to the policy to continue. / Улаштыр политикага чөпшээрежир.",
+        "unable": "Unable to create account. / Аккаунт тургузуп шыдаваан."
+      }
+    },
+    "forgotPassword": {
+      "title": "Пароль уттупкан",
+      "backToSignInLink": "Back to sign in / Кирер дээш дедир",
+      "demoWarning": "Demo only: this does not send an email yet.",
+      "successMessage": "Demo reset message shown. No email has been sent.",
+      "submitButton": "Send reset instructions / Эгидер дугайында айтыышкыннарны чорудуптуңар",
+      "submittingButton": "Эгидер дугайында айтыышкыннарны чорудуп турар / Sending reset instructions...",
+      "errors": {
+        "required": "Улаштыр электроннуг почтаңарны киирер силер. / Enter your email to continue."
+      }
+    }
+  },
   "AboutPage": {
     "kicker": "Charlal дугайында",
     "title": "Charlal дугайында",
