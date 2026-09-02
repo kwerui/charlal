@@ -1,25 +1,28 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import {
-  formatReviewDate,
-  getReviewDateFormattingLocale,
-} from '../src/lib/reviewDateFormatting.js';
+import { formatReviewDate } from '../src/lib/reviewDateFormatting.js';
 
-test('review dates use the requested app locale when supported', () => {
-  assert.equal(getReviewDateFormattingLocale('ru'), 'ru');
+test('review dates format Tuvan deterministically', () => {
+  assert.equal(
+    formatReviewDate('2026-08-29T13:12:00.000Z', 'tyv'),
+    '2026ч Авг. 29'
+  );
 });
 
-test('review dates fall back to Russian instead of the browser locale', () => {
+test('review dates format Russian deterministically', () => {
   const value = '2026-08-29T13:12:00.000Z';
-  const options: Intl.DateTimeFormatOptions = {
-    month: 'short',
-    day: 'numeric',
-    year: 'numeric',
-  };
 
-  assert.equal(getReviewDateFormattingLocale('zz-ZZ'), 'ru');
   assert.equal(
-    formatReviewDate(value, 'zz-ZZ'),
-    new Intl.DateTimeFormat('ru', options).format(new Date(value))
+    formatReviewDate(value, 'ru'),
+    new Intl.DateTimeFormat('ru-RU', {
+      month: 'short',
+      day: 'numeric',
+      year: 'numeric',
+      timeZone: 'UTC',
+    }).format(new Date(value))
   );
+});
+
+test('invalid review dates are preserved', () => {
+  assert.equal(formatReviewDate('invalid-date', 'tyv'), 'invalid-date');
 });

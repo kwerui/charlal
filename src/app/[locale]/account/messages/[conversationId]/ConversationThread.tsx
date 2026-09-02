@@ -71,6 +71,7 @@ import {
   prepareMessageAttachmentMetadata,
 } from '@/lib/supabase/messageAttachmentUploadsClient';
 import { formatMessageDateTime } from '@/lib/messageDateFormatting';
+
 import type { MessageAttachmentMetadataInput } from '@/lib/supabase/messageAttachments';
 
 type Props = {
@@ -232,8 +233,12 @@ function getDateKey(value: string, useLocalTime: boolean): string {
   return `${parts.year}-${month}-${day}`;
 }
 
-function getRelativeDateKey(offsetDays: number, useLocalTime: boolean): string {
-  const date = new Date();
+function getRelativeDateKey(
+  referenceValue: string,
+  offsetDays: number,
+  useLocalTime: boolean
+): string {
+  const date = new Date(referenceValue);
 
   if (useLocalTime) {
     date.setDate(date.getDate() - offsetDays);
@@ -248,24 +253,31 @@ function formatMessageDateDivider(
   value: string,
   locale: string,
   useLocalTime: boolean,
+  relativeDateReference: string | null,
   t: MessagesTranslator
 ): string {
   const dateKey = getDateKey(value, useLocalTime);
 
-  if (dateKey === getRelativeDateKey(0, useLocalTime)) {
+  if (
+    relativeDateReference &&
+    dateKey === getRelativeDateKey(relativeDateReference, 0, useLocalTime)
+  ) {
     return t('todayLabel');
   }
 
-  if (dateKey === getRelativeDateKey(1, useLocalTime)) {
+  if (
+    relativeDateReference &&
+    dateKey === getRelativeDateKey(relativeDateReference, 1, useLocalTime)
+  ) {
     return t('yesterdayLabel');
   }
 
-  return formatMessageDateTime(value, locale, {
-    year: 'numeric',
-    month: 'short',
-    day: 'numeric',
-    timeZone: useLocalTime ? undefined : 'UTC',
-  });
+return formatMessageDateTime(value, locale, {
+  year: 'numeric',
+  month: 'short',
+  day: 'numeric',
+  timeZone: useLocalTime ? undefined : 'UTC',
+});
 }
 
 function getSendErrorMessage(reason: string, t: MessagesTranslator): string {
@@ -631,10 +643,12 @@ export default function ConversationThread({
   const [error, setError] = useState('');
   const [readStatusError, setReadStatusError] = useState('');
   const [sendStatus, setSendStatus] = useState<SendStatus>('idle');
-  const [isBrowserOnline, setIsBrowserOnline] = useState(true);
-  const [useLocalTime, setUseLocalTime] = useState(false);
-  const [threadStatus, setThreadStatus] =
-    useState<ThreadRealtimeStatus>('idle');
+const [isBrowserOnline, setIsBrowserOnline] = useState(true);
+const [useLocalTime, setUseLocalTime] = useState(false);
+const [relativeDateReference, setRelativeDateReference] =
+  useState<string | null>(null);
+const [threadStatus, setThreadStatus] =
+  useState<ThreadRealtimeStatus>('idle');
   const [showNewMessagesButton, setShowNewMessagesButton] = useState(false);
   const [messageMenuOverlay, setMessageMenuOverlay] =
     useState<MessageMenuOverlay | null>(null);
@@ -817,13 +831,13 @@ export default function ConversationThread({
   const viewerCaptionSnippet = selectedGalleryItem
     ? getCaptionSnippet(selectedGalleryItem.message.body)
     : '';
-  const viewerMessageTime = selectedGalleryItem
-    ? formatMessageTime(
-        selectedGalleryItem.message.createdAt,
-        locale,
-        useLocalTime
-      )
-    : '';
+const viewerMessageTime = selectedGalleryItem
+  ? formatMessageTime(
+      selectedGalleryItem.message.createdAt,
+      locale,
+      useLocalTime
+    )
+  : '';
   const viewerMetadataLabel =
     viewerPositionLabel && viewerMessageTime
       ? `${viewerPositionLabel} · ${viewerMessageTime}`
@@ -974,9 +988,10 @@ export default function ConversationThread({
     threadRealtimeRetryAttemptRef.current = 0;
     clearThreadRealtimeRetry();
     mountedRef.current = true;
-    const localTimeFrame = window.requestAnimationFrame(() => {
-      setUseLocalTime(true);
-    });
+const localTimeFrame = window.requestAnimationFrame(() => {
+  setRelativeDateReference(new Date().toISOString());
+  setUseLocalTime(true);
+});
     logThreadScrollDiagnostic(conversation.id, 'Initialized initial bottom pin.', {
       initialMessageCount: initialMessages.length,
       initialAttachmentCount: initialAttachments.length,
@@ -3126,12 +3141,13 @@ export default function ConversationThread({
               <div key={message.id} className="message-list-item">
               {messageDateKey !== previousDateKey ? (
                 <div className="message-date-divider" role="separator">
-                  {formatMessageDateDivider(
-                    message.createdAt,
-                    locale,
-                    useLocalTime,
-                    t
-                  )}
+{formatMessageDateDivider(
+  message.createdAt,
+  locale,
+  useLocalTime,
+  relativeDateReference,
+  t
+)}
                 </div>
               ) : null}
               <article
@@ -3249,11 +3265,11 @@ export default function ConversationThread({
                     )}
                     <div className="message-meta">
                       <time dateTime={message.createdAt}>
-                        {formatMessageTime(
-                          message.createdAt,
-                          locale,
-                          useLocalTime
-                        )}
+{formatMessageTime(
+  message.createdAt,
+  locale,
+  useLocalTime
+)}
                       </time>
                       {message.editedAt && !isDeleted ? (
                         <span className="message-edited-label">
@@ -3689,3 +3705,5 @@ export default function ConversationThread({
     </div>
   );
 }
+
+

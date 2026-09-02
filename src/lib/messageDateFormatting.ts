@@ -1,22 +1,23 @@
-const MESSAGE_DATE_FALLBACK_LOCALE = 'ru';
-
-export function getMessageDateFormattingLocale(locale: string): string {
-  const supportedLocale = Intl.DateTimeFormat.supportedLocalesOf([locale])[0];
-
-  if (supportedLocale) {
-    return supportedLocale;
-  }
-
-  return MESSAGE_DATE_FALLBACK_LOCALE;
-}
+import {
+  formatAppShortDate,
+  formatAppTime,
+} from './appDateFormatting';
 
 export function formatMessageDateTime(
   value: string,
   locale: string,
   options: Intl.DateTimeFormatOptions
 ): string {
-  return new Intl.DateTimeFormat(
-    getMessageDateFormattingLocale(locale),
-    options
-  ).format(new Date(value));
+  const isTimeOnly =
+    options.hour !== undefined &&
+    options.minute !== undefined &&
+    options.year === undefined &&
+    options.month === undefined &&
+    options.day === undefined;
+
+  if (isTimeOnly) {
+    return formatAppTime(value, options.timeZone);
+  }
+
+  return formatAppShortDate(value, locale, options.timeZone);
 }
