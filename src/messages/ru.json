@@ -270,16 +270,12 @@
     "reviewSaveFailedMessage":  "Не удалось сохранить отзыв.",
     "reviewDeleteFailedMessage": "Не удалось удалить отзыв.",
     "deleteReviewConfirmTitle": "Удалить отзыв?",
-    "deleteReviewConfirmMessage": "Ваша оценка, текст и фотографии будут удалены. Позже вы сможете снова оставить отзыв об этом товаре.",
+    "deleteReviewConfirmMessage": "Ваша оценка и теги будут удалены. Вы сможете снова оценить эту покупку позже.",
     "reviewRatingLabel":  "Оценка",
     "reviewRatingRequiredMessage":"Выберите оценку от 1 до 5 звезд.",
-    "reviewTextLabel": "Текст отзыва (необязательно)",
-    "addReviewPhotosButton": "Добавить фото к отзыву",
-    "reviewPhotoRequirementsMessage": "Можно добавить до 3 фото. JPEG, PNG или WebP. Максимальный размер каждого файла — 5 МБ.",
-    "reviewPhotoMaximumMessage": "К отзыву можно добавить не более 3 фото.",
-    "reviewPhotoUnsupportedTypeMessage":  "Неподдерживаемый формат фото. Используйте JPEG, PNG или WebP.",
-    "reviewPhotoUploadFailedMessage":"Не удалось загрузить фото к отзыву.",
-    "reviewPhotoPreviewLabel":"Фото к отзыву"
+    "reviewTagsLabel": "Теги",
+    "reviewTagsHelp": "Необязательно. Можете выбрать до 3 тегов.",
+    "reviewTagsMaximumMessage": "Выберите не более 3 тегов."
   },
   "SavedListings": {
     "title": "Сохраненные объявления",
@@ -374,26 +370,18 @@
     "noReviewsYetLabel": "Пока нет отзывов",
     "starsLabel": "{count, plural, one {# звезда} few {# звезды} many {# звёзд} other {# звезды}}",
     "verifiedPurchaseLabel": "Подтвержденная покупка",
-    "editedReviewLabel": "Отредактировано",
-    "responseLabel": "Ответ продавца",
-    "addResponseButton": "Добавить ответ",
-    "editResponseButton": "Изменить ответ",
-    "saveResponseChangesButton": "Сохранить изменения",
-    "deleteResponseButton": "Удалить ответ",
-    "responseSavingButton": "Сохранение...",
-    "responseSavedMessage": "Ответ продавца сохранен.",
-    "responseDeletedMessage": "Ответ продавца удален.",
-    "responseSaveFailedMessage": "Не удалось сохранить ответ продавца.",
-    "responseDeleteFailedMessage": "Не удалось удалить ответ продавца.",
-    "deleteResponseConfirmMessage": "Удалить этот ответ продавца?"
+    "editedReviewLabel": "Отредактировано"
   },
-  "ReviewPhotoViewer": {
-    "openReviewPhotoLabel": "Открыть фото к отзыву {position}",
-    "reviewPhotoLabel": "Фото к отзыву",
-    "closeButton": "Закрыть",
-    "previousPhotoButton": "Предыдущее фото",
-    "nextPhotoButton":"Следующее фото",
-    "position": "{current} / {total}"
+  "ReviewTags": {
+    "selectedTagsLabel": "Выбранные теги отзыва",
+    "satisfied": "Удовлетворетволен(а)",
+    "friendly_seller": "Дружелюбный продавец",
+    "good_communication": "Хорошая коммуникация",
+    "quick_handover": "Быстрая передача товара",
+    "fair_price": "Справедливая цена",
+    "not_satisfied": "Не удовлетворетволен(а)",
+    "poor_communication": "Плохая коммуникация",
+    "handover_issue": "Проблемы с передачей товара"
   },
   "ProfilePhoto": {
     "label": "Фото профиля",

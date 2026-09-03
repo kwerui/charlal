@@ -1,18 +1,8 @@
 import type { SupabaseClient } from '@supabase/supabase-js';
-import { getSupabasePublicEnv } from '@/lib/supabase/env';
-
-export const REVIEW_MEDIA_BUCKET = 'review-media';
-export const MAX_REVIEW_PHOTOS = 3;
-export const MAX_REVIEW_PHOTO_BYTES = 5 * 1024 * 1024;
-export const REVIEW_PHOTO_ACCEPT = 'image/jpeg,image/png,image/webp';
-
-export const REVIEW_PHOTO_MIME_TYPES = [
-  'image/jpeg',
-  'image/png',
-  'image/webp',
-] as const;
-
-export type ReviewPhotoMimeType = (typeof REVIEW_PHOTO_MIME_TYPES)[number];
+import {
+  parseSellerReviewTags,
+  type SellerReviewTag,
+} from '@/lib/reviewTags';
 
 export type SaleBuyerCandidate = {
   buyerId: string;
@@ -32,14 +22,6 @@ export type RecordedListingTransaction = {
   completedAt: string;
 };
 
-export type ReviewPhoto = {
-  id: string;
-  storagePath: string;
-  position: number;
-  contentType: ReviewPhotoMimeType;
-  url: string;
-};
-
 export type ReviewableTransaction = {
   transactionId: string;
   sellerId: string;
@@ -54,10 +36,9 @@ export type ReviewableTransaction = {
   completedAt: string;
   reviewId: string | null;
   rating: number | null;
-  reviewBody: string | null;
+  reviewTags: SellerReviewTag[];
   reviewCreatedAt: string | null;
   reviewUpdatedAt: string | null;
-  reviewPhotos: ReviewPhoto[];
 };
 
 export type SellerReviewSummary = {
@@ -65,20 +46,10 @@ export type SellerReviewSummary = {
   reviewCount: number;
 };
 
-export type ReviewPhotoPathsResult =
-  | {
-      ok: true;
-      storagePaths: string[];
-    }
-  | {
-      ok: false;
-      reason: 'database-unavailable';
-    };
-
 export type PublicSellerReview = {
   reviewId: string;
   rating: number;
-  reviewBody: string | null;
+  reviewTags: SellerReviewTag[];
   reviewCreatedAt: string;
   reviewUpdatedAt: string;
   listingTitleSnapshot: string;
@@ -89,11 +60,6 @@ export type PublicSellerReview = {
   buyerAvatarFocusX: number;
   buyerAvatarFocusY: number;
   buyerAvatarZoom: number;
-  responseId: string | null;
-  responseBody: string | null;
-  responseCreatedAt: string | null;
-  responseUpdatedAt: string | null;
-  reviewPhotos: ReviewPhoto[];
 };
 
 type SaleBuyerCandidateRow = {
@@ -114,13 +80,6 @@ type RecordedListingTransactionRow = {
   completed_at: string;
 };
 
-type ReviewPhotoRow = {
-  id: string;
-  storage_path: string;
-  position: number;
-  content_type: ReviewPhotoMimeType;
-};
-
 type ReviewableTransactionRow = {
   transaction_id: string;
   seller_id: string;
@@ -135,10 +94,9 @@ type ReviewableTransactionRow = {
   completed_at: string;
   review_id: string | null;
   rating: number | null;
-  review_body: string | null;
+  review_tags: unknown;
   review_created_at: string | null;
   review_updated_at: string | null;
-  review_photos: unknown;
 };
 
 type SellerReviewSummaryRow = {
@@ -149,7 +107,7 @@ type SellerReviewSummaryRow = {
 type PublicSellerReviewRow = {
   review_id: string;
   rating: number;
-  review_body: string | null;
+  review_tags: unknown;
   review_created_at: string;
   review_updated_at: string;
   listing_title_snapshot: string;
@@ -160,58 +118,9 @@ type PublicSellerReviewRow = {
   buyer_avatar_focus_x: number;
   buyer_avatar_focus_y: number;
   buyer_avatar_zoom: number;
-  response_id: string | null;
-  response_body: string | null;
-  response_created_at: string | null;
-  response_updated_at: string | null;
-  review_photos: unknown;
 };
 
-type ReviewPhotoPathRow = {
-  storage_path: string;
-};
-
-type ReviewsSupabaseClient = Pick<SupabaseClient, 'from' | 'rpc' | 'storage'>;
-
-function isReviewPhotoMimeType(value: unknown): value is ReviewPhotoMimeType {
-  return (REVIEW_PHOTO_MIME_TYPES as readonly unknown[]).includes(value);
-}
-
-function isReviewPhotoRow(value: unknown): value is ReviewPhotoRow {
-  if (!value || typeof value !== 'object') {
-    return false;
-  }
-
-  const row = value as Partial<Record<keyof ReviewPhotoRow, unknown>>;
-
-  return (
-    typeof row.id === 'string' &&
-    typeof row.storage_path === 'string' &&
-    typeof row.position === 'number' &&
-    isReviewPhotoMimeType(row.content_type)
-  );
-}
-
-function mapReviewPhotoRow(row: ReviewPhotoRow): ReviewPhoto {
-  return {
-    id: row.id,
-    storagePath: row.storage_path,
-    position: row.position,
-    contentType: row.content_type,
-    url: getReviewPhotoPublicUrl(row.storage_path),
-  };
-}
-
-function mapReviewPhotos(value: unknown): ReviewPhoto[] {
-  if (!Array.isArray(value)) {
-    return [];
-  }
-
-  return value
-    .filter(isReviewPhotoRow)
-    .sort((first, second) => first.position - second.position)
-    .map(mapReviewPhotoRow);
-}
+type ReviewsSupabaseClient = Pick<SupabaseClient, 'from' | 'rpc'>;
 
 function isSaleBuyerCandidateRow(value: unknown): value is SaleBuyerCandidateRow {
   if (!value || typeof value !== 'object') {
@@ -265,7 +174,8 @@ function isReviewableTransactionRow(
     typeof row.seller_id === 'string' &&
     typeof row.seller_display_name === 'string' &&
     typeof row.seller_public_slug === 'string' &&
-    (row.seller_avatar_path === null || typeof row.seller_avatar_path === 'string') &&
+    (row.seller_avatar_path === null ||
+      typeof row.seller_avatar_path === 'string') &&
     typeof row.seller_avatar_focus_x === 'number' &&
     typeof row.seller_avatar_focus_y === 'number' &&
     typeof row.seller_avatar_zoom === 'number' &&
@@ -274,9 +184,10 @@ function isReviewableTransactionRow(
     typeof row.completed_at === 'string' &&
     (row.review_id === null || typeof row.review_id === 'string') &&
     (row.rating === null || typeof row.rating === 'number') &&
-    (row.review_body === null || typeof row.review_body === 'string') &&
-    (row.review_created_at === null || typeof row.review_created_at === 'string') &&
-    (row.review_updated_at === null || typeof row.review_updated_at === 'string')
+    (row.review_created_at === null ||
+      typeof row.review_created_at === 'string') &&
+    (row.review_updated_at === null ||
+      typeof row.review_updated_at === 'string')
   );
 }
 
@@ -303,104 +214,18 @@ function isPublicSellerReviewRow(value: unknown): value is PublicSellerReviewRow
   return (
     typeof row.review_id === 'string' &&
     typeof row.rating === 'number' &&
-    (row.review_body === null || typeof row.review_body === 'string') &&
     typeof row.review_created_at === 'string' &&
     typeof row.review_updated_at === 'string' &&
     typeof row.listing_title_snapshot === 'string' &&
     typeof row.completed_at === 'string' &&
     typeof row.buyer_display_name === 'string' &&
     typeof row.buyer_public_slug === 'string' &&
-    (row.buyer_avatar_path === null || typeof row.buyer_avatar_path === 'string') &&
+    (row.buyer_avatar_path === null ||
+      typeof row.buyer_avatar_path === 'string') &&
     typeof row.buyer_avatar_focus_x === 'number' &&
     typeof row.buyer_avatar_focus_y === 'number' &&
-    typeof row.buyer_avatar_zoom === 'number' &&
-    (row.response_id === null || typeof row.response_id === 'string') &&
-    (row.response_body === null || typeof row.response_body === 'string') &&
-    (row.response_created_at === null || typeof row.response_created_at === 'string') &&
-    (row.response_updated_at === null || typeof row.response_updated_at === 'string')
+    typeof row.buyer_avatar_zoom === 'number'
   );
-}
-
-function isReviewPhotoPathRow(value: unknown): value is ReviewPhotoPathRow {
-  return (
-    Boolean(value) &&
-    typeof value === 'object' &&
-    typeof (value as Partial<ReviewPhotoPathRow>).storage_path === 'string'
-  );
-}
-
-export function getReviewPhotoPublicUrl(storagePath: string): string {
-  const { supabaseUrl } = getSupabasePublicEnv();
-  const encodedPath = storagePath
-    .split('/')
-    .map((segment) => encodeURIComponent(segment))
-    .join('/');
-
-  return `${supabaseUrl}/storage/v1/object/public/${REVIEW_MEDIA_BUCKET}/${encodedPath}`;
-}
-
-export function getReviewPhotoExtension(file: File): 'jpg' | 'png' | 'webp' | null {
-  if (file.type === 'image/jpeg') {
-    return 'jpg';
-  }
-
-  if (file.type === 'image/png') {
-    return 'png';
-  }
-
-  if (file.type === 'image/webp') {
-    return 'webp';
-  }
-
-  return null;
-}
-
-export function createReviewPhotoStoragePath(
-  reviewId: string,
-  file: File
-): string | null {
-  const extension = getReviewPhotoExtension(file);
-
-  if (!extension) {
-    return null;
-  }
-
-  return `${reviewId}/${crypto.randomUUID()}.${extension}`;
-}
-
-export async function uploadReviewPhotoFile(
-  supabase: ReviewsSupabaseClient,
-  storagePath: string,
-  file: File
-): Promise<boolean> {
-  const { error } = await supabase.storage
-    .from(REVIEW_MEDIA_BUCKET)
-    .upload(storagePath, file, {
-      cacheControl: '3600',
-      contentType: file.type,
-      upsert: false,
-    });
-
-  return !error;
-}
-
-export async function removeReviewPhotoFiles(
-  supabase: ReviewsSupabaseClient,
-  storagePaths: string[]
-): Promise<boolean> {
-  const safeStoragePaths = storagePaths
-    .map((path) => path.trim())
-    .filter(Boolean);
-
-  if (safeStoragePaths.length === 0) {
-    return true;
-  }
-
-  const { error } = await supabase.storage
-    .from(REVIEW_MEDIA_BUCKET)
-    .remove(safeStoragePaths);
-
-  return !error;
 }
 
 export async function listSaleBuyerCandidates(
@@ -413,9 +238,12 @@ export async function listSaleBuyerCandidates(
     return [];
   }
 
-  const { data, error } = await supabase.rpc('list_listing_sale_buyer_candidates', {
-    p_listing_id: safeListingId,
-  });
+  const { data, error } = await supabase.rpc(
+    'list_listing_sale_buyer_candidates',
+    {
+      p_listing_id: safeListingId,
+    }
+  );
 
   if (error || !Array.isArray(data)) {
     return [];
@@ -484,10 +312,9 @@ export async function listMyReviewableTransactions(
     completedAt: row.completed_at,
     reviewId: row.review_id,
     rating: row.rating,
-    reviewBody: row.review_body,
+    reviewTags: parseSellerReviewTags(row.review_tags),
     reviewCreatedAt: row.review_created_at,
     reviewUpdatedAt: row.review_updated_at,
-    reviewPhotos: mapReviewPhotos(row.review_photos),
   }));
 }
 
@@ -532,7 +359,7 @@ export async function listPublicSellerReviews(
   return data.filter(isPublicSellerReviewRow).map((row) => ({
     reviewId: row.review_id,
     rating: row.rating,
-    reviewBody: row.review_body,
+    reviewTags: parseSellerReviewTags(row.review_tags),
     reviewCreatedAt: row.review_created_at,
     reviewUpdatedAt: row.review_updated_at,
     listingTitleSnapshot: row.listing_title_snapshot,
@@ -543,40 +370,5 @@ export async function listPublicSellerReviews(
     buyerAvatarFocusX: row.buyer_avatar_focus_x,
     buyerAvatarFocusY: row.buyer_avatar_focus_y,
     buyerAvatarZoom: row.buyer_avatar_zoom,
-    responseId: row.response_id,
-    responseBody: row.response_body,
-    responseCreatedAt: row.response_created_at,
-    responseUpdatedAt: row.response_updated_at,
-    reviewPhotos: mapReviewPhotos(row.review_photos),
   }));
-}
-
-export async function listOwnSellerReviewPhotoPaths(
-  supabase: ReviewsSupabaseClient,
-  reviewId: string
-): Promise<ReviewPhotoPathsResult> {
-  const safeReviewId = reviewId.trim();
-
-  if (!safeReviewId) {
-    return { ok: true, storagePaths: [] };
-  }
-
-  const { data, error } = await supabase.rpc(
-    'list_own_seller_review_photo_paths',
-    {
-      p_review_id: safeReviewId,
-    }
-  );
-
-  if (error || !Array.isArray(data)) {
-    return { ok: false, reason: 'database-unavailable' };
-  }
-
-  return {
-    ok: true,
-    storagePaths: data
-      .filter(isReviewPhotoPathRow)
-      .map((row) => row.storage_path.trim())
-      .filter(Boolean),
-  };
 }

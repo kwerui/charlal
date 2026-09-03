@@ -22,6 +22,7 @@
     "src/lib/messagingRealtimeClientBehavior.ts",
     "src/lib/listingFavoriteKeys.ts",
     "src/lib/publicListingQuery.ts",
+    "src/lib/reviewTags.ts",
     "src/lib/reviewDateFormatting.ts",
     "tests/**/*.test.ts"
   ]

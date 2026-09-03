@@ -161,13 +161,12 @@ export default function ListingImageGallery({
           role="presentation"
           onClick={() => setViewerOpen(false)}
         >
-          <div
-            className="listing-photo-viewer-dialog"
-            role="dialog"
-            aria-modal="true"
-            aria-label={t('viewerTitleWithPhoto', { photo: fullAlt })}
-            onClick={(event) => event.stopPropagation()}
-          >
+<div
+  className="listing-photo-viewer-dialog"
+  role="dialog"
+  aria-modal="true"
+  aria-label={t('viewerTitleWithPhoto', { photo: fullAlt })}
+>
             <button
               ref={closeButtonRef}
               type="button"
@@ -181,16 +180,20 @@ export default function ListingImageGallery({
                 <button
                   type="button"
                   className="listing-photo-viewer-nav listing-photo-viewer-nav--icon listing-photo-viewer-nav--previous"
-                  onClick={showPreviousPhoto}
-                  aria-label={t('previousPhoto')}
+onClick={(event) => {
+  event.stopPropagation();
+  showPreviousPhoto();
+}}                  aria-label={t('previousPhoto')}
                 >
                   <ArrowIcon direction="left" />
                 </button>
                 <button
                   type="button"
                   className="listing-photo-viewer-nav listing-photo-viewer-nav--icon listing-photo-viewer-nav--next"
-                  onClick={showNextPhoto}
-                  aria-label={t('nextPhoto')}
+onClick={(event) => {
+  event.stopPropagation();
+  showNextPhoto();
+}}                  aria-label={t('nextPhoto')}
                 >
                   <ArrowIcon direction="right" />
                 </button>
@@ -201,11 +204,12 @@ export default function ListingImageGallery({
             ) : null}
             <div className="listing-photo-viewer-image-frame">
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                className="listing-photo-viewer-image"
-                src={selectedImage.url}
-                alt={fullAlt}
-              />
+<img
+  className="listing-photo-viewer-image"
+  src={selectedImage.url}
+  alt={fullAlt}
+  onClick={(event) => event.stopPropagation()}
+/>
             </div>
           </div>
         </div>

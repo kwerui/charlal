@@ -3,38 +3,25 @@
 import { Link } from '@/i18n/navigation';
 import { useCallback, useEffect, useRef, useState, type FormEvent } from 'react';
 import ProfileAvatar from '@/app/components/ProfileAvatar';
-import ReviewPhotoViewer from '@/app/components/ReviewPhotoViewer';
 import { useLocale, useTranslations } from 'next-intl';
 import { formatReviewDate } from '@/lib/reviewDateFormatting';
+import {
+  MAX_SELLER_REVIEW_TAGS,
+  SELLER_REVIEW_TAGS,
+  type SellerReviewTag,
+} from '@/lib/reviewTags';
 import {
   recordReviewMutationRefreshIntent,
   shouldRefreshForReviewMutation,
 } from '@/lib/reviewMutationRefreshStorage';
 import { createClient } from '@/lib/supabase/client';
 import {
-  createReviewPhotoStoragePath,
   listMyReviewableTransactions,
-  listOwnSellerReviewPhotoPaths,
-  MAX_REVIEW_PHOTOS,
-  MAX_REVIEW_PHOTO_BYTES,
-  removeReviewPhotoFiles,
-  REVIEW_PHOTO_ACCEPT,
-  REVIEW_PHOTO_MIME_TYPES,
   type ReviewableTransaction,
-  type ReviewPhoto,
-  uploadReviewPhotoFile,
 } from '@/lib/supabase/reviews';
 
 type Props = {
   initialTransactions: ReviewableTransaction[];
-};
-
-type ReviewEditorMode = 'create' | 'edit';
-
-type ReviewDraftFile = {
-  id: string;
-  file: File;
-  url: string;
 };
 
 type PendingDeleteReview = {
@@ -49,103 +36,50 @@ function getStars(rating: number | null): string {
   return `${'★'.repeat(rating)}${'☆'.repeat(Math.max(0, 5 - rating))}`;
 }
 
-function isReviewPhotoFile(file: File): boolean {
+function ReviewTagChips({ tags }: { tags: SellerReviewTag[] }) {
+  const t = useTranslations('ReviewTags');
+
+  if (tags.length === 0) {
+    return null;
+  }
+
   return (
-    (REVIEW_PHOTO_MIME_TYPES as readonly string[]).includes(file.type) &&
-    file.size <= MAX_REVIEW_PHOTO_BYTES
+    <ul className="review-tag-list" aria-label={t('selectedTagsLabel')}>
+      {tags.map((tag) => (
+        <li key={tag}>{t(tag)}</li>
+      ))}
+    </ul>
   );
 }
 
 type ReviewEditorProps = {
   transaction: ReviewableTransaction;
-  mode: ReviewEditorMode;
   isSubmitting: boolean;
   submitLabel: string;
   onCancel?: () => void;
   onSubmit: (input: {
     transaction: ReviewableTransaction;
     rating: number;
-    body: string;
-    keptPhotos: ReviewPhoto[];
-    newFiles: File[];
+    tags: SellerReviewTag[];
   }) => Promise<void>;
 };
 
 function ReviewEditor({
   transaction,
-  mode,
   isSubmitting,
   submitLabel,
   onCancel,
   onSubmit,
 }: ReviewEditorProps) {
   const t = useTranslations('AccountReviews');
+  const reviewTagsT = useTranslations('ReviewTags');
   const listingReportT = useTranslations('ListingReport');
-  const listingFormT = useTranslations('PostAd.form');
   const publicSellerReviewsT = useTranslations('PublicSellerReviews');
   const [rating, setRating] = useState(transaction.rating || 0);
-  const [body, setBody] = useState(transaction.reviewBody || '');
-  const [keptPhotos, setKeptPhotos] = useState<ReviewPhoto[]>(
-    transaction.reviewPhotos
+  const [selectedTags, setSelectedTags] = useState<SellerReviewTag[]>(
+    transaction.reviewTags
   );
-  const [draftFiles, setDraftFiles] = useState<ReviewDraftFile[]>([]);
   const [error, setError] = useState('');
-  const draftUrlsRef = useRef<Set<string>>(new Set());
-
-  useEffect(() => {
-    const draftUrls = draftUrlsRef.current;
-
-    return () => {
-      draftUrls.forEach((url) => URL.revokeObjectURL(url));
-      draftUrls.clear();
-    };
-  }, []);
-
-  function removeDraftFile(id: string): void {
-    setDraftFiles((currentFiles) => {
-      const removedFile = currentFiles.find((file) => file.id === id);
-      if (removedFile) {
-        URL.revokeObjectURL(removedFile.url);
-        draftUrlsRef.current.delete(removedFile.url);
-      }
-
-      return currentFiles.filter((file) => file.id !== id);
-    });
-  }
-
-  function handleFiles(files: FileList | null): void {
-    if (!files) {
-      return;
-    }
-
-    const incomingFiles = Array.from(files);
-    const availableSlots =
-      MAX_REVIEW_PHOTOS - keptPhotos.length - draftFiles.length;
-
-    if (availableSlots <= 0 || incomingFiles.length > availableSlots) {
-      setError(t('reviewPhotoMaximumMessage'));
-      return;
-    }
-
-    if (!incomingFiles.every(isReviewPhotoFile)) {
-      setError(t('reviewPhotoUnsupportedTypeMessage'));
-      return;
-    }
-
-    const nextDraftFiles = incomingFiles.map((file) => {
-      const url = URL.createObjectURL(file);
-      draftUrlsRef.current.add(url);
-
-      return {
-        id: crypto.randomUUID(),
-        file,
-        url,
-      };
-    });
-
-    setDraftFiles((currentFiles) => [...currentFiles, ...nextDraftFiles]);
-    setError('');
-  }
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -159,9 +93,24 @@ function ReviewEditor({
     await onSubmit({
       transaction,
       rating,
-      body,
-      keptPhotos,
-      newFiles: draftFiles.map((draftFile) => draftFile.file),
+      tags: selectedTags,
+    });
+  }
+
+  function toggleTag(tag: SellerReviewTag): void {
+    setSelectedTags((currentTags) => {
+      if (currentTags.includes(tag)) {
+        setError('');
+        return currentTags.filter((currentTag) => currentTag !== tag);
+      }
+
+      if (currentTags.length >= MAX_SELLER_REVIEW_TAGS) {
+        setError(t('reviewTagsMaximumMessage'));
+        return currentTags;
+      }
+
+      setError('');
+      return [...currentTags, tag];
     });
   }
 
@@ -192,73 +141,30 @@ function ReviewEditor({
         </div>
       </fieldset>
 
-      <label className="form-field">
-        <span>{t('reviewTextLabel')}</span>
-        <textarea
-          value={body}
-          onChange={(event) => setBody(event.target.value)}
-          maxLength={2000}
-          rows={mode === 'edit' ? 3 : 4}
-          disabled={isSubmitting}
-        />
-      </label>
-
-      <div className="review-photo-editor">
-        <label className="secondary-button review-photo-upload-button">
-          <span>{t('addReviewPhotosButton')}</span>
-          <input
-            className="sr-only"
-            type="file"
-            accept={REVIEW_PHOTO_ACCEPT}
-            multiple
-            onChange={(event) => {
-              handleFiles(event.target.files);
-              event.target.value = '';
-            }}
-            disabled={
+      <fieldset className="review-tag-field">
+        <legend>{t('reviewTagsLabel')}</legend>
+        <p>{t('reviewTagsHelp')}</p>
+        <div className="review-tag-options">
+          {SELLER_REVIEW_TAGS.map((tag) => {
+            const isSelected = selectedTags.includes(tag);
+            const isDisabled =
               isSubmitting ||
-              keptPhotos.length + draftFiles.length >= MAX_REVIEW_PHOTOS
-            }
-          />
-        </label>
-        <small>{t('reviewPhotoRequirementsMessage')}</small>
-        {keptPhotos.length > 0 || draftFiles.length > 0 ? (
-          <ul className="review-photo-preview-list">
-            {keptPhotos.map((photo) => (
-              <li key={photo.id}>
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={photo.url} alt={t('reviewPhotoPreviewLabel')} />
-                <button
-                  type="button"
-                  onClick={() =>
-                    setKeptPhotos((currentPhotos) =>
-                      currentPhotos.filter(
-                        (currentPhoto) => currentPhoto.id !== photo.id
-                      )
-                    )
-                  }
-                  disabled={isSubmitting}
-                >
-                  {listingFormT('photos.removePhotoButton')}
-                </button>
-              </li>
-            ))}
-            {draftFiles.map((draftFile) => (
-              <li key={draftFile.id}>
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={draftFile.url} alt={t('reviewPhotoPreviewLabel')} />
-                <button
-                  type="button"
-                  onClick={() => removeDraftFile(draftFile.id)}
-                  disabled={isSubmitting}
-                >
-                  {listingFormT('photos.removePhotoButton')}
-                </button>
-              </li>
-            ))}
-          </ul>
-        ) : null}
-      </div>
+              (!isSelected && selectedTags.length >= MAX_SELLER_REVIEW_TAGS);
+
+            return (
+              <label key={tag}>
+                <input
+                  type="checkbox"
+                  checked={isSelected}
+                  onChange={() => toggleTag(tag)}
+                  disabled={isDisabled}
+                />
+                <span>{reviewTagsT(tag)}</span>
+              </label>
+            );
+          })}
+        </div>
+      </fieldset>
 
       {error ? (
         <p className="form-error" role="alert">
@@ -397,70 +303,12 @@ export default function PurchasesToReview({ initialTransactions }: Props) {
     await refreshTransactions();
   }
 
-  async function insertReviewPhotos(
-    reviewId: string,
-    files: File[],
-    positions: number[]
-  ): Promise<boolean> {
-    if (files.length === 0) {
-      return true;
-    }
-
-    const supabase = createClient();
-    const uploadedStoragePaths: string[] = [];
-    const rows: {
-      review_id: string;
-      storage_path: string;
-      position: number;
-      content_type: string;
-    }[] = [];
-
-    for (const [index, file] of files.entries()) {
-      const storagePath = createReviewPhotoStoragePath(reviewId, file);
-      const position = positions[index];
-
-      if (!storagePath || position === undefined) {
-        await removeReviewPhotoFiles(supabase, uploadedStoragePaths);
-        return false;
-      }
-
-      const uploaded = await uploadReviewPhotoFile(supabase, storagePath, file);
-
-      if (!uploaded) {
-        await removeReviewPhotoFiles(supabase, uploadedStoragePaths);
-        return false;
-      }
-
-      uploadedStoragePaths.push(storagePath);
-      rows.push({
-        review_id: reviewId,
-        storage_path: storagePath,
-        position,
-        content_type: file.type,
-      });
-    }
-
-    const { error: insertError } = await supabase
-      .from('seller_review_photos')
-      .insert(rows);
-
-    if (insertError) {
-      await removeReviewPhotoFiles(supabase, uploadedStoragePaths);
-      return false;
-    }
-
-    return true;
-  }
-
   async function handleSaveReview(input: {
     transaction: ReviewableTransaction;
     rating: number;
-    body: string;
-    keptPhotos: ReviewPhoto[];
-    newFiles: File[];
+    tags: SellerReviewTag[];
   }): Promise<void> {
-    const { transaction, rating, body, keptPhotos, newFiles } = input;
-    const bodyValue = body.trim() || null;
+    const { transaction, rating, tags } = input;
     const isEditing = Boolean(transaction.reviewId);
 
     setSubmittingTransactionId(transaction.transactionId);
@@ -472,47 +320,12 @@ export default function PurchasesToReview({ initialTransactions }: Props) {
     if (isEditing && transaction.reviewId) {
       const { error: updateError } = await supabase
         .from('seller_reviews')
-        .update({ rating, body: bodyValue })
+        .update({ rating, tags })
         .eq('id', transaction.reviewId);
 
       if (updateError) {
         setSubmittingTransactionId(null);
         setError(t('reviewSaveFailedMessage'));
-        return;
-      }
-
-      const keptPhotoIds = new Set(keptPhotos.map((photo) => photo.id));
-      const removedPhotos = transaction.reviewPhotos.filter(
-        (photo) => !keptPhotoIds.has(photo.id)
-      );
-
-      if (removedPhotos.length > 0) {
-        await supabase
-          .from('seller_review_photos')
-          .delete()
-          .in(
-            'id',
-            removedPhotos.map((photo) => photo.id)
-          );
-        await removeReviewPhotoFiles(
-          supabase,
-          removedPhotos.map((photo) => photo.storagePath)
-        );
-      }
-
-      const usedPositions = new Set(keptPhotos.map((photo) => photo.position));
-      const availablePositions = [0, 1, 2].filter(
-        (position) => !usedPositions.has(position)
-      );
-      const photosInserted = await insertReviewPhotos(
-        transaction.reviewId,
-        newFiles,
-        availablePositions
-      );
-
-      if (!photosInserted) {
-        setSubmittingTransactionId(null);
-        setError(t('reviewPhotoUploadFailedMessage'));
         return;
       }
     } else {
@@ -521,7 +334,7 @@ export default function PurchasesToReview({ initialTransactions }: Props) {
         .insert({
           transaction_id: transaction.transactionId,
           rating,
-          body: bodyValue,
+          tags,
         })
         .select('id')
         .single();
@@ -533,18 +346,6 @@ export default function PurchasesToReview({ initialTransactions }: Props) {
       ) {
         setSubmittingTransactionId(null);
         setError(t('reviewSaveFailedMessage'));
-        return;
-      }
-
-      const photosInserted = await insertReviewPhotos(
-        insertedReview.id,
-        newFiles,
-        [0, 1, 2]
-      );
-
-      if (!photosInserted) {
-        setSubmittingTransactionId(null);
-        setError(t('reviewPhotoUploadFailedMessage'));
         return;
       }
     }
@@ -566,17 +367,7 @@ export default function PurchasesToReview({ initialTransactions }: Props) {
     setError('');
     setMessage('');
 
-    const supabase = createClient();
-    const photoPathsResult = await listOwnSellerReviewPhotoPaths(
-      supabase,
-      reviewId
-    );
-
-    if (photoPathsResult.ok && photoPathsResult.storagePaths.length > 0) {
-      await removeReviewPhotoFiles(supabase, photoPathsResult.storagePaths);
-    }
-
-    const { error: deleteError } = await supabase.rpc(
+    const { error: deleteError } = await createClient().rpc(
       'delete_own_seller_review',
       {
         p_review_id: reviewId,
@@ -634,8 +425,7 @@ export default function PurchasesToReview({ initialTransactions }: Props) {
                   </div>
                   <button
                     type="button"
-                    className="listing-management-button purchase-review-toggle"
-                    onClick={() =>
+className="listing-management-button purchase-review-toggle purchase-review-toggle--primary"                    onClick={() =>
                       setOpenCreateTransactionId((currentId) =>
                         currentId === transaction.transactionId
                           ? null
@@ -651,7 +441,6 @@ export default function PurchasesToReview({ initialTransactions }: Props) {
                 {openCreateTransactionId === transaction.transactionId ? (
                   <ReviewEditor
                     transaction={transaction}
-                    mode="create"
                     isSubmitting={
                       submittingTransactionId === transaction.transactionId
                     }
@@ -706,7 +495,6 @@ export default function PurchasesToReview({ initialTransactions }: Props) {
                 {editingReviewId === transaction.reviewId ? (
                   <ReviewEditor
                     transaction={transaction}
-                    mode="edit"
                     isSubmitting={
                       submittingTransactionId === transaction.transactionId
                     }
@@ -724,17 +512,11 @@ export default function PurchasesToReview({ initialTransactions }: Props) {
                     >
                       {getStars(transaction.rating)}
                     </p>
-                    {transaction.reviewBody ? (
-                      <p className="seller-review-body">{transaction.reviewBody}</p>
-                    ) : null}
-                    <ReviewPhotoViewer
-                      photos={transaction.reviewPhotos}
-                      className="seller-review-photos my-review-photos"
-                    />
+                    <ReviewTagChips tags={transaction.reviewTags} />
                     <div className="review-form-actions">
                       <button
                         type="button"
-                        className="listing-management-button"
+className="listing-management-button review-action-button--edit"
                         onClick={() => setEditingReviewId(transaction.reviewId)}
                       >
                         {t('editReviewButton')}
@@ -742,7 +524,7 @@ export default function PurchasesToReview({ initialTransactions }: Props) {
                       {transaction.reviewId ? (
                         <button
                           type="button"
-                          className="listing-management-button"
+className="listing-management-button review-action-button--delete"
                           onClick={() =>
                             setPendingDeleteReview({
                               reviewId: transaction.reviewId || '',

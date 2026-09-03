@@ -458,18 +458,13 @@ backToResults: "Back to results / Түңнелдерже эглип келир",
   reviewSaveFailedMessage: "Unable to save review.", // TODO: add reviewed Tuvan translation.
   reviewDeleteFailedMessage: "Unable to delete review.", // TODO: add reviewed Tuvan translation.
   deleteReviewConfirmTitle: "Delete review?", // TODO: add reviewed Tuvan translation.
-  deleteReviewConfirmMessage: "Your rating, text and photos will be removed. You can review this purchase again later.", // TODO: add reviewed Tuvan translation.
+  deleteReviewConfirmMessage: "[TYV REVIEW] Your rating and tags will be removed. You can review this purchase again later.", // TODO: add reviewed Tuvan translation.
   reviewRatingLabel: "Rating", // TODO: add reviewed Tuvan translation.
   reviewRatingRequiredMessage: "Choose a 1 to 5 star rating.", // TODO: add reviewed Tuvan translation.
   starsLabel: "stars", // TODO: add reviewed Tuvan translation.
-  reviewTextLabel: "Review text (optional)", // TODO: add reviewed Tuvan translation.
-  addReviewPhotosButton: "Add review photos", // TODO: add reviewed Tuvan translation.
-  reviewPhotoRequirementsMessage: "Add up to 3 photos. JPEG, PNG, or WebP. Maximum 5 MB each.", // TODO: add reviewed Tuvan translation.
-  reviewPhotoMaximumMessage: "A review can have at most 3 photos.", // TODO: add reviewed Tuvan translation.
-  reviewPhotoTooLargeMessage: "Photo is too large. Maximum size is 5 MB.", // TODO: add reviewed Tuvan translation.
-  reviewPhotoUnsupportedTypeMessage: "Unsupported photo type. Use JPEG, PNG, or WebP.", // TODO: add reviewed Tuvan translation.
-  reviewPhotoUploadFailedMessage: "Unable to upload review photo.", // TODO: add reviewed Tuvan translation.
-  reviewPhotoPreviewLabel: "Review photo", // TODO: add reviewed Tuvan translation.
+  reviewTagsLabel: "[TYV REVIEW] Tags", // TODO: add reviewed Tuvan translation.
+  reviewTagsHelp: "[TYV REVIEW] Optional. Choose up to 3.", // TODO: add reviewed Tuvan translation.
+  reviewTagsMaximumMessage: "[TYV REVIEW] Choose no more than 3 tags.", // TODO: add reviewed Tuvan translation.
   noAdvertisementsPostedTitle: "No advertisements posted / Чарлал чок", // TODO: add reviewed Tuvan translation.
   noAdvertisementsPostedMessage: "Advertisements you create while signed in will appear here. / Кирип тургаш кылган чарлалдарыңар мында көстүп кээр.", // TODO: add reviewed Tuvan translation.
   deleteAdvertisementButton: "Delete advertisement / Чарлалды өжүрүп кааптыңар", // TODO: add reviewed Tuvan translation.

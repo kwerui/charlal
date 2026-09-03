@@ -270,16 +270,12 @@
     "reviewSaveFailedMessage": "Хыналданы кадагалап шыдаваан. / Unable to save review.",
     "reviewDeleteFailedMessage": "Хыналданы өжүрүп шыдаваан. / Unable to delete review.",
     "deleteReviewConfirmTitle": "Хыналданы өжүрүп кааптыңар бе? / Delete review?",
-    "deleteReviewConfirmMessage": "Силерниң үнелелиңер, бижиктериңер болгаш чуруктарыңар өжүртүнүп каар. Бо садып алыышкынны соонда катап көрүп болур силер. / Your rating, text and photos will be removed. You can review this purchase again later.",
+    "deleteReviewConfirmMessage": "Силерниң үнелелиңер болгаш демдектериңер ап кааптар. Бо садып алыышкынны соонда катап көрүп болур силер. / Your rating and tags will be removed. You can review this purchase again later.",
     "reviewRatingLabel": "Үнелел / Rating",
     "reviewRatingRequiredMessage": "1-ден 5 сылдыска чедир үнелелди шилип алыңар. / Choose a 1 to 5 star rating.",
-    "reviewTextLabel": "Сөзүглелди катаптаары (негелде чок) / Review text (optional)",
-    "addReviewPhotosButton": "Хыналдаңарга чурукту немеп алыңар / Add review photos",
-    "reviewPhotoRequirementsMessage": "чурукка чедир немеп каар. JPEG, PNG азы WebP. Эң хөйү 5 МБ. / Add up to 3 photos. JPEG, PNG, or WebP. Maximum 5 MB each.",
-    "reviewPhotoMaximumMessage": "Рецензияда эвээш дизе 3 чурук бар болур. / A review can have at most 3 photos.",
-    "reviewPhotoUnsupportedTypeMessage": "Деткиттинмээн чурук хевири. JPEG, PNG азы WebP ажыглаар. / Unsupported photo type. Use JPEG, PNG, or WebP.",
-    "reviewPhotoUploadFailedMessage": "Хыналда чуруун үндүрүп шыдаваан. / Unable to upload review photo.",
-    "reviewPhotoPreviewLabel": "Хыналданың чуруу / Review photo"
+    "reviewTagsLabel": "Тегтер / Tags",
+    "reviewTagsHelp": "Немелде. Чедир шилип алыңар. / Optional. Choose up to 3.",
+    "reviewTagsMaximumMessage": "3-тен хөй эвес демдектерни шилип алыңар. / Choose no more than 3 tags."
   },
   "SavedListings": {
     "title": "Камгалаттынган чарлалдар",
@@ -374,26 +370,18 @@
     "noReviewsYetLabel": "Амдыызында үнелелдер чок / No reviews yet",
     "starsLabel": " {count} Сылдыс",
     "verifiedPurchaseLabel": "Бадыткаан садып алыышкын / Verified purchase",
-    "editedReviewLabel": "Өскерткен / Edited",
-    "responseLabel": "Садыгжының харыызы / Seller response",
-    "addResponseButton": "Харыы немээр / Add response",
-    "editResponseButton": "Харыызын эде көөр / Edit response",
-    "saveResponseChangesButton": "Өскерлиишкиннерни кадагала / Save changes",
-    "deleteResponseButton": "Харыызын өжүрүп кааптыңар / Delete response",
-    "responseSavingButton": "Кадагалап турар ...",
-    "responseSavedMessage": "Садыгжының харыызы камгалаттынган. / Seller response saved.",
-    "responseDeletedMessage": "Садыгжы харыызын өжүрүп каан. / Seller response deleted.",
-    "responseSaveFailedMessage": "Садыгжы харыызын кадагалап шыдаваан. / Unable to save seller response.",
-    "responseDeleteFailedMessage": "Садыгжы харыызын өжүрүп шыдаваан. / Unable to delete seller response.",
-    "deleteResponseConfirmMessage": "Бо садыгжы харыызын өжүрүп кааптыңар бе? / Delete this seller response?"
+    "editedReviewLabel": "Өскерткен / Edited"
   },
-  "ReviewPhotoViewer": {
-    "openReviewPhotoLabel": "Ажык хыналда чурук / Open review photo {position}",
-    "reviewPhotoLabel": "Хыналданың чуруу / Review photo",
-    "closeButton": "Хаар / Close",
-    "previousPhotoButton": "Previous photo / Эрткен чурук",
-    "nextPhotoButton": "Next photo / Дараазында чурук",
-    "position": "{current} / {total}"
+  "ReviewTags": {
+    "selectedTagsLabel": "Шилиттинген хыналда демдектери / Selected review tags",
+    "satisfied": "Сеткили канган / Satisfied",
+    "friendly_seller": "Найыралдыг садыгжы / Friendly seller",
+    "good_communication": "Эки харылзаа / Good communication",
+    "quick_handover": "Дүрген дамчыдылга / Quick handover",
+    "fair_price": "Чөптүг өртек / Fair price",
+    "not_satisfied": "Хандыртынмаан / Not satisfied",
+    "poor_communication": "Харылзаа багай /Poor communication ",
+    "handover_issue": "Дамчыдылга айтырыы / Handover issue"
   },
   "ProfilePhoto": {
     "label": "Профиль чурук / Profile photo",
