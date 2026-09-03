@@ -9,7 +9,7 @@ import {
 } from '@/lib/listingDatabaseTypes';
 import { getCurrentUserResult } from '@/lib/auth/server';
 import { createClient } from '@/lib/supabase/server';
-import { revalidateListingMutationRoutes } from '@/app/account/listings/[id]/edit/actions';
+import { revalidateListingMutationRoutes } from '@/app/[locale]/account/listings/[id]/edit/actions';
 
 export type UpdateListingStatusResult =
   | {

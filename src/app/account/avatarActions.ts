@@ -1,6 +1,9 @@
 'use server';
 
-import { revalidatePath } from 'next/cache';
+import {
+  revalidateLocalizedPath,
+  revalidateLocalizedRoutePattern,
+} from '@/i18n/revalidate';
 import { getCurrentUserResult } from '@/lib/auth/server';
 import { createClient } from '@/lib/supabase/server';
 import {
@@ -55,9 +58,9 @@ function isAvatarMutationRow(value: unknown): value is AvatarMutationRow {
 }
 
 function revalidateAvatarPaths(publicSlug: string): void {
-  revalidatePath('/account');
-  revalidatePath(`/seller/${publicSlug}`);
-  revalidatePath('/listing/[id]', 'page');
+  revalidateLocalizedPath('/account');
+  revalidateLocalizedPath(`/seller/${publicSlug}`);
+  revalidateLocalizedRoutePattern('/listing/[id]', 'page');
 }
 
 async function setCurrentProfileAvatarPath(

@@ -1,6 +1,6 @@
 'use server';
 
-import { revalidatePath } from 'next/cache';
+import { revalidateLocalizedPath } from '@/i18n/revalidate';
 import type { ListingFavoriteReference } from '@/lib/listingFavoriteKeys';
 import {
   removeListingFavorite,
@@ -32,10 +32,10 @@ export async function saveFavoriteAction(
   logFavoriteActionFailure('save', reference, result);
 
   if (result.ok) {
-    revalidatePath('/');
-    revalidatePath('/search');
-    revalidatePath('/account/favorites');
-    revalidatePath(`/listing/${reference.listingId}`);
+    revalidateLocalizedPath('/');
+    revalidateLocalizedPath('/search');
+    revalidateLocalizedPath('/account/favorites');
+    revalidateLocalizedPath(`/listing/${reference.listingId}`);
   }
 
   return result;
@@ -49,10 +49,10 @@ export async function removeFavoriteAction(
   logFavoriteActionFailure('remove', reference, result);
 
   if (result.ok) {
-    revalidatePath('/');
-    revalidatePath('/search');
-    revalidatePath('/account/favorites');
-    revalidatePath(`/listing/${reference.listingId}`);
+    revalidateLocalizedPath('/');
+    revalidateLocalizedPath('/search');
+    revalidateLocalizedPath('/account/favorites');
+    revalidateLocalizedPath(`/listing/${reference.listingId}`);
   }
 
   return result;

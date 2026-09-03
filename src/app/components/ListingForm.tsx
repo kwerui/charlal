@@ -1,6 +1,6 @@
 'use client';
 
-import Link from 'next/link';
+import { Link } from '@/i18n/navigation';
 import type { ChangeEvent, FormEvent, ReactNode } from 'react';
 import { useEffect, useRef, useState } from 'react';
 import { content } from '@/content/tyv';
@@ -9,6 +9,7 @@ import {
   getListingFormValues,
   type ListingFormCategory,
   type ListingFormMode,
+  type ListingFormValidationMessages,
   type ValidatedListingFormValues,
   validateListingFormValues,
 } from '@/lib/listingFormValidation';
@@ -31,6 +32,43 @@ export type ListingFormInitialValues = {
   buyTypeSlug?: string;
 };
 
+export type ListingFormMessages = {
+  titleLabel: string;
+  categoryLabel: string;
+  categoryPlaceholder: string;
+  subcategoryLabel: string;
+  subcategoryPlaceholder: string;
+  typeLabel: string;
+  typePlaceholder: string;
+  buyTypeLabel: string;
+  buyTypePlaceholder: string;
+  descriptionLabel: string;
+  priceLabel: string;
+  locationLabel: string;
+  photosLabel: string;
+  photosHelp: string;
+  addPhotosButton: string;
+  coverPhotoLabel: string;
+  positionLabel: string;
+  movePhotoEarlierButton: string;
+  movePhotoLaterButton: string;
+  removePhotoButton: string;
+  noPhotosMessage: string;
+  imageRequirements: string;
+  photoMaximumMessage: string;
+  photoTooLargeMessage: string;
+  photoUnsupportedTypeMessage: string;
+  photoAlt: (values: { current: number; total: number }) => string;
+  cancelButton: string;
+  validation: ListingFormValidationMessages;
+};
+
+export type ListingFormStatusMessages = {
+  label: string;
+  options: Record<ListingStatus, string>;
+  help: Record<ListingStatus, string>;
+};
+
 type Props = {
   mode: ListingFormMode;
   categories: ListingFormCategory[];
@@ -42,10 +80,12 @@ type Props = {
   successMessage?: string;
   cancelHref?: string;
   initialImages?: ListingImage[];
+  messages?: ListingFormMessages;
   statusField?: {
     value: ListingStatus;
     onChange: (status: ListingStatus) => void;
     disabled?: boolean;
+    messages?: ListingFormStatusMessages;
     soldBuyerControl?: ReactNode;
   };
   onCancel?: () => void;
@@ -81,8 +121,50 @@ export default function ListingForm({
   initialImages = [],
   statusField,
   onCancel,
+  messages,
   onSubmit,
 }: Props) {
+  const formMessages: ListingFormMessages = messages ?? {
+    titleLabel: content.listingTitleLabel,
+    categoryLabel: content.listingCategoryLabel,
+    categoryPlaceholder: content.listingCategoryPlaceholder,
+    subcategoryLabel: content.listingSubcategoryLabel,
+    subcategoryPlaceholder: content.listingSubcategoryPlaceholder,
+    typeLabel: content.listingTypeLabel,
+    typePlaceholder: content.listingTypePlaceholder,
+    buyTypeLabel: content.listingBuyTypeLabel,
+    buyTypePlaceholder: content.listingBuyTypePlaceholder,
+    descriptionLabel: content.listingDescriptionLabel,
+    priceLabel: content.listingPriceLabel,
+    locationLabel: content.listingLocationLabel,
+    photosLabel: content.listingPhotosLabel,
+    photosHelp: content.listingPhotosHelp,
+    addPhotosButton: content.addPhotosButton,
+    coverPhotoLabel: content.coverPhotoLabel,
+    positionLabel: content.listingPhotoPositionLabel,
+    movePhotoEarlierButton: content.movePhotoEarlierButton,
+    movePhotoLaterButton: content.movePhotoLaterButton,
+    removePhotoButton: content.removePhotoButton,
+    noPhotosMessage: content.listingNoPhotosMessage,
+    imageRequirements: content.listingImageRequirements,
+    photoMaximumMessage: content.listingPhotoMaximumMessage,
+    photoTooLargeMessage: content.listingPhotoTooLargeMessage,
+    photoUnsupportedTypeMessage: content.listingPhotoUnsupportedTypeMessage,
+    photoAlt: ({ current, total }) =>
+      content.listingPhotoAltTemplate
+        .replace('{current}', String(current))
+        .replace('{total}', String(total)),
+    cancelButton: content.cancelButton,
+    validation: {
+      titleRequired: content.postAdErrorTitleRequired,
+      descriptionRequired: content.postAdErrorDescriptionRequired,
+      locationRequired: content.postAdErrorLocationRequired,
+      categoryRequired: content.postAdErrorCategoryRequired,
+      priceRequired: content.postAdErrorPriceRequired,
+      housingTypeRequired: content.postAdErrorHousingTypeRequired,
+      marketplaceTypeRequired: content.postAdErrorMarketplaceTypeRequired,
+    },
+  };
   const [validationErrors, setValidationErrors] = useState<string[]>([]);
   const [photoErrors, setPhotoErrors] = useState<string[]>([]);
   const [photos, setPhotos] = useState<ListingPhotoFormItem[]>(
@@ -112,6 +194,21 @@ export default function ListingForm({
   const marketplaceBuyTypes =
     selectedCategory?.buyTypes?.filter((buyType) => buyType.slug !== 'all-categories') || [];
   const errors = [...validationErrors, ...photoErrors, ...externalErrors];
+  const statusMessages: ListingFormStatusMessages = statusField?.messages ?? {
+    label: content.advertisementStatusLabel,
+    options: {
+      active: content.listingStatusActive,
+      reserved: content.listingStatusReserved,
+      sold: content.listingStatusSold,
+      archived: content.listingStatusArchived,
+    },
+    help: {
+      active: content.listingStatusActiveHelp,
+      reserved: content.listingStatusReservedHelp,
+      sold: content.listingStatusSoldHelp,
+      archived: content.listingStatusArchivedHelp,
+    },
+  };
 
   useEffect(() => {
     photosRef.current = photos;
@@ -159,7 +256,8 @@ export default function ListingForm({
 
     const validationResult = validateListingFormValues(
       getListingFormValues(new FormData(event.currentTarget)),
-      categories
+      categories,
+      formMessages.validation
     );
 
     if (!validationResult.ok) {
@@ -184,19 +282,19 @@ export default function ListingForm({
     const acceptedFiles = selectedFiles.slice(0, Math.max(remainingSlots, 0));
 
     if (selectedFiles.length > remainingSlots) {
-      nextErrors.push(content.listingPhotoMaximumMessage);
+      nextErrors.push(formMessages.photoMaximumMessage);
     }
 
     const nextPhotos: ListingPhotoFormItem[] = [];
 
     for (const file of acceptedFiles) {
       if (!(LISTING_IMAGE_MIME_TYPES as readonly string[]).includes(file.type)) {
-        nextErrors.push(`${file.name}: ${content.listingPhotoUnsupportedTypeMessage}`);
+        nextErrors.push(`${file.name}: ${formMessages.photoUnsupportedTypeMessage}`);
         continue;
       }
 
       if (file.size > MAX_LISTING_IMAGE_BYTES) {
-        nextErrors.push(`${file.name}: ${content.listingPhotoTooLargeMessage}`);
+        nextErrors.push(`${file.name}: ${formMessages.photoTooLargeMessage}`);
         continue;
       }
 
@@ -252,7 +350,7 @@ export default function ListingForm({
     <form className="post-ad-form listing-editor-form" onSubmit={handleSubmit} noValidate>
       <div className="listing-form-section listing-form-section--details">
         <label className="form-field" htmlFor="listing-title">
-          <span>{content.listingTitleLabel}</span>
+          <span>{formMessages.titleLabel}</span>
           <input
             id="listing-title"
             name="title"
@@ -264,7 +362,7 @@ export default function ListingForm({
         </label>
 
         <label className="form-field" htmlFor="listing-category">
-          <span>{content.listingCategoryLabel}</span>
+          <span>{formMessages.categoryLabel}</span>
           <select
             id="listing-category"
             name="category"
@@ -273,7 +371,7 @@ export default function ListingForm({
             onChange={(event) => handleCategoryChange(event.target.value)}
           >
             <option value="" disabled>
-              {content.listingCategoryPlaceholder}
+              {formMessages.categoryPlaceholder}
             </option>
             {categories.map((category) => (
               <option key={category.slug} value={category.slug}>
@@ -285,7 +383,7 @@ export default function ListingForm({
 
         {hasSubcategories ? (
           <label className="form-field" htmlFor="listing-subcategory">
-            <span>{content.listingSubcategoryLabel}</span>
+            <span>{formMessages.subcategoryLabel}</span>
             <select
               id="listing-subcategory"
               name="subcategory"
@@ -294,7 +392,7 @@ export default function ListingForm({
               onChange={(event) => handleSubcategoryChange(event.target.value)}
             >
               <option value="" disabled>
-                {content.listingSubcategoryPlaceholder}
+                {formMessages.subcategoryPlaceholder}
               </option>
               {selectedCategory?.subcategories.map((subcategory) => (
                 <option key={subcategory.slug} value={subcategory.slug}>
@@ -307,7 +405,7 @@ export default function ListingForm({
 
         {hasTypes ? (
           <label className="form-field" htmlFor="listing-type">
-            <span>{content.listingTypeLabel}</span>
+            <span>{formMessages.typeLabel}</span>
             <select
               id="listing-type"
               name="type"
@@ -319,7 +417,7 @@ export default function ListingForm({
               }}
             >
               <option value="" disabled>
-                {content.listingTypePlaceholder}
+                {formMessages.typePlaceholder}
               </option>
               {selectedCategory?.types?.map((typeItem) => (
                 <option key={typeItem.slug} value={typeItem.slug}>
@@ -332,7 +430,7 @@ export default function ListingForm({
 
         {hasBuyTypes ? (
           <label className="form-field" htmlFor="listing-buy-type">
-            <span>{content.listingBuyTypeLabel}</span>
+            <span>{formMessages.buyTypeLabel}</span>
             <select
               id="listing-buy-type"
               name="buyType"
@@ -344,7 +442,7 @@ export default function ListingForm({
               }}
             >
               <option value="" disabled>
-                {content.listingBuyTypePlaceholder}
+                {formMessages.buyTypePlaceholder}
               </option>
               {marketplaceBuyTypes.map((buyType) => (
                 <option key={buyType.slug} value={buyType.slug}>
@@ -356,7 +454,7 @@ export default function ListingForm({
         ) : null}
 
         <label className="form-field form-field-full" htmlFor="listing-description">
-          <span>{content.listingDescriptionLabel}</span>
+          <span>{formMessages.descriptionLabel}</span>
           <textarea
             id="listing-description"
             name="description"
@@ -370,7 +468,7 @@ export default function ListingForm({
 
       <div className="listing-form-section listing-form-section--commerce">
         <label className="form-field" htmlFor="listing-price">
-          <span>{content.listingPriceLabel}</span>
+          <span>{formMessages.priceLabel}</span>
           <input
             id="listing-price"
             name="price"
@@ -384,7 +482,7 @@ export default function ListingForm({
         </label>
 
         <label className="form-field" htmlFor="listing-location">
-          <span>{content.listingLocationLabel}</span>
+          <span>{formMessages.locationLabel}</span>
           <input
             id="listing-location"
             name="location"
@@ -399,7 +497,7 @@ export default function ListingForm({
       {statusField ? (
         <fieldset className="listing-status-edit-field form-field-full">
           <label className="form-field" htmlFor="listing-status">
-            <span>{content.advertisementStatusLabel}</span>
+            <span>{statusMessages.label}</span>
             <select
               id="listing-status"
               name="status"
@@ -409,28 +507,28 @@ export default function ListingForm({
               }}
               disabled={Boolean(statusField.disabled)}
             >
-              <option value="active">{content.listingStatusActive}</option>
-              <option value="reserved">{content.listingStatusReserved}</option>
-              <option value="sold">{content.listingStatusSold}</option>
-              <option value="archived">{content.listingStatusArchived}</option>
+              <option value="active">{statusMessages.options.active}</option>
+              <option value="reserved">{statusMessages.options.reserved}</option>
+              <option value="sold">{statusMessages.options.sold}</option>
+              <option value="archived">{statusMessages.options.archived}</option>
             </select>
           </label>
           <dl className="listing-status-help">
             <div>
-              <dt>{content.listingStatusActive}</dt>
-              <dd>{content.listingStatusActiveHelp}</dd>
+              <dt>{statusMessages.options.active}</dt>
+              <dd>{statusMessages.help.active}</dd>
             </div>
             <div>
-              <dt>{content.listingStatusReserved}</dt>
-              <dd>{content.listingStatusReservedHelp}</dd>
+              <dt>{statusMessages.options.reserved}</dt>
+              <dd>{statusMessages.help.reserved}</dd>
             </div>
             <div>
-              <dt>{content.listingStatusSold}</dt>
-              <dd>{content.listingStatusSoldHelp}</dd>
+              <dt>{statusMessages.options.sold}</dt>
+              <dd>{statusMessages.help.sold}</dd>
             </div>
             <div>
-              <dt>{content.listingStatusArchived}</dt>
-              <dd>{content.listingStatusArchivedHelp}</dd>
+              <dt>{statusMessages.options.archived}</dt>
+              <dd>{statusMessages.help.archived}</dd>
             </div>
           </dl>
           {statusField.soldBuyerControl}
@@ -439,11 +537,11 @@ export default function ListingForm({
 
       <div className="listing-photo-section form-field-full">
         <div className="listing-photo-heading">
-          <span className="filter-label">{content.listingPhotosLabel}</span>
-          <small>{content.listingPhotosHelp}</small>
+          <span className="filter-label">{formMessages.photosLabel}</span>
+          <small>{formMessages.photosHelp}</small>
         </div>
         <label className="listing-photo-picker" htmlFor="listing-photos">
-          <span>{content.addPhotosButton}</span>
+          <span>{formMessages.addPhotosButton}</span>
           <input
             id="listing-photos"
             type="file"
@@ -454,7 +552,7 @@ export default function ListingForm({
           />
         </label>
         {photos.length > 0 ? (
-          <ul className="listing-photo-grid" aria-label={content.listingPhotosLabel}>
+          <ul className="listing-photo-grid" aria-label={formMessages.photosLabel}>
             {photos.map((photo, index) => {
               const photoNumber = index + 1;
               const totalPhotos = photos.length;
@@ -465,19 +563,20 @@ export default function ListingForm({
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img
                       src={photo.url}
-                      alt={content.listingPhotoAltTemplate
-                        .replace('{current}', String(photoNumber))
-                        .replace('{total}', String(totalPhotos))}
+                      alt={formMessages.photoAlt({
+                        current: photoNumber,
+                        total: totalPhotos,
+                      })}
                     />
                     {index === 0 ? (
                       <span className="listing-photo-cover-badge">
-                        {content.coverPhotoLabel}
+                        {formMessages.coverPhotoLabel}
                       </span>
                     ) : null}
                   </div>
                   <div className="listing-photo-controls">
                     <span className="listing-photo-position">
-                      {content.listingPhotoPositionLabel}: {photoNumber}
+                      {formMessages.positionLabel}: {photoNumber}
                     </span>
                     <div className="listing-photo-control-row">
                       <button
@@ -486,7 +585,7 @@ export default function ListingForm({
                         onClick={() => movePhoto(photo.id, -1)}
                         disabled={isSubmitting || index === 0}
                       >
-                        {content.movePhotoEarlierButton}
+                        {formMessages.movePhotoEarlierButton}
                       </button>
                       <button
                         type="button"
@@ -494,7 +593,7 @@ export default function ListingForm({
                         onClick={() => movePhoto(photo.id, 1)}
                         disabled={isSubmitting || index === photos.length - 1}
                       >
-                        {content.movePhotoLaterButton}
+                        {formMessages.movePhotoLaterButton}
                       </button>
                     </div>
                     <button
@@ -503,7 +602,7 @@ export default function ListingForm({
                       onClick={() => removePhoto(photo.id)}
                       disabled={isSubmitting}
                     >
-                      {content.removePhotoButton}
+                      {formMessages.removePhotoButton}
                     </button>
                   </div>
                 </li>
@@ -511,10 +610,10 @@ export default function ListingForm({
             })}
           </ul>
         ) : (
-          <p className="listing-photo-empty">{content.listingNoPhotosMessage}</p>
+          <p className="listing-photo-empty">{formMessages.noPhotosMessage}</p>
         )}
         <div className="listing-photo-requirements">
-          <small>{content.listingImageRequirements}</small>
+          <small>{formMessages.imageRequirements}</small>
         </div>
       </div>
 
@@ -541,14 +640,14 @@ export default function ListingForm({
             className="listing-form-action listing-form-action--secondary"
             onClick={onCancel}
           >
-            {content.cancelButton}
+            {formMessages.cancelButton}
           </button>
         ) : cancelHref ? (
           <Link
             href={cancelHref}
             className="listing-form-action listing-form-action--secondary"
           >
-            {content.cancelButton}
+            {formMessages.cancelButton}
           </Link>
         ) : null}
         <button

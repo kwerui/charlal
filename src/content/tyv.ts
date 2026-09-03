@@ -7,7 +7,6 @@
 
 export const content = {
   // Header
-  categorySectionTitle: "Категориялар",
   siteName: "Charlal.org",
   homeLinkLabel: "Кол арынче",
   headerActionsLabel: "Account actions / Аккаунттуң ажыл-чорудулгазы",
@@ -165,20 +164,21 @@ export const content = {
   searchResultsTitle: "Search results / Дилээшкинниң түңнелдери", // TODO: add reviewed Tuvan translation.
   
   // Category navigation
-  categoryPageTitle: "Категориялар", // TODO: review translation
   subcategoriesTitle: "Дайындар / Subcategories title", // TODO: review translation
   servicesSearchPlaceholder: "Электрик дээн ышкаш кылдыр парлаптыңар",
   marketplaceSearchPlaceholder: "Тон дээн ышкаш кылдыр парлаптыңар",
   categorySearchButton: "Дилээр",
   typeLabel: "Хевир",
   typePlaceholder: "Хевир", 
-  priceFilterLabel: "өртээ",
-  priceMinPlaceholder: "өртээ min / Эң эвээш өртек",
-  priceMaxPlaceholder: "өртээ max / Эң бедик өртек",
-  filterSearchLabel: "Дилээр",
-  filterSearchPlaceholder: "",
-  filterButton: "Фильтр",
-  clearFilterButton: "Арыг фильтр",
+  priceFilterLabel: "Өртек",
+  priceMinPlaceholder: "Min price / Эң эвээш өртек",
+  priceMaxPlaceholder: "Max price / Эң бедик өртек",
+  filterButton: "Apply / Ажыглаар",
+  filterControlsButton: "Filters / Фильтрлер",
+  filterControlsLabel: "Filters / Фильтрлер",
+  closeFiltersButton: "Close filters / Фильтрлерни хааптыңар",
+  clearFilterButton: "Clear filter /Арыг фильтр",
+  latestListingsTitle: "Latest listings / Сөөлгү чарлалдар",
   exploreAllServices: "Шупту чарлалдардан дилээр",
   viewAllLabel: "Шупту",
   backToCategories: "Дедир категорияларже",
@@ -195,16 +195,16 @@ export const content = {
   housingRentOption: "Аренда",
   housingClearTransaction: "Clear transaction / Транзакцияны арыглаар",
   housingClearPropertyType: "Clear property type / Шынар хевирин арыглаар",
-  housingClearAllFilters: "Clear all filters / Шупту фильтрлерни арыглап кааптыңар",
+  housingClearAllFilters: "Clear filters",
   openListingLabel: "Open listing / Ажык даңзы",
-  saveAdvertisementButton: "Save advertisement", // TODO: add reviewed Tuvan translation.
-  saveAdvertisementShortButton: "Save", // TODO: add reviewed Tuvan translation.
-  savedAdvertisementButton: "Saved", // TODO: add reviewed Tuvan translation.
-  removeSavedAdvertisementButton: "Remove from saved", // TODO: add reviewed Tuvan translation.
-  signInToSaveAdvertisementMessage: "Sign in to save advertisements.", // TODO: add reviewed Tuvan translation.
+  saveAdvertisementButton: "Save advertisement / Чарлалды кадагала", // TODO: add reviewed Tuvan translation.
+  saveAdvertisementShortButton: "Save / Камгалаар", // TODO: add reviewed Tuvan translation.
+  savedAdvertisementButton: "Saved / Камгалаттынган", // TODO: add reviewed Tuvan translation.
+  removeSavedAdvertisementButton: "Remove from saved / Камгалаттынгандан үндүрер", // TODO: add reviewed Tuvan translation.
+  signInToSaveAdvertisementMessage: "Sign in to save advertisements. / Чарлалдарны кадагалаары-биле кирип алыңар.", // TODO: add reviewed Tuvan translation.
   advertisementCannotBeSavedMessage: "This advertisement cannot be saved.", // TODO: add reviewed Tuvan translation.
-  savedAdvertisementsTemporarilyUnavailableMessage: "Saved advertisements are temporarily unavailable. Try again later.", // TODO: add reviewed Tuvan translation.
-  unableUpdateSavedAdvertisementMessage: "Unable to update saved advertisement.", // TODO: add reviewed Tuvan translation.
+  savedAdvertisementsTemporarilyUnavailableMessage: "Saved advertisements are temporarily unavailable. Try again later. / Камгалаттынган чарлалдар түр када ажыглаттынмас. Соонда катап шенеп көрүңер.", // TODO: add reviewed Tuvan translation.
+  unableUpdateSavedAdvertisementMessage: "Unable to update saved advertisement. / Камгалаттынган чарлалды чаартып шыдаваан.", // TODO: add reviewed Tuvan translation.
   reportAdvertisementButton: "Report ad", // TODO: add reviewed Tuvan translation.
   reportAdvertisementTitle: "Report ad", // TODO: add reviewed Tuvan translation.
   reportAdvertisementQuestion: "Why are you reporting this ad?", // TODO: add reviewed Tuvan translation.
@@ -230,9 +230,9 @@ export const content = {
     duplicate_spam: "Duplicate / spam",
     other: "Other",
   }, // TODO: add reviewed Tuvan translations.
-  resultsCountLabel: "Matching listings / Таарыштырган даңзылар",
-  emptyResultsTitle: "No listings found / Данзылдар тывылбаан",
-  emptyResultsMessage: "Try changing or clearing the filters. / Фильтрлерни өскертип азы арыглап көрүңер",
+  resultsCountLabel: "Matching listings",
+  emptyResultsTitle: "No listings found / Даңзылар тывылбаан",
+  emptyResultsMessage: "Try changing or clearing the filters. / Фильтрлерни өскертип азы арыглап көрүңер.",
   listingDatabaseUnavailableTitle: "Listings unavailable / Даңзылар чок", // TODO: add reviewed Tuvan translation.
   databaseListingsLoadFailedMessage: "Unable to load the latest advertisements. / Сөөлгү чарлалдарны үндүрүп шыдаваан.", // TODO: add reviewed Tuvan translation.
   freePriceLabel: "Free / Халас",
@@ -247,10 +247,10 @@ export const content = {
   listingDetailUpdatedAtLabel: "Last updated / Сөөлгү катап чаарткан", // TODO: add reviewed Tuvan translation.
   listingStatusLabel: "Status", // TODO: add reviewed Tuvan translation.
   advertisementStatusLabel: "Advertisement status", // TODO: add reviewed Tuvan translation.
-  listingStatusActive: "Active", // TODO: add reviewed Tuvan translation.
-  listingStatusReserved: "Reserved", // TODO: add reviewed Tuvan translation.
-  listingStatusSold: "Sold", // TODO: add reviewed Tuvan translation.
-  listingStatusArchived: "Archived", // TODO: add reviewed Tuvan translation.
+  listingStatusActive: "Active / Идепкейлиг", // TODO: add reviewed Tuvan translation.
+  listingStatusReserved: "Reserved / Камгалаттынган", // TODO: add reviewed Tuvan translation.
+  listingStatusSold: "Sold / Саттынган", // TODO: add reviewed Tuvan translation.
+  listingStatusArchived: "Archived / Архивтелген", // TODO: add reviewed Tuvan translation.
   listingStatusControlLabel: "Status", // TODO: add reviewed Tuvan translation.
   listingStatusUpdatingMessage: "Updating status...", // TODO: add reviewed Tuvan translation.
   listingStatusUpdateFailedMessage: "Unable to update advertisement status.", // TODO: add reviewed Tuvan translation.
@@ -382,9 +382,9 @@ export const content = {
   unableDeleteMessageMessage: "Unable to delete message / Медээни өжүрүп шыдаваан", // TODO: add reviewed Tuvan translation.
   unableDeleteConversationMessage: "Unable to delete conversation / Чугааны өжүрүп шыдаваан", // TODO: add reviewed Tuvan translation.
   backToHomepage: "Back to homepage / Кол арынче",
-  backToAccount: "Back to account / Аккаунтче эглип келир", // TODO: add reviewed Tuvan translation.
-  backToSellerProfile: "Back to seller profile / Садыгжы профилинге эглип келир", // TODO: add reviewed Tuvan translation.
-  backToResults: "Back to results / Түңнелдерже эглип келир",
+backToAccount: "Back to account / Аккаунтче эглип келир", // TODO: add reviewed Tuvan translation.
+backToSellerProfile: "Back to seller profile / Садыгжы профилинге эглип келир", // TODO: add reviewed Tuvan translation.
+backToResults: "Back to results / Түңнелдерже эглип келир",
 
   // Account
   accountKicker: "Account / Аккаунт", // TODO: add reviewed Tuvan translation.
@@ -458,18 +458,13 @@ export const content = {
   reviewSaveFailedMessage: "Unable to save review.", // TODO: add reviewed Tuvan translation.
   reviewDeleteFailedMessage: "Unable to delete review.", // TODO: add reviewed Tuvan translation.
   deleteReviewConfirmTitle: "Delete review?", // TODO: add reviewed Tuvan translation.
-  deleteReviewConfirmMessage: "Your rating, text and photos will be removed. You can review this purchase again later.", // TODO: add reviewed Tuvan translation.
+  deleteReviewConfirmMessage: "[TYV REVIEW] Your rating and tags will be removed. You can review this purchase again later.", // TODO: add reviewed Tuvan translation.
   reviewRatingLabel: "Rating", // TODO: add reviewed Tuvan translation.
   reviewRatingRequiredMessage: "Choose a 1 to 5 star rating.", // TODO: add reviewed Tuvan translation.
   starsLabel: "stars", // TODO: add reviewed Tuvan translation.
-  reviewTextLabel: "Review text (optional)", // TODO: add reviewed Tuvan translation.
-  addReviewPhotosButton: "Add review photos", // TODO: add reviewed Tuvan translation.
-  reviewPhotoRequirementsMessage: "Add up to 3 photos. JPEG, PNG, or WebP. Maximum 5 MB each.", // TODO: add reviewed Tuvan translation.
-  reviewPhotoMaximumMessage: "A review can have at most 3 photos.", // TODO: add reviewed Tuvan translation.
-  reviewPhotoTooLargeMessage: "Photo is too large. Maximum size is 5 MB.", // TODO: add reviewed Tuvan translation.
-  reviewPhotoUnsupportedTypeMessage: "Unsupported photo type. Use JPEG, PNG, or WebP.", // TODO: add reviewed Tuvan translation.
-  reviewPhotoUploadFailedMessage: "Unable to upload review photo.", // TODO: add reviewed Tuvan translation.
-  reviewPhotoPreviewLabel: "Review photo", // TODO: add reviewed Tuvan translation.
+  reviewTagsLabel: "[TYV REVIEW] Tags", // TODO: add reviewed Tuvan translation.
+  reviewTagsHelp: "[TYV REVIEW] Optional. Choose up to 3.", // TODO: add reviewed Tuvan translation.
+  reviewTagsMaximumMessage: "[TYV REVIEW] Choose no more than 3 tags.", // TODO: add reviewed Tuvan translation.
   noAdvertisementsPostedTitle: "No advertisements posted / Чарлал чок", // TODO: add reviewed Tuvan translation.
   noAdvertisementsPostedMessage: "Advertisements you create while signed in will appear here. / Кирип тургаш кылган чарлалдарыңар мында көстүп кээр.", // TODO: add reviewed Tuvan translation.
   deleteAdvertisementButton: "Delete advertisement / Чарлалды өжүрүп кааптыңар", // TODO: add reviewed Tuvan translation.
@@ -531,7 +526,6 @@ export const content = {
   forgotPasswordLink: "Пароль уттупкан бе?",
   signInButton: "Кирер",
   signInErrorRequired: "Enter both email and password to continue. / Улаштыр уламчылаар дизе, электроннуг почтаны болгаш пароль киирер.",
-  demoAuthWarning: "Demo authentication has been replaced by Supabase Auth.", // TODO: add reviewed Tuvan translation.
 
   // Post ad
   postAdKicker: "Marketplace / Рынок",
@@ -644,7 +638,7 @@ export const content = {
     {
       name: "Ажыл",
       slug: "jobs",
-      image: "https://thumbs.dreamstime.com/b/none-282600526.jpg",
+      image: "/images/work.png",
       subcategories: [
         { name: "Ажылдакчы дилээннерге", slug: "find-talents" },
         { name: "Ажыл дилээннерге", slug: "find-jobs" }

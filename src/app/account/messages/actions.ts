@@ -1,6 +1,6 @@
 'use server';
 
-import { revalidatePath } from 'next/cache';
+import { revalidateLocalizedPath } from '@/i18n/revalidate';
 import type {
   AppConversationRead,
   AppConversationSummary,
@@ -131,8 +131,8 @@ export async function startConversationAction(input: {
     return result;
   }
 
-  revalidatePath('/account/messages');
-  revalidatePath(`/account/messages/${result.conversationId}`);
+  revalidateLocalizedPath('/account/messages');
+  revalidateLocalizedPath(`/account/messages/${result.conversationId}`);
 
   return result;
 }
@@ -197,8 +197,8 @@ export async function sendMessageAction(input: {
     return result;
   }
 
-  revalidatePath('/account/messages');
-  revalidatePath(`/account/messages/${input.conversationId}`);
+  revalidateLocalizedPath('/account/messages');
+  revalidateLocalizedPath(`/account/messages/${input.conversationId}`);
 
   if (attachmentCount === 0) {
     return result;
@@ -259,8 +259,8 @@ export async function editMessageAction(input: {
     return result;
   }
 
-  revalidatePath('/account/messages');
-  revalidatePath(`/account/messages/${input.conversationId}`);
+  revalidateLocalizedPath('/account/messages');
+  revalidateLocalizedPath(`/account/messages/${input.conversationId}`);
 
   return result;
 }
@@ -305,8 +305,8 @@ export async function deleteMessageAction(input: {
     return result;
   }
 
-  revalidatePath('/account/messages');
-  revalidatePath(`/account/messages/${input.conversationId}`);
+  revalidateLocalizedPath('/account/messages');
+  revalidateLocalizedPath(`/account/messages/${input.conversationId}`);
 
   return result;
 }
@@ -326,8 +326,8 @@ export async function markConversationReadAction(
     return result;
   }
 
-  revalidatePath('/account/messages');
-  revalidatePath(`/account/messages/${conversationId}`);
+  revalidateLocalizedPath('/account/messages');
+  revalidateLocalizedPath(`/account/messages/${conversationId}`);
 
   return result;
 }
@@ -347,8 +347,8 @@ export async function hideConversationAction(
     return result;
   }
 
-  revalidatePath('/account/messages');
-  revalidatePath(`/account/messages/${conversationId}`);
+  revalidateLocalizedPath('/account/messages');
+  revalidateLocalizedPath(`/account/messages/${conversationId}`);
 
   return result;
 }

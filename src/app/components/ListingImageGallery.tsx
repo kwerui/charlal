@@ -2,7 +2,7 @@
 
 import Image from 'next/image';
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { content } from '@/content/tyv';
+import { useTranslations } from 'next-intl';
 import type { ListingImage } from '@/data/listings';
 
 type Props = {
@@ -33,6 +33,7 @@ export default function ListingImageGallery({
   fallbackImage,
   listingTitle,
 }: Props) {
+  const t = useTranslations('ListingDetail.gallery');
   const galleryImages =
     images.length > 0
       ? images
@@ -48,13 +49,15 @@ export default function ListingImageGallery({
   const closeButtonRef = useRef<HTMLButtonElement | null>(null);
   const selectedImage = galleryImages[selectedIndex] || galleryImages[0];
   const totalImages = galleryImages.length;
-  const selectedAlt = content.listingPhotoAltTemplate
-    .replace('{current}', String(selectedIndex + 1))
-    .replace('{total}', String(totalImages));
+  const selectedAlt = t('photoAlt', {
+    current: selectedIndex + 1,
+    total: totalImages,
+  });
   const fullAlt = `${listingTitle} - ${selectedAlt}`;
-  const positionLabel = content.listingPhotoPositionTemplate
-    .replace('{current}', String(selectedIndex + 1))
-    .replace('{total}', String(totalImages));
+  const positionLabel = t('position', {
+    current: selectedIndex + 1,
+    total: totalImages,
+  });
 
   const showPreviousPhoto = useCallback((): void => {
     setSelectedIndex((currentIndex) =>
@@ -110,7 +113,7 @@ export default function ListingImageGallery({
         type="button"
         className="listing-detail-image-wrapper listing-detail-image-button"
         onClick={() => setViewerOpen(true)}
-        aria-label={`${content.openListingPhotoViewerLabel}: ${fullAlt}`}
+        aria-label={t('openViewerWithPhoto', { photo: fullAlt })}
       >
         <Image
           className="listing-detail-image"
@@ -122,7 +125,7 @@ export default function ListingImageGallery({
         />
       </button>
       {totalImages > 1 ? (
-        <div className="listing-image-thumbnails" aria-label={content.listingPhotosLabel}>
+        <div className="listing-image-thumbnails" aria-label={t('photosLabel')}>
           {galleryImages.map((image, index) => {
             const photoNumber = index + 1;
             const selected = index === selectedIndex;
@@ -134,9 +137,10 @@ export default function ListingImageGallery({
                 className={`listing-image-thumbnail${
                   selected ? ' listing-image-thumbnail--selected' : ''
                 }`}
-                aria-label={content.viewListingPhotoLabel
-                  .replace('{current}', String(photoNumber))
-                  .replace('{total}', String(totalImages))}
+                aria-label={t('viewPhoto', {
+                  current: photoNumber,
+                  total: totalImages,
+                })}
                 aria-current={selected ? 'true' : undefined}
                 onClick={() => setSelectedIndex(index)}
               >
@@ -157,36 +161,39 @@ export default function ListingImageGallery({
           role="presentation"
           onClick={() => setViewerOpen(false)}
         >
-          <div
-            className="listing-photo-viewer-dialog"
-            role="dialog"
-            aria-modal="true"
-            aria-label={`${content.listingPhotoViewerTitle}: ${fullAlt}`}
-            onClick={(event) => event.stopPropagation()}
-          >
+<div
+  className="listing-photo-viewer-dialog"
+  role="dialog"
+  aria-modal="true"
+  aria-label={t('viewerTitleWithPhoto', { photo: fullAlt })}
+>
             <button
               ref={closeButtonRef}
               type="button"
               className="listing-photo-viewer-close"
               onClick={() => setViewerOpen(false)}
             >
-              {content.closeListingPhotoViewerButton}
+              {t('closeViewer')}
             </button>
             {totalImages > 1 ? (
               <>
                 <button
                   type="button"
                   className="listing-photo-viewer-nav listing-photo-viewer-nav--icon listing-photo-viewer-nav--previous"
-                  onClick={showPreviousPhoto}
-                  aria-label={content.previousListingPhotoButton}
+onClick={(event) => {
+  event.stopPropagation();
+  showPreviousPhoto();
+}}                  aria-label={t('previousPhoto')}
                 >
                   <ArrowIcon direction="left" />
                 </button>
                 <button
                   type="button"
                   className="listing-photo-viewer-nav listing-photo-viewer-nav--icon listing-photo-viewer-nav--next"
-                  onClick={showNextPhoto}
-                  aria-label={content.nextListingPhotoButton}
+onClick={(event) => {
+  event.stopPropagation();
+  showNextPhoto();
+}}                  aria-label={t('nextPhoto')}
                 >
                   <ArrowIcon direction="right" />
                 </button>
@@ -197,11 +204,12 @@ export default function ListingImageGallery({
             ) : null}
             <div className="listing-photo-viewer-image-frame">
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                className="listing-photo-viewer-image"
-                src={selectedImage.url}
-                alt={fullAlt}
-              />
+<img
+  className="listing-photo-viewer-image"
+  src={selectedImage.url}
+  alt={fullAlt}
+  onClick={(event) => event.stopPropagation()}
+/>
             </div>
           </div>
         </div>

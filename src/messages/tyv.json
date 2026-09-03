@@ -1,0 +1,729 @@
+{
+  "Header": {
+    "homeLinkLabel": "Кол арынче",
+    "actionsLabel": "Account actions / Аккаунттуң ажыл-чорудулгазы",
+    "signIn": "Кирер",
+    "signOut": "Үнер",
+    "account": "Аккаунт",
+    "postAd": "Чарлалдан үндүрер",
+    "signedInAs": "Signed in as / Кылдыр кирген",
+    "messages": "Медээлер",
+    "notifications": "Уведомлениелер",
+    "languageSwitcherLabel": "Дыл",
+    "unreadConversation": "{count, plural, one {# номчуттунмаан медээ} other {# номчуттунмаан медээлер}}",
+    "unreadNotifications": "{count, plural, one {# номчуттунмаан медээ} other {# номчуттунмаан дыңнадыглар}}"
+  },
+  "Home": {
+    "categoryAriaLabel": "Категория: {category}",
+    "databaseListingsLoadFailedMessage": "Unable to load the latest advertisements. / Сөөлгү чарлалдарны үндүрүп шыдаваан."
+  },
+  "Search": {
+    "placeholder": "Чүнү дилеп тур силер бээр парлаптыңар",
+    "inputLabel": "Search listings / Даңзыларны дилеп тывар",
+    "button": "Дилээр",
+    "resultsTitle": "Search results / Дилээшкинниң түңнелдери"
+  },
+  "ListingResults": {
+    "resultsCountLabel": "Matching listings / Таарыштырган даңзылар",
+    "emptyResultsTitle": "No listings found / Даңзылар тывылбаан",
+    "emptyResultsMessage": "Фильтрлерни өскертип азы арыглап көрүңер.",
+    "databaseListingsLoadFailedMessage": "Сөөлгү чарлалдарны үндүрүп шыдаваан."
+  },
+  "ListingCard": {
+    "openListingLabel": "Ажык даңзы",
+    "freePriceLabel": "Халас",
+    "saveAdvertisementButton": "Чарлалды кадагала",
+    "saveAdvertisementShortButton": "Кадагалаар",
+    "savedAdvertisementButton": "Камгалаттынган",
+    "removeSavedAdvertisementButton": "Камгалаттынгандан үндүрер",
+    "signInToSaveAdvertisementMessage": "Чарлалдарны кадагалаары-биле кирип алыңар.",
+    "advertisementCannotBeSavedMessage": "Бо чарлалды кадагалап болбас.",
+    "savedAdvertisementsTemporarilyUnavailableMessage": "Камгалаттынган чарлалдар түр када ажыглаттынмас. Соонда катап шенеп көрүңер.",
+    "unableUpdateSavedAdvertisementMessage": "Камгалаттынган чарлалды чаартып шыдаваан.",
+    "status": {
+      "active": "Идепкейлиг",
+      "reserved": "Камгалаттынган",
+      "sold": "Саттынган",
+      "archived": "Архивтелген"
+    }
+  },
+  "ListingDetail": {
+    "breadcrumbLabel": "Хлеб үрезиннериниң изи",
+    "homeBreadcrumb": "Бажың",
+    "backToHomepage": "Кол арынче",
+    "backToAccount": "Back to account / Аккаунтче эглип келир",
+    "backToSellerProfile": "Back to seller profile / Садыгжы профилинге эглип келир",
+    "backToCategory": "Хевирлерже",
+    "backToResults": "Back to results / Түңнелдерже эглип келир",
+    "freePriceLabel": "Халас",
+    "listingDatabaseUnavailableTitle": "Listings unavailable / Даңзылар чок",
+    "databaseListingsLoadFailedMessage": "Unable to load the latest advertisements. / Сөөлгү чарлалдарны үндүрүп шыдаваан.",
+    "listingReservedDetailMessage": "This advertisement is reserved, but you can still contact the seller. / Бо чарлал аңгылаттынган, ынчалза-даа садыгжы-биле харылзажып болур силер.",
+    "listingSoldDetailMessage": "This advertisement has been sold. / Бо чарлал садыпкан.",
+    "listingArchivedDetailMessage": "This advertisement is archived and visible only to its owner. / Бо чарлал архивте чыдар болгаш чүгле ооң ээзинге көстүп турар.",
+    "sellerLabel": "Seller / Садыгжы",
+    "datePostedLabel": "Date posted / үндүрген хүнү",
+    "updatedAtLabel": "Last updated / Сөөлгү катап чаарткан",
+    "descriptionTitle": "Description / Тодарадып бижиири",
+    "gallery": {
+      "photosLabel": "Photos / Чуруктар",
+      "photoAlt": "Чурук {current} деп {total}",
+      "viewPhoto": "Чурукту көрүңер {current} деп {total}",
+      "openViewerWithPhoto": "Долу чурукту ажыдып алыңар: {photo}",
+      "viewerTitleWithPhoto": "Чарлал чурук: {photo}",
+      "closeViewer": "Хаар / Close",
+      "previousPhoto": "Previous photo / Эрткен чурук",
+      "nextPhoto": "Next photo / Дараазында чурук",
+      "position": "{current} / {total}"
+    }
+  },
+  "ListingOwnerActions": {
+    "editAdvertisementButton": "Edit advertisement / Чарлалды өскертир",
+    "contactSellerButton": "Contact seller / Садыгжы-биле харылзажыңар",
+    "soldMessagingUnavailableMessage": "This advertisement has been sold, so new seller conversations are unavailable. / Бо чарлал садыпкан, ынчангаш чаа садыгжылар-биле чугаалажыр арга чок.",
+    "archivedMessagingUnavailableMessage": "This advertisement is archived, so new seller conversations are unavailable. / Бо чарлал архивте чыдар, ынчангаш чаа садыгжылар-биле чугаалажыр арга чок.",
+    "demoListingMessagingUnavailableMessage": "Messaging unavailable for this demo listing / Бо демо-чарлалдың медээлери чок"
+  },
+  "ListingReport": {
+    "button": "Чарлалды дыңнадыр",
+    "title": "Чарлалды дыңнадыр",
+    "question": "Why are you reporting this ad? / Бо чарлалды чүге дыңнадып тур силер?",
+    "detailsLabel": "Tell us more (optional) / Оон-даа хөйнү чугаалаңар (негелде чок)",
+    "detailsHelp": "Maximum 1000 characters. / Эң хөйү 1000 демдек.",
+    "sendButton": "Send report / Хомудалды киирер",
+    "sendingButton": "Sending report... / Хомудалды чоргузуп турар...",
+    "successTitle": " Хомудалды чоруткан.",
+    "successMessage": " Четтирдим.  ",
+    "alreadyReportedTitle": "Already reported / Олар ам-на хомудаан.",
+    "alreadyReportedMessage": "You already reported this ad. / Силер бо чарлалды дыңнаткан-дыр силер.",
+    "alreadyReportedButton": "Already reported / Олар ам-на хомудаан",
+    "reasonRequiredMessage": "Choose a reason for the report. / Хомудалдың чылдагаанын шилип алыңар.",
+    "detailsTooLongMessage": "The details are too long. Use 1000 characters or fewer. / Детализациязы дыка узун. 1000 азы оон эвээш демдектерни ажыглаар.",
+    "ownListingMessage": "You cannot report your own ad. / Бодуңарның чарлалыңарны дыңнадып шыдавас силер.",
+    "unavailableMessage": "This ad cannot be reported. / Бо чарлалды дыңнадып болбас.",
+    "failedMessage": "Unable to send report. / Хомудалды чорудуп шыдаваан.",
+    "signInRequiredMessage": "Sign in to report advertisements. / Чарлалдарны дыңнадыр дээш кирип алыңар.",
+    "cancelButton": "Cancel / Узуткаар",
+    "closeButton": "Close / Хаар",
+    "reasons": {
+      "scam": "Мошенничество",
+      "prohibited_item": "Prohibited item / Хоруглуг чүүл",
+      "misleading": "Misleading information / Частырыглыг медээ",
+      "duplicate_spam": "Дубликат / спам",
+      "other": "Other / Өске"
+    }
+  },
+  "Footer": {
+    "label": "Site footer / Сайтының адаанда",
+    "navLabel": "Footer links / Адаанда ссылкалар",
+    "aboutLink": " Сайт дугайында",
+    "termsLink": "Дүрүмнер",
+    "privacyLink": "Чажыт",
+    "contactLink": " Харылзаа"
+  },
+  "CategoryPage": {
+    "subcategoriesTitle": "Дайындар",
+    "servicesSearchPlaceholder": "Электрик дээн ышкаш кылдыр парлаптыңар",
+    "servicesSearchSample": "Электрик",
+    "marketplaceSearchSample": "Тон дээн ышкаш кылдыр одуругче парлаптыңар",
+    "marketplaceSearchPlaceholder": "Тон дээн ышкаш кылдыр парлаптыңар",
+    "searchPlaceholder": "Чүнү дилеп тур силер бээр парлаптыңар",
+    "searchPromptSuffix": "",
+    "searchButton": "Дилээр",
+    "typeLabel": "Хевир",
+    "typePlaceholder": "Хевир",
+    "priceFilterLabel": "Өртек",
+    "priceMinPlaceholder": "Эң эвээш өртек",
+    "priceMaxPlaceholder": "Эң бедик өртек",
+    "filterButton": "Ажыглаар",
+    "filterControlsButton": "Фильтрлер",
+    "filterControlsLabel": "Фильтрлер",
+    "closeFiltersButton": "Фильтрлерни хааптыңар",
+    "clearFilterButton": "Арыг фильтр",
+    "latestListingsTitle": "Сөөлгү чарлалдар",
+    "exploreAllServices": "Шупту чарлалдардан дилээр",
+    "viewAllLabel": "Шупту",
+    "backToCategories": "Дедир категорияларже",
+    "backToCategory": "Хевирлерже",
+    "backToHome": "Кол арынче",
+    "housingPropertyTypeLabel": "Хевир",
+    "housingPropertyTypePlaceholder": "Хевирни шилип алыңар",
+    "housingAllOption": "Шупту",
+    "housingSaleOption": "Садар",
+    "housingRentOption": "Аренда",
+    "databaseListingsLoadFailedMessage": "Сөөлгү чарлалдарны үндүрүп шыдаваан."
+  },
+  "Categories": {
+    "items": {
+      "housing": {
+        "label": "Бажың-малгат",
+        "types": {
+          "apartments": "Чер болгаш каът бажыңнар",
+          "land": "Чер",
+          "commercial": "Коммерциялыг оран-сава",
+          "storage": "Гараж болгаш парковклар"
+        },
+        "subcategories": {
+          "sale": "Садар",
+          "rent": "Аренда"
+        }
+      },
+      "marketplace": {
+        "label": "Алыр/Садар",
+        "buyTypes": {
+          "all-categories": "Шупту хевир",
+          "clothing": "Хептер",
+          "shoes": "Идиктер",
+          "office": "Канцелярия",
+          "new": "Чаа",
+          "used": "Эдилээн",
+          "home-goods": "Эт-херексел",
+          "appliances": "Септелге херексели",
+          "furniture": "Эт-сеп",
+          "pets": "Дириг амытаннарга",
+          "kids": "Чаштарга",
+          "construction materials": "Тудуг херекселдери",
+          "books": "Номнар",
+          "beauty": "Косметика",
+          "games": "Оюннар"
+        },
+        "subcategories": {
+          "buy": "Садып турар",
+          "free": "Халас",
+          "wanted": "Дилеп турар"
+        }
+      },
+      "auto": {
+        "label": "Авто",
+        "subcategories": {
+          "used-cars": "Эдилээн авто",
+          "new-cars": "Чап-чаа авто",
+          "auto-parts": "Авто херекселдери",
+          "rent": "Аренда/Лизинг"
+        }
+      },
+      "jobs": {
+        "label": "Ажыл",
+        "subcategories": {
+          "find-talents": "Ажылдакчы дилээннерге",
+          "find-jobs": "Ажыл дилээннерге"
+        }
+      },
+      "services": {
+        "label": "Дуза/Ус ажыл",
+        "subcategories": {}
+      },
+      "events": {
+        "label": "Хөглээшкин",
+        "subcategories": {
+          "events": "Чүү болур",
+          "night-clubs": "Кежээ",
+          "lost-found": "Тывыштар"
+        }
+      }
+    }
+  },
+  "Account": {
+    "title": "Аккаунт",
+    "infoTitle": "Account information / Аккаунт дугайында медээ",
+    "emailLabel": "Signed in as / Кылдыр кирген",
+    "publicNameLabel": "Public name / Хөй-ниити ады",
+    "viewPublicProfileLabel": "View public profile / Хөй-ниити профилин көрүңер",
+    "publicNameTitle": "Change public name / Хөй-ниити адын өскертир",
+    "publicNamePlaceholder": "Enter a public seller name / Хөй-ниити садыгжы адын киирер",
+    "publicNameHelp": "This name is shown publicly on advertisements instead of your email. / Бо ат силерниң электроннуг почтаңарның орнунга чарлалдарда хөй-ниитиге көстүп турар.",
+    "publicLocationHelp": "Public city or region only; do not enter a street address. / Чүгле хөй-ниити хоорай азы регион; кудумчу адрезин киирбес.",
+    "saveProfileButton": "Save profile / Профильди кадагала",
+    "publicNameRequiredMessage": "Enter a public name before posting an advertisement. / Чарлал үндүрер мурнунда хөй-ниити адын киирер.",
+    "publicNameSaveFailedMessage": "Unable to update public name. / Хөй-ниити адын чаартып шыдаваан.",
+    "displayNameInvalidMessage": "Enter a public display name that is not an email address. / Электроннуг почта адрези эвес, хөй-ниитиге көргүзер атты киирер.",
+    "profileDetailsInvalidMessage": "Bio or location is too long. / 'Силерниң дугайыңарда' азы турар чери дыка узун.",
+    "profileLoadFailedMessage": "Your account is signed in, but the profile could not be loaded. / Силерниң аккаунтуңар кирген, ынчалза-даа профильди үндүрүп шыдаваан.",
+    "unableLoadProfileMessage": "Unable to load profile / Профильди үндүрүп шыдаваан",
+    "profileUpdatedMessage": "Profile updated. / Профиль чаарттынган.",
+    "myAdvertisementsTitle": "My advertisements / Мээң чарлалдарым",
+    "myAdvertisementsCountLabel": "My advertisements / Мээң чарлалдарым",
+    "deleteAdvertisementButton": "Delete advertisement / Чарлалды өжүрүп кааптыңар",
+    "confirmDeleteAdvertisementTitle": "Confirm deletion / Өжүргенин бадыткаар",
+    "confirmDeleteAdvertisementMessage": "Delete this advertisement? / Бо чарлалды өжүрүп кааптыңар бе?",
+    "advertisementDeletedMessage": "Advertisement deleted. / Чарлал өжүрүп каан.",
+    "advertisementDeleteFailedMessage": "This advertisement could not be deleted. / Бо чарлалды өжүрүп шыдаваан.",
+    "noAdvertisementsPostedTitle": "No advertisements posted / Чарлал чок",
+    "noAdvertisementsPostedMessage": "Advertisements you create while signed in will appear here. / Кирип тургаш кылган чарлалдарыңар мында көстүп кээр.",
+    "reviewsSummaryTitle": " Хыналдалар",
+    "reviewsSummary": "Харыы манап тур мен: {toReview} · Бижиттинген: {written} ",
+    "viewReviewsButton": "Үнелелдерни көрүңер"
+  },
+  "AccountReviews": {
+    "purchasesToReviewTitle": "Хыналдага барааннар / Purchases to review",
+    "noPurchasesToReviewMessage": "Ам-даа хыналда херек садып алыышкыннар мында көстүп кээр. / Purchases that still need a review will appear here.",
+    "myReviewsTitle": "Мээң үнелелдерим / My reviews",
+    "noMyReviewsMessage": "Силерниң бижээн үнелелдериңер мында көстүп кээр. / Reviews you have written will appear here.",
+    "purchasedFromLabel": "Садып алган / Purchased from",
+    "leaveReviewButton": "Үнелелди артырып каар / Leave review",
+    "editReviewButton": "Хыналданы эде көөр / Edit review",
+    "saveReviewChangesButton": "Өскерлиишкиннерни кадагала / Save changes",
+    "deleteReviewButton": "Хыналданы өжүрүп кааптыңар / Delete review",
+    "submitReviewButton": "Хыналданы үндүрер / Submit review",
+    "reviewSavingButton": "Камгалаттынган... / Saving review...",
+    "reviewDeletingButton": "Хыналданы өжүрүп тур мен... / Deleting review...",
+    "reviewSavedMessage": "Хыналда камгалаттынган / Review saved.",
+    "reviewDeletedMessage": "Хыналданы өжүрүп каан / Review deleted.",
+    "reviewSaveFailedMessage": "Хыналданы кадагалап шыдаваан. / Unable to save review.",
+    "reviewDeleteFailedMessage": "Хыналданы өжүрүп шыдаваан. / Unable to delete review.",
+    "deleteReviewConfirmTitle": "Хыналданы өжүрүп кааптыңар бе? / Delete review?",
+    "deleteReviewConfirmMessage": "Силерниң үнелелиңер болгаш демдектериңер ап кааптар. Бо садып алыышкынны соонда катап көрүп болур силер. / Your rating and tags will be removed. You can review this purchase again later.",
+    "reviewRatingLabel": "Үнелел / Rating",
+    "reviewRatingRequiredMessage": "1-ден 5 сылдыска чедир үнелелди шилип алыңар. / Choose a 1 to 5 star rating.",
+    "reviewTagsLabel": "Тегтер / Tags",
+    "reviewTagsHelp": "Немелде. Чедир шилип алыңар. / Optional. Choose up to 3.",
+    "reviewTagsMaximumMessage": "3-тен хөй эвес демдектерни шилип алыңар. / Choose no more than 3 tags."
+  },
+  "SavedListings": {
+    "title": "Камгалаттынган чарлалдар",
+    "countLabel": "Камгалаттынган чарлалдар",
+    "emptyTitle": "Камгалаттынган чарлалдар чок",
+    "emptyMessage": "Advertisements you save will appear here / Сактып алган чарлалдарыңар мында көстүп кээр..",
+    "unableLoadTitle": " Unable to load saved advertisements / Камгалаттынган чарлалдарны үндүрүп шыдаваан",
+    "unableLoadMessage": " Try again in a moment. / Бир секунда болгаш катап шенеп көрүңер."
+  },
+  "Messages": {
+    "title": "Медээлер",
+    "backToMessages": "Медээлерже эглип келир / Back to messages",
+    "retryButton": "Катап шенеп көрүңер / Retry",
+    "noConversationsTitle": "Амдыызында чугаалар чок / No conversations yet",
+    "noConversationsMessage": "Садып алыкчылар болгаш садыгжылар-биле медээлер мында көстүп кээр. / Messages with buyers and sellers will appear here.",
+    "unableLoadConversationsMessage": "Чугааларны үндүрүп шыдаваан / Unable to load conversations",
+    "unableLoadMessagesMessage": "Медээлерни үндүрүп шыдаваан / Unable to load messages",
+    "unableSendMessageMessage": "Медээ чорудуп шыдаваан / Unable to send message",
+    "unableUpdateMessageStatusMessage": "Медээниң байдалын чаартып шыдаваан /Unable to update message status",
+    "unableEditMessageMessage": "Медээни өскертип шыдаваан / Unable to edit message",
+    "unableDeleteMessageMessage": "Медээни өжүрүп шыдаваан / Unable to delete message",
+    "unableDeleteConversationMessage": "Чугааны өжүрүп шыдаваан / Unable to delete conversation",
+    "liveUpdatesUnavailableMessage": "Дорт дамчыдылгалар чок. Медээлер бар бе деп хынаар дээш чаартыңар. / Live updates unavailable. Refresh to check for messages.",
+    "offlineThreadStatusMessage": "Силер офлайн силер. Кажан харылзаа эглип кээрге, медээлер чаартынып кээр. / You are offline. Messages will update when the connection returns.",
+    "offlineBeforeSendMessage": "Силер офлайн силер. Чорудар мурнунда катап кожуп алыңар. / You are offline. Reconnect before sending.",
+    "reconnectingLabel": "Катап кожуп турар... / Reconnecting...",
+    "messageDeliveryUnconfirmedMessage": "Медээниң чедирилгезин бадыткап шыдаваан. Катап шенээр мурнунда чугааны хынап алыңар. /  Message delivery could not be confirmed. Check the conversation before retrying.",
+    "conversationLinkLabel": "{listingTitle} - {participantName}",
+    "unreadMessagesLabel": "{count, plural, one {# номчуттунмаан медээ} other {# номчуттунмаан медээлер}}",
+    "messageDeletedLabel": "Медээни өжүрүп каан / Message deleted",
+    "writeMessageLabel": "Медээ бижиир / Write a message",
+    "sendMessageButton": "Медээ чоргуз / Send message",
+    "sendingMessageButton": "Чорудуп турар... / Sending...",
+    "messageEmptyMessage": "Медээ куруг болбас ужурлуг / Message must not be empty",
+    "messageTooLongMessage": "Медээ дыка узун / Message is too long",
+    "sentMessageReceiptLabel": "Чоргускан / Sent",
+    "readMessageReceiptLabel": "Номчуур / Read",
+    "editedMessageLabel": "Өскерткен / Edited",
+    "jumpToNewestMessageButton": "Эң чаа медээже шилчиир / Jump to newest message",
+    "openListingLabel": "Ажык даңзы / Open listing",
+    "advertisementNoLongerAvailableMessage": "Чарлал ам чок / Advertisement no longer available",
+    "deleteConversationButton": "Чугааны өжүрүп кааптыңар / Delete conversation",
+    "deleteConversationConfirmTitle": "Бо чугааны өжүрүп кааптыңар бе? / Delete this conversation?",
+    "deleteConversationConfirmMessage": "Бо чугааны чүгле силер дээш чажырып турар. Өске кижиден чаа медээ ону дедир эккээр. / This hides the conversation only for you. A new message from the other person will bring it back.",
+    "messageActionsLabel": "Медээ ажыл-чорудулгазы / Message actions",
+    "editMessageButton": "Медээни эде көөр / Edit message",
+    "saveMessageButton": "Өскерлиишкиннерни кадагала / Save changes",
+    "deleteMessageButton": "Медээни өжүрүп кааптыңар /Delete message",
+    "deleteMessageConfirmTitle": "Бо медээни өжүрүп кааптыңар бе? / Delete this message?",
+    "deleteMessageConfirmMessage": "Бо чугаада ийи кижиниң бижиин үндүрер. / This removes the text for both people in this conversation.",
+    "addMessagePhotosButton": "Чуруктарны немеп каар / Add photos",
+    "removeMessagePhotoButton": "Чурукту үндүрер / Remove photo {position}",
+    "messagePhotosLabel": "Медээ чуруктары / Message photos",
+    "messagePhotoPreviewLabel": "Чурук / Photo",
+    "messagePhotosPreviewLabel": "Чуруктар / Photos",
+    "messageAttachmentRequirementsMessage": "Чурукка чедир немеп каар. JPEG, PNG азы WebP. Эң хөйү 8 МБ. /  Add up to 4 photos. JPEG, PNG, or WebP. Maximum 8 MB each.",
+    "messageAttachmentMaximumMessage": "Бир медээ 4 чуруктан хөйү-биле болур. / A message can have at most 4 photos.",
+    "messageAttachmentTooLargeMessage": "Чурук дыка улуг. Эң улуг хемчээли 8 МБ. / Photo is too large. Maximum size is 8 MB.",
+    "messageAttachmentUnsupportedTypeMessage": "Деткиттинмээн чурук хевири. JPEG, PNG азы WebP ажыглаар. / Unsupported photo type. Use JPEG, PNG, or WebP.",
+    "messageAttachmentUploadFailedMessage": "Чурукту үндүрүп шыдаваан. / Unable to upload photo.",
+    "openMessagePhotoViewerLabel": "{total}-дан {current} дугаар чурукту ажыдып алыңар. ",
+    "messagePhotoViewerTitle": "Медээ чурук / Message photo",
+    "messagePhotoInMessagePosition": " {total}-дан {current} дугаар чурук.  ",
+    "todayLabel": "Бо хүн",
+    "yesterdayLabel": "Дүүн "
+  },
+  "ContactSeller": {
+    "messageSellerTitle": "Message seller / Медээ садыгжы",
+    "unableStartConversationMessage": "Unable to start conversation / Чугааны эгелеп шыдаваан",
+    "advertisementNotFoundMessage": "Advertisement not found / Чарлал тывылбаан",
+    "messagingCannotMessageSelfMessage": "You cannot message yourself / Бодуңга чагаа бижип шыдавас сен"
+  },
+  "SellerProfile": {
+    "title": "Seller profile / Садыгжының профили",
+    "unavailableTitle": "Seller profile unavailable / Садыгжы профили чок",
+    "sellerFallbackLabel": "Seller / Садыгжы",
+    "locationLabel": "Location / Турар чер",
+    "memberSinceLabel": "Member since / Чылдан эгелеп кежигүн",
+    "bioLabel": "Bio / Мен дугайымда",
+    "reviewsTitle": "Reviews / Үнелелдер",
+    "seeAllReviewsLabel": " See all reviews / Шупту үнелелдерни көрүңер",
+    "noReviewsYetLabel": "No reviews yet / Амдыызында үнелелдер чок",
+    "ratingSummary": " {rating} · {count, plural, one {# Допчулал} other {# Хыналдалар}}",
+    "activeListingsTitle": "Active listings / Ажылдап турар даңзылар",
+    "noActiveListingsMessage": "No active listings from this seller. / Бо садыгжыдан ажылдап турар дыңнадыглар чок.",
+    "backToSellerProfileLabel": " Back to seller profile / Садыгжы профилинге эглип келир",
+    "profilePhotoLabel": " Profile photo / Профиль чурук",
+    "openProfilePhotoViewerLabel": " Профиль чуруун ажыдып алыңар / Open profile photo",
+    "closeProfilePhotoViewerButton": "Хаар / Close"
+  },
+  "PublicSellerReviews": {
+    "noReviewsYetLabel": "Амдыызында үнелелдер чок / No reviews yet",
+    "starsLabel": " {count} Сылдыс",
+    "verifiedPurchaseLabel": "Бадыткаан садып алыышкын / Verified purchase",
+    "editedReviewLabel": "Өскерткен / Edited"
+  },
+  "ReviewTags": {
+    "selectedTagsLabel": "Шилиттинген хыналда демдектери / Selected review tags",
+    "satisfied": "Сеткили канган / Satisfied",
+    "friendly_seller": "Найыралдыг садыгжы / Friendly seller",
+    "good_communication": "Эки харылзаа / Good communication",
+    "quick_handover": "Дүрген дамчыдылга / Quick handover",
+    "fair_price": "Чөптүг өртек / Fair price",
+    "not_satisfied": "Хандыртынмаан / Not satisfied",
+    "poor_communication": "Харылзаа багай /Poor communication ",
+    "handover_issue": "Дамчыдылга айтырыы / Handover issue"
+  },
+  "ProfilePhoto": {
+    "label": "Профиль чурук / Profile photo",
+    "chooseButton": "Чурукту шилип алыңар / Choose photo",
+    "changeButton": "Чурукту өскертир / Change photo",
+    "saveButton": "Чурукту кадагала / Save photo",
+    "removeButton": "Чурукту үндүрер / Remove photo",
+    "uploadingMessage": "Чүдүрүп турар / Uploading...",
+    "updatedMessage": "Профиль чуруун чаарткан. / Profile photo updated.",
+    "removedMessage": "Профиль чуруун үндүрген. / Profile photo removed.",
+    "uploadFailedMessage": "Профиль чуруун үндүрүп шыдаваан. / Unable to upload profile photo.",
+    "removeFailedMessage": "Профиль чуруун ап шыдаваан. / Unable to remove profile photo.",
+    "requirementsMessage": "JPEG, PNG азы WebP. Файлдың эң улуг хемчээли 5 МБ. / JPEG, PNG, or WebP. Maximum file size 5 MB.",
+    "invalidFormatMessage": "Чуруктуң шын эвес хевири. JPEG, PNG азы WebP ажыглаар. / Invalid image format. Use JPEG, PNG, or WebP.",
+    "tooLargeMessage": "Чурук дыка улуг. Файлдың эң улуг хемчээли 5 МБ. / Image is too large. Maximum file size is 5 MB.",
+    "previewTitle": "Профиль чуруктуң мурнады көрүжү / Profile photo preview",
+    "adjustButton": "Чурукту таарыштырар / Adjust photo",
+    "previewHelp": "Силерниң арын чуруктарыңар ынчаар көстүп кээр. / This is how your profile photo will appear.",
+    "dragZoomHelp": "Чурукту өскертир дээш сөөртүп алыңар. Кнопкаларны ажыглап азы улгаттырар. / Drag photo to reposition. Scroll or use the buttons to zoom.",
+    "positionControlLabel": "Профиль чуруктуң туружун таарыштыр / Adjust profile photo position",
+    "zoomControlsLabel": "Профиль чуруктарын улгаттырар башкарылгалар / Profile photo zoom controls",
+    "zoomOutButton": "Улгаттырар / Zoom out",
+    "zoomInButton": "Улугладыр / Zoom in ",
+    "resetFocusButton": "Төпче эгидип алыр / Reset to center",
+    "savePositionButton": "Туружун кадагалап алыр / Save position",
+    "removeConfirmTitle": "Профиль чуруун үндүрер бе? / Remove profile photo?",
+    "removeConfirmMessage": "Силерниң профилиңер өске чурукту немеп каарыңарга чедир эге аватарны ажыглап турар. / Your profile will use the default avatar until you add another photo.",
+    "focusSaveFailedMessage": "Чуруктуң туружун кадагалап шыдаваан. / Unable to save photo position."
+  },
+  "NotFound": {
+    "title": "Арын тывылбаан / Not found",
+    "message": "Дилээн арын тывылбаан. / The requested page could not be found."
+  },
+  "PostAd": {
+    "title": "Чарлалдан үндүрер",
+    "checkingAuthMessage": "Киргенин хынап тур мен... / Checking sign-in...",
+    "submitButton": "Submit Ad / Чарлал киирер",
+    "submittingButton": "Saving ad... / Рекламаны кадагалап турар...",
+    "successMessage": "Advertisement saved. / Чарлал камгалаттынган.",
+    "saveFailedMessage": "The advertisement could not be saved. / Чарлалды камгалап шыдаваан.",
+    "photosSaveFailedMessage": "Чарлал камгалаттынган, ынчалза-даа чамдык чуруктарны үндүрүп шыдаваан. Катап шенеп көөр дээш, чарлалды өскертирин ажыдып алыңар. / The advertisement was saved, but some photos could not be uploaded. Open Edit advertisement to try again.",
+    "form": {
+      "titleLabel": "ListingSaving title / Даңзы ады",
+      "categoryLabel": "Category / Категория",
+      "categoryPlaceholder": "Choose a category / Категория шилип алыңар",
+      "subcategoryLabel": "Subcategory / Подкатегория",
+      "subcategoryPlaceholder": "Choose a subcategory / Подкатегория шилип алыңар",
+      "typeLabel": "Хевир",
+      "typePlaceholder": "Choose a type / Хевирни шилип алыңар",
+      "buyTypeLabel": "Marketplace type / Рынок хевири",
+      "buyTypePlaceholder": "Choose a marketplace type / Рыноктуң хевирин шилип алыңар",
+      "descriptionLabel": "Тайлбыр",
+      "priceLabel": "өртээ",
+      "locationLabel": "Location / Турар чер",
+      "photosLabel": "Photos / Чуруктар",
+      "photosHelp": "Чедир чуруктарны немеп алыңар. Бир дугаар чурук арын болур. / Add up to 8 photos. The first photo will be the cover.",
+      "addPhotosButton": "Чуруктарны немеп каар / Add photos",
+      "coverPhotoLabel": "Кавер чурук /  Cover photo",
+      "positionLabel": "Туруш / Position",
+      "movePhotoEarlierButton": "Эртежик шимче / Move earlier",
+      "movePhotoLaterButton": "Соонда көжүп кел / Move later",
+      "removePhotoButton": "Чурукту үндүрер / Remove photo",
+      "noPhotosMessage": "Чуруктар шилиттинмээн. Категорияның орнунга ажыглаар. / No photos selected. A category placeholder will be used.",
+      "imageRequirements": "Чүгле JPEG, PNG азы WebP. Бир чурукка эң хөйү 5 МБ. / JPEG, PNG, or WebP only. Maximum 5 MB per photo.",
+      "photoMaximumMessage": "Бир даңзыда хөй дизе 8 чурук бар болур. / A listing can have at most 8 photos.",
+      "photoTooLargeMessage": "Чурук дыка улуг. Эң улуг хемчээли 5 МБ. / Photo is too large. Maximum size is 5 MB.",
+      "photoUnsupportedTypeMessage": "Деткиттинмээн чурук хевири. JPEG, PNG азы WebP ажыглаар. / Unsupported photo type. Use JPEG, PNG, or WebP.",
+      "photoAlt": " Чурук {current} дан {total}"
+    },
+    "validation": {
+      "titleRequired": "Enter a listing title. / Даңзының адын киирер.",
+      "descriptionRequired": "Enter a description. / Тайылбырны киирер.",
+      "locationRequired": "Enter a location. / Бир-ле черни киирер.",
+      "categoryRequired": "Choose a category and subcategory. / Категория болгаш подкатегория шилип алыңар.",
+      "priceRequired": "Enter a valid price. Zero is allowed. / Шын өртекти киирер. Ноль чөпшээрелдиг.",
+      "housingTypeRequired": "Choose a housing transaction and property type. / Бажың-балгат дугайында садыглажыышкынның хевирин болгаш өнчү-хөреңгиниң хевирин шилип алыңар. ",
+      "marketplaceTypeRequired": "Choose a marketplace type. / Рынок хевирин шилип алыңар."
+    }
+  },
+  "EditListing": {
+    "unableTitle": "Чарлалды өскертип болбас. / Unable to edit advertisement.",
+    "notFoundTitle": "Чарлал тывылбаан / Advertisement not found",
+    "notOwnedTitle": "Чарлалды өскертип болбас / Unable to edit advertisement",
+    "notOwnedMessage": "Бо чарлалдың ээзи эвес силер. / You do not own this advertisement.",
+    "saveButton": "Өскерлиишкиннерни кадагала / Save changes",
+    "savingButton": "Өскерлиишкиннерни кадагалап турар... / Saving changes...",
+    "savedMessage": "Өскерлиишкиннер кадагалаттынган. / Changes saved.",
+    "saveFailedMessage": "Чарлалды өскертип болбас. / Unable to edit advertisement.",
+    "photosSaveFailedMessage": "Чурукту үндүрүп шыдаваан. / Unable to upload photo.",
+    "statusUpdateFailedMessage": "Чарлалдың байдалын чаартып шыдаваан. / Unable to update advertisement status.",
+    "status": {
+      "label": "Чарлалдың байдалы / Advertisement status",
+      "help": {
+        "active": "Эвилелдиг көстүп турар. / Visible normally.",
+        "reserved": "Ам-даа көстүп турар, ынчалза-даа камгалаттынган деп демдеглээн. / Still visible, but marked as reserved.",
+        "sold": "Рынок түңнелдеринде ам көргүспейн турар. / No longer shown in marketplace results.",
+        "archived": "Силерден өске кижи бүрүзүнден чажырып каан. / Hidden from everyone except you."
+      }
+    },
+    "soldBuyer": {
+      "label": "Бо бараанны кым садып алганыл? / Who bought this item?",
+      "placeholder": "Садып алыкчыны шилип алыңар... / Select buyer...",
+      "outsideCharlalOption": "Чарлалдан дашкаар садып турар / чок Чарлал садып алыкчызы - Sold outside Charlal / no Charlal buyer",
+      "help": "Садып алыкчыны чүгле бо Чарлал аккаунт бараанны садып алган болза шилип алыңар. Бо чүүл садыгжыларның немелде хыналдазын кылыр арганы бээр. / Choose a buyer only if this Charlal account bought the item. This enables an optional seller review.",
+      "requiredMessage": "Чарлал садып алыкчызын шилип алыңар азы ону Чарлалдан дашкаар садып турар деп демдеглеп алыңар. / Choose the Charlal buyer or mark this as sold outside Charlal.",
+      "noCandidatesHelp": "Чарлал садып алыкчылары бо чарлал дугайында медээ биживээн. Ам-даа Чарлалдан даштынга саткан деп демдеглеп болур силер. / No Charlal buyers messaged about this exact advertisement. You can still mark it sold outside Charlal.",
+      "loadingMessage": "Садып алыкчының аргаларын үндүрүп турар... / Loading buyer options...",
+      "recordedLabel": "Бижиттинген садып алыкчы: / Recorded buyer:",
+      "recordedFallback": "Бижиттинген Чарлал садып алыкчызы / Recorded Charlal buyer",
+      "recordedHelp": "Бо доозулган Чарлал садыглаашкыны ам-на бижиттинген. Садып алыкчыны мында солуп болбас. / This completed Charlal sale is already recorded. The buyer cannot be replaced here."
+    }
+  },
+  "Auth": {
+    "fields": {
+      "displayName": "Display name / Көргүзер ат",
+      "email": "Электроннуг почта",
+      "password": "Пароль",
+      "passwordConfirmation": "Confirm password / Пароль бадыткаар"
+    },
+    "errors": {
+      "invalidEmail": "Шын электроннуг почта адрезин киирер. / Enter a valid email address.",
+      "rateLimited": "Please wait before trying again. / Катап шенээр мурнунда манап көрүңерем.",
+      "networkFailure": "Network request failed. Check your connection and try again. / Сеткил дилээ үрелген. Холбааңарны хынап алгаш, катап шенеп көрүңер."
+    },
+    "signIn": {
+      "title": "Кирер",
+      "registerPrompt": "Мында бир дугаар бе?",
+      "registerLink": "Бүрүткээр",
+      "forgotPasswordLink": "Пароль уттупкан бе?",
+      "button": "Кирер",
+      "submittingButton": "Кирип турар / Signing in...",
+      "emailConfirmedMessage": "Email confirmed. / Электроннуг почта бадыткаан.",
+      "confirmationInvalidMessage": "Confirmation link invalid or expired. / Бадыткал ссылказы шын эвес азы хуусаазы эрткен.",
+      "errors": {
+        "required": "Enter both email and password to continue. / Улаштыр уламчылаар дизе, электроннуг почтаны болгаш пароль киирер.",
+        "invalidCredentials": "The email or password is incorrect. / Электроннуг почта азы пароль шын эвес.",
+        "unconfirmedEmail": "Confirm your email before signing in. / Кирер мурнунда электроннуг почтаңарны бадыткаңар.",
+        "unable": "Unable to sign in. / Кирип шыдаваан."
+      }
+    },
+    "signUp": {
+      "title": "Sign Up / Бижидип алыңар",
+      "signInPrompt": "Already have an account? / Аккаунтуңар бар бе?",
+      "signInLink": "Sign in here / Мында кирип алыңар",
+      "button": "Sign Up / Бижидип алыңар",
+      "submittingButton": "Аккаунт тургузуп турар... / Creating account...",
+      "checkEmailTitle": "Check your email / Электроннуг почтаңарны хынап көрүңер",
+      "confirmEmailMessage": "Confirm your email to finish registration. / Бүрүткелди доозарынга электроннуг почтаңарны бадыткаңар.",
+      "policy": {
+        "prefix": "Аккаунт тургузуп тургаш, мен чөпшээрежип тур мен / By creating an account, I agree to the",
+        "termsLink": "Ажыглаарының чуруму",
+        "middle": "база ону хүлээп алыр / and acknowledge the",
+        "privacyLink": "Privacy Policy / Чажыт чоруктуң политиказы",
+        "suffix": "."
+      },
+      "errors": {
+        "required": "Enter display name, email, password, and password confirmation to continue. / Улаштыр ажылдаар дизе, көргүзер адын, электроннуг почтазын, пароль болгаш пароль бадыткалын киирер.",
+        "displayNameInvalid": "Enter a public display name that is not an email address. / Электроннуг почта адрези эвес, хөй-ниитиге көргүзер атты киирер.",
+        "passwordTooShort": "Password must be at least 8 characters. / Пароль 8 демдектен эвээш эвес болур ужурлуг.",
+        "passwordMismatch": "Passwords do not match. / Парольдар дүүшпес.",
+        "policyRequired": "Agree to the policy to continue. / Улаштыр политикага чөпшээрежир.",
+        "unable": "Unable to create account. / Аккаунт тургузуп шыдаваан."
+      }
+    },
+    "forgotPassword": {
+      "title": "Пароль уттупкан",
+      "backToSignInLink": "Back to sign in / Кирер дээш дедир",
+      "demoWarning": "Demo only: this does not send an email yet.",
+      "successMessage": "Demo reset message shown. No email has been sent.",
+      "submitButton": "Send reset instructions / Эгидер дугайында айтыышкыннарны чорудуптуңар",
+      "submittingButton": "Эгидер дугайында айтыышкыннарны чорудуп турар / Sending reset instructions...",
+      "errors": {
+        "required": "Улаштыр электроннуг почтаңарны киирер силер. / Enter your email to continue."
+      }
+    }
+  },
+  "AboutPage": {
+    "kicker": "Charlal дугайында",
+    "title": "Charlal дугайында",
+    "body": [
+      "**Charlal** дээрге *Чарлал* деп сөстен үнген латин үжүктерлиг бижик. **Charlal** болза шупту кижилерге ажыглаарда эптиг болгаш билдингир, Тывага хамаарышкан янзы-бүрү чарлалдарлыг тыва дыл кырында интернет-сайт-дыр (бөдүүнү-биле сайт).",
+      "Орус дылче сайт ажыглакчы бүрүзү боду өскертип ап болур. **Charlal**’дың соруглазы дээрге бараан дилеп турар азы бажың арендада дужаап турар дээн ышкаш чарлалдарны дүргени-биле дилээринге азы үндүр салырынга кижилерге база бир арганы бээри.",
+      "**Charlal**’ды ажыглаарының бертинде баштай Дүрүмнер болгаш оларны сагыырының чуруму-биле таныжып алыр ужурлуг. Ажыглакчы бүрүзү Дүрүмнерни сагыыр ужурлуг. Чарлалды үндүр салырда баштай бүрүткедип алыр. Бир дугаар бүрүткеткен соонда шупту Дүрүмнерни номчаан, олар-биле чөпшээрешкен, дүрүмнер сагыырынга хүлээлгени берген-деп санаттынып турар.",
+      "**Charlal**’дың ажылы дугайнда айтырыгларны техниктиг дуза бөлүүнче салыр. Оон-даа хөй ажыктыг информацияны **Charlal**’дың кол арнында адаакы кезектен тып ап болур."
+    ]
+  },
+  "TermsPage": {
+    "kicker": "Information / Медегдел",
+    "title": "Ажыглаарының чуруму",
+    "intro": "[TYV REVIEW] This page is a placeholder structure for Charlal's future reviewed user agreement. It is not final legal text.",
+    "sections": [
+      {
+        "title": "Charlal дугайында",
+        "body": "[TYV REVIEW] TODO: Add reviewed legal text describing the marketplace service."
+      },
+      {
+        "title": "[TYV REVIEW] Eligibility and account use",
+        "body": "[TYV REVIEW] TODO: Add reviewed legal text covering who may use Charlal and how accounts should be used."
+      },
+      {
+        "title": "[TYV REVIEW] Posting advertisements",
+        "body": "[TYV REVIEW] TODO: Add reviewed legal text covering advertisement posting rules."
+      },
+      {
+        "title": "[TYV REVIEW] Prohibited content",
+        "body": "[TYV REVIEW] TODO: Add reviewed legal text listing prohibited advertisements, content, and conduct."
+      },
+      {
+        "title": "[TYV REVIEW] Buyer and seller responsibility",
+        "body": "[TYV REVIEW] TODO: Add reviewed legal text explaining user responsibility for transactions and communications."
+      },
+      {
+        "title": "[TYV REVIEW] Messaging and conduct",
+        "body": "[TYV REVIEW] TODO: Add reviewed legal text covering acceptable messaging and user conduct."
+      },
+      {
+        "title": "[TYV REVIEW] User-generated content",
+        "body": "[TYV REVIEW] TODO: Add reviewed legal text covering rights and responsibilities for user-created listings, photos, and messages."
+      },
+      {
+        "title": "[TYV REVIEW] Account suspension or removal",
+        "body": "[TYV REVIEW] TODO: Add reviewed legal text covering moderation, suspension, and removal."
+      },
+      {
+        "title": "[TYV REVIEW] Service availability",
+        "body": "[TYV REVIEW] TODO: Add reviewed legal text covering availability, maintenance, and changes to the service."
+      },
+      {
+        "title": "[TYV REVIEW] Liability and disputes",
+        "body": "[TYV REVIEW] TODO: Add reviewed legal text covering liability limits, dispute handling, and applicable law."
+      },
+      {
+        "title": "[TYV REVIEW] Changes to these terms",
+        "body": "[TYV REVIEW] TODO: Add reviewed legal text explaining how terms updates will be handled."
+      },
+      {
+        "title": "Харылзаа",
+        "body": "[TYV REVIEW] TODO: Add reviewed official contact details for terms questions."
+      }
+    ]
+  },
+  "PrivacyPage": {
+    "kicker": "Information / Медегдел",
+    "title": "Privacy Policy / Чажыт чоруктуң политиказы",
+    "intro": "[TYV REVIEW] This page is a placeholder structure for Charlal's future reviewed privacy and personal data policy. It is not final legal text.",
+    "sections": [
+      {
+        "title": "[TYV REVIEW] Introduction",
+        "body": "[TYV REVIEW] TODO: Add reviewed legal text explaining the purpose and scope of this policy."
+      },
+      {
+        "title": "[TYV REVIEW] Who operates Charlal",
+        "body": "[TYV REVIEW] TODO: Add reviewed operator, responsible-party, and jurisdiction details when they are available."
+      },
+      {
+        "title": "[TYV REVIEW] Information we collect",
+        "body": "[TYV REVIEW] TODO: Add reviewed legal text describing the categories of information collected."
+      },
+      {
+        "title": "[TYV REVIEW] Account information",
+        "body": "[TYV REVIEW] TODO: Add reviewed legal text covering account registration, profile names, and authentication information."
+      },
+      {
+        "title": "[TYV REVIEW] Listings and uploaded photos",
+        "body": "[TYV REVIEW] TODO: Add reviewed legal text covering advertisement details, listing photos, and public listing content."
+      },
+      {
+        "title": "[TYV REVIEW] Messages",
+        "body": "[TYV REVIEW] TODO: Add reviewed legal text covering private buyer and seller messages."
+      },
+      {
+        "title": "[TYV REVIEW] Technical and security information",
+        "body": "[TYV REVIEW] TODO: Add reviewed legal text covering cookies, security logs, device/browser data, and abuse prevention."
+      },
+      {
+        "title": "[TYV REVIEW] Why information is processed",
+        "body": "[TYV REVIEW] TODO: Add reviewed legal text explaining the purposes and lawful basis for processing where applicable."
+      },
+      {
+        "title": "[TYV REVIEW] Who information may be shared with",
+        "body": "[TYV REVIEW] TODO: Add reviewed legal text covering service providers, legal requests, safety, and required disclosures."
+      },
+      {
+        "title": "[TYV REVIEW] Data retention",
+        "body": "[TYV REVIEW] TODO: Add reviewed legal text explaining how long different kinds of information are kept."
+      },
+      {
+        "title": "[TYV REVIEW] Account and data deletion",
+        "body": "[TYV REVIEW] TODO: Add reviewed legal text explaining how users can request account or data deletion."
+      },
+      {
+        "title": "[TYV REVIEW] User rights",
+        "body": "[TYV REVIEW] TODO: Add reviewed legal text describing applicable access, correction, deletion, and objection rights."
+      },
+      {
+        "title": "[TYV REVIEW] Security",
+        "body": "[TYV REVIEW] TODO: Add reviewed legal text describing security practices without exposing implementation secrets."
+      },
+      {
+        "title": "[TYV REVIEW] Changes to this policy",
+        "body": "[TYV REVIEW] TODO: Add reviewed legal text explaining how policy updates will be communicated."
+      },
+      {
+        "title": "Харылзаа",
+        "body": "[TYV REVIEW] TODO: Add reviewed official contact details for privacy questions."
+      }
+    ]
+  },
+  "Notifications": {
+    "title": "Уведомлениелер",
+    "emptyTitle": "No notifications yet / Амдыызында дыңнадыглар чок",
+    "emptyMessage": "Медээлер, үнелелдер болгаш кадагалаттынган чарлалдың чаартылгалары мында көстүп кээр. / Messages, reviews, and saved advertisement updates will appear here.",
+    "unableLoadTitle": "Уведомлениелерни үндүрүп шыдаваан / Unable to load notifications",
+    "unableLoadMessage": "Бир секунда болгаш катап шенеп көрүңер. / Try again in a moment.",
+    "liveUpdatesUnavailableMessage": "Дорт дамчыдылганың чаартылгалары чок. Катап хынаар дээш арынны чаартып алыңар. / Live notification updates are unavailable. Refresh the page to check again.",
+    "unreadCountLabel": "{count, plural, one { # номчуттунмаан медээ} other { # номчуттунмаан дыңнадыглар}}",
+    "markAllReadButton": "Шуптузун номчаан кылдыр демдеглээр / Mark all as read",
+    "unreadLabel": "Номчуттунмаан / Unread",
+    "openNotificationLabel": "Ажык дыңнадыг / Open notification: {title}",
+    "actorFallbackDisplayName": "Ажыглакчы / Marketplace user",
+    "fallbackAdvertisementTitle": "чарлал / advertisement",
+    "messageReceivedTitle": "Чаа медээ / New message from {actor}",
+    "messageReceivedDescription": "Чарлал: {listingTitle}",
+    "reviewReceivedTitle": "Чаа үнелел / New review from {actor}",
+    "reviewReceivedDescription": "Дээш хыналда / Review for {listingTitle}",
+    "savedListingStatusChangedTitle": "Камгалаттынган чарлалдың байдалы өскерилген / Saved advertisement status changed",
+    "savedListingStatusChangedDescription": "{listingTitle}: {oldStatus} -> {newStatus}",
+    "listingStatus": {
+      "active": "Идепкейлиг / Active",
+      "reserved": "Камгалаттынган / Reserved",
+      "sold": "Саттынган / Sold",
+      "archived": "Архивтелген / Archived",
+      "unknown": "Билдинмес / Unknown"
+    }
+  },
+  "ContactPage": {
+    "kicker": "Харылзаа",
+    "title": "Чарлал-биле харылзажыңар / Contact Charlal",
+    "intro": "This page is a placeholder for official Charlal contact details. A database-backed contact form is not included yet.",
+    "detailsTitle": "Харылзажыр аргалар / Contact details",
+    "detailsPlaceholder": "[TYV REVIEW] TODO: Add official email address, phone number, mailing address, or other approved contact details."
+  }
+}

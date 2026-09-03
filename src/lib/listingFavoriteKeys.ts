@@ -1,6 +1,6 @@
 import type { Listing } from '@/data/listings';
 
-export type ListingFavoriteSource = 'database' | 'builtin';
+export type ListingFavoriteSource = 'database';
 
 export type ListingFavoriteReference = {
   source: ListingFavoriteSource;
@@ -35,10 +35,11 @@ export function getListingFavoriteReference(
     return null;
   }
 
-  return {
-    source: listingId.startsWith('db-') ? 'database' : 'builtin',
-    listingId,
-  };
+  if (/^\d+$/.test(listingId)) {
+    return null;
+  }
+
+  return { source: 'database', listingId };
 }
 
 export function getListingFavoriteKey(
@@ -56,11 +57,7 @@ export function getDatabaseListingIdsFromFavorites(
   for (const favorite of favorites) {
     const listingId = favorite.listingId.trim();
 
-    if (
-      favorite.source !== 'database' ||
-      !listingId ||
-      seenListingIds.has(listingId)
-    ) {
+    if (!listingId || seenListingIds.has(listingId)) {
       continue;
     }
 
@@ -144,8 +141,7 @@ export type SavedListingsPayload = {
 
 export function buildSavedListingsPayload(
   favorites: ListingFavoriteRecord[],
-  databaseListings: Listing[],
-  fallbackListings: Listing[]
+  databaseListings: Listing[]
 ): SavedListingsPayload {
   const listingByKey = new Map<string, Listing>();
 
@@ -159,26 +155,10 @@ export function buildSavedListingsPayload(
     );
   }
 
-  for (const listing of fallbackListings) {
-    listingByKey.set(
-      getListingFavoriteKey({
-        source: 'builtin',
-        listingId: String(listing.id),
-      }),
-      listing
-    );
-  }
-
   const visibleFavorites = favorites.filter((favorite) => {
     const listing = listingByKey.get(getListingFavoriteKey(favorite));
 
-    return (
-      listing &&
-      !(
-        favorite.source === 'database' &&
-        listing.isOwnedByViewer === true
-      )
-    );
+    return listing && listing.isOwnedByViewer !== true;
   });
 
   return {

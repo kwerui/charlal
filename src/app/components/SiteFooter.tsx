@@ -1,19 +1,19 @@
-import Link from 'next/link';
-import { content } from '@/content/tyv';
-
-const footerLinks = [
-  { href: '/about', label: content.footerAboutLink },
-  { href: '/terms', label: content.footerTermsLink },
-  { href: '/privacy', label: content.footerPrivacyLink },
-  { href: '/contact', label: content.footerContactLink },
-];
+import { Link } from '@/i18n/navigation';
+import { useTranslations } from 'next-intl';
 
 export default function SiteFooter() {
+  const t = useTranslations('Footer');
   const currentYear = new Date().getFullYear();
+  const footerLinks = [
+    { href: '/about', label: t('aboutLink') },
+    { href: '/terms', label: t('termsLink') },
+    { href: '/privacy', label: t('privacyLink') },
+    { href: '/contact', label: t('contactLink') },
+  ];
 
   return (
-    <footer className="site-footer" aria-label={content.siteFooterLabel}>
-      <nav className="site-footer-nav" aria-label={content.siteFooterNavLabel}>
+    <footer className="site-footer" aria-label={t('label')}>
+      <nav className="site-footer-nav" aria-label={t('navLabel')}>
         {footerLinks.map((link) => (
           <Link key={link.href} href={link.href} className="site-footer-link">
             {link.label}

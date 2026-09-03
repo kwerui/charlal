@@ -1,0 +1,729 @@
+{
+  "Header": {
+    "homeLinkLabel": "На главную",
+    "actionsLabel": "Действия аккаунта",
+    "signIn": "Войти",
+    "signOut": "Выйти",
+    "account": "Аккаунт",
+    "postAd": "Выложить объявление",
+    "signedInAs": "Вошли как",
+    "messages": "Сообщения",
+    "notifications": "Уведомления",
+    "languageSwitcherLabel": "Язык",
+    "unreadConversation": "{count, plural, one {# непрочитанное сообщение} few {# непрочитанных сообщений} many {# непрочитанных сообщений} other {# непрочитанных сообщений}}",
+    "unreadNotifications": "{count, plural, one {# непрочитанное уведомление} few {# непрочитанных уведомлений} many {# непрочитанных уведомлений} other {# непрочитанных уведомлений}}"
+  },
+  "Home": {
+    "categoryAriaLabel": "Категория: {category}",
+    "databaseListingsLoadFailedMessage": "Не удалось загрузить последние объявления."
+  },
+  "Search": {
+    "placeholder": "Что вы ищете?",
+    "inputLabel": "Искать объявления",
+    "button": "Найти",
+    "resultsTitle": "Результаты поиска"
+  },
+  "ListingResults": {
+    "resultsCountLabel": "Подходящие объявления",
+    "emptyResultsTitle": "Объявления не найдены",
+    "emptyResultsMessage": "Попробуйте изменить или сбросить фильтры.",
+    "databaseListingsLoadFailedMessage": "Не удалось загрузить последние объявления."
+  },
+  "ListingCard": {
+    "openListingLabel": "Открыть объявление",
+    "freePriceLabel": "Бесплатно",
+    "saveAdvertisementButton": "Сохранить объявление",
+    "saveAdvertisementShortButton": "Сохранить",
+    "savedAdvertisementButton": "Сохранено",
+    "removeSavedAdvertisementButton": "Удалить из сохраненных",
+    "signInToSaveAdvertisementMessage": "Войдите, чтобы сохранять объявления.",
+    "advertisementCannotBeSavedMessage": "Это объявление нельзя сохранить.",
+    "savedAdvertisementsTemporarilyUnavailableMessage": "Сохраненные объявления временно недоступны. Попробуйте позже.",
+    "unableUpdateSavedAdvertisementMessage": "Не удалось обновить сохраненное объявление.",
+    "status": {
+      "active": "Активно",
+      "reserved": "Зарезервировано",
+      "sold": "Продано",
+      "archived": "В архиве"
+    }
+  },
+  "ListingDetail": {
+    "breadcrumbLabel": "Навигационная цепочка",
+    "homeBreadcrumb": "Главная",
+    "backToHomepage": "На главную",
+    "backToAccount": "К аккаунту",
+    "backToSellerProfile": "На страницу продавца",
+    "backToCategory": "К категории",
+    "backToResults": "К результатам",
+    "freePriceLabel": "Бесплатно",
+    "listingDatabaseUnavailableTitle": "Объявление недоступно",
+    "databaseListingsLoadFailedMessage": "Не удалось загрузить последние объявления.",
+    "listingReservedDetailMessage": "Объявление зарезервировано, но вы можете связаться с владельцем.",
+    "listingSoldDetailMessage": "Объявление продано.",
+    "listingArchivedDetailMessage": "Объявление в архиве и доступно только владельцу.",
+    "sellerLabel": "Продавец",
+    "datePostedLabel": "Опубликовано",
+    "updatedAtLabel": "Последнее обновление",
+    "descriptionTitle": "Описание",
+    "gallery": {
+      "photosLabel": "Фото",
+      "photoAlt": "Фото {current} из {total}",
+      "viewPhoto": "Открыть фото {current} из {total}",
+      "openViewerWithPhoto": "Открыть фото полностью: {photo}",
+      "viewerTitleWithPhoto": "Фото объявления: {photo}",
+      "closeViewer": "Закрыть",
+      "previousPhoto": "Предыдущее фото",
+      "nextPhoto": "Следующее фото",
+      "position": "{current} / {total}"
+    }
+  },
+  "ListingOwnerActions": {
+    "editAdvertisementButton": "Редактировать объявление",
+    "contactSellerButton": "Связаться с владельцем",
+    "soldMessagingUnavailableMessage": "Объявление продано, создать новый диалог невозможно.",
+    "archivedMessagingUnavailableMessage": "Объявление архивировано, создать новый диалог невозможно.",
+    "demoListingMessagingUnavailableMessage": "Сообщения недоступны для этой демо-публикации."
+  },
+  "ListingReport": {
+    "button": "Пожаловаться",
+    "title": "Пожаловаться на объявление",
+    "question": "Почему вы подаете жалобу?",
+    "detailsLabel": "Расскажите подробнее (необязательно)",
+    "detailsHelp": "Максимум 1000 символов.",
+    "sendButton": "Отправить жалобу.",
+    "sendingButton": "Отправка...",
+    "successTitle": "Успешная отправка.",
+    "successMessage": "Жалоба отправлена. Спасибо.",
+    "alreadyReportedTitle": "Жалоба уже отправлена",
+    "alreadyReportedMessage": "Вы уже отправили жалобу на это объявление.",
+    "alreadyReportedButton": "Жалоба уже отправлена.",
+    "reasonRequiredMessage": "Выберите причину жалобы.",
+    "detailsTooLongMessage": "Описание слишком длинное. Используйте не более 1000 символов.",
+    "ownListingMessage": "Вы не можете пожаловаться на свое объявление.",
+    "unavailableMessage": "На это объявление нельзя отправить жалобу.",
+    "failedMessage": "Не удалось отправить жалобу.",
+    "signInRequiredMessage": "Войдите в аккаунт чтобы отправить жалобу.",
+    "cancelButton": "Отмена",
+    "closeButton": "Закрыть",
+    "reasons": {
+      "scam": " Мошенничество",
+      "prohibited_item": "Запрещенный товар",
+      "misleading": "Недостоверная информация",
+      "duplicate_spam": "Дубликат / спам",
+      "other": "Другое"
+    }
+  },
+  "Footer": {
+    "label": "Нижняя часть сайта",
+    "navLabel": "Ссылки нижней части сайта",
+    "aboutLink": "О сайте",
+    "termsLink": "Условия",
+    "privacyLink": "Конфиденциальность",
+    "contactLink": "Контакты"
+  },
+  "CategoryPage": {
+    "subcategoriesTitle": "Подкатегории",
+    "servicesSearchPlaceholder": "Например, электрик",
+    "servicesSearchSample": "Например, электрик",
+    "marketplaceSearchPlaceholder": "Например, пальто",
+    "marketplaceSearchSample": "Например, пальто",
+    "searchPlaceholder": "Что вы ищете?",
+    "searchPromptSuffix": "",
+    "searchButton": "Найти",
+    "typeLabel": "Тип",
+    "typePlaceholder": "Тип",
+    "priceFilterLabel": "Цена",
+    "priceMinPlaceholder": "Цена от",
+    "priceMaxPlaceholder": "Цена до",
+    "filterButton": "Применить",
+    "filterControlsButton": "Фильтры",
+    "filterControlsLabel": "Фильтры",
+    "closeFiltersButton": "Закрыть фильтры",
+    "clearFilterButton": "Сбросить фильтр",
+    "latestListingsTitle": "Последние объявления",
+    "exploreAllServices": "Искать во всех объявлениях",
+    "viewAllLabel": "Все",
+    "backToCategories": "Назад к категориям",
+    "backToCategory": "К категории",
+    "backToHome": "На главную",
+    "housingPropertyTypeLabel": "Тип",
+    "housingPropertyTypePlaceholder": "Выберите тип",
+    "housingAllOption": "Все",
+    "housingSaleOption": "Продажа",
+    "housingRentOption": "Аренда",
+    "databaseListingsLoadFailedMessage": "Не удалось загрузить последние объявления."
+  },
+  "Categories": {
+    "items": {
+      "housing": {
+        "label": "Недвижимость",
+        "types": {
+          "apartments": "Квартиры и дома",
+          "land": "Земля",
+          "commercial": "Коммерческая недвижимость",
+          "storage": "Гаражи и парковки"
+        },
+        "subcategories": {
+          "sale": "Продажа",
+          "rent": "Аренда"
+        }
+      },
+      "marketplace": {
+        "label": "Купить/Продать",
+        "buyTypes": {
+          "all-categories": "Все типы",
+          "clothing": "Одежда",
+          "shoes": "Обувь",
+          "office": "Канцелярия",
+          "new": "Новое",
+          "used": "Б/У",
+          "home-goods": "Товары для дома",
+          "appliances": "Бытовая техника",
+          "furniture": "Мебель",
+          "pets": "Для животных",
+          "kids": "Для детей",
+          "construction materials": "Стройматериалы",
+          "books": "Книги",
+          "beauty": "Косметика",
+          "games": "Игры"
+        },
+        "subcategories": {
+          "buy": "Покупают",
+          "free": "Бесплатно",
+          "wanted": "Ищут"
+        }
+      },
+      "auto": {
+        "label": "Авто",
+        "subcategories": {
+          "used-cars": "Авто с пробегом",
+          "new-cars": "Новые авто",
+          "auto-parts": "Автозапчасти",
+          "rent": "Аренда/лизинг"
+        }
+      },
+      "jobs": {
+        "label": "Работа",
+        "subcategories": {
+          "find-talents": "Ищу сотрудников",
+          "find-jobs": "Ищу работу"
+        }
+      },
+      "services": {
+        "label": "Услуги",
+        "subcategories": {}
+      },
+      "events": {
+        "label": "Развлечения",
+        "subcategories": {
+          "events": "События",
+          "night-clubs": "Вечеринки",
+          "lost-found": "Потерянное и найденное"
+        }
+      }
+    }
+  },
+  "Account": {
+    "title": "Аккаунт",
+    "infoTitle": "Информация аккаунта",
+    "emailLabel": "Вошли как",
+    "publicNameLabel": "Публичное имя",
+    "viewPublicProfileLabel": "Посмотреть публичный профиль",
+    "publicNameTitle": "Изменить публичное имя",
+    "publicNamePlaceholder": "Введите публичное имя владельца",
+    "publicNameHelp": "Это имя будет отображаться в объявлениях вместо вашей электронной почты.",
+    "publicLocationHelp": "Укажите только город или регион, без адреса.",
+    "saveProfileButton": "Сохранить профиль",
+    "publicNameRequiredMessage": "Введите публичное имя перед публикацией объявления.",
+    "publicNameSaveFailedMessage": "Не удалось обновить публичное имя.",
+    "displayNameInvalidMessage": "Введите публичное имя, которое не является адресом электронной почты.",
+    "profileDetailsInvalidMessage": "Описание профиля или местоположение слишком длинное.",
+    "profileLoadFailedMessage": "Вы вошли в аккаунт, но профиль не удалось загрузить.",
+    "unableLoadProfileMessage": "Не удалось загрузить профиль",
+    "profileUpdatedMessage": "Профиль обновлен.",
+    "myAdvertisementsTitle": "Мои объявления",
+    "myAdvertisementsCountLabel": "Мои объявления",
+    "deleteAdvertisementButton": "Удалить объявление",
+    "confirmDeleteAdvertisementTitle": "Подтвердите удаление",
+    "confirmDeleteAdvertisementMessage": "Удалить это объявление?",
+    "advertisementDeletedMessage": "Объявление удалено.",
+    "advertisementDeleteFailedMessage": "Не удалось удалить объявление.",
+    "noAdvertisementsPostedTitle": "У вас пока нет объявлений",
+    "noAdvertisementsPostedMessage": "Созданные вами объявления будут отображаться здесь.",
+    "reviewsSummaryTitle": "Отзывы",
+    "reviewsSummary": "Ожидают отзыва: {toReview}  · Написано: {written}",
+    "viewReviewsButton": "Посмотреть отзывы"
+  },
+  "AccountReviews": {
+    "purchasesToReviewTitle": "Товары для отзыва",
+    "noPurchasesToReviewMessage": "Здесь появятся покупки, на которые вы ещё не оставили отзыв.",
+    "myReviewsTitle": "Мои отзывы",
+    "noMyReviewsMessage": "Здесь появятся оставленные вами отзывы.",
+    "purchasedFromLabel": "Куплено у",
+    "leaveReviewButton": "Оставить отзыв",
+    "editReviewButton": "Изменить отзыв",
+    "saveReviewChangesButton": "Сохранить изменения",
+    "deleteReviewButton":  "Удалить отзыв",
+    "submitReviewButton": "Опубликовать отзыв",
+    "reviewSavingButton": "Сохраняется...",
+    "reviewDeletingButton": "Удаляется...",
+    "reviewSavedMessage": "Отзыв сохранён.",
+    "reviewDeletedMessage":  "Отзыв удалён.",
+    "reviewSaveFailedMessage":  "Не удалось сохранить отзыв.",
+    "reviewDeleteFailedMessage": "Не удалось удалить отзыв.",
+    "deleteReviewConfirmTitle": "Удалить отзыв?",
+    "deleteReviewConfirmMessage": "Ваша оценка и теги будут удалены. Вы сможете снова оценить эту покупку позже.",
+    "reviewRatingLabel":  "Оценка",
+    "reviewRatingRequiredMessage":"Выберите оценку от 1 до 5 звезд.",
+    "reviewTagsLabel": "Теги",
+    "reviewTagsHelp": "Необязательно. Можете выбрать до 3 тегов.",
+    "reviewTagsMaximumMessage": "Выберите не более 3 тегов."
+  },
+  "SavedListings": {
+    "title": "Сохраненные объявления",
+    "countLabel": "Сохраненные объявления",
+    "emptyTitle": "Нет сохраненных объявлений",
+    "emptyMessage": "Сохраненные вами объявления появятся здесь.",
+    "unableLoadTitle": "Не удалось загрузить сохраненные объявления ",
+    "unableLoadMessage": "Попробуйте еще раз через некоторое время."
+  },
+  "Messages": {
+    "title": "Сообщения",
+    "backToMessages": "Назад к сообщениям",
+    "retryButton": "Повторить",
+    "noConversationsTitle": "Пока нет диалогов",
+    "noConversationsMessage": "Здесь появятся ваши сообщения с покупателями и продавцами.",
+    "unableLoadConversationsMessage": "Не удалось загрузить диалоги",
+    "unableLoadMessagesMessage": "Не удалось загрузить сообщения",
+    "unableSendMessageMessage": "Не удалось отправить сообщение",
+    "unableUpdateMessageStatusMessage": "Не удалось обновить статус сообщения",
+    "unableEditMessageMessage": "Не удалось изменить сообщение",
+    "unableDeleteMessageMessage": "Не удалось удалить сообщение",
+    "unableDeleteConversationMessage": "Не удалось удалить диалог",
+    "liveUpdatesUnavailableMessage": "Автообновление сообщений недоступно. Обновите страницу, чтобы проверить новые сообщения.",
+    "offlineThreadStatusMessage": "Нет подключения к интернету. Сообщения обновятся после восстановления соединения.",
+    "offlineBeforeSendMessage": "Нет подключения к интернету. Подключитесь к сети перед отправкой.",
+    "reconnectingLabel": "Восстановление соединения...",
+    "messageDeliveryUnconfirmedMessage": "Не удалось подтвердить доставку сообщения. Проверьте диалог перед повторной отправкой.",
+    "conversationLinkLabel": "{listingTitle} - {participantName}",
+    "unreadMessagesLabel": "{count, plural, one {# непрочитанное сообщение} few {# непрочитанных сообщения} many {# непрочитанных сообщений} other {# непрочитанных сообщения}}",
+    "messageDeletedLabel": "Сообщение удалено",
+    "writeMessageLabel": "Напишите сообщение",
+    "sendMessageButton": "Отправить",
+    "sendingMessageButton": "Отправляется...",
+    "messageEmptyMessage": "Сообщение не может быть пустым",
+    "messageTooLongMessage": "Сообщение слишком длинное",
+    "sentMessageReceiptLabel":  "Отправлено",
+    "readMessageReceiptLabel": "Прочитано",
+    "editedMessageLabel": "Отредактировано",
+    "jumpToNewestMessageButton":  "К новым сообщениям",
+    "openListingLabel":  "Открыть объявление",
+    "advertisementNoLongerAvailableMessage": "Объявление больше недоступно",
+    "deleteConversationButton":  "Удалить диалог",
+    "deleteConversationConfirmTitle": "Удалить этот диалог?",
+    "deleteConversationConfirmMessage": "Диалог будет скрыт только у вас. Если другой пользователь отправит новое сообщение, диалог появится снова.",
+    "messageActionsLabel": "Действия с сообщением",
+    "editMessageButton": "Изменить сообщение",
+    "saveMessageButton": "Сохранить изменения",
+    "deleteMessageButton": "Удалить сообщение",
+    "deleteMessageConfirmTitle": "Удалить это сообщение?",
+    "deleteMessageConfirmMessage": "Текст сообщения будет удалён у обоих участников этого диалога.",
+    "addMessagePhotosButton":  "Добавить фото",
+    "removeMessagePhotoButton":"Удалить фото {position}",
+    "messagePhotosLabel": "Фото в сообщении",
+    "messagePhotoPreviewLabel": "Фото",
+    "messagePhotosPreviewLabel": "Фотографии",
+    "messageAttachmentRequirementsMessage": "Можно добавить до 4 фото. JPEG, PNG или WebP. Максимальный размер каждого файла — 8 МБ.",
+    "messageAttachmentMaximumMessage": "К одному сообщению можно добавить не более 4 фото.",
+    "messageAttachmentTooLargeMessage": "Фото слишком большое. Максимальный размер — 8 МБ.",
+    "messageAttachmentUnsupportedTypeMessage": "Неподдерживаемый формат фото. Используйте JPEG, PNG или WebP.",
+    "messageAttachmentUploadFailedMessage":  "Не удалось загрузить фото.",
+    "openMessagePhotoViewerLabel": "Открыть фото {current} из {total}",
+    "messagePhotoViewerTitle":  "Фото из сообщения",
+    "messagePhotoInMessagePosition": "Фото {current} из {total}",
+    "todayLabel": "Сегодня",
+    "yesterdayLabel": "Вчера"
+  },
+  "ContactSeller": {
+    "messageSellerTitle": "Написать владельцу",
+    "unableStartConversationMessage": "Не удалось начать диалог",
+    "advertisementNotFoundMessage":  "Объявление не найдено",
+    "messagingCannotMessageSelfMessage": "Нельзя отправить сообщение самому себе"
+  },
+  "SellerProfile": {
+    "title": "Профиль продавца",
+    "unavailableTitle": "Профиль продавца недоступен",
+    "sellerFallbackLabel": "Продавец",
+    "locationLabel": "Местопололожение",
+    "memberSinceLabel": "Участник с",
+    "bioLabel": "О себе",
+    "reviewsTitle": "Отзывы",
+    "seeAllReviewsLabel": "Посмотреть все отзывы",
+    "noReviewsYetLabel": "Пока нет отзывов",
+    "ratingSummary": " {rating} · {count, plural, one {# отзыв} few {# отзыва} many {# отзывов} other {# отзыва}}",
+    "activeListingsTitle": "Активные объявления",
+    "noActiveListingsMessage": "У этого продавца пока нет активных объявлений.",
+    "backToSellerProfileLabel": "Назад к профилю продавца",
+    "profilePhotoLabel": "Фото профиля",
+    "openProfilePhotoViewerLabel": "Открыть фото профиля",
+    "closeProfilePhotoViewerButton": "Закрыть"
+  },
+  "PublicSellerReviews": {
+    "noReviewsYetLabel": "Пока нет отзывов",
+    "starsLabel": "{count, plural, one {# звезда} few {# звезды} many {# звёзд} other {# звезды}}",
+    "verifiedPurchaseLabel": "Подтвержденная покупка",
+    "editedReviewLabel": "Отредактировано"
+  },
+  "ReviewTags": {
+    "selectedTagsLabel": "Выбранные теги отзыва",
+    "satisfied": "Удовлетворетволен(а)",
+    "friendly_seller": "Дружелюбный продавец",
+    "good_communication": "Хорошая коммуникация",
+    "quick_handover": "Быстрая передача товара",
+    "fair_price": "Справедливая цена",
+    "not_satisfied": "Не удовлетворетволен(а)",
+    "poor_communication": "Плохая коммуникация",
+    "handover_issue": "Проблемы с передачей товара"
+  },
+  "ProfilePhoto": {
+    "label": "Фото профиля",
+    "chooseButton": "Выберите фото",
+    "changeButton": "Изменить фотo",
+    "saveButton": "Сохранить фото",
+    "removeButton": "Удалить фото",
+    "uploadingMessage": "Обновление...",
+    "updatedMessage": "Фото профиля обновлено.",
+    "removedMessage": "Фото профиля удалено.",
+    "uploadFailedMessage": "Невозможно обновить фото профиля.",
+    "removeFailedMessage": "Невозможно удалить фото профиля.",
+    "requirementsMessage": "JPEG, PNG, или WebP. Максимальный размер файла 5 МБ.",
+    "invalidFormatMessage": "Недопустимый формат фото. Используйте JPEG, PNG, или WebP.",
+    "tooLargeMessage": "Фото слишком большое. Максимальный размер файла 5 МБ.",
+    "previewTitle": "Предпросмотр фото профиля",
+    "adjustButton": "Отредактировать фото",
+    "previewHelp": "Так будет выглядеть фото вашего профиля.",
+    "dragZoomHelp": "Перетащите фото, чтобы изменить его положение. Прокручивайте или используйте кнопки для масштабирования.",
+    "positionControlLabel": " Настроить положение фото профиля",
+    "zoomControlsLabel": "Элементы управления масштабированием фото профиля",
+    "zoomOutButton": "Отдалить",
+    "zoomInButton": "Приблизить",
+    "resetFocusButton": "Поставить в центр",
+    "savePositionButton": "Сохранить позицию",
+    "removeConfirmTitle": "Удалить фото профиля?",
+    "removeConfirmMessage": "До загрузки нового фото будет использоваться аватар по умолчанию.",
+    "focusSaveFailedMessage": "Не удалось сохранить положение фото."
+  },
+  "NotFound": {
+    "title": "Страница не найдена",
+    "message":"Не удалось найти запрошенную страницу."
+  },
+  "PostAd": {
+    "title": "Выложить объявление",
+    "checkingAuthMessage": "Проверяем вход в аккаунт...",
+    "submitButton": "Опубликовать объявление",
+    "submittingButton": "Сохраняем объявление...",
+    "successMessage": "Объявление опубликовано.",
+    "saveFailedMessage": "Не удалось сохранить объявление.",
+    "photosSaveFailedMessage": "Объявление сохранено, но некоторые фотографии не удалось загрузить. Откройте редактирование объявления, чтобы попробовать ещё раз.",
+    "form": {
+      "titleLabel": "Название объявления",
+      "categoryLabel": "Категория",
+      "categoryPlaceholder": "Выберите категорию",
+      "subcategoryLabel": "Подкатегория",
+      "subcategoryPlaceholder": "Выберите подкатегорию",
+      "typeLabel": "Тип",
+      "typePlaceholder": "Выберите тип",
+      "buyTypeLabel": "Тип объявления",
+      "buyTypePlaceholder": "Выберите тип объявления",
+      "descriptionLabel": "Описание",
+      "priceLabel": "Цена",
+      "locationLabel": "Местопололожение",
+      "photosLabel": "Фото",
+      "photosHelp": "Можно добавить до 8 фотографий. Первая фотография будет обложкой.",
+      "addPhotosButton": "Добавить фото",
+      "coverPhotoLabel": "Обложка",
+      "positionLabel": "Позиция",
+      "movePhotoEarlierButton": "Переместить назад",
+      "movePhotoLaterButton": "Переместить вперед",
+      "removePhotoButton": "Удалить фото",
+      "noPhotosMessage": "Фотографии не выбраны. Будет использовано изображение категории.",
+      "imageRequirements": "Только JPEG, PNG, или WebP. Максимальный размер одного фото - 5 МБ.",
+      "photoMaximumMessage": "К объявлению можно добавить не более 8 фотографий.",
+      "photoTooLargeMessage": "Фото слишком большое. Максимальный размер 5 МБ.",
+      "photoUnsupportedTypeMessage": "Неподдерживаемый формат фото. Используйте JPEG, PNG или WebP.",
+      "photoAlt": "Фото {current} из {total}"
+    },
+    "validation": {
+      "titleRequired": "Введите название объявления.",
+      "descriptionRequired": "Введите описание.",
+      "locationRequired": "Укажите местоположение.",
+      "categoryRequired": "Выберите категорию и подкатегорию.",
+      "priceRequired": "Введите цену. Можно указать 0.",
+      "housingTypeRequired": "Выберите тип сделки и тип недвижимости.",
+      "marketplaceTypeRequired": "Выберите тип объявления."
+    }
+  },
+  "EditListing": {
+    "unableTitle": "Не удалось отредактировать объявление.",
+    "notFoundTitle": "Объявление не найдено",
+    "notOwnedTitle": "Не удалось отредактировать объявление",
+    "notOwnedMessage": "Это объявление принадлежит другому пользователю.",
+    "saveButton": "Сохранить изменения",
+    "savingButton": "Сохраняется...",
+    "savedMessage": "Изменения сохранены.",
+    "saveFailedMessage": "Не удалось сохранить изменения.",
+    "photosSaveFailedMessage": "Не удалось загрузить фото.",
+    "statusUpdateFailedMessage": "Не удалось изменить статус объявления.",
+    "status": {
+      "label": "Статус объявления",
+      "help": {
+        "active": "Отображается как обычно.",
+        "reserved": "Остаётся видимым, но отмечается как зарезервированное.",
+        "sold": "Больше не отображается в результатах поиска.",
+        "archived": "Скрыто от всех, кроме вас."
+      }
+    },
+    "soldBuyer": {
+      "label": "Кто купил товар?",
+      "placeholder": "Выберите покупателя...",
+      "outsideCharlalOption": "Продано вне Charlal / покупателя в Charlal нет",
+      "help": "Выберите покупателя только в том случае, если товар купил этот пользователь Charlal. После этого пользователь сможет оставить отзыв.",
+      "requiredMessage": "Выберите покупателя в Charlal или укажите, что товар продан вне Charlal.",
+      "noCandidatesHelp": "Никто из пользователей Charlal не писал вам по поводу этого объявления. Вы можете отметить, что товар продан вне Charlal.",
+      "loadingMessage": "Загружаем список покупателей...",
+      "recordedLabel": "Указанный покупатель:",
+      "recordedFallback": "Покупатель Charlal",
+      "recordedHelp": "Эта продажа через Charlal уже зарегистрирована. Нельзя выбрать другого покупателя."
+    }
+  },
+  "Auth": {
+    "fields": {
+      "displayName": "Публичное имя",
+      "email": "Электронная почта",
+      "password": "Пароль",
+      "passwordConfirmation": "Подтвердите пароль"
+    },
+    "errors": {
+"invalidEmail": "Введите корректный адрес электронной почты.",
+      "rateLimited": "Подождите перед следующей попыткой.",
+      "networkFailure": "Не удалось подключиться к сети. Проверьте подключение к интернету и попробуйте ещё раз."
+    },
+    "signIn": {
+      "title": "Войти",
+      "registerPrompt": "Впервые на Charlal?",
+      "registerLink": "Создать аккаунт",
+      "forgotPasswordLink": "Забыли пароль?",
+      "button": "Войти",
+      "submittingButton": "Вход...",
+      "emailConfirmedMessage": "Электронная почта подтверждена.",
+      "confirmationInvalidMessage": "Ссылка для подтверждения недействительна или устарела.",
+      "errors": {
+        "required": "Введите электронную почту и пароль.",
+        "invalidCredentials": "Неверная электронная почта или пароль.",
+        "unconfirmedEmail": "Подтвердите электронную почту перед входом.",
+        "unable": "Не удалось войти в аккаунт."
+      }
+    },
+    "signUp": {
+      "title": "Регистрация",
+      "signInPrompt": "Уже есть аккаунт?",
+      "signInLink": "Войти",
+      "button": "Создать аккаунт",
+      "submittingButton": "Создаем аккаунт...",
+      "checkEmailTitle": "Проверьте электронную почту",
+      "confirmEmailMessage": "Подтвердите электронную почту, чтобы завершить регистрацию.",
+      "policy": {
+        "prefix": "Создавая аккаунт, я принимаю",
+        "termsLink": "Правила пользования",
+        "middle": "и подтверждаю, что ознакомился(-ась) с",
+        "privacyLink": "политикой конфиденциальности",
+        "suffix": "."
+      },
+      "errors": {
+        "required": "Введите публичное имя, электронную почту, пароль и подтверждение пароля.",
+        "displayNameInvalid": "Введите публичное имя, которое не является адресом электронной почты.",
+        "passwordTooShort": "Пароль должен содержать не менее 8 символов.",
+        "passwordMismatch": "Пароли не совпадают.",
+        "policyRequired": "Примите условия использования и политику конфиденциальности, чтобы продолжить.",
+        "unable": "Не удалось создать аккаунт."
+      }
+    },
+    "forgotPassword": {
+      "title": "Забыли пароль?",
+      "backToSignInLink": "Назад ко входу",
+      "demoWarning": "Демо-режим: письмо для сброса пароля пока не отправляется.",
+      "successMessage": "Демо-сообщение показано. Письмо не было отправлено.",
+      "submitButton": "Отправить инструкции",
+      "submittingButton": "Отправляем инструкции...",
+      "errors": {
+"required": "Введите электронную почту, чтобы продолжить."
+      }
+    }
+  },
+  "AboutPage": {
+    "kicker": " О Charlal",
+    "title": " О Charlal",
+    "body": [
+          "Charlal — сайт объявлений на тувинском языке, связанный с Тувой. Название Charlal записано латиницей от слова «Чарлал».",
+    "Каждый пользователь может переключить сайт на русский язык. Charlal помогает искать и размещать объявления — например, находить товары или жильё в аренду.",
+    "Перед использованием Charlal пользователям следует ознакомиться с Условиями использования. Для публикации объявления необходимо зарегистрироваться. Регистрируясь, пользователь принимает Условия использования.",
+    "По вопросам работы Charlal можно обратиться в техническую поддержку. Дополнительная полезная информация доступна в нижней части главной страницы."
+    ]
+  },
+  "TermsPage": {
+    "kicker": "Информация",
+    "title": "Правила пользования",
+    "intro": "[RU REVIEW] This page is a placeholder structure for Charlal's future reviewed user agreement. It is not final legal text.",
+    "sections": [
+      {
+        "title": "О Charlal",
+        "body": "[RU REVIEW] TODO: Add reviewed legal text describing the marketplace service."
+      },
+      {
+        "title": "Условия допуска и использование учетной записи",
+        "body": "[RU REVIEW] TODO: Add reviewed legal text covering who may use Charlal and how accounts should be used."
+      },
+      {
+        "title": "[RU REVIEW] Posting advertisements",
+        "body": "[RU REVIEW] TODO: Add reviewed legal text covering advertisement posting rules."
+      },
+      {
+        "title": "Запрещенные материалы",
+        "body": "[RU REVIEW] TODO: Add reviewed legal text listing prohibited advertisements, content, and conduct."
+      },
+      {
+        "title": "Ответственность покупателя и продавца",
+        "body": "[RU REVIEW] TODO: Add reviewed legal text explaining user responsibility for transactions and communications."
+      },
+      {
+        "title": "Обмен сообщениями и правила поведения",
+        "body": "[RU REVIEW] TODO: Add reviewed legal text covering acceptable messaging and user conduct."
+      },
+      {
+        "title": "Контент, созданный пользователями",
+        "body": "[RU REVIEW] TODO: Add reviewed legal text covering rights and responsibilities for user-created listings, photos, and messages."
+      },
+      {
+        "title": "Приостановка или удаление учетной записи",
+        "body": "[RU REVIEW] TODO: Add reviewed legal text covering moderation, suspension, and removal."
+      },
+      {
+        "title": "Доступность сервиса",
+        "body": "[RU REVIEW] TODO: Add reviewed legal text covering availability, maintenance, and changes to the service."
+      },
+      {
+        "title": "Ответственность и разногласия",
+        "body": "[RU REVIEW] TODO: Add reviewed legal text covering liability limits, dispute handling, and applicable law."
+      },
+      {
+        "title": "Изменения настоящих условий",
+        "body": "[RU REVIEW] TODO: Add reviewed legal text explaining how terms updates will be handled."
+      },
+      {
+        "title": "Контракт",
+        "body": "[RU REVIEW] TODO: Add reviewed official contact details for terms questions."
+      }
+    ]
+  },
+  "PrivacyPage": {
+    "kicker": "Информация",
+    "title": "Политика конфиденциальности",
+    "intro": "[RU REVIEW] This page is a placeholder structure for Charlal's future reviewed privacy and personal data policy. It is not final legal text.",
+    "sections": [
+      {
+        "title": "Введение",
+        "body": "[RU REVIEW] TODO: Add reviewed legal text explaining the purpose and scope of this policy."
+      },
+      {
+        "title": "[RU REVIEW] Who operates Charlal",
+        "body": "[RU REVIEW] TODO: Add reviewed operator, responsible-party, and jurisdiction details when they are available."
+      },
+      {
+        "title": "[RU REVIEW] Information we collect",
+        "body": "[RU REVIEW] TODO: Add reviewed legal text describing the categories of information collected."
+      },
+      {
+        "title": "[RU REVIEW] Account information",
+        "body": "[RU REVIEW] TODO: Add reviewed legal text covering account registration, profile names, and authentication information."
+      },
+      {
+        "title": "[RU REVIEW] Listings and uploaded photos",
+        "body": "[RU REVIEW] TODO: Add reviewed legal text covering advertisement details, listing photos, and public listing content."
+      },
+      {
+        "title": "[RU REVIEW] Messages",
+        "body": "[RU REVIEW] TODO: Add reviewed legal text covering private buyer and seller messages."
+      },
+      {
+        "title": "[RU REVIEW] Technical and security information",
+        "body": "[RU REVIEW] TODO: Add reviewed legal text covering cookies, security logs, device/browser data, and abuse prevention."
+      },
+      {
+        "title": "[RU REVIEW] Why information is processed",
+        "body": "[RU REVIEW] TODO: Add reviewed legal text explaining the purposes and lawful basis for processing where applicable."
+      },
+      {
+        "title": "[RU REVIEW] Who information may be shared with",
+        "body": "[RU REVIEW] TODO: Add reviewed legal text covering service providers, legal requests, safety, and required disclosures."
+      },
+      {
+        "title": "[RU REVIEW] Data retention",
+        "body": "[RU REVIEW] TODO: Add reviewed legal text explaining how long different kinds of information are kept."
+      },
+      {
+        "title": "[RU REVIEW] Account and data deletion",
+        "body": "[RU REVIEW] TODO: Add reviewed legal text explaining how users can request account or data deletion."
+      },
+      {
+        "title": "[RU REVIEW] User rights",
+        "body": "[RU REVIEW] TODO: Add reviewed legal text describing applicable access, correction, deletion, and objection rights."
+      },
+      {
+        "title": "[RU REVIEW] Security",
+        "body": "[RU REVIEW] TODO: Add reviewed legal text describing security practices without exposing implementation secrets."
+      },
+      {
+        "title": "[RU REVIEW] Changes to this policy",
+        "body": "[RU REVIEW] TODO: Add reviewed legal text explaining how policy updates will be communicated."
+      },
+      {
+        "title": "[RU REVIEW] Contact",
+        "body": "[RU REVIEW] TODO: Add reviewed official contact details for privacy questions."
+      }
+    ]
+  },
+  "Notifications": {
+    "title": "Уведомления",
+    "emptyTitle": "Нет уведомлений",
+    "emptyMessage": "Сообщения, отзывы и обновления сохраненных объявлений будут отображаться здесь.",
+    "unableLoadTitle": "Не удалось загрузить уведомления",
+    "unableLoadMessage": "Попробуйте еще раз через некоторое время.",
+    "liveUpdatesUnavailableMessage": "Обновления уведомлений недоступны. Обновите страницу, чтобы проверить новые уведомления.",
+"unreadCountLabel": "{count, plural, one {# непрочитанное уведомление} few {# непрочитанных уведомления} many {# непрочитанных уведомлений} other {# непрочитанных уведомлений}}",
+    "markAllReadButton": "Отметить все как прочитанные",
+    "unreadLabel": "Непрочитано",
+    "openNotificationLabel": "Открыть уведомление: {title}",
+    "actorFallbackDisplayName": "Пользователь",
+    "fallbackAdvertisementTitle": "объявление",
+    "messageReceivedTitle": "Новое сообщение от {actor}",
+    "messageReceivedDescription": "Объявление: {listingTitle}",
+    "reviewReceivedTitle": "Новый отзыв от {actor}",
+    "reviewReceivedDescription": "Отзыв на товар: {listingTitle}",
+    "savedListingStatusChangedTitle": "Статус сохраненного объявления изменился",
+    "savedListingStatusChangedDescription": "{listingTitle}: {oldStatus} -> {newStatus}",
+    "listingStatus": {
+      "active": "Активно",
+      "reserved": "Зарезервировано",
+      "sold": "Продано",
+      "archived": "Архивировано",
+      "unknown": "Неизвестно"
+    }
+  },
+  "ContactPage": {
+    "kicker": "Контакты",
+    "title": "Связаться с Charlal",
+    "intro": "[RU REVIEW] This page is a placeholder for official Charlal contact details. A database-backed contact form is not included yet.",
+    "detailsTitle": "Контактные данные",
+    "detailsPlaceholder": "[RU REVIEW] TODO: Add official email address, phone number, mailing address, or other approved contact details."
+  }
+}

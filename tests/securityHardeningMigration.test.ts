@@ -11,6 +11,12 @@ const MESSAGE_ATTACHMENT_STORAGE_FIX_MIGRATION =
   'supabase/migrations/20260830_fix_message_attachment_storage_upload_policy.sql';
 const LISTING_FAVORITES_INTEGRITY_FIX_MIGRATION =
   'supabase/migrations/20260831_enforce_listing_favorites_integrity.sql';
+const REMOVE_BUILTIN_LISTING_FAVORITES_MIGRATION =
+  'supabase/migrations/20260901_remove_builtin_listing_favorites.sql';
+const LISTING_REPORT_READ_STATE_MIGRATION =
+  'supabase/migrations/20260903_add_listing_report_read_state.sql';
+const SELLER_REVIEW_TAGS_MIGRATION =
+  'supabase/migrations/20260902_redesign_seller_reviews_tags.sql';
 
 function readMigration(path: string): string {
   return readFileSync(path, 'utf8');
@@ -198,12 +204,6 @@ test('storage upload rate limits are not recursive storage object policies', () 
       limit: "when 'profile-avatars' then 20",
       ownershipCheck: 'from public.profiles p',
     },
-    {
-      name: 'review_media_storage_insert_buyer',
-      bucket: 'review-media',
-      limit: "when 'review-media' then 30",
-      ownershipCheck: 'public.current_user_owns_seller_review_path(name)',
-    },
   ];
 
   for (const policy of policies) {
@@ -330,9 +330,14 @@ test('listing favorites integrity is enforced at the database write boundary', (
     .filter((name) => name.endsWith('.sql'))
     .sort();
   const fix = readMigration(LISTING_FAVORITES_INTEGRITY_FIX_MIGRATION);
+  const removeBuiltins = readMigration(REMOVE_BUILTIN_LISTING_FAVORITES_MIGRATION);
   const triggerFunction = getFunctionDefinition(
-    fix,
+    removeBuiltins,
     'prepare_listing_favorite_write'
+  );
+  const insertPolicy = getPolicyDefinition(
+    removeBuiltins,
+    'listing_favorites_insert_own'
   );
 
   assert.ok(
@@ -341,7 +346,28 @@ test('listing favorites integrity is enforced at the database write boundary', (
         '20260831_enforce_listing_favorites_integrity.sql'
       )
   );
+  assert.ok(
+    migrationNames.indexOf(
+      '20260831_enforce_listing_favorites_integrity.sql'
+    ) <
+      migrationNames.indexOf(
+        '20260901_remove_builtin_listing_favorites.sql'
+      )
+  );
   assert.equal(fix.includes('begin;'), true);
+  assert.equal(removeBuiltins.includes('begin;'), true);
+  assert.equal(
+    removeBuiltins.includes(
+      "delete from public.listing_favorites\nwhere listing_source = 'builtin';"
+    ),
+    true
+  );
+  assert.equal(
+    removeBuiltins.includes(
+      "add constraint listing_favorites_listing_source_valid check (\n  listing_source = 'database'\n)"
+    ),
+    true
+  );
   assert.equal(triggerFunction.includes('security definer'), true);
   assert.equal(triggerFunction.includes("set search_path = ''"), true);
   assert.equal(triggerFunction.includes('viewer_id := auth.uid();'), true);
@@ -350,7 +376,7 @@ test('listing favorites integrity is enforced at the database write boundary', (
     true
   );
   assert.equal(
-    triggerFunction.includes("new.listing_source = 'database'"),
+    triggerFunction.includes("normalized_source <> 'database'"),
     true
   );
   assert.equal(triggerFunction.includes('from public.listings l'), true);
@@ -362,15 +388,15 @@ test('listing favorites integrity is enforced at the database write boundary', (
   );
   assert.equal(
     triggerFunction.includes("new.listing_source = 'builtin'"),
-    true
+    false
   );
   assert.equal(
     triggerFunction.includes("allowed_builtin_listing_ids constant text[]"),
-    true
+    false
   );
   assert.equal(
     triggerFunction.includes('new.listing_id <> all(allowed_builtin_listing_ids)'),
-    true
+    false
   );
   assert.equal(
     fix.includes(
@@ -379,9 +405,161 @@ test('listing favorites integrity is enforced at the database write boundary', (
     true
   );
   assert.equal(
+    insertPolicy.includes("listing_source = 'database'"),
+    true
+  );
+  assert.equal(
     fix.includes('grant select, insert, delete on public.listing_favorites to authenticated;'),
     true
   );
-  assert.equal(fix.includes('grant update on public.listing_favorites'), false);
-  assert.equal(fix.includes('disable row level security'), false);
+  assert.equal(removeBuiltins.includes('grant update on public.listing_favorites'), false);
+  assert.equal(removeBuiltins.includes('disable row level security'), false);
+});
+
+test('listing report read state is exposed only through a narrow current-user RPC', () => {
+  const migrationNames = readdirSync(MIGRATIONS_DIR)
+    .filter((name) => name.endsWith('.sql'))
+    .sort();
+  const fix = readMigration(LISTING_REPORT_READ_STATE_MIGRATION);
+  const helper = getFunctionDefinition(fix, 'has_reported_listing');
+
+  assert.ok(
+    migrationNames.indexOf('20260825_add_listing_reports.sql') <
+      migrationNames.indexOf('20260903_add_listing_report_read_state.sql')
+  );
+  assert.equal(fix.includes('begin;'), true);
+  assert.equal(helper.includes('security definer'), true);
+  assert.equal(helper.includes("set search_path = ''"), true);
+  assert.equal(helper.includes('viewer_id := auth.uid();'), true);
+  assert.equal(helper.includes('from public.listing_reports lr'), true);
+  assert.equal(helper.includes('lr.reporter_id = viewer_id'), true);
+  assert.equal(helper.includes('lr.listing_reference = safe_listing_id'), true);
+  assert.equal(
+    fix.includes('grant select on public.listing_reports'),
+    false
+  );
+  assert.equal(
+    fix.includes('grant execute on function public.has_reported_listing(text) to authenticated;'),
+    true
+  );
+  assert.equal(
+    fix.includes('grant execute on function public.has_reported_listing(text) to anon;'),
+    false
+  );
+  assert.equal(
+    fix.includes('grant execute on function public.has_reported_listing(text) to public;'),
+    false
+  );
+});
+
+test('seller review tags are enforced at the database write boundary', () => {
+  const migrationNames = readdirSync(MIGRATIONS_DIR)
+    .filter((name) => name.endsWith('.sql'))
+    .sort();
+  const redesign = readMigration(SELLER_REVIEW_TAGS_MIGRATION);
+  const validator = getFunctionDefinition(redesign, 'seller_review_tags_valid');
+  const insertTrigger = getFunctionDefinition(
+    redesign,
+    'prepare_seller_review_insert'
+  );
+  const updateTrigger = getFunctionDefinition(
+    redesign,
+    'prepare_seller_review_update'
+  );
+
+  assert.ok(
+    migrationNames.indexOf('20260824_add_seller_reviews.sql') <
+      migrationNames.indexOf('20260902_redesign_seller_reviews_tags.sql')
+  );
+  assert.equal(redesign.includes('begin;'), true);
+  assert.equal(
+    redesign.includes(
+      'add column if not exists tags text[] not null default array[]::text[]'
+    ),
+    true
+  );
+  assert.equal(validator.includes('immutable'), true);
+  assert.equal(validator.includes('cardinality(p_tags) <= 3'), true);
+  assert.equal(validator.includes("'satisfied'"), true);
+  assert.equal(validator.includes("'handover_issue'"), true);
+  assert.equal(
+    validator.includes('count(*) = count(distinct tag.value)'),
+    true
+  );
+  assert.equal(
+    redesign.includes(
+      'add constraint seller_reviews_tags_valid\ncheck (public.seller_review_tags_valid(tags))'
+    ),
+    true
+  );
+  assert.equal(insertTrigger.includes('new.tags := coalesce(new.tags'), true);
+  assert.equal(updateTrigger.includes('new.tags := coalesce(new.tags'), true);
+  assert.equal(updateTrigger.includes('or new.tags is distinct from old.tags'), true);
+  assert.equal(
+    redesign.includes(
+      'grant insert (transaction_id, rating, tags) on public.seller_reviews to authenticated;'
+    ),
+    true
+  );
+  assert.equal(
+    redesign.includes(
+      'grant update (rating, tags) on public.seller_reviews to authenticated;'
+    ),
+    true
+  );
+});
+
+test('seller review redesign removes public text media and response pathways', () => {
+  const redesign = readMigration(SELLER_REVIEW_TAGS_MIGRATION);
+  const myReviews = getFunctionDefinition(
+    redesign,
+    'list_my_reviewable_transactions'
+  );
+  const publicReviews = getFunctionDefinition(
+    redesign,
+    'list_public_seller_reviews'
+  );
+
+  assert.equal(myReviews.includes('review_tags text[]'), true);
+  assert.equal(publicReviews.includes('review_tags text[]'), true);
+  assert.equal(myReviews.includes('review_body'), false);
+  assert.equal(myReviews.includes('review_photos'), false);
+  assert.equal(publicReviews.includes('review_body'), false);
+  assert.equal(publicReviews.includes('review_photos'), false);
+  assert.equal(publicReviews.includes('response_'), false);
+  assert.equal(
+    redesign.includes('drop table if exists public.seller_review_responses;'),
+    true
+  );
+  assert.equal(
+    redesign.includes('drop table if exists public.seller_review_photos;'),
+    true
+  );
+  assert.equal(
+    redesign.includes('drop column if exists body;'),
+    true
+  );
+  assert.equal(
+    redesign.includes(
+      'drop policy if exists "review_media_storage_insert_buyer"'
+    ),
+    true
+  );
+  assert.equal(
+    redesign.includes("set public = false\nwhere id = 'review-media';"),
+    true
+  );
+  assert.equal(
+    redesign.includes(
+      'drop function if exists public.current_user_owns_seller_review_path(text);'
+    ),
+    true
+  );
+  assert.equal(
+    redesign.includes(
+      'drop function if exists public.list_own_seller_review_photo_paths(uuid);'
+    ),
+    true
+  );
+  assert.equal(redesign.includes("when 'review-media' then 30"), false);
 });

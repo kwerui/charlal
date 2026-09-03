@@ -1,15 +1,14 @@
 'use client';
 
 import { useMemo } from 'react';
+import { useTranslations } from 'next-intl';
 import ListingCard from '@/app/components/ListingCard';
 import ListingMutationRefreshBoundary from '@/app/components/ListingMutationRefreshBoundary';
 import ResultsScrollRestorer from '@/app/components/ResultsScrollRestorer';
-import { content } from '@/content/tyv';
 import type { Listing } from '@/data/listings';
 import { filterListings, type ListingFilterCriteria } from '@/lib/listingFilters';
 
 type Props = {
-  builtInListings: Listing[];
   databaseListings?: Listing[];
   databaseError?: string;
   criteria?: ListingFilterCriteria;
@@ -23,20 +22,7 @@ type Props = {
   currentViewerId?: string | null;
 };
 
-function combineListings(
-  builtInListings: Listing[],
-  databaseListings: Listing[]
-): Listing[] {
-  const builtInIds = new Set(builtInListings.map((listing) => String(listing.id)));
-  const safeDatabaseListings = databaseListings.filter(
-    (listing) => !builtInIds.has(String(listing.id))
-  );
-
-  return [...safeDatabaseListings, ...builtInListings];
-}
-
 export default function ListingResults({
-  builtInListings,
   databaseListings = [],
   databaseError = '',
   criteria = {},
@@ -49,15 +35,14 @@ export default function ListingResults({
   savedListingKeys = [],
   currentViewerId = null,
 }: Props) {
+  const t = useTranslations('ListingResults');
   const matchingListings = useMemo(() => {
     if (requireSearchQuery && !criteria.searchQuery?.trim()) {
       return [];
     }
 
-    const combinedListings = combineListings(builtInListings, databaseListings);
-
-    return filterListings(combinedListings, criteria);
-  }, [builtInListings, criteria, databaseListings, requireSearchQuery]);
+    return filterListings(databaseListings, criteria);
+  }, [criteria, databaseListings, requireSearchQuery]);
 
   const visibleListings =
     typeof limit === 'number' ? matchingListings.slice(0, limit) : matchingListings;
@@ -71,7 +56,7 @@ export default function ListingResults({
       {showResultsSummary ? (
         <div className="results-summary" aria-live="polite">
           <p>
-            {content.resultsCountLabel}: {matchingListings.length}
+            {t('resultsCountLabel')}: {matchingListings.length}
           </p>
         </div>
       ) : null}
@@ -96,8 +81,8 @@ export default function ListingResults({
         </div>
       ) : showEmptyState ? (
         <div className="empty-results" role="status">
-          <EmptyHeading>{content.emptyResultsTitle}</EmptyHeading>
-          <p>{content.emptyResultsMessage}</p>
+          <EmptyHeading>{t('emptyResultsTitle')}</EmptyHeading>
+          <p>{t('emptyResultsMessage')}</p>
         </div>
       ) : null}
 

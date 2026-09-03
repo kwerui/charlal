@@ -1,0 +1,543 @@
+import assert from 'node:assert/strict';
+import { readFileSync } from 'node:fs';
+import { existsSync } from 'node:fs';
+import test from 'node:test';
+import { unstable_doesMiddlewareMatch } from 'next/experimental/testing/server';
+import { routing } from '../src/i18n/routing.js';
+import {
+  clearLocaleHistoryNormalization,
+  createLocaleHistoryNormalization,
+  getNativeHistoryLocaleCorrectionHref,
+  isNativeHistoryLocaleNormalizationHref,
+  readPreferredHistoryLocale,
+  recordPreferredHistoryLocale,
+  syncPreferredHistoryLocaleToUrl,
+  takeLocaleHistoryNormalizationRedirect,
+} from '../src/i18n/localeHistory.js';
+import {
+  getSignInHref,
+  localizeReturnPathQuery,
+  localizeSafeInternalPath,
+} from '../src/i18n/localePath.js';
+import { unknownInitialAuthState } from '../src/lib/auth/initialState.js';
+import { getSafeNextPath } from '../src/lib/auth/safeNextPath.js';
+
+const proxyMatcherConfig = {
+  matcher: [
+    '/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp|avif|ico)$).*)',
+  ],
+};
+
+function withMockWindow<T>(
+  storedValues: Record<string, string>,
+  callback: (storage: Map<string, string>) => T
+): T {
+  const previousWindow = globalThis.window;
+  const storage = new Map(Object.entries(storedValues));
+
+  Object.defineProperty(globalThis, 'window', {
+    configurable: true,
+    value: {
+      sessionStorage: {
+        getItem(key: string) {
+          return storage.get(key) ?? null;
+        },
+        removeItem(key: string) {
+          storage.delete(key);
+        },
+        setItem(key: string, value: string) {
+          storage.set(key, value);
+        },
+      },
+    },
+  });
+
+  try {
+    return callback(storage);
+  } finally {
+    Object.defineProperty(globalThis, 'window', {
+      configurable: true,
+      value: previousWindow,
+    });
+  }
+}
+
+function expectedPublicPath(path: string, locale: string): string {
+  if (locale === routing.defaultLocale) {
+    return path;
+  }
+
+  return `/${locale}${path === '/' ? '' : path}`;
+}
+
+test('routing config keeps Tuvan as the unprefixed default locale', () => {
+  assert.deepEqual(routing.locales, ['tyv', 'ru']);
+  assert.equal(routing.defaultLocale, 'tyv');
+  assert.equal(routing.localePrefix, 'as-needed');
+  assert.equal(routing.localeDetection, false);
+});
+
+test('configured public URL policy keeps default locale unprefixed and prefixes Russian', () => {
+  assert.equal(expectedPublicPath('/', 'tyv'), '/');
+  assert.equal(expectedPublicPath('/category/housing', 'tyv'), '/category/housing');
+  assert.equal(expectedPublicPath('/listing/123', 'tyv'), '/listing/123');
+  assert.equal(expectedPublicPath('/', 'ru'), '/ru');
+  assert.equal(expectedPublicPath('/category/housing', 'ru'), '/ru/category/housing');
+  assert.equal(expectedPublicPath('/listing/123', 'ru'), '/ru/listing/123');
+});
+
+test('localized route tree supports default and Russian public routes', () => {
+  const homeSource = readFileSync('src/app/[locale]/page.tsx', 'utf8');
+  const categorySource = readFileSync(
+    'src/app/[locale]/category/[slug]/page.tsx',
+    'utf8'
+  );
+  const listingSource = readFileSync(
+    'src/app/[locale]/listing/[id]/page.tsx',
+    'utf8'
+  );
+
+  assert.equal(homeSource.length > 0, true);
+  assert.equal(categorySource.includes('category.slug'), true);
+  assert.equal(listingSource.includes('params'), true);
+});
+
+test('auth callback routes remain outside localized routing', () => {
+  const proxySource = readFileSync('src/proxy.ts', 'utf8');
+  const callbackSource = readFileSync('src/app/auth/callback/route.ts', 'utf8');
+  const confirmSource = readFileSync('src/app/auth/confirm/route.ts', 'utf8');
+
+  assert.equal(proxySource.includes("pathname.startsWith('/auth/')"), true);
+  assert.equal(callbackSource.includes('getSafeNextPath'), true);
+  assert.equal(confirmSource.includes('getSafeNextPath'), true);
+});
+
+test('localized auth pages use runtime message catalogs without moving callback routes', () => {
+  const authPagePaths = [
+    'src/app/[locale]/sign-in/page.tsx',
+    'src/app/[locale]/sign-in/SignInForm.tsx',
+    'src/app/[locale]/sign-up/page.tsx',
+    'src/app/[locale]/sign-up/SignUpForm.tsx',
+    'src/app/[locale]/forgot-password/page.tsx',
+    'src/app/[locale]/forgot-password/ForgotPasswordForm.tsx',
+  ];
+  const authPageSources = authPagePaths.map((path) => readFileSync(path, 'utf8'));
+  const tyvMessages = JSON.parse(readFileSync('src/messages/tyv.json', 'utf8'));
+  const ruMessages = JSON.parse(readFileSync('src/messages/ru.json', 'utf8'));
+
+  for (const source of authPageSources) {
+    assert.equal(source.includes("@/content/tyv"), false);
+  }
+
+  assert.equal(
+    authPageSources.filter((source) => source.includes('noValidate')).length,
+    3
+  );
+  assert.equal(authPageSources.some((source) => source.includes("getTranslations('Auth')")), true);
+  assert.equal(authPageSources.some((source) => source.includes("useTranslations('Auth')")), true);
+  assert.equal(typeof tyvMessages.Auth.signIn.title, 'string');
+  assert.equal(typeof ruMessages.Auth.signIn.title, 'string');
+  assert.equal(typeof tyvMessages.Auth.errors.invalidEmail, 'string');
+  assert.equal(typeof ruMessages.Auth.errors.invalidEmail, 'string');
+  assert.equal(typeof tyvMessages.Auth.forgotPassword.errors.required, 'string');
+  assert.equal(typeof ruMessages.Auth.forgotPassword.errors.required, 'string');
+  assert.equal(existsSync('src/app/auth/callback/route.ts'), true);
+  assert.equal(existsSync('src/app/auth/confirm/route.ts'), true);
+  assert.equal(existsSync('src/app/[locale]/auth/callback/route.ts'), false);
+  assert.equal(existsSync('src/app/[locale]/auth/confirm/route.ts'), false);
+});
+
+test('proxy entry point is colocated with src/app', () => {
+  assert.equal(existsSync('src/proxy.ts'), true);
+  assert.equal(existsSync('proxy.ts'), false);
+});
+
+test('proxy matcher covers localized pages and auth handlers but excludes static assets', () => {
+  const proxySource = readFileSync('src/proxy.ts', 'utf8');
+
+  assert.equal(proxySource.includes('export const config = {'), true);
+  assert.equal(proxySource.includes('matcher:'), true);
+  assert.equal(unstable_doesMiddlewareMatch({ config: proxyMatcherConfig, url: '/' }), true);
+  assert.equal(unstable_doesMiddlewareMatch({ config: proxyMatcherConfig, url: '/about' }), true);
+  assert.equal(unstable_doesMiddlewareMatch({ config: proxyMatcherConfig, url: '/ru/about' }), true);
+  assert.equal(unstable_doesMiddlewareMatch({ config: proxyMatcherConfig, url: '/auth/callback' }), true);
+  assert.equal(unstable_doesMiddlewareMatch({ config: proxyMatcherConfig, url: '/auth/confirm' }), true);
+  assert.equal(unstable_doesMiddlewareMatch({ config: proxyMatcherConfig, url: '/_next/static/app.js' }), false);
+  assert.equal(unstable_doesMiddlewareMatch({ config: proxyMatcherConfig, url: '/logo.png' }), false);
+});
+
+test('Russian account path is accepted as a safe internal next path', () => {
+  assert.equal(getSafeNextPath('/ru/account', '/account'), '/ru/account');
+});
+
+test('sign-in href keeps protected redirects localized', () => {
+  assert.equal(getSignInHref('/account', 'tyv'), '/sign-in?next=%2Faccount');
+  assert.equal(getSignInHref('/account', 'ru'), '/ru/sign-in?next=%2Fru%2Faccount');
+  assert.equal(
+    getSignInHref('/ru/account/messages', 'tyv'),
+    '/sign-in?next=%2Faccount%2Fmessages'
+  );
+});
+
+test('external next values remain rejected', () => {
+  assert.equal(
+    getSafeNextPath('https://attacker.example/account', '/account'),
+    '/account'
+  );
+  assert.equal(getSafeNextPath('//attacker.example/account', '/account'), '/account');
+  assert.equal(getSafeNextPath('%2F%2Fattacker.example/account', '/account'), '/account');
+  assert.equal(getSafeNextPath('\\\\attacker.example/account', '/account'), '/account');
+});
+
+test('locale switcher preserves the current query string', () => {
+  const headerSource = readFileSync('src/app/components/SiteHeader.tsx', 'utf8');
+
+  assert.equal(headerSource.includes('const currentQueryString = searchParams.toString()'), true);
+  assert.equal(headerSource.includes('localizeReturnPathQuery(currentQueryString, nextLocale)'), true);
+  assert.equal(headerSource.includes('recordPreferredHistoryLocale(nextLocale)'), true);
+  assert.equal(headerSource.includes("router.replace(href, { locale: nextLocale })"), true);
+});
+
+test('locale switcher no longer derives route-specific native-back fallbacks', () => {
+  const headerSource = readFileSync('src/app/components/SiteHeader.tsx', 'utf8');
+
+  assert.equal(headerSource.includes('getNaturalLocaleHistoryBackTarget'), false);
+  assert.equal(headerSource.includes('getLocaleHistoryNormalizationQueryString'), false);
+  assert.equal(headerSource.includes('categoryMatch'), false);
+});
+
+test('preferred history locale follows explicit switches and normal URL sync', () => {
+  withMockWindow({}, () => {
+    assert.equal(readPreferredHistoryLocale(), undefined);
+
+    recordPreferredHistoryLocale('ru');
+    assert.equal(readPreferredHistoryLocale(), 'ru');
+
+    recordPreferredHistoryLocale('tyv');
+    assert.equal(readPreferredHistoryLocale(), 'tyv');
+
+    syncPreferredHistoryLocaleToUrl('ru');
+    assert.equal(readPreferredHistoryLocale(), 'ru');
+  });
+});
+
+test('preferred history locale correction keeps root canonical', () => {
+  withMockWindow({}, () => {
+    recordPreferredHistoryLocale('ru');
+    assert.equal(getNativeHistoryLocaleCorrectionHref('/'), '/ru');
+
+    recordPreferredHistoryLocale('tyv');
+    assert.equal(getNativeHistoryLocaleCorrectionHref('/ru'), '/');
+  });
+});
+
+test('preferred history locale correction localizes normal Charlal routes', () => {
+  const cases: Array<[string, string, string]> = [
+    ['ru', '/category/auto', '/ru/category/auto'],
+    ['tyv', '/ru/category/auto', '/category/auto'],
+    ['ru', '/category/auto/used-cars', '/ru/category/auto/used-cars'],
+    ['tyv', '/ru/category/auto/used-cars', '/category/auto/used-cars'],
+    ['ru', '/search?q=test', '/ru/search?q=test'],
+    ['tyv', '/ru/search?q=test', '/search?q=test'],
+    ['ru', '/listing/123', '/ru/listing/123'],
+    ['tyv', '/ru/listing/123', '/listing/123'],
+    ['ru', '/account', '/ru/account'],
+    ['tyv', '/ru/account', '/account'],
+    ['ru', '/account/favorites', '/ru/account/favorites'],
+    ['tyv', '/ru/account/favorites', '/account/favorites'],
+    ['ru', '/account/messages', '/ru/account/messages'],
+    ['tyv', '/ru/account/messages', '/account/messages'],
+    ['ru', '/seller/example', '/ru/seller/example'],
+    ['tyv', '/ru/seller/example', '/seller/example'],
+    ['ru', '/sign-in', '/ru/sign-in'],
+    ['tyv', '/ru/sign-in', '/sign-in'],
+    ['ru', '/sign-up', '/ru/sign-up'],
+    ['tyv', '/ru/sign-up', '/sign-up'],
+  ];
+
+  for (const [preferredLocale, currentHref, expectedHref] of cases) {
+    withMockWindow({}, () => {
+      recordPreferredHistoryLocale(preferredLocale);
+      assert.equal(getNativeHistoryLocaleCorrectionHref(currentHref), expectedHref);
+    });
+  }
+});
+
+test('preferred history locale correction preserves query params, return params, and hashes', () => {
+  withMockWindow({}, () => {
+    recordPreferredHistoryLocale('ru');
+
+    assert.equal(
+      getNativeHistoryLocaleCorrectionHref('/account/favorites?foo=bar#saved'),
+      '/ru/account/favorites?foo=bar#saved'
+    );
+    assert.equal(
+      getNativeHistoryLocaleCorrectionHref('/listing/123?from=%2Fsearch%3Fq%3Dtest#details'),
+      '/ru/listing/123?from=%2Fru%2Fsearch%3Fq%3Dtest#details'
+    );
+    assert.equal(
+      getNativeHistoryLocaleCorrectionHref('/sign-in?next=%2Faccount'),
+      '/ru/sign-in?next=%2Fru%2Faccount'
+    );
+  });
+});
+
+test('preferred history locale correction returns null for already-correct entries', () => {
+  withMockWindow({}, () => {
+    recordPreferredHistoryLocale('ru');
+    assert.equal(getNativeHistoryLocaleCorrectionHref('/ru/account'), null);
+
+    recordPreferredHistoryLocale('tyv');
+    assert.equal(getNativeHistoryLocaleCorrectionHref('/account'), null);
+  });
+});
+
+test('native history locale normalization policy excludes system and unsafe URLs', () => {
+  assert.equal(isNativeHistoryLocaleNormalizationHref('/auth/callback'), false);
+  assert.equal(isNativeHistoryLocaleNormalizationHref('/ru/auth/callback'), false);
+  assert.equal(isNativeHistoryLocaleNormalizationHref('/_next/static/app.js'), false);
+  assert.equal(isNativeHistoryLocaleNormalizationHref('/api/listings'), false);
+  assert.equal(isNativeHistoryLocaleNormalizationHref('/icon.svg'), false);
+  assert.equal(isNativeHistoryLocaleNormalizationHref('//evil.example/account'), false);
+  assert.equal(isNativeHistoryLocaleNormalizationHref('https://evil.example/account'), false);
+  assert.equal(isNativeHistoryLocaleNormalizationHref('/account'), true);
+  assert.equal(isNativeHistoryLocaleNormalizationHref('/ru/account'), true);
+});
+
+test('native history locale correction is safe for excluded, external, and malformed URLs', () => {
+  withMockWindow({}, () => {
+    recordPreferredHistoryLocale('ru');
+
+    assert.equal(getNativeHistoryLocaleCorrectionHref('/auth/callback'), null);
+    assert.equal(getNativeHistoryLocaleCorrectionHref('/_next/static/app.js'), null);
+    assert.equal(getNativeHistoryLocaleCorrectionHref('/icon.svg'), null);
+    assert.equal(getNativeHistoryLocaleCorrectionHref('//evil.example/account'), null);
+    assert.equal(getNativeHistoryLocaleCorrectionHref('https://evil.example/account'), null);
+    assert.equal(getNativeHistoryLocaleCorrectionHref('/account\\bad'), null);
+  });
+});
+
+test('locale switcher normalizes safe nested return paths to the target locale', () => {
+  assert.equal(
+    localizeReturnPathQuery('from=%2Fru%2Fsearch%3Fq%3Dcar', 'tyv'),
+    'from=%2Fsearch%3Fq%3Dcar'
+  );
+  assert.equal(
+    localizeReturnPathQuery('from=%2Fsearch%3Fq%3Dcar', 'ru'),
+    'from=%2Fru%2Fsearch%3Fq%3Dcar'
+  );
+  assert.equal(
+    localizeReturnPathQuery('q=%D0%BC%D0%B0%D1%88%D0%B8%D0%BD%D0%B0&type=sale&next=%2Faccount', 'ru'),
+    'q=%D0%BC%D0%B0%D1%88%D0%B8%D0%BD%D0%B0&type=sale&next=%2Fru%2Faccount'
+  );
+  assert.equal(
+    localizeReturnPathQuery('from=%2Fru%2Fsearch%3Fq%3Dcar&type=sale&from=%2Faccount', 'tyv'),
+    'from=%2Fsearch%3Fq%3Dcar&type=sale&from=%2Faccount'
+  );
+});
+
+test('locale switcher does not localize unsafe nested return paths', () => {
+  assert.equal(localizeSafeInternalPath('https://evil.example', 'ru'), 'https://evil.example');
+  assert.equal(localizeSafeInternalPath('//evil.example', 'ru'), '//evil.example');
+  assert.equal(
+    localizeReturnPathQuery('from=https%3A%2F%2Fevil.example&next=%2F%2Fevil.example', 'ru'),
+    'from=https%3A%2F%2Fevil.example&next=%2F%2Fevil.example'
+  );
+});
+
+test('locale switch records native-back normalization for Tuvan search results', () => {
+  assert.deepEqual(
+    createLocaleHistoryNormalization('from=%2Fsearch%3Fq%3Dcar', 'tyv', 'ru', 123),
+    {
+      sourceHref: '/search?q=car',
+      targetHref: '/ru/search?q=car',
+      recordedAt: 123,
+    }
+  );
+});
+
+test('locale switch records native-back normalization for Russian search results', () => {
+  assert.deepEqual(
+    createLocaleHistoryNormalization('from=%2Fru%2Fsearch%3Fq%3Dcar', 'ru', 'tyv', 123),
+    {
+      sourceHref: '/ru/search?q=car',
+      targetHref: '/search?q=car',
+      recordedAt: 123,
+    }
+  );
+});
+
+test('locale switch records native-back normalization for category results', () => {
+  assert.deepEqual(
+    createLocaleHistoryNormalization('from=%2Fcategory%2Fauto', 'tyv', 'ru', 123),
+    {
+      sourceHref: '/category/auto',
+      targetHref: '/ru/category/auto',
+      recordedAt: 123,
+    }
+  );
+  assert.deepEqual(
+    createLocaleHistoryNormalization('from=%2Fru%2Fcategory%2Fauto', 'ru', 'tyv', 123),
+    {
+      sourceHref: '/ru/category/auto',
+      targetHref: '/category/auto',
+      recordedAt: 123,
+    }
+  );
+});
+
+test('locale switch native-back normalization ignores unsafe or non-results return paths', () => {
+  assert.equal(
+    createLocaleHistoryNormalization('from=https%3A%2F%2Fevil.example', 'tyv', 'ru', 123),
+    null
+  );
+  assert.equal(
+    createLocaleHistoryNormalization('from=%2F%2Fevil.example', 'tyv', 'ru', 123),
+    null
+  );
+  assert.equal(
+    createLocaleHistoryNormalization('from=%2Flisting%2F123', 'tyv', 'ru', 123),
+    null
+  );
+});
+
+test('locale history normalization redirects the exact stale previous entry once', () => {
+  const storedIntent = JSON.stringify({
+    sourceHref: '/ru/search?q=car',
+    targetHref: '/search?q=car',
+    recordedAt: Date.now(),
+  });
+
+  withMockWindow(
+    { 'charlal-locale-history-normalization': storedIntent },
+    () => {
+      assert.equal(
+        takeLocaleHistoryNormalizationRedirect('/ru/search?q=car', true),
+        '/search?q=car'
+      );
+      assert.equal(takeLocaleHistoryNormalizationRedirect('/ru/search?q=car', true), null);
+    }
+  );
+});
+
+test('locale history normalization invalidates on a fresh native traversal mismatch', () => {
+  const storedIntent = JSON.stringify({
+    sourceHref: '/ru/search?q=car',
+    targetHref: '/search?q=car',
+    recordedAt: Date.now(),
+  });
+
+  withMockWindow(
+    { 'charlal-locale-history-normalization': storedIntent },
+    (storage) => {
+      assert.equal(takeLocaleHistoryNormalizationRedirect('/ru/category/auto', true), null);
+      assert.equal(storage.has('charlal-locale-history-normalization'), false);
+    }
+  );
+});
+
+test('locale history normalization waits for native traversal before consuming', () => {
+  const storedIntent = JSON.stringify({
+    sourceHref: '/search?q=car',
+    targetHref: '/ru/search?q=car',
+    recordedAt: Date.now(),
+  });
+
+  withMockWindow(
+    { 'charlal-locale-history-normalization': storedIntent },
+    (storage) => {
+      assert.equal(
+        takeLocaleHistoryNormalizationRedirect('/search?q=car', false),
+        null
+      );
+      assert.equal(storage.get('charlal-locale-history-normalization'), storedIntent);
+      assert.equal(
+        takeLocaleHistoryNormalizationRedirect('/search?q=car', true),
+        '/ru/search?q=car'
+      );
+    }
+  );
+});
+
+test('explicit back-to-results can clear pending native-back normalization', () => {
+  const storedIntent = JSON.stringify({
+    sourceHref: '/search?q=car',
+    targetHref: '/ru/search?q=car',
+    recordedAt: Date.now(),
+  });
+
+  withMockWindow(
+    { 'charlal-locale-history-normalization': storedIntent },
+    (storage) => {
+      clearLocaleHistoryNormalization();
+      assert.equal(storage.has('charlal-locale-history-normalization'), false);
+    }
+  );
+});
+
+test('locale history normalization remains valid after several minutes on listing', () => {
+  const storedIntent = JSON.stringify({
+    sourceHref: '/ru/category/auto',
+    targetHref: '/category/auto',
+    recordedAt: Date.now() - 10 * 60 * 1000,
+  });
+
+  withMockWindow(
+    { 'charlal-locale-history-normalization': storedIntent },
+    () => {
+      assert.equal(
+        takeLocaleHistoryNormalizationRedirect('/ru/category/auto', true),
+        '/category/auto'
+      );
+    }
+  );
+});
+
+test('neutral route and database slugs stay unchanged', () => {
+  const contentSource = readFileSync('src/content/tyv.ts', 'utf8');
+  const migrationSource = readFileSync(
+    'supabase/migrations/20260826_security_hardening.sql',
+    'utf8'
+  );
+
+  assert.equal(contentSource.includes('slug: "housing"'), true);
+  assert.equal(contentSource.includes('slug: "marketplace"'), true);
+  assert.equal(migrationSource.includes("category = 'housing'"), true);
+  assert.equal(migrationSource.includes("category = 'marketplace'"), true);
+});
+
+test('auth provider initial state defaults to a deterministic checking snapshot', () => {
+  assert.deepEqual(unknownInitialAuthState, {
+    status: 'checking',
+    profileStatus: 'idle',
+    user: null,
+    profile: null,
+  });
+});
+
+test('auth provider does not hydrate from module cached auth state', () => {
+  const authProviderSource = readFileSync('src/lib/auth/client.tsx', 'utf8');
+
+  assert.equal(authProviderSource.includes('cachedAuthState?.status ||'), false);
+  assert.equal(authProviderSource.includes('initialAuthState'), false);
+  assert.equal(authProviderSource.includes('unknownInitialAuthState.status'), true);
+});
+
+test('site header gates auth controls to the hydration-stable auth status', () => {
+  const siteHeaderSource = readFileSync('src/app/components/SiteHeader.tsx', 'utf8');
+
+  assert.equal(siteHeaderSource.includes('useSyncExternalStore'), true);
+  assert.equal(
+    siteHeaderSource.includes("const renderAuthStatus = hasHydrated ? authStatus : 'checking'"),
+    true
+  );
+  assert.equal(siteHeaderSource.includes("disabled={renderAuthStatus === 'checking'}"), true);
+});
+
+test('localized root layout keeps request-specific auth out of static pages', () => {
+  const layoutSource = readFileSync('src/app/[locale]/layout.tsx', 'utf8');
+
+  assert.equal(layoutSource.includes('getCurrentAuthStateSnapshot'), false);
+  assert.equal(layoutSource.includes('getCurrentUserResult'), false);
+  assert.equal(layoutSource.includes('<AuthProvider>'), true);
+});

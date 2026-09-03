@@ -2,12 +2,14 @@
 
 import { useEffect, useRef, useState } from 'react';
 import ProfileAvatar from '@/app/components/ProfileAvatar';
-import { content } from '@/content/tyv';
 import { getProfileAvatarPublicUrl } from '@/lib/supabase/profileAvatars';
 
 type Props = {
   avatarPath: string | null;
   displayName: string;
+  profilePhotoLabel: string;
+  openProfilePhotoViewerLabel: string;
+  closeButtonLabel: string;
   focusX: number;
   focusY: number;
   zoom: number;
@@ -16,6 +18,9 @@ type Props = {
 export default function PublicSellerAvatarViewer({
   avatarPath,
   displayName,
+  profilePhotoLabel,
+  openProfilePhotoViewerLabel,
+  closeButtonLabel,
   focusX,
   focusY,
   zoom,
@@ -62,7 +67,7 @@ export default function PublicSellerAvatarViewer({
         type="button"
         className="seller-profile-avatar-button"
         onClick={() => setViewerOpen(true)}
-        aria-label={`${content.openProfilePhotoViewerLabel}: ${displayName}`}
+        aria-label={`${openProfilePhotoViewerLabel}: ${displayName}`}
       >
         <ProfileAvatar
           avatarPath={avatarPath}
@@ -84,7 +89,7 @@ export default function PublicSellerAvatarViewer({
             className="avatar-public-viewer-dialog"
             role="dialog"
             aria-modal="true"
-            aria-label={`${content.profilePhotoLabel}: ${displayName}`}
+            aria-label={`${profilePhotoLabel}: ${displayName}`}
             onClick={(event) => event.stopPropagation()}
           >
             <button
@@ -93,13 +98,13 @@ export default function PublicSellerAvatarViewer({
               className="avatar-dialog-close"
               onClick={() => setViewerOpen(false)}
             >
-              {content.closeListingPhotoViewerButton}
+              {closeButtonLabel}
             </button>
             <div className="avatar-public-image-frame">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src={getProfileAvatarPublicUrl(avatarPath)}
-                alt={`${displayName} profile photo`}
+                alt={`${displayName} ${profilePhotoLabel}`}
               />
             </div>
           </div>

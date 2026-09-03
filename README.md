@@ -55,9 +55,9 @@ Completed:
 - Search
 - Messaging
 - Image uploads
+- In-app notifications
 
 Planned:
-- Notifications
 - Moderation tools
 - Additional marketplace improvements
 

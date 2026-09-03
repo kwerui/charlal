@@ -49,6 +49,26 @@ export type ListingFormValidationResult =
       errors: string[];
     };
 
+export type ListingFormValidationMessages = {
+  titleRequired: string;
+  descriptionRequired: string;
+  locationRequired: string;
+  categoryRequired: string;
+  priceRequired: string;
+  housingTypeRequired: string;
+  marketplaceTypeRequired: string;
+};
+
+export const legacyListingFormValidationMessages: ListingFormValidationMessages = {
+  titleRequired: content.postAdErrorTitleRequired,
+  descriptionRequired: content.postAdErrorDescriptionRequired,
+  locationRequired: content.postAdErrorLocationRequired,
+  categoryRequired: content.postAdErrorCategoryRequired,
+  priceRequired: content.postAdErrorPriceRequired,
+  housingTypeRequired: content.postAdErrorHousingTypeRequired,
+  marketplaceTypeRequired: content.postAdErrorMarketplaceTypeRequired,
+};
+
 function optionExists(options: NestedListingOption[] | undefined, slug: string): boolean {
   return Boolean(options?.some((option) => option.slug === slug));
 }
@@ -74,7 +94,8 @@ export function getListingFormValues(formData: FormData): ListingFormValues {
 
 export function validateListingFormValues(
   values: ListingFormValues,
-  categories: ListingFormCategory[]
+  categories: ListingFormCategory[],
+  messages: ListingFormValidationMessages = legacyListingFormValidationMessages
 ): ListingFormValidationResult {
   const selectedFormCategory = categories.find(
     (category) => category.slug === values.categorySlug
@@ -86,15 +107,15 @@ export function validateListingFormValues(
   const errors: string[] = [];
 
   if (!values.title) {
-    errors.push(content.postAdErrorTitleRequired);
+    errors.push(messages.titleRequired);
   }
 
   if (!values.description) {
-    errors.push(content.postAdErrorDescriptionRequired);
+    errors.push(messages.descriptionRequired);
   }
 
   if (!values.location) {
-    errors.push(content.postAdErrorLocationRequired);
+    errors.push(messages.locationRequired);
   }
 
   const validSubcategory =
@@ -113,15 +134,15 @@ export function validateListingFormValues(
     formMarketplaceBuyTypes.some((buyType) => buyType.slug === values.buyTypeSlug);
 
   if (!selectedFormCategory || !subcategorySlug || !validSubcategory) {
-    errors.push(content.postAdErrorCategoryRequired);
+    errors.push(messages.categoryRequired);
   }
 
   if (values.priceText === '' || !Number.isFinite(price) || price < 0) {
-    errors.push(content.postAdErrorPriceRequired);
+    errors.push(messages.priceRequired);
   }
 
   if (values.categorySlug === 'housing' && !validHousingType) {
-    errors.push(content.postAdErrorHousingTypeRequired);
+    errors.push(messages.housingTypeRequired);
   }
 
   if (
@@ -129,7 +150,7 @@ export function validateListingFormValues(
     subcategorySlug === 'buy' &&
     !validMarketplaceType
   ) {
-    errors.push(content.postAdErrorMarketplaceTypeRequired);
+    errors.push(messages.marketplaceTypeRequired);
   }
 
   if (errors.length > 0 || !selectedFormCategory) {

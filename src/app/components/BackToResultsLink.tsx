@@ -1,7 +1,8 @@
 'use client';
 
-import Link from 'next/link';
+import { Link } from '@/i18n/navigation';
 import type { ReactNode } from 'react';
+import { clearLocaleHistoryNormalization } from '@/i18n/localeHistory';
 import { requestResultsScrollRestore } from '@/lib/resultsScrollStorage';
 
 type Props = {
@@ -16,6 +17,7 @@ export default function BackToResultsLink({
   children,
 }: Props) {
   function handleClick(): void {
+    clearLocaleHistoryNormalization();
     requestResultsScrollRestore(href);
   }
 
