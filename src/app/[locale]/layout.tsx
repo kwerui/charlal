@@ -8,6 +8,7 @@ import SiteHeader from '../components/SiteHeader';
 import SiteFooter from '../components/SiteFooter';
 import { AuthProvider } from '@/lib/auth/client';
 import { MessagingRealtimeProvider } from '@/lib/messagingRealtime';
+import { NotificationsRealtimeProvider } from '@/lib/notificationsRealtime';
 import { routing } from '@/i18n/routing';
 import "../globals.css";
 
@@ -49,11 +50,13 @@ export default async function RootLayout({
         <NextIntlClientProvider>
           <AuthProvider>
             <MessagingRealtimeProvider>
-              <Suspense fallback={null}>
-                <SiteHeader />
-              </Suspense>
-              {children}
-              <SiteFooter />
+              <NotificationsRealtimeProvider>
+                <Suspense fallback={null}>
+                  <SiteHeader />
+                </Suspense>
+                {children}
+                <SiteFooter />
+              </NotificationsRealtimeProvider>
             </MessagingRealtimeProvider>
           </AuthProvider>
         </NextIntlClientProvider>

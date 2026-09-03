@@ -8,8 +8,10 @@
     "postAd": "Выложить объявление",
     "signedInAs": "Вошли как",
     "messages": "Сообщения",
+    "notifications": "Уведомления",
     "languageSwitcherLabel": "Язык",
-    "unreadConversation": "{count, plural, one {# непрочитанное сообщение} few {# непрочитанных сообщений} many {# непрочитанных сообщений} other {# непрочитанных сообщений}}"
+    "unreadConversation": "{count, plural, one {# непрочитанное сообщение} few {# непрочитанных сообщений} many {# непрочитанных сообщений} other {# непрочитанных сообщений}}",
+    "unreadNotifications": "{count, plural, one {# непрочитанное уведомление} few {# непрочитанных уведомлений} many {# непрочитанных уведомлений} other {# непрочитанных уведомлений}}"
   },
   "Home": {
     "categoryAriaLabel": "Категория: {category}",
@@ -46,7 +48,7 @@
     }
   },
   "ListingDetail": {
-    "breadcrumbLabel": "[RU REVIEW] Breadcrumb",
+    "breadcrumbLabel": "Навигационная цепочка",
     "homeBreadcrumb": "Главная",
     "backToHomepage": "На главную",
     "backToAccount": "К аккаунту",
@@ -689,6 +691,33 @@
         "body": "[RU REVIEW] TODO: Add reviewed official contact details for privacy questions."
       }
     ]
+  },
+  "Notifications": {
+    "title": "Уведомления",
+    "emptyTitle": "Нет уведомлений",
+    "emptyMessage": "Сообщения, отзывы и обновления сохраненных объявлений будут отображаться здесь.",
+    "unableLoadTitle": "Не удалось загрузить уведомления",
+    "unableLoadMessage": "Попробуйте еще раз через некоторое время.",
+    "liveUpdatesUnavailableMessage": "Обновления уведомлений недоступны. Обновите страницу, чтобы проверить новые уведомления.",
+"unreadCountLabel": "{count, plural, one {# непрочитанное уведомление} few {# непрочитанных уведомления} many {# непрочитанных уведомлений} other {# непрочитанных уведомлений}}",
+    "markAllReadButton": "Отметить все как прочитанные",
+    "unreadLabel": "Непрочитано",
+    "openNotificationLabel": "Открыть уведомление: {title}",
+    "actorFallbackDisplayName": "Пользователь",
+    "fallbackAdvertisementTitle": "объявление",
+    "messageReceivedTitle": "Новое сообщение от {actor}",
+    "messageReceivedDescription": "Объявление: {listingTitle}",
+    "reviewReceivedTitle": "Новый отзыв от {actor}",
+    "reviewReceivedDescription": "Отзыв на товар: {listingTitle}",
+    "savedListingStatusChangedTitle": "Статус сохраненного объявления изменился",
+    "savedListingStatusChangedDescription": "{listingTitle}: {oldStatus} -> {newStatus}",
+    "listingStatus": {
+      "active": "Активно",
+      "reserved": "Зарезервировано",
+      "sold": "Продано",
+      "archived": "Архивировано",
+      "unknown": "Неизвестно"
+    }
   },
   "ContactPage": {
     "kicker": "Контакты",

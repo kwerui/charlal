@@ -17,6 +17,7 @@ import {
 import { localizeReturnPathQuery } from '@/i18n/localePath';
 import { useAuthStatus } from '@/lib/auth/client';
 import { useMessagingRealtime } from '@/lib/messagingRealtime';
+import { useNotificationsRealtime } from '@/lib/notificationsRealtime';
 import {
   clearNativeHistoryTraversalIntent,
 } from '@/lib/nativeHistoryIntentStorage';
@@ -43,6 +44,20 @@ function UserIcon() {
     >
       <path d="M20 21a8 8 0 0 0-16 0" />
       <circle cx="12" cy="7" r="4" />
+    </svg>
+  );
+}
+
+function BellIcon() {
+  return (
+    <svg
+      className="header-button-icon"
+      viewBox="0 0 24 24"
+      aria-hidden="true"
+      focusable="false"
+    >
+      <path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9" />
+      <path d="M13.73 21a2 2 0 0 1-3.46 0" />
     </svg>
   );
 }
@@ -90,6 +105,10 @@ export default function SiteHeader({
     unreadConversationCount:
       liveUnreadConversationCount,
   } = useMessagingRealtime();
+  const {
+    unreadNotificationCount:
+      liveUnreadNotificationCount,
+  } = useNotificationsRealtime();
 
   const signedIn =
     renderAuthStatus === 'authenticated' ||
@@ -103,6 +122,9 @@ export default function SiteHeader({
   const unreadConversationCount = signedIn
     ? liveUnreadConversationCount
     : 0;
+  const unreadNotificationCount = signedIn
+    ? liveUnreadNotificationCount
+    : 0;
 
   const messagesLabel =
     unreadConversationCount > 0
@@ -110,6 +132,12 @@ export default function SiteHeader({
           count: unreadConversationCount,
         })}`
       : t('messages');
+  const notificationsLabel =
+    unreadNotificationCount > 0
+      ? `${t('notifications')}, ${t('unreadNotifications', {
+          count: unreadNotificationCount,
+        })}`
+      : t('notifications');
 
 
   function handlePostAdClick() {
@@ -221,6 +249,26 @@ export default function SiteHeader({
                   >
                     {formatUnreadBadge(
                       unreadConversationCount
+                    )}
+                  </span>
+                ) : null}
+              </Link>
+
+              <Link
+                href="/account/notifications"
+                className="header-button secondary-header-button header-notifications-button"
+                aria-label={notificationsLabel}
+              >
+                <BellIcon />
+
+                {unreadNotificationCount >
+                0 ? (
+                  <span
+                    className="header-unread-badge"
+                    aria-hidden="true"
+                  >
+                    {formatUnreadBadge(
+                      unreadNotificationCount
                     )}
                   </span>
                 ) : null}

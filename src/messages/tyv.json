@@ -8,8 +8,10 @@
     "postAd": "Чарлалдан үндүрер",
     "signedInAs": "Signed in as / Кылдыр кирген",
     "messages": "Медээлер",
+    "notifications": "Уведомлениелер",
     "languageSwitcherLabel": "Дыл",
-    "unreadConversation": "{count, plural, one {# номчуттунмаан медээ} other {# Номчуттунмаан медээлер}}"
+    "unreadConversation": "{count, plural, one {# номчуттунмаан медээ} other {# номчуттунмаан медээлер}}",
+    "unreadNotifications": "{count, plural, one {# номчуттунмаан медээ} other {# номчуттунмаан дыңнадыглар}}"
   },
   "Home": {
     "categoryAriaLabel": "Категория: {category}",
@@ -46,7 +48,7 @@
     }
   },
   "ListingDetail": {
-    "breadcrumbLabel": "[TYV REVIEW] Breadcrumb",
+    "breadcrumbLabel": "Хлеб үрезиннериниң изи",
     "homeBreadcrumb": "Бажың",
     "backToHomepage": "Кол арынче",
     "backToAccount": "Back to account / Аккаунтче эглип келир",
@@ -689,6 +691,33 @@
         "body": "[TYV REVIEW] TODO: Add reviewed official contact details for privacy questions."
       }
     ]
+  },
+  "Notifications": {
+    "title": "Уведомлениелер",
+    "emptyTitle": "No notifications yet / Амдыызында дыңнадыглар чок",
+    "emptyMessage": "Медээлер, үнелелдер болгаш кадагалаттынган чарлалдың чаартылгалары мында көстүп кээр. / Messages, reviews, and saved advertisement updates will appear here.",
+    "unableLoadTitle": "Уведомлениелерни үндүрүп шыдаваан / Unable to load notifications",
+    "unableLoadMessage": "Бир секунда болгаш катап шенеп көрүңер. / Try again in a moment.",
+    "liveUpdatesUnavailableMessage": "Дорт дамчыдылганың чаартылгалары чок. Катап хынаар дээш арынны чаартып алыңар. / Live notification updates are unavailable. Refresh the page to check again.",
+    "unreadCountLabel": "{count, plural, one { # номчуттунмаан медээ} other { # номчуттунмаан дыңнадыглар}}",
+    "markAllReadButton": "Шуптузун номчаан кылдыр демдеглээр / Mark all as read",
+    "unreadLabel": "Номчуттунмаан / Unread",
+    "openNotificationLabel": "Ажык дыңнадыг / Open notification: {title}",
+    "actorFallbackDisplayName": "Ажыглакчы / Marketplace user",
+    "fallbackAdvertisementTitle": "чарлал / advertisement",
+    "messageReceivedTitle": "Чаа медээ / New message from {actor}",
+    "messageReceivedDescription": "Чарлал: {listingTitle}",
+    "reviewReceivedTitle": "Чаа үнелел / New review from {actor}",
+    "reviewReceivedDescription": "Дээш хыналда / Review for {listingTitle}",
+    "savedListingStatusChangedTitle": "Камгалаттынган чарлалдың байдалы өскерилген / Saved advertisement status changed",
+    "savedListingStatusChangedDescription": "{listingTitle}: {oldStatus} -> {newStatus}",
+    "listingStatus": {
+      "active": "Идепкейлиг / Active",
+      "reserved": "Камгалаттынган / Reserved",
+      "sold": "Саттынган / Sold",
+      "archived": "Архивтелген / Archived",
+      "unknown": "Билдинмес / Unknown"
+    }
   },
   "ContactPage": {
     "kicker": "Харылзаа",

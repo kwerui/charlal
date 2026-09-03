@@ -13,6 +13,7 @@ import ResultsScrollRestorer from '@/app/components/ResultsScrollRestorer';
 import type { Listing } from '@/data/listings';
 import { useTranslations } from 'next-intl';
 import { useMessagingRealtime } from '@/lib/messagingRealtime';
+import { useNotificationsRealtime } from '@/lib/notificationsRealtime';
 import {
   getUserOwnerId,
   isListingOwnedByUser,
@@ -78,6 +79,7 @@ export default function AccountDashboard({
     updateProfile,
   } = useAuthStatus();
   const { unreadConversationCount } = useMessagingRealtime();
+  const { unreadNotificationCount } = useNotificationsRealtime();
   const accountUser =
     authStatus === 'unauthenticated' ? null : currentUser ?? initialUser;
   const accountProfile =
@@ -442,6 +444,19 @@ export default function AccountDashboard({
                 {unreadConversationCount > 99
                   ? '99+'
                   : unreadConversationCount}
+              </span>
+            ) : null}
+          </Link>
+          <Link
+            href="/account/notifications"
+            className="secondary-button account-messages-link"
+          >
+            <span>{headerT('notifications')}</span>
+            {unreadNotificationCount > 0 ? (
+              <span className="header-unread-badge">
+                {unreadNotificationCount > 99
+                  ? '99+'
+                  : unreadNotificationCount}
               </span>
             ) : null}
           </Link>

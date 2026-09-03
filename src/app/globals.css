@@ -493,13 +493,21 @@ body {
 
 /* ===== MESSAGES BADGE ===== */
 .header-messages-button,
+.header-notifications-button,
 .account-messages-link {
   gap: 7px;
 }
 
-.header-messages-button {
+.header-messages-button,
+.header-notifications-button {
   position: relative;
   overflow: visible;
+}
+
+.header-notifications-button {
+  width: 38px;
+  padding-right: 9px;
+  padding-left: 9px;
 }
 
 .header-unread-badge {
@@ -5914,6 +5922,121 @@ min-height: calc(100dvh - 80px);
   width: min(100%, 900px);
   gap: 14px;
   padding: 22px;
+}
+
+/* ===== NOTIFICATIONS ===== */
+.account-page--notifications {
+  align-items: flex-start;
+  padding-top: 32px;
+  padding-bottom: 40px;
+}
+
+.account-panel--notifications {
+  width: min(100%, 840px);
+}
+
+.notifications-view {
+  display: grid;
+  gap: 14px;
+}
+
+.notifications-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.notifications-mark-all-button:disabled {
+  cursor: default;
+  opacity: 0.62;
+}
+
+.notifications-list {
+  display: grid;
+  gap: 10px;
+}
+
+.notification-card {
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  background: var(--bg-white);
+  overflow: hidden;
+}
+
+.notification-card--unread {
+  border-color: color-mix(in srgb, var(--primary-color) 38%, var(--border-color));
+  background: color-mix(in srgb, var(--primary-color) 6%, var(--bg-white));
+}
+
+.notification-card-button {
+  width: 100%;
+  display: block;
+  padding: 14px 16px;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.notification-card-button:hover {
+  background: var(--color-surface-muted);
+}
+
+.notification-card-button:focus-visible {
+  outline: none;
+  box-shadow: inset var(--focus-ring);
+}
+
+.notification-card-content {
+  display: grid;
+  gap: 6px;
+}
+
+.notification-card-title-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.notification-card-title {
+  min-width: 0;
+  color: var(--text-dark);
+  font-weight: 750;
+  line-height: 1.3;
+}
+
+.notification-unread-indicator {
+  flex: 0 0 auto;
+  padding: 3px 7px;
+  border-radius: var(--radius-pill);
+  background: var(--primary-color);
+  color: #fff;
+  font-size: 12px;
+  font-weight: 750;
+  line-height: 1;
+}
+
+.notification-card-description,
+.notification-card-time {
+  color: var(--text-light);
+  font-size: 14px;
+  line-height: 1.45;
+}
+
+@media (max-width: 560px) {
+  .notifications-toolbar,
+  .notification-card-title-row {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .notifications-mark-all-button {
+    width: 100%;
+  }
 }
 
 .account-panel--conversation > .page-back-link {

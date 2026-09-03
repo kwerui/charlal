@@ -14,7 +14,7 @@ const LISTING_FAVORITES_INTEGRITY_FIX_MIGRATION =
 const REMOVE_BUILTIN_LISTING_FAVORITES_MIGRATION =
   'supabase/migrations/20260901_remove_builtin_listing_favorites.sql';
 const LISTING_REPORT_READ_STATE_MIGRATION =
-  'supabase/migrations/20260830_add_listing_report_read_state.sql';
+  'supabase/migrations/20260903_add_listing_report_read_state.sql';
 const SELLER_REVIEW_TAGS_MIGRATION =
   'supabase/migrations/20260902_redesign_seller_reviews_tags.sql';
 
@@ -425,7 +425,7 @@ test('listing report read state is exposed only through a narrow current-user RP
 
   assert.ok(
     migrationNames.indexOf('20260825_add_listing_reports.sql') <
-      migrationNames.indexOf('20260830_add_listing_report_read_state.sql')
+      migrationNames.indexOf('20260903_add_listing_report_read_state.sql')
   );
   assert.equal(fix.includes('begin;'), true);
   assert.equal(helper.includes('security definer'), true);
