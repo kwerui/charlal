@@ -214,9 +214,9 @@ export const content = {
   reportAdvertisementSendingButton: "Sending report...", // TODO: add reviewed Tuvan translation.
   reportAdvertisementSuccessTitle: "Report sent", // TODO: add reviewed Tuvan translation.
   reportAdvertisementSuccessMessage: "Report sent. Thank you.", // TODO: add reviewed Tuvan translation.
-  reportAdvertisementAlreadyReportedTitle: "Already reported", // TODO: add reviewed Tuvan translation.
-  reportAdvertisementAlreadyReportedMessage: "You already reported this ad.", // TODO: add reviewed Tuvan translation.
-  reportAdvertisementAlreadyReportedButton: "Already reported", // TODO: add reviewed Tuvan translation.
+  reportAdvertisementAlreadyReportedTitle: "Ажык хомудал бар. / Open report exists", // TODO: add reviewed Tuvan translation.
+  reportAdvertisementAlreadyReportedMessage: "Бо чарлал дугайында силер ам-на хомудалды киирген силер. / You already have an open report for this ad.", // TODO: add reviewed Tuvan translation.
+  reportAdvertisementAlreadyReportedButton: "Хомудалды көрүңер / Report open", // TODO: add reviewed Tuvan translation.
   reportAdvertisementReasonRequiredMessage: "Choose a reason for the report.", // TODO: add reviewed Tuvan translation.
   reportAdvertisementDetailsTooLongMessage: "The details are too long. Use 1000 characters or fewer.", // TODO: add reviewed Tuvan translation.
   reportAdvertisementOwnListingMessage: "You cannot report your own ad.", // TODO: add reviewed Tuvan translation.
@@ -458,13 +458,13 @@ backToResults: "Back to results / Түңнелдерже эглип келир",
   reviewSaveFailedMessage: "Unable to save review.", // TODO: add reviewed Tuvan translation.
   reviewDeleteFailedMessage: "Unable to delete review.", // TODO: add reviewed Tuvan translation.
   deleteReviewConfirmTitle: "Delete review?", // TODO: add reviewed Tuvan translation.
-  deleteReviewConfirmMessage: "[TYV REVIEW] Your rating and tags will be removed. You can review this purchase again later.", // TODO: add reviewed Tuvan translation.
+  deleteReviewConfirmMessage: " Силерниң үнелелиңер болгаш демдектериңер ап кааптар. Бо садып алыышкынны соонда катап көрүп болур силер. / Your rating and tags will be removed. You can review this purchase again later.", // TODO: add reviewed Tuvan translation.
   reviewRatingLabel: "Rating", // TODO: add reviewed Tuvan translation.
   reviewRatingRequiredMessage: "Choose a 1 to 5 star rating.", // TODO: add reviewed Tuvan translation.
   starsLabel: "stars", // TODO: add reviewed Tuvan translation.
-  reviewTagsLabel: "[TYV REVIEW] Tags", // TODO: add reviewed Tuvan translation.
-  reviewTagsHelp: "[TYV REVIEW] Optional. Choose up to 3.", // TODO: add reviewed Tuvan translation.
-  reviewTagsMaximumMessage: "[TYV REVIEW] Choose no more than 3 tags.", // TODO: add reviewed Tuvan translation.
+  reviewTagsLabel: "Тегтер / Tags", // TODO: add reviewed Tuvan translation.
+  reviewTagsHelp: "Немелде. Чедир шилип алыңар.  / Optional. Choose up to 3.", // TODO: add reviewed Tuvan translation.
+  reviewTagsMaximumMessage: "3-тен хөй эвес демдектерни шилип алыңар. / Choose no more than 3 tags.", // TODO: add reviewed Tuvan translation.
   noAdvertisementsPostedTitle: "No advertisements posted / Чарлал чок", // TODO: add reviewed Tuvan translation.
   noAdvertisementsPostedMessage: "Advertisements you create while signed in will appear here. / Кирип тургаш кылган чарлалдарыңар мында көстүп кээр.", // TODO: add reviewed Tuvan translation.
   deleteAdvertisementButton: "Delete advertisement / Чарлалды өжүрүп кааптыңар", // TODO: add reviewed Tuvan translation.

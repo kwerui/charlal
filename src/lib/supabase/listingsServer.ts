@@ -111,7 +111,8 @@ export async function listPublicDatabaseListings(
   let query = supabase
     .from('listings')
     .select(PUBLIC_DATABASE_LISTING_SELECT_COLUMNS)
-    .in('status', ['active', 'reserved']);
+    .in('status', ['active', 'reserved'])
+    .eq('moderation_state', 'normal');
 
   if (normalizedOptions.categorySlug) {
     query = query.eq('category', normalizedOptions.categorySlug);
@@ -213,6 +214,7 @@ export async function listPublicDatabaseListingsByIds(
     .from('listings')
     .select(PUBLIC_DATABASE_LISTING_SELECT_COLUMNS)
     .in('status', ['active', 'reserved'])
+    .eq('moderation_state', 'normal')
     .in('id', safeIds);
 
   if (error || !isPublicDatabaseListingRowArray(data)) {
@@ -282,6 +284,8 @@ export async function getPublicDatabaseListingById(
     .from('listings')
     .select(PUBLIC_DATABASE_LISTING_SELECT_COLUMNS)
     .eq('id', safeId)
+    .in('status', ['active', 'reserved'])
+    .eq('moderation_state', 'normal')
     .maybeSingle();
 
   if (error) {

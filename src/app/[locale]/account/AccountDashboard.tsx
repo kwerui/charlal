@@ -11,6 +11,7 @@ import ProfilePhotoManager from '@/app/[locale]/account/ProfilePhotoManager';
 import ListingCard from '@/app/components/ListingCard';
 import ResultsScrollRestorer from '@/app/components/ResultsScrollRestorer';
 import type { Listing } from '@/data/listings';
+import { getListingModerationState } from '@/data/listings';
 import { useTranslations } from 'next-intl';
 import { useMessagingRealtime } from '@/lib/messagingRealtime';
 import { useNotificationsRealtime } from '@/lib/notificationsRealtime';
@@ -44,6 +45,7 @@ type Props = {
   initialOwnedListings: Listing[];
   initialSavedListingKeys: string[];
   initialReviewableTransactions: ReviewableTransaction[];
+  initialIsAdmin: boolean;
   initialListingsLoaded: boolean;
   initialListingsError: boolean;
 };
@@ -59,6 +61,7 @@ export default function AccountDashboard({
   initialOwnedListings,
   initialSavedListingKeys,
   initialReviewableTransactions,
+  initialIsAdmin,
   initialListingsLoaded,
   initialListingsError,
 }: Props) {
@@ -464,6 +467,11 @@ export default function AccountDashboard({
             <span aria-hidden="true">♥</span>
             <span>{savedListingsT('title')}</span>
           </Link>
+          {initialIsAdmin ? (
+            <Link href="/admin/reports" className="secondary-button">
+              <span>{t('adminReportsLabel')}</span>
+            </Link>
+          ) : null}
         </div>
       </section>
 
@@ -576,6 +584,9 @@ export default function AccountDashboard({
           <div className="my-ads-grid">
             {ownedListings.map((listing) => {
               const listingId = String(listing.id);
+              const editHref = `/account/listings/${listing.id}/edit`;
+              const isModerationHidden =
+                getListingModerationState(listing) === 'hidden';
               const confirmingThisListing = listingToDelete?.id === listing.id;
               const deleteErrorForThisListing =
                 deleteErrorListingId === listingId && deleteErrorMessage;
@@ -583,16 +594,23 @@ export default function AccountDashboard({
 
               return (
                 <article key={listingId} className="my-ad-item">
+                  {isModerationHidden ? (
+                    <div className="moderation-hidden-indicator" role="status">
+                      <strong>{t('moderationHiddenBadge')}</strong>
+                      <span>{t('moderationHiddenMessage')}</span>
+                    </div>
+                  ) : null}
                   <ListingCard
                     listing={listing}
+                    listingHref={isModerationHidden ? editHref : undefined}
                     fromHref="/account"
-                    showActiveStatus
+                    showActiveStatus={!isModerationHidden}
                     savedListingKeys={initialSavedListingKeys}
                     currentViewerId={accountUser?.id || null}
                   />
                   <div className="my-ad-actions">
                     <Link
-                      href={`/account/listings/${listing.id}/edit?from=/account`}
+                      href={editHref}
                       className="listing-management-button listing-management-button--edit my-ad-edit-button"
                       onClick={saveAccountScrollForEdit}
                     >

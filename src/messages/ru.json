@@ -94,9 +94,9 @@
     "sendingButton": "Отправка...",
     "successTitle": "Успешная отправка.",
     "successMessage": "Жалоба отправлена. Спасибо.",
-    "alreadyReportedTitle": "Жалоба уже отправлена",
-    "alreadyReportedMessage": "Вы уже отправили жалобу на это объявление.",
-    "alreadyReportedButton": "Жалоба уже отправлена.",
+    "alreadyReportedTitle": "Жалоба открыта.",
+    "alreadyReportedMessage": "Вы уже подали жалобу на это объявление.",
+    "alreadyReportedButton": "Просмотреть жалобу",
     "reasonRequiredMessage": "Выберите причину жалобы.",
     "detailsTooLongMessage": "Описание слишком длинное. Используйте не более 1000 символов.",
     "ownListingMessage": "Вы не можете пожаловаться на свое объявление.",
@@ -252,7 +252,10 @@
     "noAdvertisementsPostedMessage": "Созданные вами объявления будут отображаться здесь.",
     "reviewsSummaryTitle": "Отзывы",
     "reviewsSummary": "Ожидают отзыва: {toReview}  · Написано: {written}",
-    "viewReviewsButton": "Посмотреть отзывы"
+    "viewReviewsButton": "Посмотреть отзывы",
+    "moderationHiddenBadge": "Скрыто модерацией",
+    "moderationHiddenMessage": "Вы все еще можете редактировать и управлять этим объявлением здесь.",
+    "adminReportsLabel": "Администратор"
   },
   "AccountReviews": {
     "purchasesToReviewTitle": "Товары для отзыва",
@@ -691,6 +694,60 @@
         "body": "[RU REVIEW] TODO: Add reviewed official contact details for privacy questions."
       }
     ]
+  },
+  "AdminReports": {
+    "kicker": "Администратор",
+    "title": "Жалобы на объявления",
+    "filtersAriaLabel": "Фильтры жалоб",
+    "emptyTitle": "Жалобы не найдены",
+    "emptyMessage": "Для выбранного фильтра нет жалоб на объявления.",
+    "notReviewed": "Не рассмотрено",
+    "listingUnavailable": "Объявление недоступно",
+    "missingListing": "объявление удалено",
+    "reporterLabel": "Автор жалобы",
+    "sellerLabel": "Владелец объявления",
+    "filters": {
+      "open": "открытые",
+      "dismissed": "отклоненные",
+      "listing_hidden": "объявление скрыто",
+      "all": "все"
+    },
+    "table": {
+      "listing": "Объявление",
+      "report": "Жалоба",
+      "people": "Люди",
+      "state": "Состояние",
+      "actions": "Действия"
+    },
+    "actions": {
+      "dismiss": "Отклонить жалобу",
+      "reopen": "Открыть жалобу снова",
+      "hideListing": "Скрыть объявление",
+      "restoreListing": "Восстановить объявление"
+    },
+    "actionFeedback": {
+      "dismissed": "Жалоба отклонена.",
+      "reopened": "Жалоба открыта снова.",
+      "hidden": "Объявление скрыто.",
+      "restored": "Объявление восстановлено.",
+      "failed": "Действие не удалось. Обновите страницу и попробуйте снова."
+    },
+    "reportStates": {
+      "open": "открытые",
+      "dismissed": "отклоненные",
+      "listing_hidden": "объявление скрыто"
+    },
+    "moderationStates": {
+      "normal": "обычное",
+      "hidden": "скрыто"
+    },
+    "reasons": {
+      "scam": "мошенничество",
+      "prohibited_item": "запрещенный товар",
+      "misleading": "вводит в заблуждение",
+      "duplicate_spam": "дубликат/спам",
+      "other": "другое"
+    }
   },
   "Notifications": {
     "title": "Уведомления",

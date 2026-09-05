@@ -17,6 +17,7 @@ import { resolveListingImage } from '@/lib/listingPlaceholders';
 
 type Props = {
   listing: Listing;
+  listingHref?: string;
   fromHref?: string;
   showActiveStatus?: boolean;
   savedListingKeys?: string[];
@@ -26,6 +27,7 @@ type Props = {
 
 export default function ListingCard({
   listing,
+  listingHref: listingHrefOverride,
   fromHref,
   showActiveStatus = false,
   savedListingKeys = [],
@@ -33,7 +35,7 @@ export default function ListingCard({
   onFavoriteRemoved,
 }: Props) {
   const t = useTranslations('ListingCard');
-  const listingPath = `/listing/${listing.id}`;
+  const listingPath = listingHrefOverride || `/listing/${listing.id}`;
   const listingImage = resolveListingImage(listing);
   const listingStatus = getListingStatus(listing);
   const favoriteReference = getListingFavoriteReference(listing);

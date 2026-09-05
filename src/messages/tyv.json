@@ -94,9 +94,9 @@
     "sendingButton": "Sending report... / Хомудалды чоргузуп турар...",
     "successTitle": " Хомудалды чоруткан.",
     "successMessage": " Четтирдим.  ",
-    "alreadyReportedTitle": "Already reported / Олар ам-на хомудаан.",
-    "alreadyReportedMessage": "You already reported this ad. / Силер бо чарлалды дыңнаткан-дыр силер.",
-    "alreadyReportedButton": "Already reported / Олар ам-на хомудаан",
+    "alreadyReportedTitle": "Ажык хомудал бар. / Open report exists",
+    "alreadyReportedMessage": "Бо чарлал дугайында силер ам-на хомудалды киирген силер. / You already have an open report for this ad.",
+    "alreadyReportedButton": "Хомудалды көрүңер / Report open",
     "reasonRequiredMessage": "Choose a reason for the report. / Хомудалдың чылдагаанын шилип алыңар.",
     "detailsTooLongMessage": "The details are too long. Use 1000 characters or fewer. / Детализациязы дыка узун. 1000 азы оон эвээш демдектерни ажыглаар.",
     "ownListingMessage": "You cannot report your own ad. / Бодуңарның чарлалыңарны дыңнадып шыдавас силер.",
@@ -252,7 +252,10 @@
     "noAdvertisementsPostedMessage": "Advertisements you create while signed in will appear here. / Кирип тургаш кылган чарлалдарыңар мында көстүп кээр.",
     "reviewsSummaryTitle": " Хыналдалар",
     "reviewsSummary": "Харыы манап тур мен: {toReview} · Бижиттинген: {written} ",
-    "viewReviewsButton": "Үнелелдерни көрүңер"
+    "viewReviewsButton": "Үнелелдерни көрүңер",
+    "moderationHiddenBadge": "Модерация-биле чажырып каан / Hidden by moderation",
+    "moderationHiddenMessage": "Бо чарлалды ам-даа мында өскертип, башкарып болур силер. / You can still edit and manage this listing here.",
+    "adminReportsLabel": "Админ"
   },
   "AccountReviews": {
     "purchasesToReviewTitle": "Хыналдага барааннар / Purchases to review",
@@ -691,6 +694,60 @@
         "body": "[TYV REVIEW] TODO: Add reviewed official contact details for privacy questions."
       }
     ]
+  },
+  "AdminReports": {
+    "kicker": "Админ",
+    "title": "Чарлал дугайында хомудалдар / Listing reports",
+    "filtersAriaLabel": "Хомудал фильтри / Report filters",
+    "emptyTitle": "Хомудалдар тывылбаан / No reports found",
+    "emptyMessage": "Шилип алган фильтрге хамаарыштыр чарлалдарның хомудалдары чок. / There are no listing reports for this filter.",
+    "notReviewed": "Бодаттынмаан / Not reviewed",
+    "listingUnavailable": "Чарлал чок / Listing unavailable",
+    "missingListing": "чарлалды үндүрген / missing listing",
+    "reporterLabel": "Хомудалдың автору / Reporter",
+    "sellerLabel": "Ээ / Seller",
+    "filters": {
+      "open": "ажыдар / open",
+      "dismissed": "хүлээп албаан / dismissed",
+      "listing_hidden": "чарлал чажырып каан / listing hidden",
+      "all": "шупту"
+    },
+    "table": {
+      "listing": "Чарлал",
+      "report": "Хомудал",
+      "people": "Кижилер / People",
+      "state": "Аймак / State",
+      "actions": "Кылыр чүүлдер / Actions"
+    },
+    "actions": {
+      "dismiss": "Чөпшээревес / Dismiss",
+      "reopen": "Хомудалды катап ажыдар / Reopen report",
+      "hideListing": "Чарлалды чажыр / Hide listing",
+      "restoreListing": "Чарлалды катап тургузар / Restore listing"
+    },
+    "actionFeedback": {
+      "dismissed": "Хомудалды хүлээп албаан. / Report dismissed.",
+      "reopened": "Хомудалды катап ажыткан. / Report reopened.",
+      "hidden": "Чарлал чажыт. / Listing hidden.",
+      "restored": "Чарлал катап тургустунган. / Listing restored.",
+      "failed": "Акция үрелген. Арынны чаартып алгаш, катап шенеп көрүңер. / Action failed. Refresh and try again."
+    },
+    "reportStates": {
+      "open": "ажыдар / open",
+      "dismissed": "хүлээп албаан / dismissed",
+      "listing_hidden": "чарлал чажырып каан / listing hidden"
+    },
+    "moderationStates": {
+      "normal": "бөдүүн / normal",
+      "hidden": "чажыт / hidden"
+    },
+    "reasons": {
+      "scam": "мошшеничество",
+      "prohibited_item": "хоруглуг барааннар / prohibited item",
+      "misleading": "мегелеп турар / misleading",
+      "duplicate_spam": "катаптаашкын/спам / duplicate/spam",
+      "other": "өске / other"
+    }
   },
   "Notifications": {
     "title": "Уведомлениелер",

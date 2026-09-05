@@ -1,10 +1,14 @@
-import type { Listing, ListingStatus } from '@/data/listings';
-import { isListingStatus } from '@/data/listings';
+import type {
+  Listing,
+  ListingModerationState,
+  ListingStatus,
+} from '@/data/listings';
+import { isListingModerationState, isListingStatus } from '@/data/listings';
 import { getListingPlaceholder } from '@/lib/listingPlaceholders';
 import type { ValidatedListingFormValues } from '@/lib/listingFormValidation';
 
 export const DATABASE_LISTING_SELECT_COLUMNS =
-  'id, owner_id, seller_display_name, title, description, price, location, category, subcategory, transaction_type, property_type, marketplace_type, status, created_at, updated_at';
+  'id, owner_id, seller_display_name, title, description, price, location, category, subcategory, transaction_type, property_type, marketplace_type, status, moderation_state, created_at, updated_at';
 
 export const PUBLIC_DATABASE_LISTING_SELECT_COLUMNS =
   'id, seller_display_name, title, description, price, location, category, subcategory, transaction_type, property_type, marketplace_type, status, created_at, updated_at';
@@ -23,6 +27,7 @@ export type DatabaseListingRow = {
   property_type: string | null;
   marketplace_type: string | null;
   status: ListingStatus;
+  moderation_state?: ListingModerationState;
   created_at: string;
   updated_at: string;
 };
@@ -83,6 +88,8 @@ export function isDatabaseListingRow(value: unknown): value is DatabaseListingRo
     (row.property_type === null || typeof row.property_type === 'string') &&
     (row.marketplace_type === null || typeof row.marketplace_type === 'string') &&
     isListingStatus(row.status) &&
+    (row.moderation_state === undefined ||
+      isListingModerationState(row.moderation_state)) &&
     typeof row.created_at === 'string' &&
     typeof row.updated_at === 'string'
   );
@@ -120,6 +127,8 @@ export function isPublicDatabaseListingRow(
     (row.property_type === null || typeof row.property_type === 'string') &&
     (row.marketplace_type === null || typeof row.marketplace_type === 'string') &&
     isListingStatus(row.status) &&
+    (row.moderation_state === undefined ||
+      isListingModerationState(row.moderation_state)) &&
     typeof row.created_at === 'string' &&
     typeof row.updated_at === 'string'
   );
@@ -193,6 +202,10 @@ export function publicDatabaseRowToListing(row: PublicDatabaseListingRow): Listi
     datePosted: toDateLabel(row.created_at),
     status: row.status,
   };
+
+  if (row.moderation_state) {
+    listing.moderationState = row.moderation_state;
+  }
 
   if (hasMeaningfulUpdate(row.created_at, row.updated_at)) {
     listing.updatedAt = toDateLabel(row.updated_at);

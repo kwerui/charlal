@@ -20,6 +20,7 @@ export type Listing = {
   marketplaceType?: string;
   images?: ListingImage[];
   status?: ListingStatus;
+  moderationState?: ListingModerationState;
 };
 
 export type ListingImage = {
@@ -30,6 +31,7 @@ export type ListingImage = {
 };
 
 export type ListingStatus = 'active' | 'reserved' | 'sold' | 'archived';
+export type ListingModerationState = 'normal' | 'hidden';
 
 export const LISTING_STATUSES: ListingStatus[] = [
   'active',
@@ -49,6 +51,20 @@ export function isListingStatus(value: unknown): value is ListingStatus {
 
 export function getListingStatus(listing: Listing): ListingStatus {
   return isListingStatus(listing.status) ? listing.status : 'active';
+}
+
+export function isListingModerationState(
+  value: unknown
+): value is ListingModerationState {
+  return value === 'normal' || value === 'hidden';
+}
+
+export function getListingModerationState(
+  listing: Listing
+): ListingModerationState {
+  return isListingModerationState(listing.moderationState)
+    ? listing.moderationState
+    : 'normal';
 }
 
 export const LOCAL_LISTING_PLACEHOLDER_IMAGE =
