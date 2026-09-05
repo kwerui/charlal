@@ -34,3 +34,18 @@ export async function createClient() {
     },
   });
 }
+
+export async function createPublicClient() {
+  const { supabaseUrl, supabasePublishableKey } = getSupabasePublicEnv();
+
+  return createServerClient(supabaseUrl, supabasePublishableKey, {
+    cookies: {
+      getAll() {
+        return [];
+      },
+      setAll() {
+        return undefined;
+      },
+    },
+  });
+}

@@ -4,11 +4,26 @@ import test from 'node:test';
 
 test('public listing server reads explicitly filter out moderation-hidden listings', () => {
   const source = readFileSync('src/lib/supabase/listingsServer.ts', 'utf8');
+  const serverClientSource = readFileSync('src/lib/supabase/server.ts', 'utf8');
+  const listFunction = source.slice(
+    source.indexOf('export async function listPublicDatabaseListings'),
+    source.indexOf('export async function listPublicDatabaseListingsByIds')
+  );
+  const listByIdsFunction = source.slice(
+    source.indexOf('export async function listPublicDatabaseListingsByIds'),
+    source.indexOf('export async function listOwnedDatabaseListingsForOwner')
+  );
   const detailFunction = source.slice(
     source.indexOf('export async function getPublicDatabaseListingById'),
     source.indexOf('export async function getOwnedDatabaseListingById')
   );
 
+  assert.equal(serverClientSource.includes('createPublicClient'), true);
+  assert.match(serverClientSource, /getAll\(\)\s*{\s*return \[\];\s*}/);
+  assert.equal(source.includes('createPublicClient'), true);
+  assert.equal(listFunction.includes('const publicSupabase = await createPublicClient();'), true);
+  assert.equal(listByIdsFunction.includes('const publicSupabase = await createPublicClient();'), true);
+  assert.equal(detailFunction.includes('const publicSupabase = await createPublicClient();'), true);
   assert.equal(
     source.includes(".eq('moderation_state', 'normal')"),
     true
@@ -20,6 +35,22 @@ test('public listing server reads explicitly filter out moderation-hidden listin
   assert.equal(
     detailFunction.includes(".in('status', ['active', 'reserved'])"),
     true
+  );
+  assert.equal(
+    detailFunction.includes(".rpc('listing_is_publicly_visible'"),
+    false
+  );
+  assert.equal(
+    listFunction.includes(".rpc('listing_is_publicly_visible'"),
+    false
+  );
+  assert.equal(
+    listByIdsFunction.includes(".rpc('listing_is_publicly_visible'"),
+    false
+  );
+  assert.equal(
+    detailFunction.includes('getSafeResultsHref'),
+    false
   );
   assert.equal(
     source.includes("listPublicDatabaseListings("),
@@ -69,6 +100,49 @@ test('owner account listings surface moderation-hidden listings without public d
   assert.equal(accountSource.includes('initialIsAdmin ? ('), true);
   assert.equal(accountSource.includes('href="/admin/reports"'), true);
   assert.equal(accountSource.includes("t('adminReportsLabel')"), true);
+});
+
+test('public entry points keep public eligibility separate from owner history reads', () => {
+  const accountPageSource = readFileSync(
+    'src/app/[locale]/account/page.tsx',
+    'utf8'
+  );
+  const listingPageSource = readFileSync(
+    'src/app/[locale]/listing/[id]/page.tsx',
+    'utf8'
+  );
+  const contactPageSource = readFileSync(
+    'src/app/[locale]/contact/[listingId]/page.tsx',
+    'utf8'
+  );
+  const favoritesSource = readFileSync(
+    'src/lib/supabase/listingFavorites.ts',
+    'utf8'
+  );
+  const listingsServerSource = readFileSync(
+    'src/lib/supabase/listingsServer.ts',
+    'utf8'
+  );
+
+  assert.equal(accountPageSource.includes('listOwnedDatabaseListingsForOwner'), true);
+  assert.equal(listingsServerSource.includes("rpc('list_my_listings'"), true);
+  assert.equal(listingPageSource.includes('getPublicDatabaseListingById(id)'), true);
+  assert.equal(
+    listingPageSource.includes('getPublicDatabaseListingById(id, query'),
+    false
+  );
+  assert.equal(
+    listingPageSource.includes('getPublicDatabaseListingById(id, safeFromHref'),
+    false
+  );
+  assert.equal(
+    contactPageSource.includes('getPublicDatabaseListingById(listingId)'),
+    true
+  );
+  assert.equal(
+    favoritesSource.includes('listPublicDatabaseListingsByIds(databaseListingIds)'),
+    true
+  );
 });
 
 test('admin reports page is server protected and uses only admin moderation RPC wrappers', () => {

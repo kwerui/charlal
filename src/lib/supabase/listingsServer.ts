@@ -21,7 +21,7 @@ import {
   toPublicListingIlikePattern,
   type PublicListingQueryOptions,
 } from '@/lib/publicListingQuery';
-import { createClient } from '@/lib/supabase/server';
+import { createClient, createPublicClient } from '@/lib/supabase/server';
 import { attachViewerOwnership } from '@/lib/supabase/listingViewerOwnership';
 
 export type DatabaseListingReadResult =
@@ -107,8 +107,8 @@ export async function listPublicDatabaseListings(
   await connection();
 
   const normalizedOptions = normalizePublicListingQueryOptions(options);
-  const supabase = await createClient();
-  let query = supabase
+  const publicSupabase = await createPublicClient();
+  let query = publicSupabase
     .from('listings')
     .select(PUBLIC_DATABASE_LISTING_SELECT_COLUMNS)
     .in('status', ['active', 'reserved'])
@@ -174,12 +174,13 @@ export async function listPublicDatabaseListings(
     return { ok: false, reason: 'database-unavailable' };
   }
 
+  const supabase = await createClient();
   const listings = await attachViewerOwnership(
     publicDatabaseRowsToListings(data),
     supabase
   );
   const imageRows = await listListingImageRowsForListingIds(
-    supabase,
+    publicSupabase,
     listings.map((listing) => String(listing.id))
   );
 
@@ -209,8 +210,8 @@ export async function listPublicDatabaseListingsByIds(
     };
   }
 
-  const supabase = await createClient();
-  const { data, error } = await supabase
+  const publicSupabase = await createPublicClient();
+  const { data, error } = await publicSupabase
     .from('listings')
     .select(PUBLIC_DATABASE_LISTING_SELECT_COLUMNS)
     .in('status', ['active', 'reserved'])
@@ -221,12 +222,13 @@ export async function listPublicDatabaseListingsByIds(
     return { ok: false, reason: 'database-unavailable' };
   }
 
+  const supabase = await createClient();
   const listings = await attachViewerOwnership(
     publicDatabaseRowsToListings(data),
     supabase
   );
   const imageRows = await listListingImageRowsForListingIds(
-    supabase,
+    publicSupabase,
     listings.map((listing) => String(listing.id))
   );
 
@@ -279,8 +281,8 @@ export async function getPublicDatabaseListingById(
     return { ok: true, listing: null };
   }
 
-  const supabase = await createClient();
-  const { data, error } = await supabase
+  const publicSupabase = await createPublicClient();
+  const { data, error } = await publicSupabase
     .from('listings')
     .select(PUBLIC_DATABASE_LISTING_SELECT_COLUMNS)
     .eq('id', safeId)
@@ -300,11 +302,12 @@ export async function getPublicDatabaseListingById(
     return { ok: false, reason: 'database-unavailable' };
   }
 
+  const supabase = await createClient();
   const [listing] = await attachViewerOwnership(
     [publicDatabaseRowToListing(data)],
     supabase
   );
-  const imageRows = await listListingImageRowsForListingIds(supabase, [
+  const imageRows = await listListingImageRowsForListingIds(publicSupabase, [
     String(listing.id),
   ]);
 
