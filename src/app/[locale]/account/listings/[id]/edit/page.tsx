@@ -4,6 +4,7 @@ import { getSignInHref } from '@/i18n/localePath';
 import { getCurrentViewerId } from '@/lib/auth/server';
 import { buildListingFormCategories } from '@/lib/listingFormCategories';
 import { getSafeEditReturnHref } from '@/lib/resultReturnHref';
+import { getCurrentUserSuspension } from '@/lib/supabase/adminModeration';
 import { getOwnedDatabaseListingById } from '@/lib/supabase/listingsServer';
 import EditListingForm from './EditListingForm';
 
@@ -32,6 +33,11 @@ export default async function EditListingPage({
     id,
     viewer.status === 'signed-in' ? viewer.userId : ''
   );
+  const suspensionResult =
+    viewer.status === 'signed-in' ? await getCurrentUserSuspension() : null;
+  const isSuspended = suspensionResult?.ok
+    ? suspensionResult.isSuspended
+    : false;
   const initialEditState =
     viewer.status === 'unresolved'
       ? 'checking'
@@ -61,6 +67,7 @@ export default async function EditListingPage({
           categories={buildListingFormCategories(categoriesT)}
           initialEditStatus={initialEditState}
           initialListing={initialListing}
+          initialIsSuspended={isSuspended}
           editOrigin={editOrigin}
         />
       </section>

@@ -46,6 +46,7 @@ type Props = {
   initialSavedListingKeys: string[];
   initialReviewableTransactions: ReviewableTransaction[];
   initialIsAdmin: boolean;
+  initialIsSuspended: boolean;
   initialListingsLoaded: boolean;
   initialListingsError: boolean;
 };
@@ -62,6 +63,7 @@ export default function AccountDashboard({
   initialSavedListingKeys,
   initialReviewableTransactions,
   initialIsAdmin,
+  initialIsSuspended,
   initialListingsLoaded,
   initialListingsError,
 }: Props) {
@@ -258,6 +260,11 @@ export default function AccountDashboard({
     setPublicNameMessage('');
     setPublicNameError('');
 
+    if (initialIsSuspended) {
+      setPublicNameError(t('suspendedProfileActionMessage'));
+      return;
+    }
+
     const safeDisplayName = sanitizeProfileDisplayName(displayNameInput);
     const trimmedBio = bioInput.trim();
     const trimmedLocation = locationInput.trim();
@@ -312,6 +319,13 @@ export default function AccountDashboard({
   }
 
   function startDelete(listing: Listing): void {
+    if (initialIsSuspended) {
+      setDeleteMessage('');
+      setDeleteErrorListingId(String(listing.id));
+      setDeleteErrorMessage(t('suspendedListingActionMessage'));
+      return;
+    }
+
     setDeleteMessage('');
     setDeleteErrorListingId(null);
     setDeleteErrorMessage('');
@@ -328,6 +342,12 @@ export default function AccountDashboard({
 
   async function confirmDelete(): Promise<void> {
     if (!listingToDelete || !ownerId || isDeleting) {
+      return;
+    }
+
+    if (initialIsSuspended) {
+      setDeleteErrorListingId(String(listingToDelete.id));
+      setDeleteErrorMessage(t('suspendedListingActionMessage'));
       return;
     }
 
@@ -419,6 +439,12 @@ export default function AccountDashboard({
     <div className="account-content" ref={accountContentRef}>
       <section className="account-overview" aria-labelledby="account-info-title">
         <h3 id="account-info-title">{t('infoTitle')}</h3>
+        {initialIsSuspended ? (
+          <div className="account-suspension-notice" role="status">
+            <strong>{t('suspendedAccountTitle')}</strong>
+            <span>{t('suspendedAccountMessage')}</span>
+          </div>
+        ) : null}
         <div className="account-overview-meta">
           <p className="account-overview-row">
             <span>{t('emailLabel')}</span>
@@ -476,7 +502,7 @@ export default function AccountDashboard({
       </section>
 
       <section className="account-profile-settings">
-        {accountProfile ? (
+        {accountProfile && !initialIsSuspended ? (
           <ProfilePhotoManager
             profile={accountProfile}
             displayName={renderedUser.displayName || sellerProfileT('sellerFallbackLabel')}
@@ -500,6 +526,7 @@ export default function AccountDashboard({
                 setPublicNameError('');
                 setPublicNameMessage('');
               }}
+              disabled={initialIsSuspended}
               required
             />
           </label>
@@ -517,6 +544,7 @@ export default function AccountDashboard({
                 setPublicNameError('');
                 setPublicNameMessage('');
               }}
+              disabled={initialIsSuspended}
             />
           </label>
           <label className="form-field" htmlFor="account-profile-location">
@@ -532,6 +560,7 @@ export default function AccountDashboard({
                 setPublicNameError('');
                 setPublicNameMessage('');
               }}
+              disabled={initialIsSuspended}
             />
           </label>
           <p className="account-help-text">{t('publicLocationHelp')}</p>
@@ -551,9 +580,16 @@ export default function AccountDashboard({
               {publicNameError}
             </p>
           ) : null}
-          <button type="submit" className="search-button account-save-profile-button">
+          <button
+            type="submit"
+            className="search-button account-save-profile-button"
+            disabled={initialIsSuspended}
+          >
             {t('saveProfileButton')}
           </button>
+          {initialIsSuspended ? (
+            <p className="account-help-text">{t('suspendedProfileActionMessage')}</p>
+          ) : null}
         </form>
       </section>
 
@@ -600,6 +636,12 @@ export default function AccountDashboard({
                       <span>{t('moderationHiddenMessage')}</span>
                     </div>
                   ) : null}
+                  {initialIsSuspended ? (
+                    <div className="moderation-hidden-indicator" role="status">
+                      <strong>{t('suspendedListingBadge')}</strong>
+                      <span>{t('suspendedListingMessage')}</span>
+                    </div>
+                  ) : null}
                   <ListingCard
                     listing={listing}
                     listingHref={isModerationHidden ? editHref : undefined}
@@ -608,14 +650,18 @@ export default function AccountDashboard({
                     savedListingKeys={initialSavedListingKeys}
                     currentViewerId={accountUser?.id || null}
                   />
-                  <div className="my-ad-actions">
-                    <Link
-                      href={editHref}
-                      className="listing-management-button listing-management-button--edit my-ad-edit-button"
-                      onClick={saveAccountScrollForEdit}
-                    >
-                      {listingOwnerActionsT('editAdvertisementButton')}
-                    </Link>
+                  {!initialIsSuspended ? (
+                    <div className="my-ad-actions">
+<Link
+  href={{
+    pathname: editHref,
+    query: { from: '/account' },
+  }}
+  className="listing-management-button listing-management-button--edit my-ad-edit-button"
+  onClick={saveAccountScrollForEdit}
+>
+  {listingOwnerActionsT('editAdvertisementButton')}
+</Link>
                     <button
                       type="button"
                       className="listing-management-button listing-management-button--delete my-ad-delete-button"
@@ -625,6 +671,7 @@ export default function AccountDashboard({
                       {t('deleteAdvertisementButton')}
                     </button>
                   </div>
+                  ) : null}
                   {confirmingThisListing ? (
                     <section
                       className="delete-confirmation my-ad-delete-confirmation"
@@ -677,13 +724,15 @@ export default function AccountDashboard({
         )}
       </section>
 
-      <AccountRefreshScrollManager ready={accountReady} />
-      <AccountNativeHistoryRestorer
-        accountReady={accountReady}
-        canHoldVisualRestoration={canHoldVisualRestoration}
-        contentRef={accountContentRef}
-      />
-      <ResultsScrollRestorer resultsHref="/account" />
+<AccountRefreshScrollManager ready={accountReady} />
+<AccountNativeHistoryRestorer
+  accountReady={accountReady}
+  canHoldVisualRestoration={canHoldVisualRestoration}
+  contentRef={accountContentRef}
+/>
+{accountReady ? (
+  <ResultsScrollRestorer resultsHref="/account" />
+) : null}
     </div>
   );
 }

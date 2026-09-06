@@ -80,6 +80,8 @@ type Props = {
   initialMessages: AppMessage[];
   initialAttachments: AppMessageAttachment[];
   initialReadMarkers: AppConversationRead[];
+  canSendMessages: boolean;
+  currentUserIsSuspended: boolean;
   currentUserId: string;
 };
 
@@ -299,6 +301,10 @@ function getSendErrorMessage(reason: string, t: MessagesTranslator): string {
 
   if (reason === 'attachment-upload-failed') {
     return t('messageAttachmentUploadFailedMessage');
+  }
+
+  if (reason === 'suspended') {
+    return t('messagingSuspendedMessage');
   }
 
   return t('unableSendMessageMessage');
@@ -613,6 +619,8 @@ export default function ConversationThread({
   initialMessages,
   initialAttachments,
   initialReadMarkers,
+  canSendMessages,
+  currentUserIsSuspended,
   currentUserId,
 }: Props) {
   const t = useTranslations('Messages');
@@ -2735,6 +2743,12 @@ const localTimeFrame = window.requestAnimationFrame(() => {
       return;
     }
 
+    if (!canSendMessages) {
+      updateSendStatus('failed');
+      setError(t('messagingSuspendedMessage'));
+      return;
+    }
+
     const safeBody = body.trim();
 
     if (!safeBody && pendingAttachments.length === 0) {
@@ -2891,6 +2905,11 @@ const localTimeFrame = window.requestAnimationFrame(() => {
   }
 
   function startEditingMessage(message: AppMessage): void {
+    if (currentUserIsSuspended) {
+      setMessageActionError(t('messagingSuspendedMessage'));
+      return;
+    }
+
     setEditingMessageId(message.id);
     setEditBody(message.body);
     setMessageMenuOverlay(null);
@@ -2902,6 +2921,11 @@ const localTimeFrame = window.requestAnimationFrame(() => {
     messageId: string,
     triggerElement: HTMLButtonElement
   ): void {
+    if (currentUserIsSuspended) {
+      setMessageActionError(t('messagingSuspendedMessage'));
+      return;
+    }
+
     setConfirmationDialog(null);
     setMessageActionError('');
     setMessageMenuOverlay((currentOverlay) => {
@@ -2917,6 +2941,11 @@ const localTimeFrame = window.requestAnimationFrame(() => {
   }
 
   function openMessageDeleteConfirmation(messageId: string): void {
+    if (currentUserIsSuspended) {
+      setMessageActionError(t('messagingSuspendedMessage'));
+      return;
+    }
+
     setMessageMenuOverlay(null);
     setEditingMessageId(null);
     setEditBody('');
@@ -2939,6 +2968,11 @@ const localTimeFrame = window.requestAnimationFrame(() => {
     event.preventDefault();
 
     if (!editingMessageId || editingSubmittingMessageId) {
+      return;
+    }
+
+    if (currentUserIsSuspended) {
+      setMessageActionError(t('messagingSuspendedMessage'));
       return;
     }
 
@@ -2994,6 +3028,11 @@ const localTimeFrame = window.requestAnimationFrame(() => {
 
   async function handleDeleteMessage(messageId: string): Promise<void> {
     if (deletingMessageId) {
+      return;
+    }
+
+    if (currentUserIsSuspended) {
+      setMessageActionError(t('messagingSuspendedMessage'));
       return;
     }
 
@@ -3291,7 +3330,8 @@ const localTimeFrame = window.requestAnimationFrame(() => {
                       ) : null}
                     </div>
                     {isOwnMessage && !isDeleted ? (
-                      <div className="message-actions-menu">
+                      !currentUserIsSuspended ? (
+                        <div className="message-actions-menu">
                         <button
                           ref={(element) => {
                             if (element) {
@@ -3318,6 +3358,7 @@ const localTimeFrame = window.requestAnimationFrame(() => {
                           •••
                         </button>
                       </div>
+                      ) : null
                     ) : null}
                   </>
                 )}
@@ -3362,6 +3403,12 @@ const localTimeFrame = window.requestAnimationFrame(() => {
         </p>
       ) : null}
 
+      {!canSendMessages ? (
+        <p className="messaging-live-status messaging-live-status--unavailable" role="status">
+          {t('messagingSuspendedMessage')}
+        </p>
+      ) : null}
+
       <form
         ref={messageFormRef}
         className="message-form"
@@ -3379,6 +3426,7 @@ const localTimeFrame = window.requestAnimationFrame(() => {
               multiple
               onChange={handleAttachmentFilesChange}
               disabled={
+                !canSendMessages ||
                 sendStatus === 'sending' ||
                 pendingAttachments.length >= MAX_MESSAGE_ATTACHMENTS
               }
@@ -3388,6 +3436,7 @@ const localTimeFrame = window.requestAnimationFrame(() => {
               className="secondary-button message-attachment-add-button"
               onClick={() => attachmentInputRef.current?.click()}
               disabled={
+                !canSendMessages ||
                 sendStatus === 'sending' ||
                 pendingAttachments.length >= MAX_MESSAGE_ATTACHMENTS
               }
@@ -3410,6 +3459,7 @@ const localTimeFrame = window.requestAnimationFrame(() => {
               rows={2}
               placeholder={t('writeMessageLabel')}
               aria-describedby={error ? errorId : undefined}
+              disabled={!canSendMessages}
               onChange={(event) => {
                 const nextBody = event.target.value;
 
@@ -3435,7 +3485,7 @@ const localTimeFrame = window.requestAnimationFrame(() => {
           <button
             type="submit"
             className="search-button message-send-button"
-            disabled={sendStatus === 'sending'}
+            disabled={!canSendMessages || sendStatus === 'sending'}
             aria-busy={sendStatus === 'sending'}
           >
             {sendStatus === 'sending'
@@ -3705,5 +3755,3 @@ const localTimeFrame = window.requestAnimationFrame(() => {
     </div>
   );
 }
-
-

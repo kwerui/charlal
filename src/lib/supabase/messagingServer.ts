@@ -39,6 +39,7 @@ export type MessagingFailureReason =
   | 'too-many-attachments'
   | 'invalid-attachment'
   | 'attachment-upload-failed'
+  | 'suspended'
   | 'database-unavailable';
 
 export type ConversationIdResult =
@@ -79,6 +80,7 @@ export type ConversationThreadResult =
       messages: AppMessage[];
       attachments: AppMessageAttachment[];
       readMarkers: AppConversationRead[];
+      canSendMessages: boolean;
     }
   | {
       ok: false;
@@ -303,6 +305,13 @@ function classifyMessagingError(message: string | undefined): MessagingFailureRe
 
   if (safeMessage.includes('cannot message yourself')) {
     return 'self-message';
+  }
+
+  if (
+    safeMessage.includes('suspended users cannot') ||
+    safeMessage.includes('current user is suspended')
+  ) {
+    return 'suspended';
   }
 
   if (
@@ -552,6 +561,20 @@ export async function getCurrentUserConversationThread(
     };
   }
 
+  const { data: canSendData, error: canSendError } = await supabase.rpc(
+    'current_user_can_message_conversation',
+    {
+      p_conversation_id: safeConversationId,
+    }
+  );
+
+  if (canSendError || typeof canSendData !== 'boolean') {
+    return {
+      ok: false,
+      reason: classifyMessagingError(canSendError?.message),
+    };
+  }
+
   return {
     ok: true,
     conversation: databaseConversationRowToApp(conversationData),
@@ -559,6 +582,7 @@ export async function getCurrentUserConversationThread(
     messages: messageData.map(databaseMessageRowToApp),
     attachments,
     readMarkers: readMarkerData.map(databaseConversationReadRowToApp),
+    canSendMessages: canSendData,
   };
 }
 

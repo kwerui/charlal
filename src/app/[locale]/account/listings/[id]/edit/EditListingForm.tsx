@@ -37,7 +37,10 @@ import {
   cleanupUploadedListingPhotos,
   prepareListingPhotoMetadata,
 } from '@/lib/supabase/listingPhotoUploadsClient';
-import { hasActiveResultsNavigation } from '@/lib/resultsScrollStorage';
+import {
+  hasActiveResultsNavigation,
+  requestResultsScrollRestore,
+} from '@/lib/resultsScrollStorage';
 import { revalidateEditedListingRoutes } from './actions';
 
 type Props = {
@@ -45,6 +48,7 @@ type Props = {
   categories: ListingFormCategory[];
   initialEditStatus: EditListingStatus;
   initialListing: Listing | null;
+  initialIsSuspended: boolean;
   editOrigin: string | undefined;
 };
 
@@ -76,6 +80,7 @@ export default function EditListingForm({
   categories,
   initialEditStatus,
   initialListing,
+  initialIsSuspended,
   editOrigin,
 }: Props) {
   const router = useRouter();
@@ -279,6 +284,11 @@ export default function EditListingForm({
       return;
     }
 
+    if (initialIsSuspended) {
+      setErrors([t('suspendedEditMessage')]);
+      return;
+    }
+
     const originalStatus = getListingStatus(listing);
     const publicDisplayName = currentUser.displayName.trim();
     const selectedSoldBuyerId =
@@ -326,7 +336,9 @@ export default function EditListingForm({
     if (!updateResult.ok) {
       setIsSubmitting(false);
       setErrors([
-        updateResult.reason === 'not-owned'
+        updateResult.reason === 'suspended'
+          ? t('suspendedEditMessage')
+          : updateResult.reason === 'not-owned'
           ? t('notOwnedMessage')
           : t('saveFailedMessage'),
       ]);
@@ -356,7 +368,11 @@ export default function EditListingForm({
       await cleanupUploadedListingPhotos(photoResult.uploadedStoragePaths);
       setIsSubmitting(false);
       setSuccessMessage(t('savedMessage'));
-      setErrors([t('photosSaveFailedMessage')]);
+      setErrors([
+        imageSaveResult.reason === 'suspended'
+          ? t('suspendedEditMessage')
+          : t('photosSaveFailedMessage'),
+      ]);
       return;
     }
 
@@ -371,7 +387,11 @@ export default function EditListingForm({
         setIsSubmitting(false);
         setListing(imageSaveResult.listing);
         setSuccessMessage('');
-        setErrors([t('statusUpdateFailedMessage')]);
+        setErrors([
+          statusResult.reason === 'suspended'
+            ? t('suspendedEditMessage')
+            : t('statusUpdateFailedMessage'),
+        ]);
         return;
       }
     }
@@ -383,6 +403,7 @@ export default function EditListingForm({
     recordListingMutationRefreshIntent(String(imageSaveResult.listing.id));
 
     if (editOrigin === '/account' && hasActiveResultsNavigation('/account')) {
+      requestResultsScrollRestore('/account');
       router.back();
       return;
     }
@@ -395,14 +416,15 @@ export default function EditListingForm({
     router.replace('/account');
   }
 
-  function handleCancel(): void {
-    if (editOrigin === '/account' && hasActiveResultsNavigation('/account')) {
-      router.back();
-      return;
-    }
-
-    router.push(editOrigin || '/account');
+function handleCancel(): void {
+  if (editOrigin === '/account' && hasActiveResultsNavigation('/account')) {
+    requestResultsScrollRestore('/account');
+    router.back();
+    return;
   }
+
+  router.push(editOrigin || '/account');
+}
 
   if (authStatus === 'unauthenticated' || editStatus === 'checking') {
     return (
@@ -456,6 +478,18 @@ export default function EditListingForm({
       <div className="empty-results" role="status">
         <h3>{t('notOwnedTitle')}</h3>
         <p>{t('notOwnedMessage')}</p>
+        <Link href="/account" className="secondary-button edit-listing-state-link">
+          {listingDetailT('backToAccount')}
+        </Link>
+      </div>
+    );
+  }
+
+  if (initialIsSuspended) {
+    return (
+      <div className="empty-results" role="status">
+        <h3>{t('suspendedEditTitle')}</h3>
+        <p>{t('suspendedEditMessage')}</p>
         <Link href="/account" className="secondary-button edit-listing-state-link">
           {listingDetailT('backToAccount')}
         </Link>

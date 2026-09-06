@@ -7,7 +7,10 @@ import { getCurrentUserFavoriteReferences } from '@/lib/supabase/listingFavorite
 import { listOwnedDatabaseListingsForOwner } from '@/lib/supabase/listingsServer';
 import { createClient } from '@/lib/supabase/server';
 import { listMyReviewableTransactions } from '@/lib/supabase/reviews';
-import { getCurrentUserIsAdmin } from '@/lib/supabase/adminModeration';
+import {
+  getCurrentUserIsAdmin,
+  getCurrentUserSuspension,
+} from '@/lib/supabase/adminModeration';
 import AccountDashboard from './AccountDashboard';
 
 type AccountPageProps = {
@@ -39,6 +42,13 @@ export default async function AccountPage({ params }: AccountPageProps) {
     authResult.status === 'authenticated'
       ? await getCurrentUserIsAdmin()
       : false;
+  const suspensionResult =
+    authResult.status === 'authenticated'
+      ? await getCurrentUserSuspension()
+      : null;
+  const isSuspended = suspensionResult?.ok
+    ? suspensionResult.isSuspended
+    : false;
 
   return (
     <main className="account-page account-page--dashboard">
@@ -67,6 +77,7 @@ export default async function AccountPage({ params }: AccountPageProps) {
           initialSavedListingKeys={savedListingKeys}
           initialReviewableTransactions={reviewableTransactions}
           initialIsAdmin={isAdmin}
+          initialIsSuspended={isSuspended}
           initialListingsLoaded={Boolean(ownedListingsResult)}
           initialListingsError={Boolean(
             ownedListingsResult && !ownedListingsResult.ok

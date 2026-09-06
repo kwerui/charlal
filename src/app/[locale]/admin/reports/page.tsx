@@ -174,9 +174,17 @@ function AdminReportsTable({
               </td>
               <td>
                 <span>
-                  {t('reporterLabel')}: {report.reporterDisplayName || report.reporterId}
+                  {t('reporterLabel')}:{' '}
+                  <Link href={`/admin/users/${report.reporterId}`}>
+                    {report.reporterDisplayName || report.reporterId}
+                  </Link>
                 </span>
-                <span>{t('sellerLabel')}: {report.sellerDisplayName || report.sellerId}</span>
+                <span>
+                  {t('sellerLabel')}:{' '}
+                  <Link href={`/admin/users/${report.sellerId}`}>
+                    {report.sellerDisplayName || report.sellerId}
+                  </Link>
+                </span>
               </td>
               <td>
                 <strong>{formatReportState(report.reportState, t)}</strong>

@@ -2177,6 +2177,21 @@ min-height: calc(100dvh - 80px);
   border-color: #fca5a5;
 }
 
+.account-suspension-notice {
+  display: grid;
+  gap: 6px;
+  padding: 12px 14px;
+  border: 1px solid rgba(180, 83, 9, 0.34);
+  border-radius: 8px;
+  background: rgba(245, 158, 11, 0.12);
+  color: #78350f;
+  line-height: 1.45;
+}
+
+.account-suspension-notice strong {
+  color: #92400e;
+}
+
 .account-loading-skeleton,
 .edit-listing-loading-skeleton {
   width: 100%;
@@ -2849,6 +2864,63 @@ min-height: calc(100dvh - 80px);
   color: #b91c1c;
 }
 
+.admin-user-summary {
+  display: grid;
+  gap: 14px;
+  padding: 16px;
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  background: var(--bg-light);
+}
+
+.admin-user-summary h2 {
+  margin: 0;
+  font-size: 18px;
+}
+
+.admin-user-summary dl {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  margin: 0;
+}
+
+.admin-user-summary dt {
+  color: var(--text-light);
+  font-size: 12px;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.admin-user-summary dd {
+  margin: 4px 0 0;
+  overflow-wrap: anywhere;
+  color: var(--text-dark);
+  line-height: 1.45;
+}
+
+.admin-user-audit-list {
+  display: grid;
+  gap: 10px;
+  margin: 0;
+  padding-left: 20px;
+}
+
+.admin-user-audit-list li {
+  padding-left: 4px;
+}
+
+.admin-user-audit-list strong,
+.admin-user-audit-list span {
+  display: block;
+  line-height: 1.45;
+}
+
+.admin-user-audit-list span {
+  color: var(--text-light);
+  font-size: 14px;
+}
+
 @media (max-width: 700px) {
   .admin-page {
     width: min(100% - 20px, 1180px);
@@ -2857,6 +2929,10 @@ min-height: calc(100dvh - 80px);
 
   .admin-report-filter {
     flex: 1 1 130px;
+  }
+
+  .admin-user-summary dl {
+    grid-template-columns: 1fr;
   }
 }
 

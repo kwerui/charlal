@@ -8,6 +8,7 @@ import {
   publicDatabaseRowToOwnedListing,
 } from '@/lib/listingDatabaseTypes';
 import { getCurrentUserResult } from '@/lib/auth/server';
+import { getCurrentUserSuspension } from '@/lib/supabase/adminModeration';
 import { createClient } from '@/lib/supabase/server';
 import { revalidateListingMutationRoutes } from '@/app/[locale]/account/listings/[id]/edit/actions';
 
@@ -21,7 +22,12 @@ export type UpdateListingStatusResult =
     }
   | {
       ok: false;
-      reason: 'unauthenticated' | 'invalid-status' | 'not-owned' | 'database-unavailable';
+      reason:
+        | 'unauthenticated'
+        | 'invalid-status'
+        | 'not-owned'
+        | 'suspended'
+        | 'database-unavailable';
     };
 
 export async function updateListingStatusAction(input: {
@@ -43,6 +49,12 @@ export async function updateListingStatusAction(input: {
 
   if (authResult.status !== 'authenticated') {
     return { ok: false, reason: 'unauthenticated' };
+  }
+
+  const suspensionResult = await getCurrentUserSuspension();
+
+  if (suspensionResult.ok && suspensionResult.isSuspended) {
+    return { ok: false, reason: 'suspended' };
   }
 
   const supabase = await createClient();

@@ -32,7 +32,7 @@ export type DatabaseListingMutationResult =
     }
   | {
       ok: false;
-      reason: 'not-found' | 'not-owned' | 'database-unavailable';
+      reason: 'not-found' | 'not-owned' | 'suspended' | 'database-unavailable';
     };
 
 export type DatabaseListingListResult =
@@ -51,7 +51,7 @@ export type DatabaseDeleteListingResult =
     }
   | {
       ok: false;
-      reason: 'not-found' | 'not-owned' | 'database-unavailable';
+      reason: 'not-found' | 'not-owned' | 'suspended' | 'database-unavailable';
     };
 
 export type DatabaseListingImageSaveResult =
@@ -61,11 +61,32 @@ export type DatabaseListingImageSaveResult =
     }
   | {
       ok: false;
-      reason: 'not-found' | 'not-owned' | 'database-unavailable';
+      reason: 'not-found' | 'not-owned' | 'suspended' | 'database-unavailable';
     };
 
 function isMissingOrDeniedResponse(errorCode: string | undefined): boolean {
   return errorCode === 'PGRST116' || errorCode === '42501';
+}
+
+async function getCurrentUserIsSuspended(): Promise<boolean | null> {
+  const supabase = createClient();
+  const { data, error } = await supabase.rpc('current_user_is_suspended');
+
+  if (error || typeof data !== 'boolean') {
+    return null;
+  }
+
+  return data;
+}
+
+async function classifyMissingOrDeniedListingMutation(
+  errorCode: string | undefined
+): Promise<'not-owned' | 'suspended' | 'database-unavailable'> {
+  if (!isMissingOrDeniedResponse(errorCode)) {
+    return 'database-unavailable';
+  }
+
+  return (await getCurrentUserIsSuspended()) ? 'suspended' : 'not-owned';
 }
 
 async function attachImagesToListing(
@@ -179,7 +200,7 @@ export async function findOwnedDatabaseListingById(
   if (error) {
     return {
       ok: false,
-      reason: isMissingOrDeniedResponse(error.code) ? 'not-owned' : 'database-unavailable',
+      reason: await classifyMissingOrDeniedListingMutation(error.code),
     };
   }
 
@@ -222,12 +243,15 @@ export async function updateDatabaseListingOwnedBy(
   if (error) {
     return {
       ok: false,
-      reason: isMissingOrDeniedResponse(error.code) ? 'not-owned' : 'database-unavailable',
+      reason: await classifyMissingOrDeniedListingMutation(error.code),
     };
   }
 
   if (!data) {
-    return { ok: false, reason: 'not-owned' };
+    return {
+      ok: false,
+      reason: (await getCurrentUserIsSuspended()) ? 'suspended' : 'not-owned',
+    };
   }
 
   if (!isPublicDatabaseListingRow(data)) {
@@ -275,7 +299,10 @@ export async function saveDatabaseListingImagesOwnedBy(
   }
 
   if (!isOwned) {
-    return { ok: false, reason: 'not-owned' };
+    return {
+      ok: false,
+      reason: (await getCurrentUserIsSuspended()) ? 'suspended' : 'not-owned',
+    };
   }
 
   const { data: existingRows, error: existingRowsError } = await supabase
@@ -304,7 +331,10 @@ export async function saveDatabaseListingImagesOwnedBy(
     const { error } = await supabase.from('listing_images').insert(newRows);
 
     if (error) {
-      return { ok: false, reason: 'database-unavailable' };
+      return {
+        ok: false,
+        reason: await classifyMissingOrDeniedListingMutation(error.code),
+      };
     }
   }
 
@@ -320,7 +350,10 @@ export async function saveDatabaseListingImagesOwnedBy(
       .eq('storage_path', image.storagePath);
 
     if (error) {
-      return { ok: false, reason: 'database-unavailable' };
+      return {
+        ok: false,
+        reason: await classifyMissingOrDeniedListingMutation(error.code),
+      };
     }
   }
 
@@ -332,7 +365,10 @@ export async function saveDatabaseListingImagesOwnedBy(
       .in('storage_path', removedStoragePaths);
 
     if (error) {
-      return { ok: false, reason: 'database-unavailable' };
+      return {
+        ok: false,
+        reason: await classifyMissingOrDeniedListingMutation(error.code),
+      };
     }
   }
 
@@ -379,7 +415,10 @@ export async function deleteDatabaseListingOwnedBy(
   }
 
   if (!isOwned) {
-    return { ok: false, reason: 'not-owned' };
+    return {
+      ok: false,
+      reason: (await getCurrentUserIsSuspended()) ? 'suspended' : 'not-owned',
+    };
   }
 
   const { data: imageRowsData, error: imageRowsError } = await supabase
@@ -414,12 +453,15 @@ export async function deleteDatabaseListingOwnedBy(
   if (error) {
     return {
       ok: false,
-      reason: isMissingOrDeniedResponse(error.code) ? 'not-owned' : 'database-unavailable',
+      reason: await classifyMissingOrDeniedListingMutation(error.code),
     };
   }
 
   if (!data) {
-    return { ok: false, reason: 'not-owned' };
+    return {
+      ok: false,
+      reason: (await getCurrentUserIsSuspended()) ? 'suspended' : 'not-owned',
+    };
   }
 
   return { ok: true };

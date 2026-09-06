@@ -3,6 +3,7 @@ import { redirect } from 'next/navigation';
 import { getTranslations } from 'next-intl/server';
 import { getSignInHref } from '@/i18n/localePath';
 import { getCurrentUserResult } from '@/lib/auth/server';
+import { getCurrentUserSuspension } from '@/lib/supabase/adminModeration';
 import { getCurrentUserConversationThread } from '@/lib/supabase/messagingServer';
 import ConversationThread from './ConversationThread';
 
@@ -36,6 +37,8 @@ export default async function ConversationPage({
   }
 
   const threadResult = await getCurrentUserConversationThread(conversationId);
+  const suspensionResult = await getCurrentUserSuspension();
+  const isSuspended = suspensionResult.ok ? suspensionResult.isSuspended : false;
 
   return (
     <main className="account-page account-page--conversation">
@@ -60,6 +63,8 @@ export default async function ConversationPage({
             initialMessages={threadResult.messages}
             initialAttachments={threadResult.attachments}
             initialReadMarkers={threadResult.readMarkers}
+            canSendMessages={threadResult.canSendMessages}
+            currentUserIsSuspended={isSuspended}
             currentUserId={authResult.user.id}
           />
         )}

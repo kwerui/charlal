@@ -255,7 +255,13 @@
     "viewReviewsButton": "Үнелелдерни көрүңер",
     "moderationHiddenBadge": "Модерация-биле чажырып каан / Hidden by moderation",
     "moderationHiddenMessage": "Бо чарлалды ам-даа мында өскертип, башкарып болур силер. / You can still edit and manage this listing here.",
-    "adminReportsLabel": "Админ"
+    "suspendedAccountTitle": "Аккаунт соксаткан / Account suspended",
+    "suspendedAccountMessage": "Бо аккаунт соксаткан турда, рыноктуң ажыл-чорудулгазы кызыгаарлаттынган. Аккаунт төөгүзү, бар чугаалар, дыңнадыглар болгаш кадагалаттынган чарлалдар ам-даа бар. / Marketplace actions are restricted while this account is suspended. Account history, existing conversations, notifications, and saved advertisements remain available.",
+    "suspendedProfileActionMessage": "Аккаунтту соксаткан турда, профиль болгаш чурук өскерлиишкиннери болдунмас. / Profile and photo changes are unavailable while the account is suspended.",
+    "suspendedListingBadge": "Аккаунт соксаткан / Account suspended",
+    "suspendedListingMessage": "Бо чарлал аккаунт төөгүзүнде артар, ынчалза-даа аккаунт катап тургустунмаан шаанда, хөй-ниитиге көстүп, үндүрүлге ажыл-чорудулгазы кызыгаарлаттынган. / This advertisement remains in account history, but public visibility and listing actions are restricted until the account is restored.",
+    "suspendedListingActionMessage": "Аккаунттуң соксаткан үезинде чарлалдың өскерлиишкиннери болгаш өжүрүлгелери болдунмас. / Advertisement changes and deletion are unavailable while the account is suspended.",
+    "adminReportsLabel": "Администратор"
   },
   "AccountReviews": {
     "purchasesToReviewTitle": "Хыналдага барааннар / Purchases to review",
@@ -303,6 +309,7 @@
     "unableEditMessageMessage": "Медээни өскертип шыдаваан / Unable to edit message",
     "unableDeleteMessageMessage": "Медээни өжүрүп шыдаваан / Unable to delete message",
     "unableDeleteConversationMessage": "Чугааны өжүрүп шыдаваан / Unable to delete conversation",
+    "messagingSuspendedMessage": "Бир чугаа киржикчизи соксаткан турда, медээлер чорудары азы өскертири болдунмас. Медээлер төөгүзү ам-даа бар. / Sending or changing messages is unavailable while one conversation participant is suspended. Message history remains available.",
     "liveUpdatesUnavailableMessage": "Дорт дамчыдылгалар чок. Медээлер бар бе деп хынаар дээш чаартыңар. / Live updates unavailable. Refresh to check for messages.",
     "offlineThreadStatusMessage": "Силер офлайн силер. Кажан харылзаа эглип кээрге, медээлер чаартынып кээр. / You are offline. Messages will update when the connection returns.",
     "offlineBeforeSendMessage": "Силер офлайн силер. Чорудар мурнунда катап кожуп алыңар. / You are offline. Reconnect before sending.",
@@ -471,6 +478,8 @@
     "notFoundTitle": "Чарлал тывылбаан / Advertisement not found",
     "notOwnedTitle": "Чарлалды өскертип болбас / Unable to edit advertisement",
     "notOwnedMessage": "Бо чарлалдың ээзи эвес силер. / You do not own this advertisement.",
+    "suspendedEditTitle": "Өскертир арга чок / Editing unavailable",
+    "suspendedEditMessage": "Аккаунт соксаттынган турда, чарлалдарны аккаунт төөгүзүнден көрүп болур, ынчалза-даа оларны өскертип, өжүрүп, статузун өскертип азы чуруктарны башкарып болбас. / While the account is suspended, advertisements can be viewed in account history but cannot be edited, deleted, have status changed, or have photos managed.",
     "saveButton": "Өскерлиишкиннерни кадагала / Save changes",
     "savingButton": "Өскерлиишкиннерни кадагалап турар... / Saving changes...",
     "savedMessage": "Өскерлиишкиннер кадагалаттынган. / Changes saved.",
@@ -696,7 +705,7 @@
     ]
   },
   "AdminReports": {
-    "kicker": "Админ",
+    "kicker": "Администратор",
     "title": "Чарлал дугайында хомудалдар / Listing reports",
     "filtersAriaLabel": "Хомудал фильтри / Report filters",
     "emptyTitle": "Хомудалдар тывылбаан / No reports found",
@@ -747,6 +756,48 @@
       "misleading": "мегелеп турар / misleading",
       "duplicate_spam": "катаптаашкын/спам / duplicate/spam",
       "other": "өске / other"
+    }
+  },
+  "AdminUsers": {
+    "kicker": "Администратор",
+    "backToReports": "Отчеттарже эглип келир / Back to reports",
+    "summaryTitle": "Ажыглакчы / User",
+    "moderationTitle": "Аккаунт модерациязы / Account moderation",
+    "notChanged": "Данныйлар чок / No data",
+    "missingValue": "Данныйлар чок / No data",
+    "fields": {
+      "userId": "Хереглекчиниң идентификатору / User ID",
+      "email": "Электроннуг почта / Email",
+      "publicSlug": "Хөй-ниити ссылказы / Public slug",
+      "createdAt": "Бүрүткел хүнү / Created",
+      "state": "Аймак / State",
+      "changedAt": "Өскерилген хүнү / Changed at",
+      "changedBy": "Өскерилген / Changed by"
+    },
+    "states": {
+      "normal": "Хемчээл чок / normal",
+      "suspended": "Тургузупкан / suspended"
+    },
+    "actions": {
+      "suspend": "Хереглекчини соксадыр / Suspend user",
+      "restore": "Хереглекчини катап тургузар / Restore user"
+    },
+    "actionFeedback": {
+      "suspended": "Ажыглакчыны соксаткан. / User suspended.",
+      "restored": "Ажыглакчы катап тургустунган. / User restored.",
+      "self": "Бодуңарның аккаунтуңарны доктаадып болбас. / You cannot suspend your own account.",
+      "adminTarget": "Админ ажыглакчыларны соксадыр арга чок. / Admin users cannot be suspended.",
+      "notFound": "Ажыглакчы тывылбаан. / User not found.",
+      "failed": "Херектер үрелген. Чаарткаш, катап шенеп көрүңер. / Action failed. Refresh and try again."
+    },
+    "audit": {
+      "title": "Модерация төөгүзү / Moderation history",
+      "empty": "Бо ажыглакчыга амдыызында модерация төөгүзү чок. / No moderation history for this user yet.",
+      "actorLabel": "Администратор",
+      "actions": {
+        "user_suspended": "Аккаунт соксаткан / Account suspended",
+        "user_restored": "Аккаунт катап тургустунган / Account restored"
+      }
     }
   },
   "Notifications": {
