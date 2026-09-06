@@ -274,7 +274,7 @@ Purpose: Avoid accidentally exposing a private frontend while keeping production
 
 Routes: Production routing and hosting only when explicitly instructed.
 
-Key files: `setup.md`.
+Key files: `docs/development.md`.
 
 Data/security dependencies: Production API, environment variables, VPS services, Caddy routes.
 

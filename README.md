@@ -256,4 +256,4 @@ For implementation safety and behavior-preservation rules:
 
 - [`AGENTS.md`](AGENTS.md)
 - [`docs/product-invariants.md`](docs/product-invariants.md)
-
+- [`docs/development.md`](docs/development.md)
