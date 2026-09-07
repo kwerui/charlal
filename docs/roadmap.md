@@ -39,6 +39,24 @@ automatically. Complete and verify the currently selected phase before moving on
 - Recruiter-facing README.
 - Local development documentation.
 
+### Hardening exit criteria
+
+Repository/codebase hardening is complete when:
+
+- [ ] Repository structure is understandable and no known dependency-direction problem remains.
+- [ ] Confirmed dead/demo repository code has been removed.
+- [ ] Critical Supabase authorization boundaries have executable local integration coverage.
+- [ ] Existing static/unit regression suite passes.
+- [ ] Lint passes.
+- [ ] Production build passes.
+- [ ] GitHub CI passes.
+- [ ] No unexplained framework/build warnings remain.
+- [ ] No known Critical security or data-integrity issue remains.
+- [ ] Documentation and roadmap reflect the current project.
+- [ ] Working tree is clean.
+
+Large files, cosmetic refactoring, CSS reorganization, and Low-priority cleanup are not blockers.
+
 ## Current repository hardening
 
 - Continue repository hygiene where the benefit is verified.
