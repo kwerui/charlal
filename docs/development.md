@@ -151,6 +151,20 @@ Phase 2J-A recorded a checkpoint of 146 passing automated tests. Treat that as
 a checkpoint, not a permanent ceiling; the count can increase as coverage is
 added.
 
+### Local Supabase Security Tests
+
+After starting the local Supabase stack with `supabase start`, run the executable
+local authorization smoke tests with:
+
+```bash
+npm run test:supabase -- --reset-local-db
+```
+
+This command is local-only and destructive. It resets the local database with
+`supabase db reset --local --no-seed`, destroying local users and test data, and
+refuses to run unless the Supabase API and database resolve to the expected local
+hosts and ports.
+
 ## Useful Notes
 
 - Tuvan (`tyv`) is the default locale and uses unprefixed URLs.

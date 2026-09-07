@@ -7,6 +7,7 @@
     "dev": "next dev",
     "build": "next build",
     "test": "tsc -p tsconfig.test.json && node --test .tmp-tests/tests/**/*.test.js",
+    "test:supabase": "node scripts/run-supabase-security-tests.mjs",
     "start": "next start",
     "lint": "eslint"
   },
