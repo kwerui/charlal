@@ -2,7 +2,26 @@
 
 Roadmap items are not authorization to implement them. Work on a roadmap item only when it is explicitly selected by the user.
 
-This is a planning document, not an implementation specification. Product and workflow behavior that must not regress lives in [Product invariants](product-invariants.md).
+This is a planning document, not an implementation specification. Product and workflow behavior that must not regress lives in [Product invariants]
+(product-invariants.md).
+
+## Current Execution Order
+
+Work should proceed in this order unless the roadmap is explicitly changed:
+
+1. Finish repository and codebase hardening.
+2. Authentication correctness and Russian provider expansion.
+3. Multiple-buyer / completed-sale workflow.
+4. Message reporting and moderation.
+5. Decide whether minimal external email notifications are needed.
+6. Finish localization, legal/compliance, and launch readiness.
+7. Pre-launch engineering and admin operational readiness.
+8. Soft Launch.
+9. Public Launch.
+10. Post-launch improvements driven by real usage.
+
+Roadmap order is planning context, not authorization to implement the next item
+automatically. Complete and verify the currently selected phase before moving on.
 
 ## Completed foundation
 
