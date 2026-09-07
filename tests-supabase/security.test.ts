@@ -28,6 +28,15 @@ type MessageRow = {
   deleted_at: string | null;
 };
 
+type MessageAttachmentRow = {
+  id: string;
+  message_id: string;
+  storage_path: string;
+  position: number;
+  content_type: string;
+  created_at: string;
+};
+
 type ModerationStateRow = {
   user_id: string;
   state: string;
@@ -53,6 +62,11 @@ const anonClient = createClient(apiUrl, anonKey, {
     persistSession: false,
   },
 });
+
+const MESSAGE_ATTACHMENTS_BUCKET = 'message-attachments';
+const TINY_PNG_BYTES = new Uint8Array([
+  0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a,
+]);
 
 let seller: TestUser;
 let ordinaryUser: TestUser;
@@ -534,6 +548,129 @@ test('suspended sender cannot edit their own existing message', async () => {
   assert.equal(data.length, 1);
   assert.equal((data[0] as MessageRow).id, fixture.initialMessage.id);
   assert.equal((data[0] as MessageRow).body, fixture.initialMessage.body);
+});
+
+test('message attachments stay private to conversation participants', async () => {
+  const fixture = await createConversationFixture('h2c-attachments');
+  const unrelatedUser = await createLocalUser('h2c-unrelated@example.test');
+  const unrelatedClient = await createAuthenticatedClient(unrelatedUser);
+  const clientAttemptId = randomUUID();
+  const fileId = randomUUID();
+  const storagePath = `${fixture.conversationId}/${clientAttemptId}/${fileId}.png`;
+  const unauthorizedStoragePath = `${fixture.conversationId}/${randomUUID()}/${randomUUID()}.png`;
+  const file = new Blob([TINY_PNG_BYTES], { type: 'image/png' });
+
+  const { error: uploadError } = await fixture.buyerClient.storage
+    .from(MESSAGE_ATTACHMENTS_BUCKET)
+    .upload(storagePath, file, {
+      cacheControl: '300',
+      contentType: 'image/png',
+      upsert: false,
+    });
+
+  assert.equal(uploadError, null);
+
+  const { error: unrelatedUploadError } = await unrelatedClient.storage
+    .from(MESSAGE_ATTACHMENTS_BUCKET)
+    .upload(unauthorizedStoragePath, file, {
+      cacheControl: '300',
+      contentType: 'image/png',
+      upsert: false,
+    });
+
+  assert.ok(
+    unrelatedUploadError,
+    'unrelated user unexpectedly uploaded into another conversation'
+  );
+
+  const unauthorizedObjectCount = runLocalSql(
+    `select count(*) from storage.objects where bucket_id = ${sqlStringLiteral(
+      MESSAGE_ATTACHMENTS_BUCKET
+    )} and name = ${sqlStringLiteral(unauthorizedStoragePath)};`
+  );
+  assert.equal(unauthorizedObjectCount, '0');
+
+  const { data: sentMessages, error: sendError } =
+    await fixture.buyerClient.rpc('send_conversation_message_with_attachments', {
+      p_conversation_id: fixture.conversationId,
+      p_body: 'H2-C attachment message',
+      p_client_attempt_id: clientAttemptId,
+      p_attachments: [
+        {
+          storage_path: storagePath,
+          content_type: 'image/png',
+        },
+      ],
+    });
+
+  assert.equal(sendError, null);
+  assert.ok(Array.isArray(sentMessages));
+  assert.equal(sentMessages.length, 1);
+
+  const sentMessage = sentMessages[0] as MessageRow;
+  assertUuid(sentMessage.id);
+  assert.equal(sentMessage.conversation_id, fixture.conversationId);
+  assert.equal(sentMessage.sender_id, fixture.buyer.id);
+
+  const { data: participantAttachments, error: participantMetadataError } =
+    await fixture.sellerClient
+      .from('message_attachments')
+      .select('id, message_id, storage_path, position, content_type, created_at')
+      .eq('message_id', sentMessage.id);
+
+  assert.equal(participantMetadataError, null);
+  assert.ok(Array.isArray(participantAttachments));
+  assert.equal(participantAttachments.length, 1);
+
+  const attachment = participantAttachments[0] as MessageAttachmentRow;
+  assertUuid(attachment.id);
+  assert.equal(attachment.message_id, sentMessage.id);
+  assert.equal(attachment.storage_path, storagePath);
+  assert.equal(attachment.position, 0);
+  assert.equal(attachment.content_type, 'image/png');
+
+  const { data: unrelatedAttachments, error: unrelatedMetadataError } =
+    await unrelatedClient
+      .from('message_attachments')
+      .select('id, message_id, storage_path, position, content_type, created_at')
+      .eq('message_id', sentMessage.id);
+
+  if (unrelatedMetadataError) {
+    assert.equal(unrelatedAttachments, null);
+  } else {
+    assert.deepEqual(unrelatedAttachments, []);
+  }
+
+  const { data: participantDownload, error: participantDownloadError } =
+    await fixture.sellerClient.storage
+      .from(MESSAGE_ATTACHMENTS_BUCKET)
+      .download(storagePath);
+
+  assert.equal(participantDownloadError, null);
+  assert.ok(participantDownload);
+  assert.equal(participantDownload.size, TINY_PNG_BYTES.byteLength);
+
+  const { data: unrelatedDownload, error: unrelatedDownloadError } =
+    await unrelatedClient.storage
+      .from(MESSAGE_ATTACHMENTS_BUCKET)
+      .download(storagePath);
+
+  assert.ok(
+    unrelatedDownloadError || unrelatedDownload === null,
+    'unrelated user unexpectedly downloaded another conversation attachment'
+  );
+  assert.equal(unrelatedDownload, null);
+
+  const { data: anonymousDownload, error: anonymousDownloadError } =
+    await anonClient.storage
+      .from(MESSAGE_ATTACHMENTS_BUCKET)
+      .download(storagePath);
+
+  assert.ok(
+    anonymousDownloadError || anonymousDownload === null,
+    'anonymous user unexpectedly downloaded a private message attachment'
+  );
+  assert.equal(anonymousDownload, null);
 });
 
 test('local admin can invoke admin moderation RPC', async () => {
