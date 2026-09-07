@@ -79,6 +79,9 @@ Research and, if selected, implement suitable Russian authentication providers:
 - VK
 - Mail.ru
 
+Provider work must preserve the stable account/identity rules in
+[Authentication identity policy](auth-identity-policy.md).
+
 Self-hosted Supabase compatibility, OAuth/OIDC behavior, account linking, and operational implications must be researched before implementation.
 
 ### Multiple-buyer / completed-sale UX
