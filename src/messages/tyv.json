@@ -563,12 +563,30 @@
     "forgotPassword": {
       "title": "Пароль уттупкан",
       "backToSignInLink": "Back to sign in / Кирер дээш дедир",
-      "demoWarning": "Demo only: this does not send an email yet.",
-      "successMessage": "Demo reset message shown. No email has been sent.",
+      "successMessage": "Бир эвес бо чагаага аккаунт бар болза, катап тургузарының дугайында айтыышкыннар чоруттунган. / If an account exists for this email, recovery instructions have been sent.",
       "submitButton": "Send reset instructions / Эгидер дугайында айтыышкыннарны чорудуптуңар",
       "submittingButton": "Эгидер дугайында айтыышкыннарны чорудуп турар / Sending reset instructions...",
+      "recoveryLinkInvalidMessage": "Бо катап тургузарының ссылказы шын эвес азы хуусаазы эрткен. Улаштыр чаа ссылканы дилеңер. / This recovery link is invalid or expired. Request a new link to continue.",
       "errors": {
-        "required": "Улаштыр электроннуг почтаңарны киирер силер. / Enter your email to continue."
+        "required": "Улаштыр электроннуг почтаңарны киирер силер. / Enter your email to continue.",
+        "unable": "Эгидип алырының дугайында айтыышкыннарны чорудуп шыдаваан. Соонда катап шенеп көрүңер. / Unable to send recovery instructions. Try again later."
+      }
+    },
+    "resetPassword": {
+      "title": "Парольду эгидип алыңар / Reset password",
+      "instructions": "Чарлал аккаунтуңарже чаа парольду киирер силер. / Enter a new password for your Charlal account.",
+      "fields": {
+        "newPassword": "Чаа пароль / New password"
+      },
+      "button": "Парольду чаарт / Update password",
+      "submittingButton": "Парольду чаартып турар... / Updating password...",
+      "requestNewLink": "Чаа катап тургузарының ссылказын дилеңер / Request a new recovery link",
+      "errors": {
+        "required": "Чаа парольду киирип, бадыткаңар. / Enter and confirm your new password.",
+        "password-too-short": "Пароль 8 демдектен эвээш эвес болур ужурлуг. / Password must be at least 8 characters.",
+        "password-mismatch": "Парольдар дүүшпес. / Passwords do not match.",
+        "same-password": "Чаа пароль амгы парольдан ылгалдыг болур ужурлуг. / New password must be different from your current password.",
+        "unable": "Парольду чаартып шыдаваан. Чаа катап тургузарының ссылказын дилеп алгаш, катап шенеп көрүңер. / Unable to update password. Request a new recovery link and try again."
       }
     }
   },

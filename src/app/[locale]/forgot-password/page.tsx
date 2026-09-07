@@ -2,8 +2,19 @@ import { Link } from '@/i18n/navigation';
 import { getTranslations } from 'next-intl/server';
 import ForgotPasswordForm from './ForgotPasswordForm';
 
-export default async function ForgotPasswordPage() {
+type ForgotPasswordPageProps = {
+  params: Promise<{ locale: string }>;
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
+};
+
+export default async function ForgotPasswordPage({
+  params,
+  searchParams,
+}: ForgotPasswordPageProps) {
+  const { locale } = await params;
+  const query = await searchParams;
   const t = await getTranslations('Auth');
+  const recoveryLinkInvalid = query.error === 'recovery';
 
   return (
     <main className="auth-page">
@@ -18,7 +29,13 @@ export default async function ForgotPasswordPage() {
             </Link>
           </p>
         </div>
-        <ForgotPasswordForm />
+        <ForgotPasswordForm
+          locale={locale}
+          initialMessage={
+            recoveryLinkInvalid ? t('forgotPassword.recoveryLinkInvalidMessage') : ''
+          }
+          initialMessageTone="error"
+        />
       </section>
     </main>
   );

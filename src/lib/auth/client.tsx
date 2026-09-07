@@ -13,6 +13,10 @@ import {
 } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import {
+  getPasswordRecoveryRedirectTo,
+  getPasswordUpdateFailureReason,
+} from '@/lib/auth/passwordRecovery';
+import {
   getRealtimeDiagnostics,
   logRealtimeDiagnostic,
 } from '@/lib/supabase/realtimeDiagnostics';
@@ -46,6 +50,14 @@ type SignInResult =
 type SignUpResult =
   | { ok: true; requiresEmailConfirmation: boolean }
   | { ok: false; reason: AuthFailureReason };
+
+type PasswordResetRequestResult =
+  | { ok: true }
+  | { ok: false; reason: 'network' | 'unable-to-send' };
+
+type PasswordUpdateResult =
+  | { ok: true }
+  | { ok: false; reason: 'same-password' | 'network' | 'unable-to-update' };
 
 type ProfileUpdateResult =
   | { ok: true; user: AppUser; profile: AppProfile }
@@ -329,6 +341,71 @@ export async function signUpWithEmailPassword({
     return {
       ok: false,
       reason: classifyAuthError(error instanceof Error ? error : null),
+    };
+  }
+}
+
+export async function requestPasswordResetEmail(
+  email: string,
+  locale: string
+): Promise<PasswordResetRequestResult> {
+  try {
+    const supabase = createClient();
+    const redirectTo = getPasswordRecoveryRedirectTo({
+      locale,
+      requestOrigin: window.location.origin,
+    });
+    const { error } = await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo,
+    });
+
+    if (error) {
+      return {
+        ok: false,
+        reason:
+          classifyAuthError(error) === 'network' ? 'network' : 'unable-to-send',
+      };
+    }
+
+    return { ok: true };
+  } catch (error) {
+    return {
+      ok: false,
+      reason:
+        classifyAuthError(error instanceof Error ? error : null) === 'network'
+          ? 'network'
+          : 'unable-to-send',
+    };
+  }
+}
+
+export async function updateCurrentUserPassword(
+  password: string
+): Promise<PasswordUpdateResult> {
+  try {
+    const supabase = createClient();
+    const { error } = await supabase.auth.updateUser({ password });
+
+    if (error) {
+      const fallbackReason =
+        classifyAuthError(error) === 'network' ? 'network' : 'unable-to-update';
+
+      return {
+        ok: false,
+        reason: getPasswordUpdateFailureReason(error, fallbackReason),
+      };
+    }
+
+    return { ok: true };
+  } catch (error) {
+    const fallbackReason =
+      classifyAuthError(error instanceof Error ? error : null) === 'network'
+        ? 'network'
+        : 'unable-to-update';
+
+    return {
+      ok: false,
+      reason: getPasswordUpdateFailureReason(error, fallbackReason),
     };
   }
 }

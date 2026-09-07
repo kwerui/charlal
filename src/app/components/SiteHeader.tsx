@@ -14,7 +14,7 @@ import {
 import {
   recordPreferredHistoryLocale,
 } from '@/i18n/localeHistory';
-import { localizeReturnPathQuery } from '@/i18n/localePath';
+import { localizePath, localizeReturnPathQuery } from '@/i18n/localePath';
 import { useAuthStatus } from '@/lib/auth/client';
 import { useMessagingRealtime } from '@/lib/messagingRealtime';
 import { useNotificationsRealtime } from '@/lib/notificationsRealtime';
@@ -159,7 +159,7 @@ export default function SiteHeader({
       pathname.startsWith('/account/') ||
       pathname.startsWith('/contact/')
     ) {
-      router.replace('/sign-in');
+      router.replace(localizePath('/sign-in', locale));
     }
   }
 

@@ -1,21 +1,57 @@
 "use client";
 
 import type { FormEvent } from 'react';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useTranslations } from 'next-intl';
+import { requestPasswordResetEmail } from '@/lib/auth/client';
 import { isValidAuthEmail } from '@/lib/auth/types';
 
-export default function ForgotPasswordForm() {
+type Props = {
+  locale: string;
+  initialMessage?: string;
+  initialMessageTone?: 'success' | 'error';
+};
+
+function getForgotPasswordErrorMessage(
+  reason: 'network' | 'unable-to-send',
+  t: (key: string) => string
+): string {
+  if (reason === 'network') {
+    return t('errors.networkFailure');
+  }
+
+  return t('forgotPassword.errors.unable');
+}
+
+export default function ForgotPasswordForm({
+  locale,
+  initialMessage = '',
+  initialMessageTone = 'success',
+}: Props) {
   const t = useTranslations('Auth');
-  const [message, setMessage] = useState('');
-  const [messageTone, setMessageTone] = useState<'success' | 'error'>('success');
+  const [message, setMessage] = useState(initialMessage);
+  const [messageTone, setMessageTone] =
+    useState<'success' | 'error'>(initialMessageTone);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  function handleSubmit(event: FormEvent<HTMLFormElement>) {
+  useEffect(() => {
+    if (!window.location.hash) {
+      return;
+    }
+
+    window.history.replaceState(
+      window.history.state,
+      '',
+      `${window.location.pathname}${window.location.search}`
+    );
+  }, []);
+
+  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setMessage('');
 
-    const formData = new FormData(event.currentTarget);
+    const form = event.currentTarget;
+    const formData = new FormData(form);
     const email = String(formData.get('email') || '').trim();
 
     if (!email) {
@@ -30,17 +66,29 @@ export default function ForgotPasswordForm() {
       return;
     }
 
+    if (isSubmitting) {
+      return;
+    }
+
     setIsSubmitting(true);
+
+    const resetResult = await requestPasswordResetEmail(email, locale);
+
+    setIsSubmitting(false);
+
+    if (!resetResult.ok) {
+      setMessageTone('error');
+      setMessage(getForgotPasswordErrorMessage(resetResult.reason, t));
+      return;
+    }
+
     setMessageTone('success');
     setMessage(t('forgotPassword.successMessage'));
-    event.currentTarget.reset();
-    setIsSubmitting(false);
+    form.reset();
   }
 
   return (
     <form className="auth-form" onSubmit={handleSubmit} noValidate>
-      <p className="demo-auth-warning">{t('forgotPassword.demoWarning')}</p>
-
       <label className="form-field" htmlFor="forgot-password-email">
         <span>{t('fields.email')}</span>
         <input id="forgot-password-email" name="email" type="email" autoComplete="email" required />

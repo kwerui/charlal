@@ -120,6 +120,8 @@ test('localized auth pages use runtime message catalogs without moving callback 
     'src/app/[locale]/sign-up/SignUpForm.tsx',
     'src/app/[locale]/forgot-password/page.tsx',
     'src/app/[locale]/forgot-password/ForgotPasswordForm.tsx',
+    'src/app/[locale]/reset-password/page.tsx',
+    'src/app/[locale]/reset-password/ResetPasswordForm.tsx',
   ];
   const authPageSources = authPagePaths.map((path) => readFileSync(path, 'utf8'));
   const tyvMessages = JSON.parse(readFileSync('src/messages/tyv.json', 'utf8'));
@@ -131,7 +133,7 @@ test('localized auth pages use runtime message catalogs without moving callback 
 
   assert.equal(
     authPageSources.filter((source) => source.includes('noValidate')).length,
-    3
+    4
   );
   assert.equal(authPageSources.some((source) => source.includes("getTranslations('Auth')")), true);
   assert.equal(authPageSources.some((source) => source.includes("useTranslations('Auth')")), true);
@@ -141,10 +143,55 @@ test('localized auth pages use runtime message catalogs without moving callback 
   assert.equal(typeof ruMessages.Auth.errors.invalidEmail, 'string');
   assert.equal(typeof tyvMessages.Auth.forgotPassword.errors.required, 'string');
   assert.equal(typeof ruMessages.Auth.forgotPassword.errors.required, 'string');
+  assert.equal(
+    typeof tyvMessages.Auth.forgotPassword.recoveryLinkInvalidMessage,
+    'string'
+  );
+  assert.equal(
+    typeof ruMessages.Auth.forgotPassword.recoveryLinkInvalidMessage,
+    'string'
+  );
+  assert.equal(typeof tyvMessages.Auth.resetPassword.errors.required, 'string');
+  assert.equal(typeof ruMessages.Auth.resetPassword.errors.required, 'string');
+  assert.equal(typeof tyvMessages.Auth.resetPassword.errors['same-password'], 'string');
+  assert.equal(typeof ruMessages.Auth.resetPassword.errors['same-password'], 'string');
+  assert.equal(typeof tyvMessages.Auth.resetPassword.requestNewLink, 'string');
+  assert.equal(typeof ruMessages.Auth.resetPassword.requestNewLink, 'string');
   assert.equal(existsSync('src/app/auth/callback/route.ts'), true);
   assert.equal(existsSync('src/app/auth/confirm/route.ts'), true);
+  assert.equal(existsSync('src/app/auth/recovery/complete/route.ts'), true);
   assert.equal(existsSync('src/app/[locale]/auth/callback/route.ts'), false);
   assert.equal(existsSync('src/app/[locale]/auth/confirm/route.ts'), false);
+});
+
+test('forgot-password form is wired to real password recovery requests', () => {
+  const formSource = readFileSync(
+    'src/app/[locale]/forgot-password/ForgotPasswordForm.tsx',
+    'utf8'
+  );
+
+  assert.equal(formSource.includes('requestPasswordResetEmail'), true);
+  assert.equal(formSource.includes('resetPasswordForEmail'), false);
+  assert.equal(formSource.includes('demoWarning'), false);
+  assert.equal(formSource.includes('const form = event.currentTarget'), true);
+  assert.equal(formSource.includes('form.reset()'), true);
+  assert.equal(formSource.includes('event.currentTarget.reset()'), false);
+});
+
+test('forgot-password recovery errors remove only the client-side URL hash', () => {
+  const formSource = readFileSync(
+    'src/app/[locale]/forgot-password/ForgotPasswordForm.tsx',
+    'utf8'
+  );
+
+  assert.equal(formSource.includes('window.location.hash'), true);
+  assert.equal(formSource.includes('window.history.replaceState'), true);
+  assert.equal(
+    formSource.includes('`${window.location.pathname}${window.location.search}`'),
+    true
+  );
+  assert.equal(formSource.includes('window.location.reload'), false);
+  assert.equal(formSource.includes('error_description'), false);
 });
 
 test('proxy entry point is colocated with src/app', () => {
@@ -177,6 +224,62 @@ test('sign-in href keeps protected redirects localized', () => {
     getSignInHref('/ru/account/messages', 'tyv'),
     '/sign-in?next=%2Faccount%2Fmessages'
   );
+});
+
+test('protected sign-out destination preserves the active locale', () => {
+  const headerSource = readFileSync('src/app/components/SiteHeader.tsx', 'utf8');
+
+  assert.equal(headerSource.includes("localizePath('/sign-in', locale)"), true);
+  assert.equal(headerSource.includes("router.replace('/sign-in')"), false);
+});
+
+test('callback failure destination is localized from a safe next path', () => {
+  const callbackSource = readFileSync('src/app/auth/callback/route.ts', 'utf8');
+
+  assert.equal(callbackSource.includes('getAuthFailureSignInPath(nextPath)'), true);
+  assert.equal(callbackSource.includes("new URL('/sign-in', origin)"), false);
+  assert.equal(callbackSource.includes('getPasswordRecoveryErrorPath'), true);
+  assert.equal(callbackSource.includes('isPasswordRecoveryNextPath(nextPath)'), true);
+});
+
+test('recovery callback state is established only after successful recovery exchange', () => {
+  const callbackSource = readFileSync('src/app/auth/callback/route.ts', 'utf8');
+
+  assert.equal(callbackSource.includes('getAuthRedirectType(data) !=='), true);
+  assert.equal(callbackSource.includes("'recovery'"), true);
+  assert.equal(callbackSource.includes('response.cookies.set'), true);
+  assert.equal(callbackSource.includes('PASSWORD_RECOVERY_STATE_COOKIE'), true);
+  assert.equal(callbackSource.includes('httpOnly: true'), true);
+  assert.equal(callbackSource.includes("sameSite: 'lax'"), true);
+});
+
+test('reset-password page requires auth session and recovery marker', () => {
+  const pageSource = readFileSync(
+    'src/app/[locale]/reset-password/page.tsx',
+    'utf8'
+  );
+
+  assert.equal(pageSource.includes('getCurrentViewerId'), true);
+  assert.equal(pageSource.includes('PASSWORD_RECOVERY_STATE_COOKIE'), true);
+  assert.equal(pageSource.includes("authResult.status !== 'signed-in' || !hasRecoveryState"), true);
+  assert.equal(pageSource.includes("localizePath('/forgot-password', locale)"), true);
+});
+
+test('successful password update clears recovery marker and lands on localized account', () => {
+  const formSource = readFileSync(
+    'src/app/[locale]/reset-password/ResetPasswordForm.tsx',
+    'utf8'
+  );
+  const clearRouteSource = readFileSync(
+    'src/app/auth/recovery/complete/route.ts',
+    'utf8'
+  );
+
+  assert.equal(formSource.includes("fetch('/auth/recovery/complete'"), true);
+  assert.equal(formSource.includes('getPasswordResetSuccessPath(locale)'), true);
+  assert.equal(formSource.includes('window.location.replace'), true);
+  assert.equal(clearRouteSource.includes('PASSWORD_RECOVERY_STATE_COOKIE'), true);
+  assert.equal(clearRouteSource.includes('maxAge: 0'), true);
 });
 
 test('external next values remain rejected', () => {
