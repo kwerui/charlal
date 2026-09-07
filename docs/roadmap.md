@@ -43,17 +43,17 @@ automatically. Complete and verify the currently selected phase before moving on
 
 Repository/codebase hardening is complete when:
 
-- [ ] Repository structure is understandable and no known dependency-direction problem remains.
-- [ ] Confirmed dead/demo repository code has been removed.
-- [ ] Critical Supabase authorization boundaries have executable local integration coverage.
-- [ ] Existing static/unit regression suite passes.
-- [ ] Lint passes.
-- [ ] Production build passes.
-- [ ] GitHub CI passes.
-- [ ] No unexplained framework/build warnings remain.
-- [ ] No known Critical security or data-integrity issue remains.
-- [ ] Documentation and roadmap reflect the current project.
-- [ ] Working tree is clean.
+- [x] Repository structure is understandable and no known dependency-direction problem remains.
+- [x] Confirmed dead/demo repository code has been removed.
+- [x] Critical Supabase authorization boundaries have executable local integration coverage.
+- [x] Existing static/unit regression suite passes.
+- [x] Lint passes.
+- [x] Production build passes.
+- [x] GitHub CI passes.
+- [x] No unexplained framework/build warnings remain.
+- [x] No known Critical security or data-integrity issue remains.
+- [x] Documentation and roadmap reflect the current project.
+- [x] Working tree is clean.
 
 Large files, cosmetic refactoring, CSS reorganization, and Low-priority cleanup are not blockers.
 
