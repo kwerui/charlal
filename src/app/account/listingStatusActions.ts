@@ -10,7 +10,7 @@ import {
 import { getCurrentUserResult } from '@/lib/auth/server';
 import { getCurrentUserSuspension } from '@/lib/supabase/adminModeration';
 import { createClient } from '@/lib/supabase/server';
-import { revalidateListingMutationRoutes } from '@/app/[locale]/account/listings/[id]/edit/actions';
+import { revalidateListingMutationRoutes } from '@/app/account/listingMutationRevalidation';
 
 export type UpdateListingStatusResult =
   | {

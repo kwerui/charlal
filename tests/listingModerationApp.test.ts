@@ -145,6 +145,66 @@ test('public entry points keep public eligibility separate from owner history re
   );
 });
 
+test('listing mutation revalidation is account-owned and preserves route coverage', () => {
+  const helperSource = readFileSync(
+    'src/app/account/listingMutationRevalidation.ts',
+    'utf8'
+  );
+  const statusActionSource = readFileSync(
+    'src/app/account/listingStatusActions.ts',
+    'utf8'
+  );
+  const editActionSource = readFileSync(
+    'src/app/[locale]/account/listings/[id]/edit/actions.ts',
+    'utf8'
+  );
+
+  assert.equal(helperSource.includes("import 'server-only';"), true);
+  assert.equal(
+    helperSource.includes('export function revalidateListingMutationRoutes'),
+    true
+  );
+  assert.equal(helperSource.includes('listingId.trim()'), true);
+  assert.match(helperSource, /!safeListingId\s*\|\|\s*\/\^\\d\+\$\/\.test\(safeListingId\)/);
+  assert.equal(
+    helperSource.includes('revalidateLocalizedPath(`/listing/${safeListingId}`)'),
+    true
+  );
+  assert.equal(helperSource.includes("revalidateLocalizedPath('/')"), true);
+  assert.equal(helperSource.includes("revalidateLocalizedPath('/account')"), true);
+  assert.equal(helperSource.includes("revalidateLocalizedPath('/search')"), true);
+  assert.equal(
+    helperSource.includes(
+      "revalidateLocalizedRoutePattern('/category/[slug]', 'page')"
+    ),
+    true
+  );
+  assert.equal(
+    helperSource.includes(
+      "revalidateLocalizedRoutePattern('/category/[slug]/[subcategory]', 'page')"
+    ),
+    true
+  );
+  assert.equal(
+    helperSource.includes("revalidateLocalizedRoutePattern('/seller/[slug]', 'page')"),
+    true
+  );
+  assert.equal(
+    statusActionSource.includes(
+      "@/app/[locale]/account/listings/[id]/edit/actions"
+    ),
+    false
+  );
+  assert.equal(
+    statusActionSource.includes("@/app/account/listingMutationRevalidation"),
+    true
+  );
+  assert.equal(
+    editActionSource.includes("@/app/account/listingMutationRevalidation"),
+    true
+  );
+});
+
 test('admin reports page is server protected and uses only admin moderation RPC wrappers', () => {
   const pageSource = readFileSync(
     'src/app/[locale]/admin/reports/page.tsx',

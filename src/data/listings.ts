@@ -67,9 +67,6 @@ export function getListingModerationState(
     : 'normal';
 }
 
-export const LOCAL_LISTING_PLACEHOLDER_IMAGE =
-  'https://img.magnific.com/free-photo/hands-holding-colorful-paper-bags_1301-1750.jpg?semt=ais_hybrid&w=740&q=80';
-
 export function formatListingPrice(price: number): string {
   if (price === 0) {
     return content.freePriceLabel;
