@@ -172,4 +172,3 @@ Revisit VK/Mail authentication only when:
 ## Classification
 
 D. Requires auth bridge / provider-specific Auth adaptation.
-
