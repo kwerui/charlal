@@ -13,6 +13,10 @@ import {
 } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import {
+  getEmailConfirmationRedirectTo,
+  type EmailConfirmationFailureReason,
+} from '@/lib/auth/emailConfirmation';
+import {
   getPasswordRecoveryRedirectTo,
   getPasswordUpdateFailureReason,
 } from '@/lib/auth/passwordRecovery';
@@ -50,6 +54,10 @@ type SignInResult =
 type SignUpResult =
   | { ok: true; requiresEmailConfirmation: boolean }
   | { ok: false; reason: AuthFailureReason };
+
+type EmailConfirmationResendResult =
+  | { ok: true }
+  | { ok: false; reason: EmailConfirmationFailureReason };
 
 type PasswordResetRequestResult =
   | { ok: true }
@@ -313,10 +321,10 @@ export async function signUpWithEmailPassword({
 }): Promise<SignUpResult> {
   try {
     const supabase = createClient();
-    const origin = window.location.origin;
-    const callbackUrl = new URL('/auth/callback', origin);
-
-    callbackUrl.searchParams.set('next', nextPath);
+    const emailRedirectTo = getEmailConfirmationRedirectTo({
+      nextPath,
+      requestOrigin: window.location.origin,
+    });
 
     const { data, error } = await supabase.auth.signUp({
       email,
@@ -325,7 +333,7 @@ export async function signUpWithEmailPassword({
         data: {
           display_name: displayName,
         },
-        emailRedirectTo: callbackUrl.toString(),
+        emailRedirectTo,
       },
     });
 
@@ -341,6 +349,53 @@ export async function signUpWithEmailPassword({
     return {
       ok: false,
       reason: classifyAuthError(error instanceof Error ? error : null),
+    };
+  }
+}
+
+export async function requestEmailConfirmationResend({
+  email,
+  nextPath,
+}: {
+  email: string;
+  nextPath: string;
+}): Promise<EmailConfirmationResendResult> {
+  try {
+    const supabase = createClient();
+    const emailRedirectTo = getEmailConfirmationRedirectTo({
+      nextPath,
+      requestOrigin: window.location.origin,
+    });
+    const { error } = await supabase.auth.resend({
+      type: 'signup',
+      email,
+      options: {
+        emailRedirectTo,
+      },
+    });
+
+    if (error) {
+      const reason = classifyAuthError(error);
+
+      return {
+        ok: false,
+        reason:
+          reason === 'rate-limited' || reason === 'network'
+            ? reason
+            : 'unable-to-send',
+      };
+    }
+
+    return { ok: true };
+  } catch (error) {
+    const reason = classifyAuthError(error instanceof Error ? error : null);
+
+    return {
+      ok: false,
+      reason:
+        reason === 'rate-limited' || reason === 'network'
+          ? reason
+          : 'unable-to-send',
     };
   }
 }

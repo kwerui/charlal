@@ -520,6 +520,13 @@
       "rateLimited": "Please wait before trying again. / Катап шенээр мурнунда манап көрүңерем.",
       "networkFailure": "Network request failed. Check your connection and try again. / Сеткил дилээ үрелген. Холбааңарны хынап алгаш, катап шенеп көрүңер."
     },
+    "confirmation": {
+      "resendButton": "[TYV REVIEW] Resend confirmation email",
+      "resendSubmittingButton": "[TYV REVIEW] Sending...",
+      "resendSuccess": "[TYV REVIEW] If confirmation is still pending, a new email has been sent.",
+      "resendRateLimited": "[TYV REVIEW] Please wait before requesting another confirmation email.",
+      "resendUnable": "[TYV REVIEW] Unable to send a confirmation email. Try again later."
+    },
     "signIn": {
       "title": "Кирер",
       "registerPrompt": "Мында бир дугаар бе?",

@@ -141,6 +141,22 @@ test('localized auth pages use runtime message catalogs without moving callback 
   assert.equal(typeof ruMessages.Auth.signIn.title, 'string');
   assert.equal(typeof tyvMessages.Auth.errors.invalidEmail, 'string');
   assert.equal(typeof ruMessages.Auth.errors.invalidEmail, 'string');
+  assert.equal(typeof tyvMessages.Auth.confirmation.resendButton, 'string');
+  assert.equal(typeof ruMessages.Auth.confirmation.resendButton, 'string');
+  assert.equal(
+    typeof tyvMessages.Auth.confirmation.resendSubmittingButton,
+    'string'
+  );
+  assert.equal(
+    typeof ruMessages.Auth.confirmation.resendSubmittingButton,
+    'string'
+  );
+  assert.equal(typeof tyvMessages.Auth.confirmation.resendSuccess, 'string');
+  assert.equal(typeof ruMessages.Auth.confirmation.resendSuccess, 'string');
+  assert.equal(typeof tyvMessages.Auth.confirmation.resendRateLimited, 'string');
+  assert.equal(typeof ruMessages.Auth.confirmation.resendRateLimited, 'string');
+  assert.equal(typeof tyvMessages.Auth.confirmation.resendUnable, 'string');
+  assert.equal(typeof ruMessages.Auth.confirmation.resendUnable, 'string');
   assert.equal(typeof tyvMessages.Auth.forgotPassword.errors.required, 'string');
   assert.equal(typeof ruMessages.Auth.forgotPassword.errors.required, 'string');
   assert.equal(
@@ -240,6 +256,14 @@ test('callback failure destination is localized from a safe next path', () => {
   assert.equal(callbackSource.includes("new URL('/sign-in', origin)"), false);
   assert.equal(callbackSource.includes('getPasswordRecoveryErrorPath'), true);
   assert.equal(callbackSource.includes('isPasswordRecoveryNextPath(nextPath)'), true);
+});
+
+test('token-hash confirmation failure destination is localized from a safe next path', () => {
+  const confirmSource = readFileSync('src/app/auth/confirm/route.ts', 'utf8');
+
+  assert.equal(confirmSource.includes('getAuthFailureSignInPath(nextPath)'), true);
+  assert.equal(confirmSource.includes("new URL('/sign-in', request.url)"), false);
+  assert.equal(confirmSource.includes('getSafeNextPath'), true);
 });
 
 test('recovery callback state is established only after successful recovery exchange', () => {

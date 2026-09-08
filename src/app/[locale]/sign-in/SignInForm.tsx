@@ -4,7 +4,11 @@ import { Link } from '@/i18n/navigation';
 import type { FormEvent } from 'react';
 import { useState } from 'react';
 import { useTranslations } from 'next-intl';
-import { signInWithEmailPassword, useAuthStatus } from '@/lib/auth/client';
+import {
+  requestEmailConfirmationResend,
+  signInWithEmailPassword,
+  useAuthStatus,
+} from '@/lib/auth/client';
 import { getSafeNextPath } from '@/lib/auth/safeNextPath';
 import { isValidAuthEmail } from '@/lib/auth/types';
 
@@ -59,6 +63,21 @@ function getSignInErrorMessage(reason: string, t: (key: string) => string): stri
   return t('signIn.errors.unable');
 }
 
+function getResendConfirmationErrorMessage(
+  reason: string,
+  t: (key: string) => string
+): string {
+  if (reason === 'rate-limited') {
+    return t('confirmation.resendRateLimited');
+  }
+
+  if (reason === 'network') {
+    return t('errors.networkFailure');
+  }
+
+  return t('confirmation.resendUnable');
+}
+
 export default function SignInForm({
   nextPath,
   initialMessage = '',
@@ -71,10 +90,13 @@ export default function SignInForm({
     initialMessageTone
   );
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [unconfirmedEmail, setUnconfirmedEmail] = useState('');
+  const [isResendingConfirmation, setIsResendingConfirmation] = useState(false);
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setFormMessage('');
+    setUnconfirmedEmail('');
 
     const formData = new FormData(event.currentTarget);
     const email = String(formData.get('email') || '').trim();
@@ -104,6 +126,11 @@ export default function SignInForm({
       setIsSubmitting(false);
       setMessageTone('error');
       setFormMessage(getSignInErrorMessage(signInResult.reason, t));
+
+      if (signInResult.reason === 'email-not-confirmed') {
+        setUnconfirmedEmail(email);
+      }
+
       return;
     }
 
@@ -112,6 +139,33 @@ export default function SignInForm({
     window.location.replace(
       getAuthenticatedRedirectPath(getSafeNextPath(nextPath, '/account'))
     );
+  }
+
+  async function handleResendConfirmation() {
+    if (!unconfirmedEmail || isResendingConfirmation) {
+      return;
+    }
+
+    setIsResendingConfirmation(true);
+
+    const resendResult = await requestEmailConfirmationResend({
+      email: unconfirmedEmail,
+      nextPath,
+    });
+
+    setIsResendingConfirmation(false);
+
+    if (!resendResult.ok) {
+      setMessageTone('error');
+      setFormMessage(
+        getResendConfirmationErrorMessage(resendResult.reason, t)
+      );
+      return;
+    }
+
+    setMessageTone('success');
+    setFormMessage(t('confirmation.resendSuccess'));
+    setUnconfirmedEmail('');
   }
 
   return (
@@ -133,12 +187,24 @@ export default function SignInForm({
       </div>
 
       {formMessage ? (
-        <p
+        <div
           className={messageTone === 'success' ? 'form-success' : 'form-error'}
           role={messageTone === 'success' ? 'status' : 'alert'}
         >
-          {formMessage}
-        </p>
+          <p>{formMessage}</p>
+          {unconfirmedEmail ? (
+            <button
+              type="button"
+              className="secondary-button auth-inline-action"
+              disabled={isResendingConfirmation || isSubmitting}
+              onClick={handleResendConfirmation}
+            >
+              {isResendingConfirmation
+                ? t('confirmation.resendSubmittingButton')
+                : t('confirmation.resendButton')}
+            </button>
+          ) : null}
+        </div>
       ) : null}
 
       <button type="submit" className="search-button form-submit-button" disabled={isSubmitting}>

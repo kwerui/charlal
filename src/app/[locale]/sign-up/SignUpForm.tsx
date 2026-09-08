@@ -6,6 +6,7 @@ import type { FormEvent } from 'react';
 import { useState } from 'react';
 import { useTranslations } from 'next-intl';
 import {
+  requestEmailConfirmationResend,
   signUpWithEmailPassword,
   useAuthStatus,
 } from '@/lib/auth/client';
@@ -32,6 +33,21 @@ function getSignUpErrorMessage(reason: string, t: (key: string) => string): stri
   return t('signUp.errors.unable');
 }
 
+function getResendConfirmationErrorMessage(
+  reason: string,
+  t: (key: string) => string
+): string {
+  if (reason === 'rate-limited') {
+    return t('confirmation.resendRateLimited');
+  }
+
+  if (reason === 'network') {
+    return t('errors.networkFailure');
+  }
+
+  return t('confirmation.resendUnable');
+}
+
 export default function SignUpForm({ nextPath }: Props) {
   const t = useTranslations('Auth');
   const router = useRouter();
@@ -39,11 +55,17 @@ export default function SignUpForm({ nextPath }: Props) {
   const [errorMessage, setErrorMessage] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [pendingConfirmationEmail, setPendingConfirmationEmail] = useState('');
+  const [resendMessage, setResendMessage] = useState('');
+  const [resendMessageTone, setResendMessageTone] =
+    useState<'success' | 'error'>('success');
+  const [isResendingConfirmation, setIsResendingConfirmation] = useState(false);
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setErrorMessage('');
     setSuccessMessage('');
+    setResendMessage('');
 
     const formData = new FormData(event.currentTarget);
     const displayName = sanitizeProfileDisplayName(
@@ -89,6 +111,7 @@ export default function SignUpForm({ nextPath }: Props) {
     }
 
     setIsSubmitting(true);
+    setPendingConfirmationEmail('');
 
     const signUpResult = await signUpWithEmailPassword({
       displayName,
@@ -105,6 +128,7 @@ export default function SignUpForm({ nextPath }: Props) {
 
     if (signUpResult.requiresEmailConfirmation) {
       setIsSubmitting(false);
+      setPendingConfirmationEmail(email);
       setSuccessMessage(t('signUp.confirmEmailMessage'));
       return;
     }
@@ -112,6 +136,35 @@ export default function SignUpForm({ nextPath }: Props) {
     await refreshAuth();
     router.refresh();
     router.replace(nextPath);
+  }
+
+  async function handleResendConfirmation() {
+    if (!pendingConfirmationEmail || isResendingConfirmation) {
+      return;
+    }
+
+    setErrorMessage('');
+    setResendMessage('');
+    setIsResendingConfirmation(true);
+
+    const resendResult = await requestEmailConfirmationResend({
+      email: pendingConfirmationEmail,
+      nextPath,
+    });
+
+    setIsResendingConfirmation(false);
+
+    if (!resendResult.ok) {
+      setResendMessageTone('error');
+      setResendMessage(
+        getResendConfirmationErrorMessage(resendResult.reason, t)
+      );
+      return;
+    }
+
+    setResendMessageTone('success');
+    setResendMessage(t('confirmation.resendSuccess'));
+    setPendingConfirmationEmail('');
   }
 
   return (
@@ -167,7 +220,28 @@ export default function SignUpForm({ nextPath }: Props) {
         <div className="form-success" role="status">
           <strong>{t('signUp.checkEmailTitle')}</strong>
           <p>{successMessage}</p>
+          {pendingConfirmationEmail ? (
+            <button
+              type="button"
+              className="secondary-button auth-inline-action"
+              disabled={isResendingConfirmation || isSubmitting}
+              onClick={handleResendConfirmation}
+            >
+              {isResendingConfirmation
+                ? t('confirmation.resendSubmittingButton')
+                : t('confirmation.resendButton')}
+            </button>
+          ) : null}
         </div>
+      ) : null}
+
+      {resendMessage ? (
+        <p
+          className={resendMessageTone === 'success' ? 'form-success' : 'form-error'}
+          role={resendMessageTone === 'success' ? 'status' : 'alert'}
+        >
+          {resendMessage}
+        </p>
       ) : null}
 
       <button type="submit" className="search-button form-submit-button" disabled={isSubmitting}>

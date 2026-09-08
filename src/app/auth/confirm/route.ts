@@ -1,5 +1,6 @@
 import { type EmailOtpType } from '@supabase/supabase-js';
 import { NextResponse, type NextRequest } from 'next/server';
+import { getAuthFailureSignInPath } from '@/lib/auth/emailConfirmation';
 import { getSafeNextPath } from '@/lib/auth/safeNextPath';
 import { createClient } from '@/lib/supabase/server';
 
@@ -26,7 +27,7 @@ export async function GET(request: NextRequest) {
     }
   }
 
-  const failedUrl = new URL('/sign-in', request.url);
+  const failedUrl = new URL(getAuthFailureSignInPath(nextPath), request.url);
   failedUrl.searchParams.set('error', 'confirmation');
   failedUrl.searchParams.set('next', nextPath);
 

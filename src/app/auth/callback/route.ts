@@ -6,17 +6,15 @@ import {
   getPasswordRecoveryErrorPath,
   isPasswordRecoveryNextPath,
 } from '@/lib/auth/passwordRecovery';
+import {
+  getAuthFailureSignInPath,
+  getLocaleFromSafeAuthPath,
+} from '@/lib/auth/emailConfirmation';
 import { getSafeNextPath } from '@/lib/auth/safeNextPath';
 import { createClient } from '@/lib/supabase/server';
 
-function getAuthFailureSignInPath(nextPath: string): string {
-  return nextPath === '/ru' || nextPath.startsWith('/ru/')
-    ? '/ru/sign-in'
-    : '/sign-in';
-}
-
 function getLocaleFromSafePath(nextPath: string): string {
-  return nextPath === '/ru' || nextPath.startsWith('/ru/') ? 'ru' : 'tyv';
+  return getLocaleFromSafeAuthPath(nextPath);
 }
 
 function getAuthRedirectType(data: unknown): string | null {

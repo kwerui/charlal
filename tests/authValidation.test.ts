@@ -1,6 +1,11 @@
 import assert from 'node:assert/strict';
+import { readFileSync } from 'node:fs';
 import test from 'node:test';
 import { isValidAuthEmail } from '../src/lib/auth/types.js';
+import {
+  getAuthFailureSignInPath,
+  getEmailConfirmationRedirectTo,
+} from '../src/lib/auth/emailConfirmation.js';
 import {
   getPasswordRecoveryErrorPath,
   getPasswordRecoveryRequestPath,
@@ -22,6 +27,105 @@ test('auth email validation rejects values browser type=email would reject', () 
   assert.equal(isValidAuthEmail('missing-domain@'), false);
   assert.equal(isValidAuthEmail('@missing-local.test'), false);
   assert.equal(isValidAuthEmail('has whitespace@example.com'), false);
+});
+
+test('email confirmation redirect targets the localized account page', () => {
+  assert.equal(
+    getEmailConfirmationRedirectTo({
+      nextPath: '/account',
+      requestOrigin: 'http://localhost:3000',
+      siteUrl: '',
+      nodeEnv: 'development',
+    }),
+    'http://localhost:3000/auth/callback?next=%2Faccount'
+  );
+  assert.equal(
+    getEmailConfirmationRedirectTo({
+      nextPath: '/ru/account',
+      requestOrigin: 'http://localhost:3000',
+      siteUrl: '',
+      nodeEnv: 'development',
+    }),
+    'http://localhost:3000/auth/callback?next=%2Fru%2Faccount'
+  );
+});
+
+test('email confirmation redirect rejects unsafe next paths', () => {
+  assert.equal(
+    getEmailConfirmationRedirectTo({
+      nextPath: 'https://attacker.example/account',
+      requestOrigin: 'http://localhost:3000',
+      siteUrl: '',
+      nodeEnv: 'development',
+    }),
+    'http://localhost:3000/auth/callback?next=%2Faccount'
+  );
+});
+
+test('auth confirmation failure sign-in path follows the safe next locale', () => {
+  assert.equal(getAuthFailureSignInPath('/ru/account'), '/ru/sign-in');
+  assert.equal(getAuthFailureSignInPath('/ru/account/messages'), '/ru/sign-in');
+  assert.equal(getAuthFailureSignInPath('/account'), '/sign-in');
+  assert.equal(getAuthFailureSignInPath('/'), '/sign-in');
+});
+
+test('signup keeps pending confirmation local and avoids account redirect', () => {
+  const formSource = readFileSync(
+    'src/app/[locale]/sign-up/SignUpForm.tsx',
+    'utf8'
+  );
+
+  assert.equal(formSource.includes('setPendingConfirmationEmail(email)'), true);
+  assert.equal(formSource.includes('setSuccessMessage(t(\'signUp.confirmEmailMessage\'))'), true);
+  assert.equal(
+    formSource.includes('router.replace(nextPath)') &&
+      formSource.indexOf('setSuccessMessage(t(\'signUp.confirmEmailMessage\'))') <
+        formSource.indexOf('router.replace(nextPath)'),
+    true
+  );
+  assert.equal(formSource.includes('setPendingConfirmationEmail(password)'), false);
+});
+
+test('resend confirmation uses signup type and locale-aware redirect target', () => {
+  const clientSource = readFileSync('src/lib/auth/client.tsx', 'utf8');
+  const signUpFormSource = readFileSync(
+    'src/app/[locale]/sign-up/SignUpForm.tsx',
+    'utf8'
+  );
+  const signInFormSource = readFileSync(
+    'src/app/[locale]/sign-in/SignInForm.tsx',
+    'utf8'
+  );
+
+  assert.equal(clientSource.includes('requestEmailConfirmationResend'), true);
+  assert.equal(clientSource.includes("type: 'signup'"), true);
+  assert.equal(clientSource.includes('emailRedirectTo'), true);
+  assert.equal(clientSource.includes('getEmailConfirmationRedirectTo'), true);
+  assert.equal(signUpFormSource.includes('handleResendConfirmation'), true);
+  assert.equal(signUpFormSource.includes('pendingConfirmationEmail'), true);
+  assert.equal(signUpFormSource.includes("setPendingConfirmationEmail('')"), true);
+  assert.equal(signInFormSource.includes('handleResendConfirmation'), true);
+  assert.equal(signInFormSource.includes('unconfirmedEmail'), true);
+  assert.equal(signInFormSource.includes("setUnconfirmedEmail('')"), true);
+});
+
+test('resend confirmation UI exposes only safe feedback', () => {
+  const signUpFormSource = readFileSync(
+    'src/app/[locale]/sign-up/SignUpForm.tsx',
+    'utf8'
+  );
+  const signInFormSource = readFileSync(
+    'src/app/[locale]/sign-in/SignInForm.tsx',
+    'utf8'
+  );
+
+  for (const source of [signUpFormSource, signInFormSource]) {
+    assert.equal(source.includes('confirmation.resendSuccess'), true);
+    assert.equal(source.includes('confirmation.resendRateLimited'), true);
+    assert.equal(source.includes('error.message'), false);
+    assert.equal(source.includes('error_description'), false);
+    assert.equal(source.includes('User already registered'), false);
+  }
 });
 
 test('password recovery redirect targets the localized reset-password page', () => {

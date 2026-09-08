@@ -520,6 +520,13 @@
       "rateLimited": "Подождите перед следующей попыткой.",
       "networkFailure": "Не удалось подключиться к сети. Проверьте подключение к интернету и попробуйте ещё раз."
     },
+    "confirmation": {
+      "resendButton": "[RU REVIEW] Отправить письмо ещё раз",
+      "resendSubmittingButton": "[RU REVIEW] Отправляем...",
+      "resendSuccess": "[RU REVIEW] Если подтверждение всё ещё ожидается, новое письмо отправлено.",
+      "resendRateLimited": "[RU REVIEW] Подождите перед повторной отправкой письма.",
+      "resendUnable": "[RU REVIEW] Не удалось отправить письмо для подтверждения. Попробуйте позже."
+    },
     "signIn": {
       "title": "Войти",
       "registerPrompt": "Впервые на Charlal?",
