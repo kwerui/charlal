@@ -79,6 +79,13 @@ Research and, if selected, implement suitable Russian authentication providers:
 - VK
 - Mail.ru
 
+Yandex POC status: deferred pending an email-bearing test identity; see
+[Yandex authentication POC findings](auth-yandex-poc.md).
+
+VK ID / Mail status: compatibility audited; requires larger auth bridge or
+provider-specific Auth adaptation; deferred. See
+[VK ID / Mail.ru authentication compatibility](auth-vkid-poc.md).
+
 Provider work must preserve the stable account/identity rules in
 [Authentication identity policy](auth-identity-policy.md).
 
